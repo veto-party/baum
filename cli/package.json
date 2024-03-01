@@ -1,6 +1,6 @@
 {
     "name": "baum",
     "devDependencies": {
-        "@veto/config": "*" 
+        "@veto-party/config": "*" 
     }
 }

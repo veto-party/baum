@@ -1,5 +1,5 @@
 import { IBaumManager, IPackageManager, IStep } from "../..";
-import { Workspace } from "../../interface/IPackageManager";
+import { IWorkspace } from "../../interface/IPackageManager";
 import { CopyAndCleanLockFileStep } from "../Step/internal/CopyAndCleanLockFile";
 import { shakeWorkspacesIntoExecutionGroups } from "./utility/shakeWorkspacesIntoExecutionGroups";
 import { structure } from "./validation";
@@ -38,7 +38,7 @@ export class BaumManager implements IBaumManager {
         await structure.parseAsync(this);
     }
 
-    private async executeGroup(workspaces: Workspace[]) {
+    private async executeGroup(workspaces: IWorkspace[]) {
 
         if (this.doCopyLockFileStep) {
             await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.execute(workspace, this.packageManager!)));

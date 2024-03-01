@@ -1,4 +1,5 @@
 
-export type { IBaumManagerConfiguration as IBaumManager } from './interface/IBaumManagerConfiguration';
-export type { IPackageManager } from './interface/IPackageManager';
+export type { IBaumManager } from './interface/IBaumManager';
+export type { IBaumManagerConfiguration } from './interface/IBaumManagerConfiguration';
+export type { IPackageManager, IDependent, IWorkspace } from './interface/IPackageManager';
 export type { IStep } from './interface/IStep';

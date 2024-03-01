@@ -1,5 +1,5 @@
 {
     "$schema": "https://json.schemastore.org/tsconfig",
-    "extends": "@veto/config/tsconfig.json"
+    "extends": "@veto-party/config/tsconfig.json"
   }
   

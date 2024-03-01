@@ -1,5 +1,5 @@
 {
-  "name": "@veto/baum",
+  "name": "@veto-party/baum",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -8,7 +8,7 @@
     "config",
     "core",
     "cli",
-    "modules/*",
+    "package_managers/*",
     "steps/*"
   ],
   "devDependencies": {

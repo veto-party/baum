@@ -1,11 +1,11 @@
-import { Dependent, Workspace } from "../../../interface/IPackageManager";
-import semver, { SemVer, satisfies } from 'semver';
+import { IDependent, IWorkspace } from "../../../interface/IPackageManager";
+import * as semver from 'semver';
 
-export const shakeWorkspacesIntoExecutionGroups = (workspaces: Workspace[]): Workspace[][] => {
+export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
 
-    let nodes: [name: string, version: semver.SemVer, workspace: Workspace, deps: [version: SemVer, dependent: Dependent][], index: number][] = [];
+    let nodes: [name: string, version: semver.SemVer, workspace: IWorkspace, deps: [version: semver.SemVer, dependent: IDependent][], index: number][] = [];
 
-    const dependencyMapping = workspaces.reduce<Record<string, [semver.SemVer, Workspace][]>>((previous, workspace) => {
+    const dependencyMapping = workspaces.reduce<Record<string, [semver.SemVer, IWorkspace][]>>((previous, workspace) => {
         previous[workspace.getName()] ??= [];
 
 
@@ -51,9 +51,9 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: Workspace[]): Wor
 
     let checkedDepth = 0;
     let currentDepth = 0;
-    const dependenciesToCheck: [semver.SemVer | null, Workspace, number][] = withoutDependencies.map((workspace) => [semver.parse(workspace.getVersion()), workspace, currentDepth]);
+    const dependenciesToCheck: [semver.SemVer | null, IWorkspace, number][] = withoutDependencies.map((workspace) => [semver.parse(workspace.getVersion()), workspace, currentDepth]);
 
-    const workspaceGroups: Workspace[][] = [[]];
+    const workspaceGroups: IWorkspace[][] = [[]];
 
     while (dependenciesToCheck.length > 0) {
         const [sem, dependency, givenDepth] = dependenciesToCheck.shift()!;

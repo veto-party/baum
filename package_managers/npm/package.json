@@ -1,0 +1,15 @@
+{
+    "name": "@veto-party/baum__package_manager__npm",
+    "type": "module",
+    "dependencies": {
+        "yaml": "^2.4.0",
+        "@veto-party/baum__core": "*",
+        "globby": "^14.0.1"
+    },
+    "devDependencies": {
+        "@veto-party/config": "*"
+    },
+    "workspaces": {
+        "packages": []
+    }
+}

@@ -1,7 +1,7 @@
-import { IPackageManager, Workspace } from "./IPackageManager";
+import { IPackageManager, IWorkspace } from "./IPackageManager";
 
 export interface IStep {
-    execute(workspace: Workspace, packageManager: IPackageManager): Promise<void>;
+    execute(workspace: IWorkspace, packageManager: IPackageManager): Promise<void>;
 
-    clean(workspace: Workspace, packageManager: IPackageManager): Promise<void>;
+    clean(workspace: IWorkspace, packageManager: IPackageManager): Promise<void>;
 }

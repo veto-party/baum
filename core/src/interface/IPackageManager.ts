@@ -1,16 +1,16 @@
 
 import type { writeFile } from 'fs/promises';
 
-export interface Dependent {
+export interface IDependent {
     getName(): string;
     getVersion(): string;
 }
 
-export interface Workspace {
+export interface IWorkspace {
     getName(): string;
     getVersion(): string;
     getDirectory(): string;
-    getDynamicDependents(): Dependent[];
+    getDynamicDependents(): IDependent[];
 }
 
 export interface IPackageManager {
@@ -19,7 +19,7 @@ export interface IPackageManager {
 
     getLockFileName(): string;
 
-    readWorkspace(rootDirectory: string): Promise<Workspace[]>;
+    readWorkspace(rootDirectory: string): Promise<IWorkspace[]>;
 
     disableGlobalWorkspace(): any;
 

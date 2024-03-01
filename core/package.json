@@ -1,12 +1,13 @@
 {
-    "name": "@veto/baum__core",
+    "name": "@veto-party/baum__core",
     "version": "0.0.0",
+    "main": "./src/index.ts",
     "dependencies": {
         "zod": "^3.22.4",
         "semver": "^7.6.0"
     },
     "devDependencies": {
-        "@veto/config": "*",
+        "@veto-party/config": "*",
         "@types/semver": "^7.5.8"
     }
 }
