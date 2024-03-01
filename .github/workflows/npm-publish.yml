@@ -1,0 +1,19 @@
+name: npm-publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci # TODO: replace
+      - run: npm publish # TODO: replace
+        env:
+          NPM_TOKEN: ${{secrets.npm_token}}
