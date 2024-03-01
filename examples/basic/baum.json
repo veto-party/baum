@@ -1,0 +1,28 @@
+{
+    "manager": "pnpm",
+    "execution": {
+        "order": [
+            "test",
+            "build",
+            "push",
+            "cleanup"
+        ],
+        "step": {
+            "test": "npm-run",
+            "build": {
+                "required": true,
+                "type:": "npm-run",
+                ""
+            },
+            "push": {
+                "type": "group",
+                "if": "${veto.publish} == true",
+                "elements": [{
+                    ""
+                }]
+            }
+                "["npm", { "required": false}],
+            "push": ["exec", [{ "command": "docker build ${name}"}]]
+        }
+    }
+}

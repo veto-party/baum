@@ -1,0 +1,7 @@
+{
+    "private": true,
+    "name": "@veto/config",
+    "dependencies": {
+        "@types/node": "^20.11.24"
+    }
+}

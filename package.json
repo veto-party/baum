@@ -1,0 +1,17 @@
+{
+  "name": "@veto/baum",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Tree shaking and building for monorepos",
+  "workspaces": [
+    "config",
+    "core",
+    "cli",
+    "modules/*",
+    "steps/*"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3"
+  }
+}
