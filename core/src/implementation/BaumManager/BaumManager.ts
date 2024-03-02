@@ -69,6 +69,8 @@ export class BaumManager implements IBaumManager {
 
         const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
 
+        console.log(groups);
+
         while (groups.length > 0) {
             await this.executeGroup(groups.shift()!);
         }

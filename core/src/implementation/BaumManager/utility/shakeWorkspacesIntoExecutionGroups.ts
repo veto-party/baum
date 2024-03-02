@@ -34,10 +34,11 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
         });
     });
 
-
     let checkedDepth = 0;
     let currentDepth = 0;
     const dependenciesToCheck: [string, IWorkspace, number][] = withoutDependencies.map((workspace) => [workspace.getVersion(), workspace, currentDepth]);
+
+    nodes = nodes.filter(([, , workspace]) => !withoutDependencies.includes(workspace));
 
     const workspaceGroups: IWorkspace[][] = [[]];
 
