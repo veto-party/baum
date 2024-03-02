@@ -38,7 +38,7 @@ export class BaumManager implements IBaumManager {
         await structure.parseAsync(this);
     }
 
-    private async executeGroup(workspaces: IWorkspace[]) {
+    private async executeGroup(workspaces: IWorkspace[], steps?: string[]) {
 
         if (this.doCopyLockFileStep) {
             await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.execute(workspace, this.packageManager!, this.rootDirectory!)));
@@ -47,6 +47,11 @@ export class BaumManager implements IBaumManager {
         let currentStep = -1;
         await Promise.all(this.steps.map(async (step, index) => {
             currentStep = index;
+
+            if (steps !== undefined && !steps.includes(step.name)) {
+                return;
+            }
+
             await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
         })).catch(async (error) => {
 
@@ -64,15 +69,20 @@ export class BaumManager implements IBaumManager {
         });
     }
 
-    async run(): Promise<void> {
+    async run(steps?: string[]): Promise<void> {
         await this.validate();
 
         const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
 
-        console.log(groups);
+        try {
 
-        while (groups.length > 0) {
-            await this.executeGroup(groups.shift()!);
+            await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);
+
+            while (groups.length > 0) {
+                await this.executeGroup(groups.shift()!, steps);
+            }
+        } finally {
+            await this.packageManager?.enableGlobalWorkspace(this.rootDirectory!);
         }
     }
 }

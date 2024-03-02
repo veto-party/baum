@@ -24,4 +24,8 @@ export class NPMWorkspace implements IWorkspace {
         return Object.entries(this.pkgFile.dependencies).filter(([, version]) => version === "*").map(([name, version]) => new NPMDependent(name, version as string));
     }
 
+    getScriptNames(): string[] {
+        return this.pkgFile.scripts ? Object.keys(this.pkgFile.scripts) : [];
+    }
+
 }

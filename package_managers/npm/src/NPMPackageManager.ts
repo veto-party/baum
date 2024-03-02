@@ -1,11 +1,12 @@
 import FileSystem from 'fs/promises';
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { Stream } from "stream";
 import { globby } from 'globby';
 import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import { NPMWorkspace } from './NPMWorkspace.js';
-import { spawn } from 'child_process';
+import shelljs from 'shelljs';
+
+const { exec } = shelljs;
 
 export class NPMPackageManager implements IPackageManager {
 
@@ -86,17 +87,22 @@ export class NPMPackageManager implements IPackageManager {
     }
 
     private doSpawn(cwd: string, command: string) {
-        const args = command.split(' ');
-        const cp = spawn(args.splice(0, 1)[0], args, { cwd });
-
         return new Promise<void>((resolve, reject) => {
-            cp.on('close', (code) => {
-                if (code === 0) {
-                    resolve();
+
+            const process = exec(command, {
+                async: true,
+                cwd,
+            });
+
+            process.on("close", (code) => {
+
+                if (code !== 0) {
+                    reject(new Error(`Proeccess exited with code: "${code}"`));
+                    return;
                 }
 
-                reject(code);
-            });
+                resolve();
+            })
         });
     }
 

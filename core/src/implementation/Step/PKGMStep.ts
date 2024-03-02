@@ -5,14 +5,18 @@ import { IPackageManager, IStep, IWorkspace } from "../../index.js";
  */
 export class PKGMStep implements IStep {
 
-    constructor(private command: string) { }
+    constructor(private command: string, private required: boolean = false) { }
 
     async execute(workspace: IWorkspace, packageManager: IPackageManager): Promise<void> {
-        if (workspace.getDirectory().endsWith("config")) {
-            return // TODO: REMOVE THIS
+
+        if (!workspace.getScriptNames().includes(this.command)) {
+            if (this.required) {
+                throw new Error(`Script: "${this.command}" is required for all the packages.`);
+            }
+
+            return;
         }
 
-        console.log(workspace.getDirectory());
         await packageManager.executeScript(workspace.getDirectory(), this.command);
     }
 

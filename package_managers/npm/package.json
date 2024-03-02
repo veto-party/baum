@@ -6,12 +6,13 @@
         "build": "tsc"
     },
     "dependencies": {
-        "yaml": "^2.4.0",
         "@veto-party/baum__core": "*",
-        "globby": "^14.0.1"
+        "globby": "^14.0.1",
+        "shelljs": "^0.8.5"
     },
     "devDependencies": {
-        "@veto-party/config": "*"
+        "@veto-party/config": "*",
+        "@types/shelljs": "^0.8.15"
     },
     "workspaces": {
         "packages": []

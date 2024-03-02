@@ -11,6 +11,7 @@ export interface IWorkspace {
     getVersion(): string;
     getDirectory(): string;
     getDynamicDependents(): IDependent[];
+    getScriptNames(): string[];
 }
 
 export interface IPackageManager {

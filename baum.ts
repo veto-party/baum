@@ -1,5 +1,5 @@
 
-import { IBaumManagerConfiguration, PKGMStep, ParallelStep, PublishStep } from 'baum';
+import { IBaumManagerConfiguration, PKGMStep, ParallelStep, PublishStep, GroupStep } from 'baum';
 import Path from 'path';
 import FileSystem from 'fs/promises';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
@@ -13,7 +13,7 @@ export default (baum: IBaumManagerConfiguration) => {
     baum.setPackageManager(new NPMPackageManager());
     baum.setRootDirectory(__dirname);
     baum.addExecutionStep("prepare", new ParallelStep([
-        //new PKGMStep('test'),
+        new GroupStep([new PKGMStep('test')/*, new CopyStep()*/]),
         new PKGMStep('build')
     ]));
 
@@ -21,7 +21,16 @@ export default (baum: IBaumManagerConfiguration) => {
     const oldFiles: Record<string, any> = {};
 
     baum.addExecutionStep('package_modification', {
-        clean: async () => { },
+        clean: async (workspace) => {
+
+            const givenPath = Path.join(workspace.getDirectory(), 'package.json');
+
+            const oldFile = oldFiles[`${workspace.getName()}-${workspace.getVersion()}`];
+
+            if (oldFile) {
+                await FileSystem.writeFile(givenPath, oldFiles[`${workspace.getName()}-${workspace.getVersion()}`]);
+            }
+        },
         execute: async (workspace, pm) => {
             const givenPath = Path.join(workspace.getDirectory(), 'package.json');
             const file = (await FileSystem.readFile(givenPath)).toString();
