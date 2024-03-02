@@ -14,10 +14,10 @@ export class NPMPackageManager implements IPackageManager {
     const content = file.toString();
     const parser = JSON.parse(content);
 
-    delete parser['packages']['']['workspaces'];
-    Object.entries(parser['packages']).forEach(([k, v]: [string, any]) => {
-      if (!k.startsWith('node_modules') || v['link']) {
-        delete parser['packages'][k];
+    delete parser.packages[''].workspaces;
+    Object.entries(parser.packages).forEach(([k, v]: [string, any]) => {
+      if (!k.startsWith('node_modules') || v.link) {
+        delete parser.packages[k];
       }
     });
 
@@ -82,9 +82,8 @@ export class NPMPackageManager implements IPackageManager {
 
     if (Array.isArray(content.workspaces)) {
       return this.parseWorkspaces(workspaces, rootDirectory);
-    } else {
-      return this.parseWorkspaces(workspaces.packages, rootDirectory);
     }
+    return this.parseWorkspaces(workspaces.packages, rootDirectory);
   }
 
   private doSpawn(cwd: string, command: string) {
