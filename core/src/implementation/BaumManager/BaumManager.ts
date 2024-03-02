@@ -56,7 +56,7 @@ export class BaumManager implements IBaumManager {
         })).catch(async (error) => {
 
             // TODO: Change to allSettled and log errors.
-            await Promise.all(this.steps.splice(0, currentStep).flatMap((step) => {
+            await Promise.all(this.steps.splice(0, currentStep + 1).flatMap((step) => {
                 return workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!, this.rootDirectory!));
             }));
 
