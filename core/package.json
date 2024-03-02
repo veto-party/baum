@@ -3,6 +3,9 @@
     "version": "0.0.0",
     "main": "./src/index.ts",
     "type": "module",
+    "scripts": {
+        "build": "tsc"
+    },
     "exports": {
         ".": "./src/index.ts"
     },
@@ -12,6 +15,7 @@
     },
     "devDependencies": {
         "@veto-party/config": "*",
-        "@types/semver": "^7.5.8"
+        "@types/semver": "^7.5.8",
+        "typescript": "^5.3.3"
     }
 }

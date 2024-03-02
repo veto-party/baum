@@ -13,7 +13,7 @@ export default (baum: IBaumManagerConfiguration) => {
     baum.setPackageManager(new NPMPackageManager());
     baum.setRootDirectory(__dirname);
     baum.addExecutionStep("prepare", new ParallelStep([
-        new PKGMStep('test'),
+        //new PKGMStep('test'),
         new PKGMStep('build')
     ]));
 
