@@ -15,13 +15,17 @@ export interface IWorkspace {
 
 export interface IPackageManager {
 
-    getCleanLockFile(): Parameters<typeof writeFile>[1];
+    getCleanLockFile(rootDirectory: string): Promise<Parameters<typeof writeFile>[1]>;
 
     getLockFileName(): string;
 
     readWorkspace(rootDirectory: string): Promise<IWorkspace[]>;
 
-    disableGlobalWorkspace(): any;
+    disableGlobalWorkspace(rootDirectory: string): any;
 
-    enableGlobalWorkspace(): any;
+    enableGlobalWorkspace(rootDirectory: string): any;
+
+    executeScript(cwd: string, task: string): Promise<void>;
+
+    publish(cwd: string, registry?: string): Promise<void>;
 } 

@@ -41,23 +41,23 @@ export class BaumManager implements IBaumManager {
     private async executeGroup(workspaces: IWorkspace[]) {
 
         if (this.doCopyLockFileStep) {
-            await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.execute(workspace, this.packageManager!)));
+            await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.execute(workspace, this.packageManager!, this.rootDirectory!)));
         }
 
         let currentStep = -1;
         await Promise.all(this.steps.map(async (step, index) => {
             currentStep = index;
-            await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!)));
+            await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
         })).catch(async (error) => {
 
             // TODO: Change to allSettled and log errors.
             await Promise.all(this.steps.splice(0, currentStep).flatMap((step) => {
-                return workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!));
+                return workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!, this.rootDirectory!));
             }));
 
             if (this.doCopyLockFileStep) {
                 // TODO: Change to allSettled and log errors.
-                await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.clean(workspace, this.packageManager!)));
+                await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.clean(workspace, this.packageManager!, this.rootDirectory!)));
             }
 
             throw error;

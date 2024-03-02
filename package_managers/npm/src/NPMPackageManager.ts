@@ -1,27 +1,57 @@
 import FileSystem from 'fs/promises';
+import OldFileSystem from 'fs';
 import Path from 'path';
 import { Stream } from "stream";
 import { globby } from 'globby';
 import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import { NPMWorkspace } from './NPMWorkspace.js';
+import { spawn } from 'child_process';
 
 export class NPMPackageManager implements IPackageManager {
 
-    getCleanLockFile(): string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream {
-        throw new Error("Method not implemented.");
+    async getCleanLockFile(rootDirectory: string): Promise<Parameters<typeof FileSystem['writeFile']>[1]> {
+        const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
+        const content = file.toString();
+        const parser = JSON.parse(content);
+
+        delete parser['packages'][""]['workspaces'];
+        Object.entries(parser['packages']).forEach(([k, v]: [string, any]) => {
+            if (!k.startsWith("node_modules") || v['link']) {
+                delete parser['packages'][k];
+            }
+        });
+
+        return JSON.stringify(parser);
     }
 
     getLockFileName(): string {
-        // const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
-        return "";
+        return "package-lock.json";
     }
 
-    disableGlobalWorkspace() {
-        throw new Error("Method not implemented.");
+    private async checkCopy(rootDirectory: string, reversed: boolean): Promise<void> {
+
+        let paths = [Path.join(rootDirectory, 'package.json'), Path.join(rootDirectory, 'package.json-bak')] as const;
+
+        if (reversed) {
+            paths = paths.toReversed() as [string, string];
+        }
+
+
+        if (OldFileSystem.existsSync(paths[1])) {
+            await FileSystem.rm(paths[1]);
+        }
+
+
+        await FileSystem.copyFile(...paths);
     }
 
-    enableGlobalWorkspace() {
-        throw new Error("Method not implemented.");
+    async disableGlobalWorkspace(rootDirectory: string) {
+        await this.checkCopy(rootDirectory, false);
+    }
+
+    async enableGlobalWorkspace(rootDirectory: string) {
+        await this.checkCopy(rootDirectory, true);
+
     }
 
     private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
@@ -50,5 +80,32 @@ export class NPMPackageManager implements IPackageManager {
 
     async disableWorkspaceConfig() {
         return () => { }
+    }
+
+    private doSpawn(cwd: string, command: string) {
+        const cp = spawn(command, { cwd });
+
+        return new Promise<void>((resolve, reject) => {
+            cp.on('close', (code) => {
+                if (code === 0) {
+                    resolve();
+                }
+
+                reject(code);
+            });
+        });
+    }
+
+
+    async executeScript(cwd: string, task: string): Promise<void> {
+        await this.doSpawn(cwd, `npm run ${task}`);
+    }
+
+    async publish(cwd: string, registry?: string | undefined): Promise<void> {
+        if (registry) {
+            await this.doSpawn(cwd, `npm publish --registry=${registry}`);
+        }
+
+        await this.doSpawn(cwd, 'npm publish');
     }
 }
