@@ -10,7 +10,6 @@
       "types": ["node"],
       "lib": ["es2022", "DOM", "DOM.Iterable", "ESNext"],
       "module": "NodeNext",
-      "moduleDetection": "force",
       "moduleResolution": "NodeNext",
       "resolveJsonModule": true,
       "skipLibCheck": true,

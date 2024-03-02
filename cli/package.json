@@ -2,8 +2,12 @@
     "name": "baum",
     "type": "module",
     "main": "./src/index.ts",
+    "bin": "./src/cli.js",
     "dependencies": {
         "@veto-party/baum__core": "*"
+    },
+    "peerDependencies": {
+        "ts-node": "^10.9.2"
     },
     "devDependencies": {
         "@veto-party/config": "*"

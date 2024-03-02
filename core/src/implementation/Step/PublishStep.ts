@@ -1,4 +1,4 @@
-import { IPackageManager, IStep, IWorkspace } from "../..";
+import { IPackageManager, IStep, IWorkspace } from "../../index.js";
 
 export class PublishStep implements IStep {
 

@@ -1,5 +1,5 @@
-import { IPackageManager, IStep } from "../../..";
-import { IWorkspace } from "../../../interface/IPackageManager";
+import { IPackageManager, IStep } from "../../../index.js";
+import { IWorkspace } from "../../../interface/IPackageManager.js";
 import FileSystem from 'fs/promises';
 import Path from 'path';
 

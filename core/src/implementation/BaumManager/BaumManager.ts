@@ -1,8 +1,8 @@
-import { IBaumManager, IPackageManager, IStep } from "../..";
-import { IWorkspace } from "../../interface/IPackageManager";
-import { CopyAndCleanLockFileStep } from "../Step/internal/CopyAndCleanLockFile";
-import { shakeWorkspacesIntoExecutionGroups } from "./utility/shakeWorkspacesIntoExecutionGroups";
-import { structure } from "./validation";
+import { IBaumManager, IPackageManager, IStep } from "../../index.js";
+import { IWorkspace } from "../../interface/IPackageManager.js";
+import { CopyAndCleanLockFileStep } from "../Step/internal/CopyAndCleanLockFile.js";
+import { shakeWorkspacesIntoExecutionGroups } from "./utility/shakeWorkspacesIntoExecutionGroups.js";
+import { structure } from "./validation.js";
 
 export class BaumManager implements IBaumManager {
 

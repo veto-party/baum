@@ -1,6 +1,7 @@
 {
     "name": "@veto-party/baum__package_manager__npm",
     "type": "module",
+    "main": "./src/index.ts",
     "dependencies": {
         "yaml": "^2.4.0",
         "@veto-party/baum__core": "*",

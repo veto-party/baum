@@ -1,10 +1,10 @@
 
-export type { IBaumManager } from './interface/IBaumManager';
-export type { IBaumManagerConfiguration } from './interface/IBaumManagerConfiguration';
-export type { IPackageManager, IDependent, IWorkspace } from './interface/IPackageManager';
-export type { IStep } from './interface/IStep';
+export type { IBaumManager } from './interface/IBaumManager.js';
+export type { IBaumManagerConfiguration } from './interface/IBaumManagerConfiguration.js';
+export type { IPackageManager, IDependent, IWorkspace } from './interface/IPackageManager.js';
+export type { IStep } from './interface/IStep.js';
 
-export { BaumManager } from './implementation/BaumManager/BaumManager';
-export { ParallelStep } from './implementation/Step/ParallelStep';
-export { PKGMStep } from './implementation/Step/PKGMStep';
-export { PublishStep } from './implementation/Step/PublishStep';
+export { BaumManager } from './implementation/BaumManager/BaumManager.js';
+export { ParallelStep } from './implementation/Step/ParallelStep.js';
+export { PKGMStep } from './implementation/Step/PKGMStep.js';
+export { PublishStep } from './implementation/Step/PublishStep.js';

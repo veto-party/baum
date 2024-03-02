@@ -1,5 +1,5 @@
-import { IPackageManager } from "./IPackageManager";
-import { IStep } from "./IStep";
+import { IPackageManager } from "./IPackageManager.js";
+import { IStep } from "./IStep.js";
 
 export interface IBaumManagerConfiguration {
     setRootDirectory(root: string): IBaumManagerConfiguration;

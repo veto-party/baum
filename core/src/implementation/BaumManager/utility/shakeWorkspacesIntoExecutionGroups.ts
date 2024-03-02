@@ -1,4 +1,4 @@
-import { IDependent, IWorkspace } from "../../../interface/IPackageManager";
+import { IDependent, IWorkspace } from "../../../interface/IPackageManager.js";
 import * as semver from 'semver';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {

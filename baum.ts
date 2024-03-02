@@ -2,8 +2,16 @@
 import { IBaumManagerConfiguration, PKGMStep, ParallelStep, PublishStep } from 'baum';
 import Path from 'path';
 import FileSystem from 'fs/promises';
+import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = Path.dirname(__filename);
+
 
 export default (baum: IBaumManagerConfiguration) => {
+    baum.setPackageManager(new NPMPackageManager());
+    baum.setRootDirectory(__dirname);
     baum.addExecutionStep("prepare", new ParallelStep([
         new PKGMStep('test'),
         new PKGMStep('build')
