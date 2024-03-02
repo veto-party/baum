@@ -24,7 +24,7 @@ export default (baum: IBaumManagerConfiguration) => {
         clean: async () => { },
         execute: async (workspace, pm) => {
             const givenPath = Path.join(workspace.getDirectory(), 'package.json');
-            const file = (await FileSystem.readFile(givenPath).toString());
+            const file = (await FileSystem.readFile(givenPath)).toString();
 
             oldFiles[`${workspace.getName()}-${workspace.getVersion()}`] = file;
 

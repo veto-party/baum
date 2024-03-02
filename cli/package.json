@@ -1,8 +1,13 @@
 {
     "name": "baum",
+    "version": "0.0.0-pre-1",
     "type": "module",
     "main": "./src/index.ts",
+    "license": "MIT",
     "bin": "./src/cli.js",
+    "scripts": {
+        "build": "tsc"
+    },
     "dependencies": {
         "@veto-party/baum__core": "*"
     },
@@ -10,6 +15,7 @@
         "ts-node": "^10.9.2"
     },
     "devDependencies": {
-        "@veto-party/config": "*"
+        "@veto-party/config": "*",
+        "typescript": "^5.3.3"
     }
 }

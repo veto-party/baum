@@ -79,7 +79,8 @@ export class NPMPackageManager implements IPackageManager {
     }
 
     private doSpawn(cwd: string, command: string) {
-        const cp = spawn(command, { cwd });
+        const args = command.split(' ');
+        const cp = spawn(args.splice(0, 1)[0], args, { cwd });
 
         return new Promise<void>((resolve, reject) => {
             cp.on('close', (code) => {
@@ -91,7 +92,6 @@ export class NPMPackageManager implements IPackageManager {
             });
         });
     }
-
 
     async executeScript(cwd: string, task: string): Promise<void> {
         await this.doSpawn(cwd, `npm run ${task}`);

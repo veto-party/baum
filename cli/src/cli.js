@@ -11,7 +11,7 @@ else {
             NODE_OPTIONS: [
                 process.env["NODE_OPTIONS"],
                 "--loader ts-node/esm",
-                "--no-warnings",
+                "--trace-uncaught"
             ]
                 .filter((item) => !!item)
                 .join(" "),

@@ -1,7 +1,1 @@
-{
-    "private": true,
-    "name": "@veto-party/config",
-    "dependencies": {
-        "@types/node": "^20.11.24"
-    }
-}
+{"private":true,"name":"@veto-party/config","dependencies":{"@types/node":"^20.11.24"}}
