@@ -13,7 +13,7 @@ export class NPMWorkspace implements IWorkspace {
     }
 
     getVersion(): string {
-        return this.pkgFile.version;
+        return this.pkgFile.version ?? '*';
     }
 
     getDirectory(): string {

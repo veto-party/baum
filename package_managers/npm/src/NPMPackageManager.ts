@@ -56,7 +56,7 @@ export class NPMPackageManager implements IPackageManager {
 
     private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
         const resolvedPaths = await Promise.all(workspacePaths.map((path) => globby(path, { cwd, absolute: true })));
-        return await Promise.all(resolvedPaths.flat().map<Promise<IWorkspace>>(async (path) => {
+        return await Promise.all(resolvedPaths.flat().filter((file) => file.endsWith('package.json')).map((file) => Path.dirname(file)).map<Promise<IWorkspace>>(async (path) => {
 
             const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
             const packageJson = JSON.parse(packageJsonFile.toString());
@@ -76,10 +76,6 @@ export class NPMPackageManager implements IPackageManager {
         } else {
             return this.parseWorkspaces(workspaces.packages, rootDirectory);
         }
-    }
-
-    async disableWorkspaceConfig() {
-        return () => { }
     }
 
     private doSpawn(cwd: string, command: string) {

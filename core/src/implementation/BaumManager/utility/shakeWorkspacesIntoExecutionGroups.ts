@@ -3,18 +3,10 @@ import * as semver from 'semver';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
 
-    let nodes: [name: string, version: semver.SemVer, workspace: IWorkspace, deps: [version: semver.SemVer, dependent: IDependent][], index: number][] = [];
+    let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
 
-    const dependencyMapping = workspaces.reduce<Record<string, [semver.SemVer, IWorkspace][]>>((previous, workspace) => {
+    const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
         previous[workspace.getName()] ??= [];
-
-
-
-        const semv = semver.parse(workspace.getVersion());
-
-        if (!semv) {
-            throw new Error("Cannot parse semv");
-        }
 
         // TODO: improve sorting
         if (previous[workspace.getName()].some(([version]) => semver.eq(version, workspace.getVersion()))) {
@@ -22,15 +14,9 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
             throw new Error("Duplicate package, cannot resolve tree.");
         }
 
-        const index = previous[workspace.getName()].push([semv, workspace]);
-        nodes.push([workspace.getName(), semv, workspace, workspace.getDynamicDependents().map((dependent) => {
-            const semv2 = semver.parse(dependent.getVersion());
-
-            if (!semv2) {
-                throw new Error("cannot parse semv (2)");
-            }
-
-            return [semv2, dependent];
+        const index = previous[workspace.getName()].push([workspace.getVersion(), workspace]);
+        nodes.push([workspace.getName(), workspace.getVersion(), workspace, workspace.getDynamicDependents().map((dependent) => {
+            return [dependent.getVersion(), dependent];
         }), index]);
         return previous;
     }, {});
@@ -51,7 +37,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
 
     let checkedDepth = 0;
     let currentDepth = 0;
-    const dependenciesToCheck: [semver.SemVer | null, IWorkspace, number][] = withoutDependencies.map((workspace) => [semver.parse(workspace.getVersion()), workspace, currentDepth]);
+    const dependenciesToCheck: [string, IWorkspace, number][] = withoutDependencies.map((workspace) => [workspace.getVersion(), workspace, currentDepth]);
 
     const workspaceGroups: IWorkspace[][] = [[]];
 

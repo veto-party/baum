@@ -11,7 +11,7 @@ export class NPMDependent implements IDependent {
         return this.name;
     }
     getVersion(): string {
-        return this.version;
+        return this.version ?? '*';
     }
 
 }
