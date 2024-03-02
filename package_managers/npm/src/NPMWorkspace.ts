@@ -1,35 +1,35 @@
-import { IDependent, IWorkspace } from "@veto-party/baum__core";
-import { NPMDependent } from "./NPMDependent.js";
+import { IDependent, IWorkspace } from '@veto-party/baum__core';
+import { NPMDependent } from './NPMDependent.js';
 
 export class NPMWorkspace implements IWorkspace {
+  constructor(
+    private directory: string,
+    private pkgFile: any
+  ) {}
 
-    constructor(
-        private directory: string,
-        private pkgFile: any
-    ) { }
+  getName(): string {
+    return this.pkgFile.name;
+  }
 
-    getName(): string {
-        return this.pkgFile.name;
-    }
+  getVersion(): string {
+    return this.pkgFile.version ?? '*';
+  }
 
-    getVersion(): string {
-        return this.pkgFile.version ?? '*';
-    }
+  getDirectory(): string {
+    return this.directory;
+  }
 
-    getDirectory(): string {
-        return this.directory;
-    }
+  getDynamicDependents(): IDependent[] {
+    return Object.entries(this.pkgFile.dependencies)
+      .filter(([, version]) => version === '*')
+      .map(([name, version]) => new NPMDependent(name, version as string));
+  }
 
-    getDynamicDependents(): IDependent[] {
-        return Object.entries(this.pkgFile.dependencies).filter(([, version]) => version === "*").map(([name, version]) => new NPMDependent(name, version as string));
-    }
+  getScriptNames(): string[] {
+    return this.pkgFile.scripts ? Object.keys(this.pkgFile.scripts) : [];
+  }
 
-    getScriptNames(): string[] {
-        return this.pkgFile.scripts ? Object.keys(this.pkgFile.scripts) : [];
-    }
-
-    isPublishable(): boolean {
-        return this.pkgFile.private !== true;
-    }
-
+  isPublishable(): boolean {
+    return this.pkgFile.private !== true;
+  }
 }
