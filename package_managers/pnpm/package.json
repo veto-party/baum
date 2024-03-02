@@ -1,0 +1,21 @@
+{
+    "name": "@veto-party/baum__package_manager__pnpm",
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@veto-party/baum__core": "*",
+        "globby": "^14.0.1",
+        "shelljs": "^0.8.5",
+        "yaml": "^2.4.0"
+    },
+    "devDependencies": {
+        "@veto-party/config": "*",
+        "@types/shelljs": "^0.8.15"
+    },
+    "workspaces": {
+        "packages": []
+    }
+}
