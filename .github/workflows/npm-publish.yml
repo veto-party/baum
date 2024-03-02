@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org/
-      - run: npm ci # TODO: replace
-      - run: npm publish # TODO: replace
+      - run: npm ci
+      - run: npm run baum
         env:
-          NPM_TOKEN: ${{secrets.npm_token}}
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
