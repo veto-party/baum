@@ -55,7 +55,14 @@ export class NPMPackageManager implements IPackageManager {
     }
 
     private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
-        const resolvedPaths = await Promise.all(workspacePaths.map((path) => globby(path, { cwd, absolute: true })));
+        const resolvedPaths = await Promise.all(workspacePaths.map((path) => {
+
+            if (path.endsWith('/*')) {
+                return globby(`${path}/package.json`, { cwd, absolute: true })
+            }
+
+            return globby(path, { cwd, absolute: true });
+        }));
         return await Promise.all(resolvedPaths.flat().filter((file) => file.endsWith('package.json')).map((file) => Path.dirname(file)).map<Promise<IWorkspace>>(async (path) => {
 
             const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));

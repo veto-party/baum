@@ -3,6 +3,8 @@ import * as semver from 'semver';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
 
+    console.log(workspaces.map((workspace) => [workspace.getName(), workspace.getDynamicDependents()]));
+
     let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
 
     const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
@@ -25,12 +27,12 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
     Object.values(dependencyMapping).forEach((entries) => entries.sort(([a], [b]) => semver.compare(a, b) || semver.compareBuild(a, b)));
 
     const withoutDependencies = workspaces.filter((workspace) => {
-        return !workspace.getDynamicDependents().some((dependent) => {
+        return workspace.getDynamicDependents().some((dependent) => {
             if (!dependencyMapping[dependent.getName()]) {
                 return false;
             }
 
-            return semver.satisfies(dependent.getVersion(), workspace.getVersion());
+            return !semver.satisfies(workspace.getVersion(), dependent.getVersion());
         });
     });
 
@@ -76,5 +78,5 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
         }).filter((node) => node[3].length !== 0);
     }
 
-    return workspaceGroups;
+    return workspaceGroups.toReversed();
 }
