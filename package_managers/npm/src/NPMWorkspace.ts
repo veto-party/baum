@@ -28,4 +28,8 @@ export class NPMWorkspace implements IWorkspace {
         return this.pkgFile.scripts ? Object.keys(this.pkgFile.scripts) : [];
     }
 
+    isPublishable(): boolean {
+        return this.pkgFile.private !== true;
+    }
+
 }
