@@ -4,8 +4,8 @@ import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
-import { PNPMWorkspace } from './PNPMWorkspace.js';
 import yaml from 'yaml';
+import { PNPMWorkspace } from './PNPMWorkspace.js';
 
 const { exec } = shelljs;
 
@@ -17,10 +17,10 @@ export class PNPMPackageManager implements IPackageManager {
 
     Object.values(parser.importers).forEach((element: any) => {
       Object.entries(element).forEach(([key, subElement]: [string, any]) => {
-        if (subElement.version.startsWith("link:")) {
+        if (subElement.version.startsWith('link:')) {
           delete element[key];
         }
-      })
+      });
     });
 
     return yaml.stringify(parser);

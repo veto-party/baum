@@ -4,7 +4,7 @@ export class PNPMDependent implements IDependent {
   constructor(
     private name: string,
     private version: string
-  ) { }
+  ) {}
 
   getName(): string {
     return this.name;

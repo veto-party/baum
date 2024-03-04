@@ -2,7 +2,6 @@ import * as semver from 'semver';
 import { IDependent, IWorkspace } from '../../../interface/IPackageManager.js';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
-
   let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
 
   const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
@@ -70,7 +69,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
           }
 
           const arr = dependencyMapping[dependent.getName()] ?? [];
-          return (semver.satisfies(ver, dependency.getVersion()) && (index <= arr.length - 2 && !semver.satisfies(arr[index + 1][0], dependency.getVersion())));
+          return semver.satisfies(ver, dependency.getVersion()) && index <= arr.length - 2 && !semver.satisfies(arr[index + 1][0], dependency.getVersion());
         });
 
         if (newDeps.length === 0) {

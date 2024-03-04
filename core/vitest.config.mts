@@ -1,10 +1,10 @@
-import { defineConfig, mergeConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-    test: {
-        globals: true,
-        typecheck: {
-            enabled: true
-        }
+  test: {
+    globals: true,
+    typecheck: {
+      enabled: true
     }
+  }
 });
