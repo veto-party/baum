@@ -3,6 +3,7 @@
     "version": "0.0.0-pre-1",
     "type": "module",
     "main": "./src/index.ts",
+    "types": "./src/index.ts",
     "license": "MIT",
     "bin": "./src/cli.js",
     "dependencies": {
