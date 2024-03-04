@@ -5,9 +5,6 @@
     "main": "./src/index.ts",
     "license": "MIT",
     "bin": "./src/cli.js",
-    "scripts": {
-        "build": "tsc"
-    },
     "dependencies": {
         "@veto-party/baum__core": "*"
     },
