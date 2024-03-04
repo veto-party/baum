@@ -88,14 +88,23 @@ export class NPMPackageManager implements IPackageManager {
 
   private doSpawn(cwd: string, command: string) {
     return new Promise<void>((resolve, reject) => {
-      const process = exec(command, {
+
+
+      const givenEnv = {
+        ...process.env,
+        NODE_ENV: undefined,
+        NODE_OPTIONS: undefined,
+      };
+
+      const givenProcess = exec(command, {
         async: true,
-        cwd
+        cwd,
+        env: givenEnv
       });
 
-      process.on('close', (code) => {
+      givenProcess.on('close', (code) => {
         if (code !== 0) {
-          reject(new Error(`Proeccess exited with code: "${code}"`));
+          reject(new Error(`Process exited with code: "${code}"`));
           return;
         }
 
