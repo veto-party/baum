@@ -4,8 +4,8 @@
     "main": "./src/index.ts",
     "type": "module",
     "scripts": {
-        "build": "tsc --project tsconfig.build.json",
-        "test": "vitest"
+        "build": "tsc --project ./tsconfig.build.json",
+        "test": "vitest run"
     },
     "exports": {
         ".": "./src/index.ts"
