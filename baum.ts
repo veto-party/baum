@@ -34,8 +34,8 @@ export default (baum: IBaumManagerConfiguration) => {
       const jsonFile = JSON.parse(file);
 
       if (jsonFile.scripts && jsonFile.scripts.build === 'tsc') {
-        if (jsonFile.main !== undefined) {
-          jsonFile.main = jsonFile.main.replace('\\./src/', './dist/');
+        if (jsonFile.main !== undefined && jsonFile.main === "./src/index.ts") {
+          jsonFile.main = './dist/index.js';
         }
       }
 
