@@ -36,7 +36,7 @@ export default (baum: IBaumManagerConfiguration) => {
       if (jsonFile.scripts && jsonFile.scripts.build.trim().startsWith('tsc')) {
         if (jsonFile.main !== undefined && jsonFile.main === "./src/index.ts") {
           jsonFile.main = './dist/index.js';
-          jsonFile.types = './dist/index.d.ts';
+          jsonFile.types = './dist/index.js';
         }
       }
 
