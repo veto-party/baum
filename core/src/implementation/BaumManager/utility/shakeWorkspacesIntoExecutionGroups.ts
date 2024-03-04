@@ -9,7 +9,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
     previous[workspace.getName()] ??= [];
 
     // TODO: improve sorting
-    if (previous[workspace.getName()].some(([version]) => semver.eq(version, workspace.getVersion()))) {
+    if (previous[workspace.getName()].some(([version]) => semver.eq(workspace.getVersion(), version))) {
       // TODO: Improve error logging.
       throw new Error('Duplicate package, cannot resolve tree.');
     }
@@ -63,8 +63,6 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
       .map((entry) => {
         const [name, version, workspace, deps, index] = entry;
         // TODO: check if it is latest version that satisfies.
-
-        console.log(deps);
 
         const newDeps = deps.filter(([ver, dependent]) => {
           if (dependent.getName() !== dependency.getName()) {

@@ -1,7 +1,7 @@
 import { shakeWorkspacesIntoExecutionGroups } from "../src/implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js";
-import { IWorkspace } from "../src/index.js";
 import IDependentMock from "./mock/IDependentMock.js";
 import IWorkspaceMock from "./mock/IWorkspaceMock.js";
+import * as semver from 'semver';
 
 describe('Basic tree tests', () => {
     it('Should generate some execution groups', () => {
@@ -17,35 +17,105 @@ describe('Basic tree tests', () => {
         expect(shakeWorkspacesIntoExecutionGroups([leaf, nodeA, nodeB, nodeC])).toEqual([[leaf], [nodeA, nodeB], [nodeC]]);
     });
 
-    /*
     describe('Edge cases', () => {
         describe('Circular', () => {
             it('Simple', () => {
-                // TODO: Change test.
                 const leaf = new IWorkspaceMock('example02', 'v1.1.1', [new IDependentMock('example02', 'v1.1.1')]);
 
                 try {
                     expect(shakeWorkspacesIntoExecutionGroups([leaf]));
                     expect.fail("Should fail.");
                 } catch (error) {
+                    if (!(error instanceof Error)) {
+                        throw error;
+                    }
 
+                    expect(error.message).toEqual("Should fail."); // Improve error message.
+                }
+            });
+
+            it('Complex', () => {
+                const leaf = new IWorkspaceMock('example02', 'v1.1.1', [new IDependentMock('test', 'v0.0.0')]);
+                const node = new IWorkspaceMock('test', 'v0.0.0', [leaf]);
+
+                try {
+                    expect(shakeWorkspacesIntoExecutionGroups([leaf, node]));
+                    expect.fail("Should fail.");
+                } catch (error) {
+                    if (!(error instanceof Error)) {
+                        throw error;
+                    }
+
+                    expect(error.message).toEqual("Should fail."); // Improve error message.
+                }
+            });
+
+            it('Complex chain', () => {
+                const leaf = new IWorkspaceMock('example02', 'v1.1.1', [new IDependentMock('test-B', 'v0.0.1')]);
+                const nodeA = new IWorkspaceMock('test', 'v0.0.0', [leaf]);
+                const nodeB = new IWorkspaceMock('test-B', 'v0.0.1', [nodeA.toDepdendent()]);
+
+                try {
+                    expect(shakeWorkspacesIntoExecutionGroups([leaf, nodeA, nodeB]));
+                    expect.fail("Should fail.");
+                } catch (error) {
+                    if (!(error instanceof Error)) {
+                        throw error;
+                    }
+
+                    expect(error.message).toEqual("Should fail."); // Improve error message.
                 }
             });
         });
 
         it('Should ignore nonexisting dependencies', () => {
-            // TODO: Change test.
-            const leaf = new IWorkspaceMock('example02', 'v1.1.1', []);
+            const leaf = new IWorkspaceMock('example02', 'v1.1.1', [new IDependentMock('bla', '0.0.0-nonexistent')]);
             const node = new IWorkspaceMock('example01', '0.0.0', [leaf.toDepdendent()]);
             expect(shakeWorkspacesIntoExecutionGroups([leaf, node])).toEqual([[leaf], [node]]);
         });
 
         it('Should detect duplicate dependencies', () => {
-            // TOOD: Change test.
             const leaf = new IWorkspaceMock('example02', 'v1.1.1', []);
-            const node = new IWorkspaceMock('example01', '0.0.0', [leaf.toDepdendent()]);
-            expect(shakeWorkspacesIntoExecutionGroups([leaf, node])).toEqual([[leaf], [node]]);
+
+            const leafDuplicate = new IWorkspaceMock('example02', 'v1.1.1', []);
+            const node = new IWorkspaceMock('example01', '0.0.0', [leaf.toDepdendent(), leafDuplicate.toDepdendent()]);
+
+            try {
+                shakeWorkspacesIntoExecutionGroups([leaf, leafDuplicate, node]);
+                expect.fail("Should not end up here.");
+            } catch (error) {
+                if (!(error instanceof Error)) {
+                    throw error;
+                }
+
+                expect(error.message).toEqual("Duplicate package, cannot resolve tree.");
+            }
+        });
+
+        describe('My version goodness (Very edgy cases)', () => {
+            it('Should handle version chains', () => {
+                const leaf0 = new IWorkspaceMock('example', '0.0.0', []);
+                const leaf1 = new IWorkspaceMock('example', '1.0.0', [leaf0.toDepdendent()]);
+
+                expect(semver.eq('0.0.0', '1.0.0')).toBeFalsy();
+
+                expect(shakeWorkspacesIntoExecutionGroups([leaf0, leaf1])).toEqual([[leaf0], [leaf1]]);
+            });
+        });
+
+        describe('My version goodness (Very edgy cases)', () => {
+            it('Should handle version chains', () => {
+                const leaf0 = new IWorkspaceMock('example', '0.0.0', []);
+                const leaf1 = new IWorkspaceMock('example', '1.0.0', []);
+
+
+                expect(semver.eq('0.0.0', '1.0.0')).toBeFalsy();
+
+                const nodeA = new IWorkspaceMock('node01', 'v1.1.1', [leaf0.toDepdendent()]);
+                const nodeB = new IWorkspaceMock('node02', 'v1.1.1', [leaf1.toDepdendent()]);
+
+                expect(shakeWorkspacesIntoExecutionGroups([leaf0, leaf1, nodeA, nodeB])).toEqual([[leaf0, leaf1], [nodeA, nodeB]]);
+            });
         });
     });
-    */
 });
