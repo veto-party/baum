@@ -2,6 +2,9 @@
     "name": "@veto-party/baum__package_manager__npm",
     "type": "module",
     "main": "./src/index.ts",
+    "files": [
+        "./dist/**"
+    ],
     "scripts": {
         "build": "tsc"
     },
