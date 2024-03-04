@@ -10,9 +10,6 @@
         "build": "tsc --project ./tsconfig.build.json",
         "test": "vitest run"
     },
-    "exports": {
-        ".": "./src/index.ts"
-    },
     "dependencies": {
         "zod": "^3.22.4",
         "semver": "^7.6.0"
