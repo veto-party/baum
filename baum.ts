@@ -39,6 +39,9 @@ export default (baum: IBaumManagerConfiguration) => {
         }
       }
 
+      jsonFile['version'] = process.env.PUBLISH_VERSION;
+      jsonFile['license'] = 'MIT';
+
       await FileSystem.writeFile(givenPath, JSON.stringify(jsonFile));
     }
   });
