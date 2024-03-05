@@ -79,15 +79,15 @@ export class PNPMPackageManager implements IPackageManager {
   }
 
   async readWorkspace(rootDirectory: string) {
-    const file = await FileSystem.readFile(Path.join(rootDirectory, 'package.json'));
-    const content = JSON.parse(file.toString());
+    const file = await FileSystem.readFile(Path.join(rootDirectory, 'pnpm-workspace.yaml'));
+    const content = yaml.parse(file.toString());
 
-    const workspaces = content.workspaces ?? [];
+    const workspaces = content.packages ?? [];
 
-    if (Array.isArray(content.workspaces)) {
+    if (Array.isArray(workspaces)) {
       return this.parseWorkspaces(workspaces, rootDirectory);
     }
-    return this.parseWorkspaces(workspaces.packages, rootDirectory);
+    return [];
   }
 
   private doSpawn(cwd: string, command: string) {

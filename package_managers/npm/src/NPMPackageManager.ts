@@ -80,48 +80,14 @@ export class NPMPackageManager implements IPackageManager {
 
     const workspaces = content.workspaces ?? [];
 
-    if (Array.isArray(content.workspaces)) {
+    if (Array.isArray(workspaces)) {
       return this.parseWorkspaces(workspaces, rootDirectory);
     }
-    return this.parseWorkspaces(workspaces.packages, rootDirectory);
-  }
 
-  private doSpawn(cwd: string, command: string) {
-    return new Promise<void>((resolve, reject) => {
-
-
-      const givenEnv = {
-        ...process.env,
-        NODE_ENV: undefined,
-        NODE_OPTIONS: undefined,
-      };
-
-      const givenProcess = exec(command, {
-        async: true,
-        cwd,
-        env: givenEnv
-      });
-
-      givenProcess.on('close', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Process exited with code: "${code}"`));
-          return;
-        }
-
-        resolve();
-      });
-    });
-  }
-
-  async executeScript(cwd: string, task: string): Promise<void> {
-    await this.doSpawn(cwd, `npm run ${task}`);
-  }
-
-  async publish(cwd: string, registry?: string | undefined): Promise<void> {
-    if (registry) {
-      await this.doSpawn(cwd, `npm publish --registry=${registry}`);
+    if (typeof workspaces === "object" && Array.isArray(workspaces.packages)) {
+      return this.parseWorkspaces(workspaces.packages, rootDirectory);
     }
 
-    await this.doSpawn(cwd, 'npm publish');
+    return [];
   }
 }

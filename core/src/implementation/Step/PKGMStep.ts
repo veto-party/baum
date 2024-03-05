@@ -1,24 +1,18 @@
-import { IPackageManager, IStep, IWorkspace } from '../../index.js';
+import type { IPackageManager, IStep, IWorkspace } from '../../index.js';
+import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IExecutionIntent, IExecutionIntentBuilder } from '../../interface/PackageManager/executor/IPackageManagerExecutor.js';
 
 /**
  * Package Manager Step
  */
 export class PKGMStep implements IStep {
   constructor(
-    private command: string,
-    private required = false
-  ) {}
+    private intentCreator: (itent: IExecutionIntentBuilder, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => (IExecutionIntent[]) | IExecutionIntent
+  ) { }
 
-  async execute(workspace: IWorkspace, packageManager: IPackageManager): Promise<void> {
-    if (!workspace.getScriptNames().includes(this.command)) {
-      if (this.required) {
-        throw new Error(`Script: "${this.command}" is required for all the packages.`);
-      }
-
-      return;
-    }
-
-    await packageManager.executeScript(workspace.getDirectory(), this.command);
+  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    const intent = this.intentCreator(packageManager.getExecutor().startExecutionIntent(), workspace, packageManager, rootDirectory);
+    await packageManager.getExecutorParser().parseAbstractSyntax([intent].flat()).execute(workspace, packageManager, rootDirectory);
   }
 
   async clean(workspace: IWorkspace, packageManager: IPackageManager): Promise<void> {

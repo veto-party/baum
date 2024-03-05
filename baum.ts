@@ -11,7 +11,12 @@ const __dirname = Path.dirname(__filename);
 export default (baum: IBaumManagerConfiguration) => {
   baum.setPackageManager(new NPMPackageManager());
   baum.setRootDirectory(__dirname);
-  baum.addExecutionStep('prepare', new ParallelStep([new GroupStep([new PKGMStep('test'), new CopyStep('**/*.report.xml', (_, file) => Path.join(__dirname, 'out', new Date().toISOString(), Path.basename(file)))]), new PKGMStep('build')]));
+
+
+  baum.addExecutionStep('prepare', new ParallelStep([
+    new GroupStep([new PKGMStep((intent) => intent.run().setRunStep('test'))])
+  ])
+  baum.addExecutionStep('prepare', new ParallelStep([new GroupStep([new PKGMStep((()), new CopyStep('**/*.report.xml', (_, file) => Path.join(__dirname, 'out', new Date().toISOString(), Path.basename(file)))]), new PKGMStep('build')]));
 
   const oldFiles: Record<string, any> = {};
 

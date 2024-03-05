@@ -1,4 +1,5 @@
 import { IPackageManager, IStep, IWorkspace } from "../../index.js"
+import { IExecutablePackageManager } from "../../interface/PackageManager/IExecutablePackageManager.js";
 
 class PromiseStorage<T extends (...args: any[]) => any> {
 
@@ -24,18 +25,18 @@ class PromiseStorage<T extends (...args: any[]) => any> {
 }
 
 export const RunOnce = () => {
-    return <T extends new (...args: any[]) => IStep>(constructor: T) => {
+    return <T extends new (...args: any[]) => IStep>(constructor: T, _context?: ClassDecoratorContext<T>) => {
         return class extends constructor {
 
             #executeStorage = new PromiseStorage(super.execute.bind(this));
 
             #cleanStorage = new PromiseStorage(super.clean.bind(this));
 
-            execute(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+            execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
                 return this.#executeStorage.create(workspace, packageManager, rootDirectory);
             }
 
-            clean(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+            clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
                 return this.#cleanStorage.create(workspace, packageManager, rootDirectory);
             }
         }

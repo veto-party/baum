@@ -1,5 +1,6 @@
-import { IBaumManager, IPackageManager, IStep } from '../../index.js';
-import { IWorkspace } from '../../interface/IPackageManager.js';
+import { GroupStep, IBaumManager, IPackageManager, IStep } from '../../index.js';
+import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 import { CopyAndCleanLockFileStep } from '../Step/internal/CopyAndCleanLockFile.js';
 import { shakeWorkspacesIntoExecutionGroups } from './utility/shakeWorkspacesIntoExecutionGroups.js';
 import { structure } from './validation.js';
@@ -7,7 +8,7 @@ import { structure } from './validation.js';
 export class BaumManager implements IBaumManager {
   private rootDirectory?: string;
 
-  private packageManager?: IPackageManager;
+  private packageManager?: IExecutablePackageManager;
 
   private steps: { name: string; step: IStep }[] = [];
 
@@ -18,7 +19,7 @@ export class BaumManager implements IBaumManager {
     return this;
   }
 
-  setPackageManager(packageManager: IPackageManager): IBaumManager {
+  setPackageManager(packageManager: IExecutablePackageManager): IBaumManager {
     this.packageManager = packageManager;
     return this;
   }
@@ -38,10 +39,6 @@ export class BaumManager implements IBaumManager {
   }
 
   private async executeGroup(workspaces: IWorkspace[], steps?: string[]) {
-    if (this.doCopyLockFileStep) {
-      await Promise.all(workspaces.map((workspace) => this.doCopyLockFileStep?.execute(workspace, this.packageManager!, this.rootDirectory!)));
-    }
-
     const stepsForReversal: IStep[] = [];
     const current_steps = [...this.steps];
 
@@ -58,24 +55,28 @@ export class BaumManager implements IBaumManager {
         await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
       }
     } catch (error) {
-
       while (stepsForReversal.length > 0) {
         // TODO: Log errors.
         const step = stepsForReversal.shift()!;
         await Promise.allSettled(workspaces.map((workspace) => step.clean(workspace, this.packageManager!, this.rootDirectory!)));
       }
-
-      if (this.doCopyLockFileStep) {
-        // TODO: log errors.
-        await Promise.allSettled(workspaces.map((workspace) => this.doCopyLockFileStep?.clean(workspace, this.packageManager!, this.rootDirectory!)));
-      }
-
       throw error;
     }
   }
 
   async run(steps?: string[]): Promise<void> {
     await this.validate();
+
+
+    let internalSteps: IStep[] = [];
+
+    if (this.doCopyLockFileStep) {
+      internalSteps.push(this.doCopyLockFileStep);
+    }
+
+    if (internalSteps.length > 0) {
+      this.steps.unshift({ name: 'Internal -- Preparation', step: new GroupStep(internalSteps) });
+    }
 
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
 

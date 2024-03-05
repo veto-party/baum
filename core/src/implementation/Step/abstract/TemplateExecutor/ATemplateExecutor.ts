@@ -1,0 +1,46 @@
+import { GroupStep, IStep } from "../../../../index.js";
+import { IExecutionIntent, IExecutionIntentBuilder } from "../../../../interface/PackageManager/executor/IPackageManagerExecutor.js";
+import { IExecutablePackageManagerParser } from "../../../../interface/PackageManager/executor/IPackageManagerParser.js";
+import { CommandStep } from "../../CommandStep.js";
+import { AIntent } from "./intent/AIntent.js";
+import { CommandIntent } from "./intent/implementation/CommandIntent.js";
+import { InstallIntent } from "./intent/implementation/InstallIntent.js";
+import { PublishIntent } from "./intent/implementation/PublishIntent/PublishIntent.js";
+import { RunIntent } from "./intent/implementation/RunIntent.js";
+import ejs from 'ejs';
+
+abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
+
+    constructor(
+        private templates: Record<keyof IExecutionIntentBuilder, (...args: string[]) => string>
+    ) { }
+
+    private mapToBasicString(step: IExecutionIntent): keyof IExecutionIntentBuilder {
+        switch (true) {
+            case step instanceof PublishIntent:
+                return 'publish';
+            case step instanceof CommandIntent:
+                return 'command';
+            case step instanceof InstallIntent:
+                return 'install';
+            case step instanceof RunIntent:
+                return 'run';
+        }
+
+        throw new Error("got unmapped or custom intent, this is currently not supported.");
+    }
+
+    parseAbstractSyntax(syntax: IExecutionIntent[]): IStep {
+        // TODO: find option to make this parallel.
+        return new GroupStep(syntax.map((step) => {
+
+            if (!(step instanceof AIntent)) {
+                throw new Error("This class only supported AIntent instances.");
+            }
+
+            return new CommandStep(this.templates[this.mapToBasicString(step)](...step.toStingGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
+        }))
+    }
+}
+
+export default ATemplateExecutor;

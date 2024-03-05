@@ -1,5 +1,5 @@
 import * as semver from 'semver';
-import { IDependent, IWorkspace } from '../../../interface/IPackageManager.js';
+import { IDependent, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
   let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];

@@ -1,4 +1,5 @@
 import type { writeFile } from 'fs/promises';
+import type { IPackageManagerExecutor } from './executor/IPackageManagerExecutor.js';
 
 export interface IDependent {
   getName(): string;
@@ -15,6 +16,7 @@ export interface IWorkspace {
 }
 
 export interface IPackageManager {
+
   getCleanLockFile(rootDirectory: string): Promise<Parameters<typeof writeFile>[1]>;
 
   getLockFileName(): string;
@@ -24,8 +26,4 @@ export interface IPackageManager {
   disableGlobalWorkspace(rootDirectory: string): any;
 
   enableGlobalWorkspace(rootDirectory: string): any;
-
-  executeScript(cwd: string, task: string): Promise<void>;
-
-  publish(cwd: string, registry?: string): Promise<void>;
 }
