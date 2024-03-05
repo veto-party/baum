@@ -8,7 +8,7 @@
       "incremental": false,
       "isolatedModules": true,
       "types": ["node"],
-      "lib": ["es2022", "DOM", "DOM.Iterable", "ESNext"],
+      "lib": ["es2022", "DOM", "DOM.Iterable", "ESNext", "ES2015"],
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
       "resolveJsonModule": true,
@@ -16,7 +16,8 @@
       "strict": true,
       "target": "ESNext",
       "allowSyntheticDefaultImports": true,
-      "allowUmdGlobalAccess": true
+      "allowUmdGlobalAccess": true,
+      "experimentalDecorators": true
     }
   }
   

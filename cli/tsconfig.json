@@ -1,8 +1,19 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "@veto-party/config/tsconfig.json",
-  "include": ["./src/"],
   "compilerOptions": {
-    "outDir": "dist"
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "types": ["node"],
+    "lib": ["es2022", "DOM", "DOM.Iterable", "ESNext"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext",
+    "allowSyntheticDefaultImports": true,
+    "allowUmdGlobalAccess": true
   }
 }

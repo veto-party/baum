@@ -6,6 +6,10 @@
     "types": "./src/index.ts",
     "license": "MIT",
     "bin": "./src/cli.js",
+    "files": [
+        "./tsconfig.json",
+        "./src/**"
+    ],
     "dependencies": {
         "@veto-party/baum__core": "*"
     },

@@ -12,7 +12,8 @@
     },
     "dependencies": {
         "zod": "^3.22.4",
-        "semver": "^7.6.0"
+        "semver": "^7.6.0",
+        "@types/node": "^20.11.24"
     },
     "devDependencies": {
         "@veto-party/config": "*",
