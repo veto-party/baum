@@ -8,3 +8,4 @@ export { ParallelStep } from './implementation/Step/ParallelStep.js';
 export { PKGMStep } from './implementation/Step/PKGMStep.js';
 export { PublishStep } from './implementation/Step/PublishStep.js';
 export { GroupStep } from './implementation/Step/GroupStep.js';
+export { RunOnce } from './implementation/annotation/RunOnce.js';
