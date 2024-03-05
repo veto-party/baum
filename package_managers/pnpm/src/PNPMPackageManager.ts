@@ -15,11 +15,13 @@ export class PNPMPackageManager implements IPackageManager {
     const content = file.toString();
     const parser = yaml.parse(content);
 
-    Object.values(parser.importers).forEach((element: any) => {
-      Object.entries(element).forEach(([key, subElement]: [string, any]) => {
-        if (subElement.version.startsWith('link:')) {
-          delete element[key];
-        }
+    Object.values(parser.importers).forEach((dependencyGroup: any) => {
+      Object.values(dependencyGroup).forEach((dependencyType: any) => {
+        Object.entries(dependencyType).forEach(([depdencyName, dependencyDescription]: [string, any]) => {
+          if (dependencyDescription.version.startsWith('link:')) {
+            delete dependencyType[depdencyName];
+          }
+        });
       });
     });
 
