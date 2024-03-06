@@ -18,14 +18,20 @@ const stepMapping = {
 
 stepMapping satisfies Record<keyof IExecutionIntentBuilder, any>;
 
-type callbackArgs = { [K in keyof typeof stepMapping]: InstanceType<(typeof stepMapping)[K]> extends {
+
+export type callbackArgs = { [K in keyof typeof stepMapping]: InstanceType<(typeof stepMapping)[K]> extends {
     toGroup(): infer U
-} ? U extends any[] ? [K, ...U] : never : never }[keyof typeof stepMapping]
+} ? U extends any[] ? U : never : never };
+
+
+export type CallbackType = {
+    [K in keyof callbackArgs]: [K, callbackArgs[K]]
+}[keyof callbackArgs];
 
 export abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
 
     constructor(
-        private templates: Record<keyof IExecutionIntentBuilder, (...args: callbackArgs) => string>
+        private executable: (...args: CallbackType) => string
     ) { }
 
     private mapToBasicString(step: IExecutionIntent): keyof IExecutionIntentBuilder {
@@ -51,7 +57,7 @@ export abstract class ATemplateExecutor implements IExecutablePackageManagerPars
                 throw new Error("This class only supported AIntent instances.");
             }
 
-            return new CommandStep(this.templates[this.mapToBasicString(step)](this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
+            return new CommandStep(this.executable(this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
         }))
     }
 }

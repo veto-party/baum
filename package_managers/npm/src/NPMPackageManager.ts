@@ -1,11 +1,12 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { ATemplateExecutor, IExecutionIntentBuilder, IWorkspace, TemplateBuilder, IExecutablePackageManager, IPackageManagerExecutor } from '@veto-party/baum__core';
+import { IExecutionIntentBuilder, IWorkspace, TemplateBuilder, IExecutablePackageManager, IPackageManagerExecutor } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMWorkspace } from './NPMWorkspace.js';
 import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
+import { NPMExecutor } from './NPMExecutor.js';
 
 const { exec } = shelljs;
 
@@ -94,10 +95,14 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   getExecutor(): IPackageManagerExecutor {
-
+    return new class implements IPackageManagerExecutor {
+      startExecutionIntent(): IExecutionIntentBuilder {
+        return new TemplateBuilder();
+      }
+    };
   }
 
   getExecutorParser(): IExecutablePackageManagerParser {
-    return new TemplateBuilder();
+    return new NPMExecutor();
   }
 }
