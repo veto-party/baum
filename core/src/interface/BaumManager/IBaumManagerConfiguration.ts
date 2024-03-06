@@ -1,11 +1,10 @@
-import type { IPackageManager } from '../PackageManager/IPackageManager.js';
 import type { IStep } from '../IStep.js';
-import { IPackageManagerExecutor } from '../PackageManager/executor/IPackageManagerExecutor.js';
+import { IExecutablePackageManager } from '../PackageManager/IExecutablePackageManager.js';
 
 export interface IBaumManagerConfiguration {
   setRootDirectory(root: string): IBaumManagerConfiguration;
   dontCopyLockFile(): IBaumManagerConfiguration;
-  setPackageManager(packageManager: IPackageManagerExecutor): IBaumManagerConfiguration;
+  setPackageManager(packageManager: IExecutablePackageManager): IBaumManagerConfiguration;
   addExecutionStep(name: string, step: IStep): IBaumManagerConfiguration;
   addExecutionStep(name: string, step: IStep, deps: string[]): IBaumManagerConfiguration;
 }

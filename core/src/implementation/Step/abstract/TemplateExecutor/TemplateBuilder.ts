@@ -7,7 +7,7 @@ import { RunIntent } from "./intent/implementation/RunIntent.js";
 
 
 
-class TemplateBuilder implements IExecutionIntentBuilder {
+export class TemplateBuilder implements IExecutionIntentBuilder {
     publish(): IPublishIntent {
         return new PublishIntent();
     }
@@ -22,5 +22,3 @@ class TemplateBuilder implements IExecutionIntentBuilder {
         return new InstallIntent()
     }
 }
-
-export default TemplateBuilder;

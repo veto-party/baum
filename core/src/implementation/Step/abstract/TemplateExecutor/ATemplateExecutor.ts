@@ -22,7 +22,7 @@ type callbackArgs = { [K in keyof typeof stepMapping]: InstanceType<(typeof step
     toGroup(): infer U
 } ? U extends any[] ? [K, ...U] : never : never }[keyof typeof stepMapping]
 
-abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
+export abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
 
     constructor(
         private templates: Record<keyof IExecutionIntentBuilder, (...args: callbackArgs) => string>
@@ -55,5 +55,3 @@ abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
         }))
     }
 }
-
-export default ATemplateExecutor;
