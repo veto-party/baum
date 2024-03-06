@@ -5,7 +5,7 @@ export class NPMWorkspace implements IWorkspace {
   constructor(
     private directory: string,
     private pkgFile: any
-  ) {}
+  ) { }
 
   getName(): string {
     return this.pkgFile.name;
@@ -20,9 +20,14 @@ export class NPMWorkspace implements IWorkspace {
   }
 
   getDynamicDependents(): IDependent[] {
-    return Object.entries(this.pkgFile.dependencies)
-      .filter(([, version]) => version === '*')
-      .map(([name, version]) => new NPMDependent(name, version as string));
+    return [
+      Object.entries(this.pkgFile.dependencies ?? {})
+        .filter(([, version]) => version === '*')
+        .map(([name, version]) => new NPMDependent(name, version as string)),
+      Object.entries(this.pkgFile.devDependencies ?? {})
+        .filter(([, version]) => version === '*')
+        .map(([name, version]) => new NPMDependent(name, version as string))
+    ].flat();
   }
 
   getScriptNames(): string[] {

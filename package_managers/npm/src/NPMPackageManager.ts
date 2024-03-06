@@ -68,15 +68,17 @@ export class NPMPackageManager implements IExecutablePackageManager {
         return globby(path, { cwd, absolute: true });
       })
     );
+
+    console.log(resolvedPaths);
+
     return await Promise.all(
       resolvedPaths
         .flat()
-        .filter((file) => file.endsWith('package.json'))
+        .filter((file) => file.endsWith('package.json') && !file.includes("node_modules"))
         .map((file) => Path.dirname(file))
         .map<Promise<IWorkspace>>(async (path) => {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
-
           return new NPMWorkspace(path, packageJson);
         })
     );

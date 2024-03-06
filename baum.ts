@@ -83,13 +83,13 @@ export default async (baum: IBaumManagerConfiguration) => {
         return version;
       };
 
-      Object.entries(jsonFile.dependencies).forEach(([k, v]) => {
+      Object.entries(jsonFile.dependencies ?? {}).forEach(([k, v]) => {
         if (namesTVersions[k]?.includes(v as any)) {
           jsonFile.dependencies[k] = toMappedVersion(k, v as string);
         }
       });
 
-      Object.entries(jsonFile.devDependencies).forEach(([k, v]) => {
+      Object.entries(jsonFile.devDependencies ?? {}).forEach(([k, v]) => {
         if (namesTVersions[k]?.includes(v as any)) {
           jsonFile.devDependencies[k] = toMappedVersion(k, v as string);
         }
