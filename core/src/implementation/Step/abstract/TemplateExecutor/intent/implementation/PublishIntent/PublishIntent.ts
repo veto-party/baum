@@ -10,7 +10,7 @@ const publishIntentValidation = zod.object({
     forcePublic: zod.boolean().optional(),
 });
 
-class PublishIntent extends AIntent implements IPublishIntent {
+class PublishIntent extends AIntent<[string] | [string, 'public']> implements IPublishIntent {
 
     constructor(
         private registry?: string | [registry: string, authToken: string],
@@ -53,8 +53,16 @@ class PublishIntent extends AIntent implements IPublishIntent {
 `);
     };
 
-    toStingGroup(): string[] {
-        return [Array.isArray(this.registry) ? this.registry[0] : this.registry!, this.forcePublic ? 'public' : undefined].filter((value): value is string => typeof value === "string");
+    toGroup(): [string] | [string, 'public'] {
+        this.validate();
+
+        const registry = Array.isArray(this.registry) ? this.registry[0] : this.registry!;
+
+        if (!this.forcePublic) {
+            return [registry];
+        }
+
+        return [registry, 'public'];
     }
 }
 

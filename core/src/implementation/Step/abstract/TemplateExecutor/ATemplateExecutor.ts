@@ -1,3 +1,4 @@
+import { satisfies } from "semver";
 import { GroupStep, IStep } from "../../../../index.js";
 import { IExecutionIntent, IExecutionIntentBuilder } from "../../../../interface/PackageManager/executor/IPackageManagerExecutor.js";
 import { IExecutablePackageManagerParser } from "../../../../interface/PackageManager/executor/IPackageManagerParser.js";
@@ -7,7 +8,19 @@ import { CommandIntent } from "./intent/implementation/CommandIntent.js";
 import { InstallIntent } from "./intent/implementation/InstallIntent.js";
 import { PublishIntent } from "./intent/implementation/PublishIntent/PublishIntent.js";
 import { RunIntent } from "./intent/implementation/RunIntent.js";
-import ejs from 'ejs';
+
+const stepMapping = {
+    'run': RunIntent,
+    'publish': PublishIntent,
+    'command': CommandIntent,
+    'install': InstallIntent,
+};
+
+stepMapping satisfies Record<keyof IExecutionIntentBuilder, any>;
+
+type callbackArgs = { [K in keyof typeof stepMapping]: InstanceType<(typeof stepMapping)[K]> extends {
+    toGroup(): infer U
+} ? U extends any[] ? [K, U] : never : never }[keyof typeof stepMapping]
 
 abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
 
@@ -38,7 +51,7 @@ abstract class ATemplateExecutor implements IExecutablePackageManagerParser {
                 throw new Error("This class only supported AIntent instances.");
             }
 
-            return new CommandStep(this.templates[this.mapToBasicString(step)](...step.toStingGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
+            return new CommandStep(this.templates[this.mapToBasicString(step)](...step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
         }))
     }
 }

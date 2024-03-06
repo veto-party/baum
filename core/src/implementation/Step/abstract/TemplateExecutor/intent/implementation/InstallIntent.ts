@@ -11,7 +11,7 @@ const installIntentValidation = zod.object({
     keep: zod.boolean()
 });
 
-class InstallIntent extends AIntent implements IInstallIntent {
+class InstallIntent extends AIntent<[string]> implements IInstallIntent {
     constructor(
         private type?: string,
         private keep: boolean = true
@@ -72,7 +72,7 @@ class InstallIntent extends AIntent implements IInstallIntent {
     /**
      * @inheritdoc
      */
-    toStingGroup(): string[] {
+    toGroup(): [string] {
         this.validate();
         return [this.type!];
     }

@@ -8,7 +8,7 @@ const runIntentValidator = zod.object({
     parameters: zod.string().optional()
 });
 
-class RunIntent extends AIntent implements IRunIntent {
+class RunIntent extends AIntent<[string] | [string, string]> implements IRunIntent {
 
     constructor(
         private successCodes: number[] = [0],
@@ -41,8 +41,14 @@ class RunIntent extends AIntent implements IRunIntent {
         }
     }
 
-    toStingGroup(): string[] {
-        return [this.step, this.parameters].filter((value): value is string => typeof value === "string");
+    toGroup(): [string] | [string, string] {
+        this.validate();
+
+        if (this.parameters) {
+            return [this.step!, this.parameters];
+        }
+
+        return [this.step!];
     }
 }
 

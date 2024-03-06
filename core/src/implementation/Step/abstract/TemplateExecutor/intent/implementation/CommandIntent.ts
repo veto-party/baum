@@ -3,11 +3,11 @@ import { ICommandIntent } from "../../../../../../interface/PackageManager/execu
 import { AIntent } from "../AIntent.js";
 
 const commandIntentValidator = zod.object({
-    command: zod.string().min(1),
+    command: zod.string(),
     parameters: zod.string().optional()
 })
 
-class CommandIntent extends AIntent implements ICommandIntent {
+class CommandIntent extends AIntent<[string] | [string, string]> implements ICommandIntent {
 
     constructor(
         private command?: string,
@@ -20,9 +20,15 @@ class CommandIntent extends AIntent implements ICommandIntent {
         return new CommandIntent(command, this.parameters);
     }
 
-    toStingGroup(): string[] {
+    toGroup(): [string] | [string, string] {
         this.validate();
-        return [this.command!, this.parameters].filter((item): item is string => typeof item === "string");
+
+        if (this.parameters) {
+            return [this.command!, this.parameters];
+        }
+
+        return [this.command!];
+
     }
 
     setParameters(parameters: string): ICommandIntent {

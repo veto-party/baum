@@ -1,14 +1,15 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
+import { IWorkspace } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMWorkspace } from './NPMWorkspace.js';
+import { IPackageManagerExecutor } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerExecutor.js';
 
 const { exec } = shelljs;
 
-export class NPMPackageManager implements IPackageManager {
+export class NPMPackageManager implements IPackageManagerExecutor {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
