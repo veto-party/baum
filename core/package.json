@@ -1,6 +1,5 @@
 {
     "name": "@veto-party/baum__core",
-    "version": "0.0.0",
     "main": "./src/index.ts",
     "type": "module",
     "files": [
