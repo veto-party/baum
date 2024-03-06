@@ -8,8 +8,14 @@ import { CopyStep } from './core/src/implementation/Step/CopyStep.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
-export default (baum: IBaumManagerConfiguration) => {
-  baum.setPackageManager(new NPMPackageManager());
+export default async (baum: IBaumManagerConfiguration) => {
+
+  const pm = new NPMPackageManager();
+
+  baum.setPackageManager(pm);
+
+
+
   baum.setRootDirectory(__dirname);
 
   baum.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
