@@ -51,10 +51,13 @@ export class BaumManager implements IBaumManager {
           return;
         }
 
-
+        console.log("executing step", step.name);
         await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
       }
     } catch (error) {
+
+      console.warn("Failed, reverting state.");
+
       while (stepsForReversal.length > 0) {
         // TODO: Log errors.
         const step = stepsForReversal.shift()!;
@@ -79,6 +82,7 @@ export class BaumManager implements IBaumManager {
     }
 
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
+    console.log(JSON.stringify(groups.map((group) => group.map((workspace) => [workspace.getName(), workspace.getVersion(), workspace.getDynamicDependents().map((depdent) => [depdent.getName(), depdent.getVersion()])])), undefined, 2));
 
     try {
       await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);

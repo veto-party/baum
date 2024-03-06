@@ -57,7 +57,7 @@ export abstract class ATemplateExecutor implements IExecutablePackageManagerPars
                 throw new Error("This class only supported AIntent instances.");
             }
 
-            return new CommandStep(this.executable(this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? []).includes(code!));
+            return new CommandStep(this.executable(this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? [0]).includes(code!));
         }))
     }
 }
