@@ -47,6 +47,11 @@ export class NPMPackageManager implements IExecutablePackageManager {
 
   async disableGlobalWorkspace(rootDirectory: string) {
     await this.checkCopy(rootDirectory, false);
+    const file = JSON.parse((await FileSystem.readFile(Path.join(rootDirectory, 'package.json'))).toString());
+
+    delete file.workspaces;
+
+    await FileSystem.writeFile(Path.join(rootDirectory, 'package.json'), JSON.stringify(file));
   }
 
   async enableGlobalWorkspace(rootDirectory: string) {

@@ -18,11 +18,6 @@ export default async (baum: IBaumManagerConfiguration) => {
 
   baum.setRootDirectory(__dirname);
 
-  baum.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
-  baum.addExecutionStep('prepare', new ParallelStep([
-    new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("test")), new CopyStep('**/*.report.xml', (_, file) => Path.join(__dirname, 'out', new Date().toISOString(), Path.basename(file)))]),
-    new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("build")),
-  ]));
 
   const oldFiles: Record<string, any> = {};
 
@@ -57,6 +52,12 @@ export default async (baum: IBaumManagerConfiguration) => {
       await FileSystem.writeFile(givenPath, JSON.stringify(jsonFile));
     }
   });
+
+  baum.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
+  baum.addExecutionStep('prepare', new ParallelStep([
+    new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("test")), new CopyStep('**/*.report.xml', (_, file) => Path.join(__dirname, 'out', new Date().toISOString(), Path.basename(file)))]),
+    new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("build")),
+  ]));
 
   baum.addExecutionStep('publish', new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((publsh) => publsh.setRegistry('https://registry.npmjs.org/').setForcePublic(true))));
 };
