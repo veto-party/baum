@@ -67,7 +67,7 @@ export class BaumManager implements IBaumManager {
     }
   }
 
-  async run(steps?: string[]): Promise<void> {
+  async run(steps?: (string[])): Promise<void> {
     await this.validate();
 
 
