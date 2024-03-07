@@ -1,5 +1,5 @@
 export type { IBaumManager } from './interface/BaumManager/IBaumManager.js';
-export type { IBaumManagerConfiguration } from './interface/BaumManager/IBaumManagerConfiguration.js';
+export type { IBaumManagerConfiguration, IBaumRegistrable } from './interface/BaumManager/IBaumManagerConfiguration.js';
 export type { IPackageManager, IDependent, IWorkspace } from './interface/PackageManager/IPackageManager.js';
 export type { IExecutablePackageManager } from './interface/PackageManager/IExecutablePackageManager.js';
 

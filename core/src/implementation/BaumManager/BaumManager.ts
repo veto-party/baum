@@ -14,22 +14,22 @@ export class BaumManager implements IBaumManager {
 
   private doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
-  setRootDirectory(root: string): IBaumManager {
+  setRootDirectory(root: string): this {
     this.rootDirectory = root;
     return this;
   }
 
-  setPackageManager(packageManager: IExecutablePackageManager): IBaumManager {
+  setPackageManager(packageManager: IExecutablePackageManager): this {
     this.packageManager = packageManager;
     return this;
   }
 
-  dontCopyLockFile(): IBaumManager {
+  dontCopyLockFile(): this {
     this.doCopyLockFileStep = undefined;
     return this;
   }
 
-  addExecutionStep(name: string, step: IStep): IBaumManager {
+  addExecutionStep(name: string, step: IStep): this {
     this.steps.push({ name, step });
     return this;
   }
