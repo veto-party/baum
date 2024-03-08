@@ -25,6 +25,13 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.addExecutionStep('publish', new VerdaccioRegistryStep(version));
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
-    baum.addExecutionStep('publish-npm', new PKGMStep((intent) => intent.publish().setRegistry('https://registry.npmjs.org/').setAuthorization(process.env.NODE_AUTH_TOKEN!)));
+    baum.addExecutionStep('publish-npm', new class extends PublicRegistryStep {
+      modifyJSON = (json: any) => {
+        PublicRegistryStep.prototype.modifyJSON.call(this, json);
+        if (json.scripts?.build === "tsc") {
+          json.main = "./dist/index.js";
+        }
+      }
+    }(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN));
   }
 };
