@@ -18,17 +18,19 @@ const createHash = (value: string) => {
     return Crypto.createHash('SHA256').update(value).digest('base64').toString();
 }
 
-const configPath = (packageName: string) => Path.join(__dirname, 'configuration', packageName, 'base.config.yaml');
-const newConfigPath = (packageName: string) => Path.join(__dirname, 'configuration', packageName, 'config.yaml');
+const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...[absolute ? __dirname : undefined, 'configuration', Crypto.createHash("sha256").update(packageName).digest().toString("base64"), 'config.yaml'].filter((value): value is string => typeof value === "string"));
 
 @RunOnce()
 export class PrepareStep extends DockerBuildStep {
+
+    private cwd: string;
 
     constructor(
         name: string,
         cwd: string
     ) {
-        super(`. --tag ${name}`, cwd);
+        super(`. --tag ${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __dirname);
+        this.cwd = cwd;
     }
 
     async execute(workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -42,7 +44,7 @@ export class PrepareStep extends DockerBuildStep {
             return prev;
         }, []);
 
-        const base = await FileSystem.readFile(configPath(createHash(rootDirectory)));
+        const base = await FileSystem.readFile(Path.join(__dirname, 'configuration', 'base.config.yaml'));
         const config = yaml.parse(base.toString());
 
         config.storage = '/storage/storage';
@@ -58,7 +60,11 @@ export class PrepareStep extends DockerBuildStep {
             }
         });
 
-        await FileSystem.writeFile(newConfigPath(createHash(rootDirectory)), yaml.stringify(config, {
+        const fullPath = newConfigPath(this.cwd, true);
+        await FileSystem.mkdir(fullPath, {
+            recursive: true
+        })
+        await FileSystem.writeFile(fullPath, yaml.stringify(config, {
             defaultStringType: 'QUOTE_SINGLE'
         }));
 
