@@ -4,9 +4,11 @@ import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import { GroupStep, IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
 import { CopyStep } from './core/src/implementation/Step/CopyStep.js';
 import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
+import { PublicRegistryStep } from './registry/public/src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
+
 
 export default async (baum: IBaumManagerConfiguration) => {
   const pm = new NPMPackageManager();
@@ -25,6 +27,6 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.addExecutionStep('publish', new VerdaccioRegistryStep(version));
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
-    baum.addExecutionStep('publish-npm', new PKGMStep((intent) => intent.publish().setRegistry('https://registry.npmjs.org/').setAuthorization(process.env.NODE_AUTH_TOKEN!)));
+    baum.addExecutionStep('publish-npm', new PublicRegistryStep(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN));
   }
 };
