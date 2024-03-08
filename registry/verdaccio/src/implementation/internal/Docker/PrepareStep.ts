@@ -61,7 +61,7 @@ export class PrepareStep extends DockerBuildStep {
         });
 
         const fullPath = newConfigPath(this.cwd, true);
-        await FileSystem.mkdir(fullPath, {
+        await FileSystem.mkdir(Path.dirname(fullPath), {
             recursive: true
         })
         await FileSystem.writeFile(fullPath, yaml.stringify(config, {
