@@ -21,6 +21,7 @@ class InitStep extends GroupStep {
 
         this.addExecutionStep("prepare", new PrepareStep(hash, root));
         this.addExecutionStep("startup", new StartupStep(hash, (await this.getPort()).toString(), root));
+        super.execute(workspace, packageManager, root)
     }
 }
 
@@ -46,11 +47,16 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     }
 
     protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-        await super.startExecution(workspace, pm, root);
         await this.initStep.execute(workspace, pm, root);
-
+        await super.startExecution(workspace, pm, root);
         const port = await this.initStep.getPort();
 
         this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization("not-empty"));
+    }
+
+    public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
+        try {
+            await this.initStep.clean(workspace, pm, root);
+        }
     }
 }
