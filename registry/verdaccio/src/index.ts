@@ -10,6 +10,10 @@ class InitStep extends GroupStep {
 
     private port?: number;
 
+    constructor() {
+        super([]);
+    }
+
     async getPort() {
         this.port ??= await portFinder.getPortPromise();
         return this.port;
@@ -28,17 +32,18 @@ class InitStep extends GroupStep {
 export class VerdaccioRegistryStep extends ARegistryStep {
 
     private publishStep?: PKGMStep;
-    private initStep = new InitStep([]);
+    private initStep: InitStep;
 
     constructor(
         private pinVersion: string,
         private dockerAddress = 'http://localhost'
     ) {
         super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
+        this.initStep = new InitStep()
     }
 
     modifyJSON = (json: any) => {
-        json.version = json.version ?? GenericVersionManager.MIN_VERSION;
+        json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
         delete json.private
     };
 
