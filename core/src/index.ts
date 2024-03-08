@@ -10,6 +10,8 @@ export type { IPackageManagerExecutor, ICommandIntent, IExecutionIntent, IExecut
 export { TemplateBuilder } from './implementation/Step/abstract/TemplateExecutor/TemplateBuilder.js';
 export { ATemplateExecutor, type callbackArgs } from './implementation/Step/abstract/TemplateExecutor/ATemplateExecutor.js';
 
+/** @internal */
+export { ModifyNPMRC } from './implementation/Step/abstract/TemplateExecutor/intent/implementation/PublishIntent/ModifyNPMRC.js';
 export { CommandStep } from './implementation/Step/CommandStep.js';
 export { BaumManager } from './implementation/BaumManager/BaumManager.js';
 export { ParallelStep } from './implementation/Step/ParallelStep.js';

@@ -23,7 +23,7 @@ export default async (baum: IBaumManagerConfiguration) => {
 
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
 
-  baum.addExecutionStep('publish', new VerdaccioRegistryStep(version));
+  baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep());
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
     baum.addExecutionStep(

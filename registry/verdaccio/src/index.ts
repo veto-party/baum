@@ -1,6 +1,6 @@
 import Crypto from 'crypto';
 import { GroupStep, IExecutablePackageManager, IWorkspace, PKGMStep, RunOnce } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, VersionManagerVersionOverride } from '@veto-party/baum__registry';
+import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
@@ -31,12 +31,19 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: PKGMStep;
   private initStep: InitStep;
 
+  private doInstall: boolean = false;
+
   constructor(
     private pinVersion: string,
     private dockerAddress = 'http://localhost'
   ) {
     super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
     this.initStep = new InitStep();
+  }
+
+  addInstallStep(): this {
+    this.doInstall = true;
+    return this;
   }
 
   modifyJSON(json: any) {
@@ -49,9 +56,16 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
+
+    const port = await this.initStep.getPort();
+
+    if (this.doInstall) {
+      this.initStep.addExecutionStep("modify_npmrc", new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}`));
+      this.initStep.addExecutionStep("install", new PKGMStep((intent) => intent.install().ci()));
+    }
+
     await this.initStep.execute(workspace, pm, root);
     await super.startExecution(workspace, pm, root);
-    const port = await this.initStep.getPort();
 
     this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
   }
