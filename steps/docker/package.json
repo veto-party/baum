@@ -1,0 +1,12 @@
+{
+    "name": "@veto-party/baum__steps__docker",
+    "type": "module",
+    "main": "./src/index.ts",
+    "dependencies": {
+        "@veto-party/baum__core": "*"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.2",
+        "@veto-party/config": "*"
+    }
+}

@@ -16,7 +16,8 @@
     },
     "devDependencies": {
         "@veto-party/config": "*",
-        "@types/shelljs": "^0.8.15"
+        "@types/shelljs": "^0.8.15",
+        "typescript": "^5.4.2"
     },
     "workspaces": {
         "packages": []

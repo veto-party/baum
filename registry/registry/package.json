@@ -1,0 +1,15 @@
+{
+    "name": "@veto-party/baum__registry",
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@veto-party/baum__core": "*"
+    },
+    "devDependencies": {
+        "typescript": "^5.4.2",
+        "@veto-party/config": "*"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "name": "@veto-party/baum__verdaccio",
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@veto-party/baum__core": "*",
+        "@veto-party/baum__registry": "*",
+        "yaml": "^2.4.1",
+        "portfinder": "^1.0.32"
+    },
+    "devDependencies": {
+        "@types/semver": "^7.5.8",
+        "typescript": "^5.4.2",
+        "@veto-party/config": "*"
+    }
+}
