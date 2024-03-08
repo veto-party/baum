@@ -1,13 +1,19 @@
-import { IPackageManager, IStep, IWorkspace } from '../../index.js';
+import { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
+import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
-export class ParallelStep implements IStep {
-  constructor(private steps: IStep[]) {}
+export class ParallelStep implements IStep, IBaumRegistrable {
+  constructor(protected steps: IStep[]) {}
 
-  async clean(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await Promise.all(this.steps.map((step) => step.clean(workspace, packageManager, rootDirectory)));
   }
 
-  async execute(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await Promise.all(this.steps.map((step) => step.execute(workspace, packageManager, rootDirectory)));
+  }
+
+  addExecutionStep(name: string, step: IStep): this {
+    this.steps.push(step);
+    return this;
   }
 }

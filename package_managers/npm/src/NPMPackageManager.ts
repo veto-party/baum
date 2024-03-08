@@ -1,14 +1,16 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
+import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
+import { NPMExecutor } from './NPMExecutor.js';
 import { NPMWorkspace } from './NPMWorkspace.js';
 
 const { exec } = shelljs;
 
-export class NPMPackageManager implements IPackageManager {
+export class NPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
@@ -44,6 +46,11 @@ export class NPMPackageManager implements IPackageManager {
 
   async disableGlobalWorkspace(rootDirectory: string) {
     await this.checkCopy(rootDirectory, false);
+    const file = JSON.parse((await FileSystem.readFile(Path.join(rootDirectory, 'package.json'))).toString());
+
+    delete file.workspaces;
+
+    await FileSystem.writeFile(Path.join(rootDirectory, 'package.json'), JSON.stringify(file));
   }
 
   async enableGlobalWorkspace(rootDirectory: string) {
@@ -60,68 +67,47 @@ export class NPMPackageManager implements IPackageManager {
         return globby(path, { cwd, absolute: true });
       })
     );
+
     return await Promise.all(
       resolvedPaths
         .flat()
-        .filter((file) => file.endsWith('package.json'))
+        .filter((file) => file.endsWith('package.json') && !file.includes('node_modules'))
         .map((file) => Path.dirname(file))
         .map<Promise<IWorkspace>>(async (path) => {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
-
           return new NPMWorkspace(path, packageJson);
         })
     );
   }
 
+  @CachedFN(true)
   async readWorkspace(rootDirectory: string) {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package.json'));
     const content = JSON.parse(file.toString());
 
     const workspaces = content.workspaces ?? [];
 
-    if (Array.isArray(content.workspaces)) {
+    if (Array.isArray(workspaces)) {
       return this.parseWorkspaces(workspaces, rootDirectory);
     }
-    return this.parseWorkspaces(workspaces.packages, rootDirectory);
-  }
 
-  private doSpawn(cwd: string, command: string) {
-    return new Promise<void>((resolve, reject) => {
-
-
-      const givenEnv = {
-        ...process.env,
-        NODE_ENV: undefined,
-        NODE_OPTIONS: undefined,
-      };
-
-      const givenProcess = exec(command, {
-        async: true,
-        cwd,
-        env: givenEnv
-      });
-
-      givenProcess.on('close', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Process exited with code: "${code}"`));
-          return;
-        }
-
-        resolve();
-      });
-    });
-  }
-
-  async executeScript(cwd: string, task: string): Promise<void> {
-    await this.doSpawn(cwd, `npm run ${task}`);
-  }
-
-  async publish(cwd: string, registry?: string | undefined): Promise<void> {
-    if (registry) {
-      await this.doSpawn(cwd, `npm publish --registry=${registry}`);
+    if (typeof workspaces === 'object' && Array.isArray(workspaces.packages)) {
+      return this.parseWorkspaces(workspaces.packages, rootDirectory);
     }
 
-    await this.doSpawn(cwd, 'npm publish');
+    return [];
+  }
+
+  getExecutor(): IPackageManagerExecutor {
+    return new (class implements IPackageManagerExecutor {
+      startExecutionIntent(): IExecutionIntentBuilder {
+        return new TemplateBuilder();
+      }
+    })();
+  }
+
+  getExecutorParser(): IExecutablePackageManagerParser {
+    return new NPMExecutor();
   }
 }

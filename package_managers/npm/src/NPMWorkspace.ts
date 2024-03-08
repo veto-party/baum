@@ -20,9 +20,14 @@ export class NPMWorkspace implements IWorkspace {
   }
 
   getDynamicDependents(): IDependent[] {
-    return Object.entries(this.pkgFile.dependencies)
-      .filter(([, version]) => version === '*')
-      .map(([name, version]) => new NPMDependent(name, version as string));
+    return [
+      Object.entries(this.pkgFile.dependencies ?? {})
+        .filter(([, version]) => version === '*')
+        .map(([name, version]) => new NPMDependent(name, version as string)),
+      Object.entries(this.pkgFile.devDependencies ?? {})
+        .filter(([, version]) => version === '*')
+        .map(([name, version]) => new NPMDependent(name, version as string))
+    ].flat();
   }
 
   getScriptNames(): string[] {

@@ -1,14 +1,15 @@
 import Path from 'path';
 import FileSystem from 'fs/promises';
-import { IPackageManager, IStep } from '../../../index.js';
-import { IWorkspace } from '../../../interface/IPackageManager.js';
+import { IStep } from '../../../index.js';
+import { IExecutablePackageManager } from '../../../interface/PackageManager/IExecutablePackageManager.js';
+import { IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
 
 export class CopyAndCleanLockFileStep implements IStep {
-  async execute(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) {
+  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string) {
     await FileSystem.writeFile(Path.join(workspace.getDirectory(), packageManager.getLockFileName()), await packageManager.getCleanLockFile(rootDirectory));
   }
 
-  async clean(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await FileSystem.rm(Path.join(workspace.getDirectory(), packageManager.getLockFileName()));
   }
 }

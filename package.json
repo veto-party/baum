@@ -11,7 +11,9 @@
     "config",
     "core",
     "cli",
-    "package_managers/*"
+    "package_managers/*",
+    "registry/*",
+    "steps/*"
   ],
   "devDependencies": {
     "@biomejs/biome": "1.5.3",

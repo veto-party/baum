@@ -1,11 +1,12 @@
 import Path from 'path';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
-import { IPackageManager, IStep, IWorkspace } from '../../index.js';
+import { IStep, IWorkspace } from '../../index.js';
+import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 export class CopyStep implements IStep {
   constructor(
-    private from: string,
+    private from: string | ((workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => string[]),
     private to: string | ((workspace: IWorkspace, filename: string) => string)
   ) {}
 
@@ -17,7 +18,11 @@ export class CopyStep implements IStep {
     );
   }
 
-  async execute(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    if (typeof this.from === 'function') {
+      return this.doOrderFiles(workspace, this.from(workspace, packageManager, rootDirectory));
+    }
+
     if (this.from.includes('*')) {
       const files = await globby(this.from, {
         absolute: true,
@@ -39,7 +44,7 @@ export class CopyStep implements IStep {
     await this.doOrderFiles(workspace, [source]);
   }
 
-  async clean(workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     // NO-OP
   }
 }

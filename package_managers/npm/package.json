@@ -11,11 +11,13 @@
     "dependencies": {
         "@veto-party/baum__core": "*",
         "globby": "^14.0.1",
-        "shelljs": "^0.8.5"
+        "ejs": "^3.1.9"
     },
     "devDependencies": {
         "@veto-party/config": "*",
-        "@types/shelljs": "^0.8.15"
+        "@types/shelljs": "^0.8.15",
+        "@types/ejs": "^3.1.5",
+        "typescript": "^5.4.2"
     },
     "workspaces": {
         "packages": []

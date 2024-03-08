@@ -24,8 +24,4 @@ export interface IPackageManager {
   disableGlobalWorkspace(rootDirectory: string): any;
 
   enableGlobalWorkspace(rootDirectory: string): any;
-
-  executeScript(cwd: string, task: string): Promise<void>;
-
-  publish(cwd: string, registry?: string): Promise<void>;
 }
