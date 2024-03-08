@@ -30,7 +30,14 @@ export class CopyStep implements IStep {
         if (!this.keepFiles) {
           const entry = ensureMapEntry(this.filesThatGotCopied, workspace, {});
           entry[destination] ??= [];
-          entry[destination].push(...(await FileSystem.stat(source)).isDirectory() ? await globby(Path.join(source, '**', '*')) : [source]);
+
+          const fileSources = (await FileSystem.stat(source)).isDirectory() ? await globby(Path.join(source, '**', '*')) : [source];
+
+          if (await FileSystem.stat(destination).then((stats) => stats.isDirectory(), () => false)) {
+            entry[destination].push(...fileSources.map((fileSource) => Path.join(destination, fileSource)));
+          } else {
+            entry[destination].push(destination);
+          }
         }
 
         await FileSystem.cp(source, destination);

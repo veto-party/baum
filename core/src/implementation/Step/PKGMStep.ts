@@ -6,25 +6,37 @@ import type { IExecutionIntent, IExecutionIntentBuilder } from '../../interface/
  * Package Manager Step
  */
 export class PKGMStep implements IStep {
-  constructor(private intentCreator: (itent: IExecutionIntentBuilder, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => IExecutionIntent[] | IExecutionIntent) {}
+  constructor(private intentCreator: (itent: IExecutionIntentBuilder, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => IExecutionIntent[] | IExecutionIntent) { }
+
+  private workspaceMapping: Map<IWorkspace, IStep> = new Map();
 
   static DEFAULT_TYPES = {
     RunPGKMWhenKeyExists:
       (task: string): ConstructorParameters<typeof PKGMStep>[0] =>
-      (itent, workspace) =>
-        workspace.getScriptNames().includes(task) ? [itent.run().setRunStep(task)] : [],
+        (itent, workspace) =>
+          workspace.getScriptNames().includes(task) ? [itent.run().setRunStep(task)] : [],
     RunPublishIfRequired:
       (callback: (itent: ReturnType<IExecutionIntentBuilder['publish']>, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => IExecutionIntent): ConstructorParameters<typeof PKGMStep>[0] =>
-      (intent, workspace, pk, rootDir) =>
-        workspace.isPublishable() ? callback(intent.publish(), workspace, pk, rootDir) : []
+        (intent, workspace, pk, rootDir) =>
+          workspace.isPublishable() ? callback(intent.publish(), workspace, pk, rootDir) : []
   };
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    const intent = this.intentCreator(packageManager.getExecutor().startExecutionIntent(), workspace, packageManager, rootDirectory);
-    await packageManager.getExecutorParser().parseAbstractSyntax([intent].flat()).execute(workspace, packageManager, rootDirectory);
+
+    if (!this.workspaceMapping.has(workspace)) {
+      const intent = this.intentCreator(packageManager.getExecutor().startExecutionIntent(), workspace, packageManager, rootDirectory);
+      this.workspaceMapping.set(workspace, packageManager.getExecutorParser().parseAbstractSyntax([intent].flat()));
+    }
+
+
+    return this.workspaceMapping.get(workspace)!.execute(workspace, packageManager, rootDirectory);
   }
 
-  async clean(workspace: IWorkspace, packageManager: IPackageManager): Promise<void> {
-    // NO-OP
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
+    if (!this.workspaceMapping.has(workspace)) {
+      return;
+    }
+
+    return this.workspaceMapping.get(workspace)!.clean(workspace, packageManager, root);
   }
 }

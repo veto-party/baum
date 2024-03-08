@@ -2,17 +2,16 @@ import FileSystem from 'fs';
 import Path from 'path';
 import { IStep, IWorkspace } from '../../../../../../../index.js';
 import { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
-import { cat } from 'shelljs';
 
 class ModifyNPMRC implements IStep {
 
-  private hasRun: Map<IWorkspace, undefined> = new Map();
+  private hasRun: Map<IWorkspace, Symbol> = new Map();
   private previousFileContent: Buffer | undefined;
 
   constructor(private dataToAdd: string) { }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    this.hasRun.set(workspace, undefined);
+    this.hasRun.set(workspace, Symbol(workspace.getName()));
     try {
       this.previousFileContent = FileSystem.readFileSync(Path.join(workspace.getDirectory(), '.npmrc'));
     } catch (error) { }

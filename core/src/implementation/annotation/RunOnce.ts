@@ -8,7 +8,7 @@ class PromiseStorage<T extends (...args: any[]) => any> {
 
   private result: any = never;
 
-  constructor(private callback: T) {}
+  constructor(private callback: T) { }
 
   private doResolve<I extends 0 | 1>(index: I): (typeof this.promiseResolvers)[number][I] {
     return (param: any) => this.promiseResolvers.map((value) => value[index]).forEach((fnc) => fnc(param));
