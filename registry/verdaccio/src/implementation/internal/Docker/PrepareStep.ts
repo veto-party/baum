@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 const createHash = (value: string) => {
-    return Crypto.createHash('SHA256').update(value).digest().toString();
+    return Crypto.createHash('SHA256').update(value).digest('base64').toString();
 }
 
 const configPath = (packageName: string) => Path.join(__dirname, 'configuration', packageName, 'base.config.yaml');

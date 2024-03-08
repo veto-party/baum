@@ -8,6 +8,7 @@
     "dependencies": {
         "@veto-party/baum__core": "*",
         "@veto-party/baum__registry": "*",
+        "@veto-party/baum__steps__docker": "*",
         "yaml": "^2.4.1",
         "portfinder": "^1.0.32"
     },
