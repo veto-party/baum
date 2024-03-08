@@ -24,7 +24,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
         await super.startExecution(workspace, pm, root);
         const [port] = await Promise.all([portFinder.getPortPromise()]);
 
-        const hash = Crypto.createHash("sha256").update(root).digest("base64");
+        const hash = Crypto.createHash("sha256").update(root).digest("hex");
 
         this.addExecutionStep("prepare", new PrepareStep(hash, root));
         this.addExecutionStep("startup", new StartupStep(hash, port.toString(), root));

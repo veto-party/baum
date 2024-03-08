@@ -14,11 +14,7 @@ import { DockerBuildStep } from '@veto-party/baum__steps__docker';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
-const createHash = (value: string) => {
-    return Crypto.createHash('SHA256').update(value).digest('base64').toString();
-}
-
-const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...[absolute ? __dirname : undefined, 'configuration', Crypto.createHash("sha256").update(packageName).digest().toString("base64"), 'config.yaml'].filter((value): value is string => typeof value === "string"));
+const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...[absolute ? __dirname : undefined, 'configuration', Crypto.createHash("sha256").update(packageName).digest().toString("hex"), 'config.yaml'].filter((value): value is string => typeof value === "string"));
 
 @RunOnce()
 export class PrepareStep extends DockerBuildStep {
@@ -29,7 +25,8 @@ export class PrepareStep extends DockerBuildStep {
         name: string,
         cwd: string
     ) {
-        super(`. --tag ${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __dirname);
+        super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __dirname);
+        console.log(__dirname);
         this.cwd = cwd;
     }
 
@@ -68,7 +65,9 @@ export class PrepareStep extends DockerBuildStep {
             defaultStringType: 'QUOTE_SINGLE'
         }));
 
+        console.log("a");
         await super.execute(workspace, pm, rootDirectory);
+        console.log("b");
     }
     async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
         // NO-OP

@@ -1,7 +1,7 @@
 import { ATemplateExecutor, callbackArgs } from "@veto-party/baum__core";
 import ejs from 'ejs';
 
-const ifSet = (variableName: string, templateStr: string) => `<%= ${variableName} !== undefined ? "${ejs.render(templateStr, { [variableName]: variableName })}" : "" %>`;
+const ifSet = (variableName: string, templateStr: string) => `<%= ${variableName} !== undefined ? ${ejs.render(templateStr, { [variableName]: variableName })} : "" %>`;
 
 const raw_commands: Record<keyof callbackArgs, string> = {
     command: `npx <%= package %><%= command %> ${ifSet('parameters', "-- <%= parameters %>")}`,

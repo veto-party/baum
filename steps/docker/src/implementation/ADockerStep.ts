@@ -6,6 +6,6 @@ export class ADockerStep extends CommandStep {
         cwd: string,
         processValidation: (code: number | null) => boolean = (code) => code === 0
     ) {
-        super(`docker ${subCommand},`, cwd, processValidation);
+        super(`docker ${subCommand}`, cwd, processValidation);
     }
 }

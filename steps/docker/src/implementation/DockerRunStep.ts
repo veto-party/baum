@@ -22,8 +22,8 @@ export class DockerRunStep implements IStep {
         cwd: string,
         processValidation: (code: number | null) => boolean = (code) => code === 0
     ) {
-        this.tag = properties.tag ?? Object.entries(properties).map(([k, v]) => JSON.stringify(k) + "-" + JSON.stringify(v)).reduce((prev, current) => prev.update(current), Crypto.createHash('sha256').update(cwd)).digest().toString('base64');
-        this.startStep = new ADockerStep(`run --tag=${this.tag} ${properties.paramsForDocker ?? ''} ${properties.image} ${properties.paramsForContainer ?? ''}`, cwd, processValidation);
+        this.tag = properties.tag ?? Object.entries(properties).map(([k, v]) => JSON.stringify(k) + "-" + JSON.stringify(v)).reduce((prev, current) => prev.update(current), Crypto.createHash('sha256').update(cwd)).digest().toString('hex');
+        this.startStep = new ADockerStep(`run --name=${this.tag} ${properties.paramsForDocker ?? ''} ${properties.image} ${properties.paramsForContainer ?? ''}`, cwd, processValidation);
         this.stopSTep = new ADockerStep(`stop ${this.tag}`, cwd, processValidation);
     }
 

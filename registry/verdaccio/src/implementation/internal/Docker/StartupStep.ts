@@ -9,8 +9,8 @@ export class StartupStep extends DockerRunStep {
         cwd: string
     ) {
         super({
-            image: name,
-            paramsForDocker: `--rm -d -p ${port}:4873 --name ${name}__running`,
+            image: `internal/${name}`,
+            paramsForDocker: `--rm -d -p ${port}:4873`,
         }, cwd);
     }
 }

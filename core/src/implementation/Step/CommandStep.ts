@@ -15,12 +15,27 @@ class CommandStep implements IStep {
         private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
     ) { }
 
+    protected getCleanEnv() {
+        const current = {
+            ...process.env
+        };
+
+        delete current['PWD'];
+        delete current['NODE_ENV'];
+        delete current['NODE_OPTIONS'];
+
+        return current;
+    }
+
     execute(workspace: IWorkspace, __packageManager: IExecutablePackageManager, __rootDirectory: string): Promise<void> {
 
         return new Promise<void>((resolve, reject) => {
+
+            console.log(`Running command: ${JSON.stringify(this.command)} now!`);
             const newProcess = exec(this.command, {
                 async: true,
-                cwd: this.cwdAddition ? Path.join(workspace.getDirectory(), this.cwdAddition) : workspace.getDirectory()
+                cwd: this.cwdAddition ? Path.isAbsolute(this.cwdAddition) ? this.cwdAddition : Path.join(workspace.getDirectory(), this.cwdAddition) : workspace.getDirectory(),
+                env: this.getCleanEnv()
             });
 
             newProcess.addListener('close', (code) => {
