@@ -2,16 +2,35 @@ import FileSystem from 'fs';
 import Path from 'path';
 import { IStep, IWorkspace } from '../../../../../../../index.js';
 import { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
+import { cat } from 'shelljs';
 
 class ModifyNPMRC implements IStep {
-  constructor(private dataToAdd: string) {}
+
+  private hasRun: Map<IWorkspace, undefined> = new Map();
+  private previousFileContent: Buffer | undefined;
+
+  constructor(private dataToAdd: string) { }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    this.hasRun.set(workspace, undefined);
+    try {
+      this.previousFileContent = FileSystem.readFileSync(Path.join(workspace.getDirectory(), '.npmrc'));
+    } catch (error) { }
+
     FileSystem.appendFileSync(Path.join(workspace.getDirectory(), '.npmrc'), this.dataToAdd);
   }
-  clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    // NO-OP: // TODO: Maybe cut out content, since npmrc might not be in the gitignore.
-    return Promise.resolve();
+
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+
+    if (!this.hasRun.has(workspace)) {
+      return;
+    }
+
+    if (this.previousFileContent) {
+      FileSystem.writeFileSync(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent);
+    } else {
+      FileSystem.unlinkSync(Path.join(workspace.getDirectory(), '.npmrc'));
+    }
   }
 }
 

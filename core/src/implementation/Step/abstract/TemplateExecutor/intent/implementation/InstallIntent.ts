@@ -14,7 +14,7 @@ const installIntentValidation = zod.object({
 class InstallIntent extends AIntent<[string]> implements IInstallIntent {
   constructor(
     private type?: string,
-    private keep = true
+    private keepLockFileFlag = true
   ) {
     super();
   }
@@ -27,21 +27,21 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
    * @inheritdoc
    */
   ci(): IInstallIntent {
-    return new InstallIntent('ci', this.keep);
+    return new InstallIntent('ci', this.keepLockFileFlag);
   }
 
   /**
    * @inheritdoc
    */
   install(): IInstallIntent {
-    return new InstallIntent('install', this.keep);
+    return new InstallIntent('install', this.keepLockFileFlag);
   }
 
   /**
    * @inheritdoc
    */
   rebuild(): IInstallIntent {
-    return new InstallIntent('rebuild', this.keep);
+    return new InstallIntent('rebuild', this.keepLockFileFlag);
   }
 
   /**
@@ -61,7 +61,7 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
       (workspace) => workspace.getDirectory()
     );
 
-    if (this.keep) {
+    if (this.keepLockFileFlag) {
       return new ParallelStep([
         npmRCCopy,
         new CopyStep(
