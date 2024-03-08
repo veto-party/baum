@@ -21,5 +21,11 @@ export default async (baum: IBaumManagerConfiguration) => {
     new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("build")),
   ]));
 
-  baum.addExecutionStep('publish', new VerdaccioRegistryStep("v0.0.0"));
+  const version = process.env.PUBLISH_VERSION ?? "v0.0.0";
+
+  baum.addExecutionStep('publish', new VerdaccioRegistryStep(version));
+
+  if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
+    baum.addExecutionStep("publish-npm", new PKGMStep((intent) => intent.publish().setRegistry("https://registry.npmjs.org/").setAuthorization(process.env.NODE_AUTH_TOKEN!)));
+  }
 };
