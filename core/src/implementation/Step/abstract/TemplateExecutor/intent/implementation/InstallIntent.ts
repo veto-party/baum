@@ -8,7 +8,7 @@ import { AIntent } from '../AIntent.js';
 
 const installIntentValidation = zod.object({
   type: zod.string(),
-  keep: zod.boolean()
+  keepLockFileFlag: zod.boolean()
 });
 
 class InstallIntent extends AIntent<[string]> implements IInstallIntent {
@@ -58,7 +58,8 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
   getPrepareStep = (): IStep => {
     const npmRCCopy = new CopyStep(
       (_, __, rootDirectory) => (FileSystem.existsSync(Path.join(rootDirectory, '.npmrc')) ? [Path.join(rootDirectory, '.npmrc')] : []),
-      (workspace) => workspace.getDirectory()
+      (workspace) => workspace.getDirectory(),
+      false
     );
 
     if (this.keepLockFileFlag) {
@@ -66,7 +67,8 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
         npmRCCopy,
         new CopyStep(
           (_, pm, root) => [Path.join(root, pm.getLockFileName())],
-          (workspace, filename) => Path.join(workspace.getDirectory(), Path.basename(filename))
+          (workspace, filename) => Path.join(workspace.getDirectory(), Path.basename(filename)),
+          false
         )
       ]);
     }
