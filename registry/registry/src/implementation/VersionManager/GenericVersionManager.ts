@@ -11,6 +11,7 @@ export class GenericVersionManager implements IVersionManager {
 
   private mapToVersions(workspaces: IWorkspace[]) {
     for (const workspace of workspaces) {
+      this.namesToWorkspaces[workspace.getName()] ??= {};
       this.namesToWorkspaces[workspace.getName()][workspace.getVersion()] = workspace;
       this.nameToVersionOrder[workspace.getName()] ??= [];
       this.nameToVersionOrder[workspace.getName()].push(workspace);

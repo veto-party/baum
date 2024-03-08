@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash';
+import isEqual from 'lodash.isequal';
 
 /**
  * This currently does not support async functions.
