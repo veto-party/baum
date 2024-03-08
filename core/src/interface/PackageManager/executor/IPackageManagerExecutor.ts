@@ -8,7 +8,7 @@ export interface IPublishIntent extends IExecutionIntent {
     /**
      * Sets the registry, will use npm registry if not defined.
      */
-    setRegistry(registry: string | [registry: string, authToken: string]): IPublishIntent;
+    setRegistry(registry: string): IPublishIntent;
 
 
     /**

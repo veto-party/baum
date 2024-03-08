@@ -13,7 +13,7 @@ const publishIntentValidation = zod.object({
 class PublishIntent extends AIntent<[string] | [string, 'public']> implements IPublishIntent {
 
     constructor(
-        private registry?: string | [registry: string, authToken: string],
+        private registry?: string,
         private token?: string,
         private forcePublic: boolean = false
     ) {
@@ -24,7 +24,7 @@ class PublishIntent extends AIntent<[string] | [string, 'public']> implements IP
         return new PublishIntent(this.registry, token, this.forcePublic);
     }
 
-    setRegistry(registry?: string | [registry: string, authToken: string]): IPublishIntent {
+    setRegistry(registry?: string): IPublishIntent {
         return new PublishIntent(registry, this.token, this.forcePublic);
     }
 
@@ -41,15 +41,15 @@ class PublishIntent extends AIntent<[string] | [string, 'public']> implements IP
     }
 
     getPrepareStep = () => {
-        if (!Array.isArray(this.registry)) {
+        if (!this.token) {
             return new GroupStep([]); // For now return empty step. // TODO: This could be undefined to improve performance.
         }
 
-        const url = new URL(this.registry[0]);
+        const url = new URL(this.registry!);
 
         return new ModifyNPMRC(`
-//${url.toString().substring(url.protocol.length)}:authToken="${this.registry[1]}"
-//${url.toString().substring(url.protocol.length)}:always-auth=true
+${url.toString().substring(url.protocol.length)}:_authToken="${this.token}"
+${url.toString().substring(url.protocol.length)}:always-auth=true
 `);
     };
 

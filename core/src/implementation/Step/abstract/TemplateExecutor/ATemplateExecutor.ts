@@ -50,14 +50,21 @@ export abstract class ATemplateExecutor implements IExecutablePackageManagerPars
     }
 
     parseAbstractSyntax(syntax: IExecutionIntent[]): IStep {
-        // TODO: find option to make this parallel.
+
         return new GroupStep(syntax.map((step) => {
 
             if (!(step instanceof AIntent)) {
                 throw new Error("This class only supported AIntent instances.");
             }
 
-            return new CommandStep(this.executable(this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? [0]).includes(code!));
-        }))
+            const command = new CommandStep(this.executable(this.mapToBasicString(step), step.toGroup()), undefined, (code) => (step.getSuccessCodes?.() ?? [0]).includes(code!));
+            const intent = step.getPrepareStep?.();
+
+            if (intent) {
+                return [intent, command];
+            }
+
+            return command;
+        }).flat());
     }
 }
