@@ -2,6 +2,9 @@
     "name": "@veto-party/baum__registry",
     "type": "module",
     "main": "./src/index.ts",
+    "files": [
+        "./dist/**"
+    ],
     "scripts": {
         "build": "tsc"
     },

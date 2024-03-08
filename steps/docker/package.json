@@ -2,6 +2,9 @@
     "name": "@veto-party/baum__steps__docker",
     "type": "module",
     "main": "./src/index.ts",
+    "files": [
+        "./dist/**"
+    ],
     "dependencies": {
         "@veto-party/baum__core": "*"
     },
