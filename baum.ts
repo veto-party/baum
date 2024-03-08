@@ -26,13 +26,16 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.addExecutionStep('publish', new VerdaccioRegistryStep(version));
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
-    baum.addExecutionStep('publish-npm', new class extends PublicRegistryStep {
-      modifyJSON(json: any) {
-        super.modifyJSON(json);
-        if (json.scripts?.build === "tsc") {
-          json.main = "./dist/index.js";
+    baum.addExecutionStep(
+      'publish-npm',
+      new (class extends PublicRegistryStep {
+        modifyJSON(json: any) {
+          super.modifyJSON(json);
+          if (json.scripts?.build === 'tsc') {
+            json.main = './dist/index.js';
+          }
         }
-      }
-    }(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN));
+      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN)
+    );
   }
 };

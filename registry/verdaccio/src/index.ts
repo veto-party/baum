@@ -42,7 +42,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   modifyJSON(json: any) {
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
-  };
+  }
 
   getPublishStep(): PKGMStep | undefined {
     return this.publishStep;
