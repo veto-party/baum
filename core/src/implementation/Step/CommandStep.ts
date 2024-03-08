@@ -2,7 +2,6 @@ import { IStep, IWorkspace } from "../../index.js";
 import { IExecutablePackageManager } from "../../interface/PackageManager/IExecutablePackageManager.js";
 import shelljs from 'shelljs';
 import Path from 'path';
-import { boolean } from "zod";
 
 const { exec } = shelljs;
 

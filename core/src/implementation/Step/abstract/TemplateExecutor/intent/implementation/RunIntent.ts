@@ -3,7 +3,7 @@ import { AIntent } from "../AIntent.js";
 import zod from 'zod';
 
 const runIntentValidator = zod.object({
-    successCode: zod.array(zod.number()),
+    successCodes: zod.array(zod.number()),
     step: zod.string(),
     parameters: zod.string().optional()
 });
@@ -35,6 +35,7 @@ class RunIntent extends AIntent<[string] | [string, string]> implements IRunInte
     }
 
     validate(): void {
+        console.log(this);
         const result = runIntentValidator.safeParse(this);
         if (!result.success) {
             throw result.error;
