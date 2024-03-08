@@ -23,6 +23,8 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     abstract getPublishStep(): PKGMStep | undefined;
 
+    modifyJSON?: (file: any) => any = undefined;
+
     protected async startExecution(workspace: IWorkspace, pm: IPackageManager, root: string) {
         const givenPath = Path.join(workspace.getDirectory(), 'package.json');
         const file = (await FileSystem.readFile(givenPath)).toString();
@@ -48,6 +50,8 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
         Object.entries((jsonFile.optionalDependencies ?? {}) as Record<string, string>).forEach(([k, v]) => {
             jsonFile.optionalDependencies[k] = manager.getLatestVersionFor(k, v) ?? jsonFile.optionalDependencies[k];
         });
+
+        await this.modifyJSON?.(jsonFile);
 
         await FileSystem.writeFile(givenPath, JSON.stringify(jsonFile));
     }

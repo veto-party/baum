@@ -1,5 +1,5 @@
 import { IWorkspace, IExecutablePackageManager, IStep, PKGMStep, GroupStep } from "@veto-party/baum__core";
-import { ARegistryStep, VersionManagerVersionOverride } from "@veto-party/baum__registry";
+import { ARegistryStep, GenericVersionManager, VersionManagerVersionOverride } from "@veto-party/baum__registry";
 import { PrepareStep } from "./implementation/internal/Docker/PrepareStep.js";
 import { StartupStep } from "./implementation/internal/Docker/StartupStep.js";
 import Crypto from 'crypto';
@@ -15,6 +15,11 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     ) {
         super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
     }
+
+    modifyJSON = (json: any) => {
+        json.version = json.version ?? GenericVersionManager.MIN_VERSION;
+        delete json.private;
+    };
 
     getPublishStep(): PKGMStep | undefined {
         return this.publishStep;
