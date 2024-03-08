@@ -12,7 +12,8 @@
         "@veto-party/baum__core": "*",
         "globby": "^14.0.1",
         "shelljs": "^0.8.5",
-        "yaml": "^2.4.0"
+        "yaml": "^2.4.0",
+        "ejs": "^3.1.9"
     },
     "devDependencies": {
         "@veto-party/config": "*",
