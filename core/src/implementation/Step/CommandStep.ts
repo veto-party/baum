@@ -17,9 +17,9 @@ class CommandStep implements IStep {
       ...process.env
     };
 
-    delete current['PWD'];
-    delete current['NODE_ENV'];
-    delete current['NODE_OPTIONS'];
+    delete current.PWD;
+    delete current.NODE_ENV;
+    delete current.NODE_OPTIONS;
 
     return current;
   }

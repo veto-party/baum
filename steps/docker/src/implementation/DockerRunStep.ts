@@ -20,7 +20,7 @@ export class DockerRunStep implements IStep {
     this.tag =
       properties.tag ??
       Object.entries(properties)
-        .map(([k, v]) => JSON.stringify(k) + '-' + JSON.stringify(v))
+        .map(([k, v]) => `${JSON.stringify(k)}-${JSON.stringify(v)}`)
         .reduce((prev, current) => prev.update(current), Crypto.createHash('sha256').update(cwd))
         .digest()
         .toString('hex');
