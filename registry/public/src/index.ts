@@ -12,7 +12,7 @@ export class PublicRegistryStep extends ARegistryStep {
     super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
   }
 
-  modifyJSON = (json: any) => {
+  modifyJSON(json: any) {
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   };

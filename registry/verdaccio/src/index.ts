@@ -39,7 +39,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     this.initStep = new InitStep();
   }
 
-  modifyJSON = (json: any) => {
+  modifyJSON(json: any) {
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   };

@@ -27,8 +27,8 @@ export default async (baum: IBaumManagerConfiguration) => {
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
     baum.addExecutionStep('publish-npm', new class extends PublicRegistryStep {
-      modifyJSON = (json: any) => {
-        PublicRegistryStep.prototype.modifyJSON.call(this, json);
+      modifyJSON(json: any) {
+        super.modifyJSON(json);
         if (json.scripts?.build === "tsc") {
           json.main = "./dist/index.js";
         }
