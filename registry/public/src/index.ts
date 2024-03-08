@@ -1,4 +1,3 @@
-
 import { IExecutablePackageManager, IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
