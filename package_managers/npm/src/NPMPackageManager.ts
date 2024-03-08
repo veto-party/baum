@@ -1,6 +1,6 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { IExecutionIntentBuilder, IWorkspace, TemplateBuilder, IExecutablePackageManager, IPackageManagerExecutor } from '@veto-party/baum__core';
+import { IExecutionIntentBuilder, IWorkspace, TemplateBuilder, IExecutablePackageManager, IPackageManagerExecutor, CachedFN } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
@@ -69,8 +69,6 @@ export class NPMPackageManager implements IExecutablePackageManager {
       })
     );
 
-    console.log(resolvedPaths);
-
     return await Promise.all(
       resolvedPaths
         .flat()
@@ -84,6 +82,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
     );
   }
 
+  @CachedFN(true)
   async readWorkspace(rootDirectory: string) {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package.json'));
     const content = JSON.parse(file.toString());
