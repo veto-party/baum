@@ -1,12 +1,5 @@
 import isEqual from 'lodash.isequal';
 
-/**
- * This currently does not support async functions.
- * It is guarded by the type.
- *
- * @param async
- * @returns
- */
 export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;

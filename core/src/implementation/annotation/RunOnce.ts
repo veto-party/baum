@@ -34,8 +34,8 @@ class PromiseStorage<T extends (...args: any[]) => any> {
 }
 
 export const RunOnce = () => {
-  return <T extends new (...args: any[]) => IStep>(constructor: T, _context?: ClassDecoratorContext<T>) => {
-    return class extends constructor {
+  return <T extends new (...args: any[]) => IStep>(ctr: T, _context?: ClassDecoratorContext<T>) => {
+    return class extends ctr {
       #executeStorage = new PromiseStorage(super.execute.bind(this));
 
       #cleanStorage = new PromiseStorage(super.clean.bind(this));
