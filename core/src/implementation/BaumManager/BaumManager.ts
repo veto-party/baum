@@ -1,4 +1,4 @@
-import { GroupStep, IBaumManager, IPackageManager, IStep } from '../../index.js';
+import { GroupStep, IBaumManager, IStep } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 import { CopyAndCleanLockFileStep } from '../Step/internal/CopyAndCleanLockFile.js';
@@ -51,12 +51,11 @@ export class BaumManager implements IBaumManager {
           return;
         }
 
-        console.log("executing step", step.name);
+        console.log('executing step', step.name);
         await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
       }
     } catch (error) {
-
-      console.warn("Failed, reverting state.");
+      console.warn('Failed, reverting state.');
 
       while (stepsForReversal.length > 0) {
         // TODO: Log errors.
@@ -67,11 +66,10 @@ export class BaumManager implements IBaumManager {
     }
   }
 
-  async run(steps?: (string[])): Promise<void> {
+  async run(steps?: string[]): Promise<void> {
     await this.validate();
 
-
-    let internalSteps: IStep[] = [];
+    const internalSteps: IStep[] = [];
 
     if (this.doCopyLockFileStep) {
       internalSteps.push(this.doCopyLockFileStep);

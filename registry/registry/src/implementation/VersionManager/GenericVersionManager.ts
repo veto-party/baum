@@ -1,9 +1,8 @@
-import { IWorkspace } from "@veto-party/baum__core";
-import { IVersionManager } from "../../interface/IVersionManager.js";
+import { IWorkspace } from '@veto-party/baum__core';
 import semver from 'semver';
+import { IVersionManager } from '../../interface/IVersionManager.js';
 
 export class GenericVersionManager implements IVersionManager {
-
   public static readonly MIN_VERSION = 'v0.0.0-temp';
 
   protected nameToVersionOrder: Record<string, IWorkspace[]> = {};
@@ -17,21 +16,15 @@ export class GenericVersionManager implements IVersionManager {
       this.nameToVersionOrder[workspace.getName()].push(workspace);
     }
 
-    Object.values(this.nameToVersionOrder).forEach(
-      (workspaceMapping) => Object.values(workspaceMapping).sort(
-        (workspaceA, workspaceB) => semver.compare(workspaceA.getVersion(), workspaceB.getVersion()) || semver.compareBuild(workspaceA.getVersion(), workspaceB.getVersion())
-      )
-    );
+    Object.values(this.nameToVersionOrder).forEach((workspaceMapping) => Object.values(workspaceMapping).sort((workspaceA, workspaceB) => semver.compare(workspaceA.getVersion(), workspaceB.getVersion()) || semver.compareBuild(workspaceA.getVersion(), workspaceB.getVersion())));
   }
 
-  constructor(
-    readonly workspaces: IWorkspace[]
-  ) {
+  constructor(readonly workspaces: IWorkspace[]) {
     this.mapToVersions(workspaces);
   }
 
   protected starToVersion(name: string, version: string) {
-    return version === "*" ? GenericVersionManager.MIN_VERSION : version;
+    return version === '*' ? GenericVersionManager.MIN_VERSION : version;
   }
 
   protected findLatestVersionGenerator(name: string, version: string) {
@@ -40,8 +33,7 @@ export class GenericVersionManager implements IVersionManager {
 
   getLatestVersionFor(name: string, version: string): string | undefined {
     if (this.nameToVersionOrder[name] && this.nameToVersionOrder[name].length > 0) {
-
-      if (!version.includes("*") && this.namesToWorkspaces[name][version]) {
+      if (!version.includes('*') && this.namesToWorkspaces[name][version]) {
         return version;
       }
 
@@ -52,7 +44,7 @@ export class GenericVersionManager implements IVersionManager {
         return this.getLatestVersionFor(name, foundVersion?.getVersion());
       }
 
-      throw new Error("Invalid dependency.");
+      throw new Error('Invalid dependency.');
     }
 
     return version;

@@ -5,7 +5,7 @@ export class NPMWorkspace implements IWorkspace {
   constructor(
     private directory: string,
     private pkgFile: any
-  ) { }
+  ) {}
 
   getName(): string {
     return this.pkgFile.name;

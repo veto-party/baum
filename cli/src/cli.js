@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { spawnSync } from 'child_process';
-import { fileURLToPath } from 'url';
 import Path from 'path';
-import  * as util from 'util';
+import { fileURLToPath } from 'url';
+import * as util from 'util';
 
 const __dirname = fileURLToPath(Path.dirname(Path.dirname(import.meta.resolve('baum'))));
 
@@ -12,10 +12,9 @@ process.on('uncaughtException', (error) => {
   } catch (__error) {
     throw error;
   }
-})
+});
 
 if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) await import('./runner.js');
-
 else {
   const childProcess = spawnSync(process.argv[0], process.argv.slice(1), {
     stdio: 'inherit',

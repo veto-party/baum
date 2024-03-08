@@ -1,3 +1,3 @@
-import { IBaumRegistrable, IStep } from "@veto-party/baum__core";
+import { IBaumRegistrable, IStep } from '@veto-party/baum__core';
 
-export interface ICollection extends IStep, IBaumRegistrable { }
+export interface ICollection extends IStep, IBaumRegistrable {}

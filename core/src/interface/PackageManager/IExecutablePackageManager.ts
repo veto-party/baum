@@ -1,6 +1,5 @@
-import type { writeFile } from 'fs/promises';
-import type { IPackageManagerExecutor } from './executor/IPackageManagerExecutor.js';
 import { IPackageManager } from './IPackageManager.js';
+import type { IPackageManagerExecutor } from './executor/IPackageManagerExecutor.js';
 import { IExecutablePackageManagerParser } from './executor/IPackageManagerParser.js';
 
 export interface IDependent {

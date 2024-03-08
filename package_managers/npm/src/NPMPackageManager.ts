@@ -1,17 +1,16 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { IExecutionIntentBuilder, IWorkspace, TemplateBuilder, IExecutablePackageManager, IPackageManagerExecutor, CachedFN } from '@veto-party/baum__core';
+import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
-import { NPMWorkspace } from './NPMWorkspace.js';
-import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import { NPMExecutor } from './NPMExecutor.js';
+import { NPMWorkspace } from './NPMWorkspace.js';
 
 const { exec } = shelljs;
 
 export class NPMPackageManager implements IExecutablePackageManager {
-
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
@@ -72,7 +71,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
     return await Promise.all(
       resolvedPaths
         .flat()
-        .filter((file) => file.endsWith('package.json') && !file.includes("node_modules"))
+        .filter((file) => file.endsWith('package.json') && !file.includes('node_modules'))
         .map((file) => Path.dirname(file))
         .map<Promise<IWorkspace>>(async (path) => {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
@@ -93,7 +92,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
       return this.parseWorkspaces(workspaces, rootDirectory);
     }
 
-    if (typeof workspaces === "object" && Array.isArray(workspaces.packages)) {
+    if (typeof workspaces === 'object' && Array.isArray(workspaces.packages)) {
       return this.parseWorkspaces(workspaces.packages, rootDirectory);
     }
 
@@ -101,11 +100,11 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   getExecutor(): IPackageManagerExecutor {
-    return new class implements IPackageManagerExecutor {
+    return new (class implements IPackageManagerExecutor {
       startExecutionIntent(): IExecutionIntentBuilder {
         return new TemplateBuilder();
       }
-    };
+    })();
   }
 
   getExecutorParser(): IExecutablePackageManagerParser {

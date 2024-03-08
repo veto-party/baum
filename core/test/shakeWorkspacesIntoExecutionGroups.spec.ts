@@ -122,11 +122,10 @@ describe('Basic tree tests', () => {
 
     describe('With star as version', () => {
       it('Should complete successfully', () => {
-
         const leaf = new IWorkspaceMock('example02', '*', []);
         const node = new IWorkspaceMock('example01', '*', [leaf.toDepdendent()]);
         expect(shakeWorkspacesIntoExecutionGroups([leaf, node])).toEqual([[leaf], [node]]);
       });
-    })
+    });
   });
 });

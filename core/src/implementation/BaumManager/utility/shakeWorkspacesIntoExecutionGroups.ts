@@ -35,7 +35,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
         return false;
       }
 
-      return dependencyMapping[dependent.getName()].some(([version]) => semver.satisfies(dependent.getVersion() === "*" ? "0.0.0" : dependent.getVersion(), version));
+      return dependencyMapping[dependent.getName()].some(([version]) => semver.satisfies(dependent.getVersion() === '*' ? '0.0.0' : dependent.getVersion(), version));
     });
   });
 

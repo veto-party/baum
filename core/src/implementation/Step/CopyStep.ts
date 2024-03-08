@@ -8,7 +8,7 @@ export class CopyStep implements IStep {
   constructor(
     private from: string | ((workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => string[]),
     private to: string | ((workspace: IWorkspace, filename: string) => string)
-  ) { }
+  ) {}
 
   private async doOrderFiles(workspace: IWorkspace, files: string[]) {
     await Promise.all(
@@ -19,7 +19,7 @@ export class CopyStep implements IStep {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (typeof this.from === "function") {
+    if (typeof this.from === 'function') {
       return this.doOrderFiles(workspace, this.from(workspace, packageManager, rootDirectory));
     }
 
