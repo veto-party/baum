@@ -38,6 +38,22 @@ export class BaumManager implements IBaumManager {
     await structure.parseAsync(this);
   }
 
+  private async doClean(workspaces: IWorkspace[], steps?: string[]) {
+
+    const current_steps = [...this.steps];
+    while (current_steps.length > 0) {
+
+      const step = current_steps.shift()!;
+
+      if (steps !== undefined && !steps.includes(step.name)) {
+        return;
+      }
+
+      // TODO: Log errors.
+      await Promise.allSettled(workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!, this.rootDirectory!)));
+    }
+  }
+
   private async executeGroup(workspaces: IWorkspace[], steps?: string[]) {
     const stepsForReversal: IStep[] = [];
     const current_steps = [...this.steps];
@@ -79,14 +95,27 @@ export class BaumManager implements IBaumManager {
       this.steps.unshift({ name: 'Internal -- Preparation', step: new GroupStep(internalSteps) });
     }
 
+    let executedGroups: IWorkspace[][] = [];
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
 
     try {
       await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);
       while (groups.length > 0) {
-        await this.executeGroup(groups.shift()!, steps);
+        const currentGroup = groups.shift()!;
+        await this.executeGroup(currentGroup, steps);
+        executedGroups.push(currentGroup);
       }
     } finally {
+
+      while (executedGroups.length > 0) {
+        const currentGroup = executedGroups.shift()!;
+        try {
+          await this.doClean(currentGroup, steps);
+        } catch (error) {
+          console.warn(`Failed to clean up group.`, error);
+        }
+      }
+
       await this.packageManager?.enableGlobalWorkspace(this.rootDirectory!);
     }
   }
