@@ -33,10 +33,16 @@ export class PrepareStep extends DockerBuildStep {
         const packages = await pm.readWorkspace(rootDirectory);
 
         const prefixes = packages.reduce<string[]>((prev, currentPackage) => {
-            const scope = currentPackage.getName().split('/')[0];
-            if (!prev.includes(scope) && currentPackage.isPublishable()) {
-                prev.push(`${scope}/*`);
+
+            if (currentPackage.getName().includes("@")) {
+                const scope = currentPackage.getName().split('/')[0];
+                if (!prev.includes(scope)) {
+                    prev.push(`${scope}/*`);
+                }
+            } else {
+                prev.push('*');
             }
+
             return prev;
         }, []);
 
