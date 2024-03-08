@@ -1,10 +1,9 @@
 import Path from 'path';
 import { fileURLToPath } from 'url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
-import { GroupStep, IBaumManagerConfiguration, IWorkspace, PKGMStep, ParallelStep } from 'baum';
-import FileSystem from 'fs/promises';
+import { GroupStep, IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
 import { CopyStep } from './core/src/implementation/Step/CopyStep.js';
-import semver from 'semver';
+import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
@@ -22,7 +21,7 @@ export default async (baum: IBaumManagerConfiguration) => {
     new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists("build")),
   ]));
 
-  baum.addExecutionStep('publish', new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((publsh) => publsh.setRegistry('https://registry.npmjs.org/').setForcePublic(true))));
+  baum.addExecutionStep('publish', new VerdaccioRegistryStep("v0.0.0"));
 };
 
 

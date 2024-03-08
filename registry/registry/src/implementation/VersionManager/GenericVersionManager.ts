@@ -38,7 +38,12 @@ export class GenericVersionManager implements IVersionManager {
   }
 
   getLatestVersionFor(name: string, version: string): string | undefined {
-    if (this.nameToVersionOrder[name].length > 0) {
+    if (this.nameToVersionOrder[name] && this.nameToVersionOrder[name].length > 0) {
+
+      if (!version.includes("*") && this.namesToWorkspaces[name][version]) {
+        return version;
+      }
+
       const versions = Object.values(this.nameToVersionOrder[name]);
       const foundVersion = versions.findLast(this.findLatestVersionGenerator(name, version));
 
