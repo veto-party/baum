@@ -57,6 +57,8 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
         try {
             await this.initStep.clean(workspace, pm, root);
+        } finally {
+            await super.clean(workspace, pm, root);
         }
     }
 }
