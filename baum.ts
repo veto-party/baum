@@ -23,18 +23,3 @@ export default async (baum: IBaumManagerConfiguration) => {
 
   baum.addExecutionStep('publish', new VerdaccioRegistryStep("v0.0.0"));
 };
-
-
-
-/*
-if (jsonFile?.scripts?.build?.trim?.()?.startsWith?.('tsc')) {
-    if (jsonFile.main !== undefined && jsonFile.main === "./src/index.ts") {
-        jsonFile.main = './dist/index.js';
-        jsonFile.types = './dist/index.d.ts';
-    }
-}
-
-
-        jsonFile.version = process.env.PUBLISH_VERSION;
-        jsonFile.license = 'MIT';
-*/

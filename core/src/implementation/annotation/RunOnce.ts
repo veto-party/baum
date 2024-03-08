@@ -1,9 +1,13 @@
 import { IPackageManager, IStep, IWorkspace } from "../../index.js"
 import { IExecutablePackageManager } from "../../interface/PackageManager/IExecutablePackageManager.js";
 
+const never = Symbol("never");
+
 class PromiseStorage<T extends (...args: any[]) => any> {
 
     private promiseResolvers: [(value: ReturnType<T>) => any, (error?: any) => any][] = [];
+
+    private result: any = never;
 
     constructor(
         private callback: T
@@ -14,9 +18,16 @@ class PromiseStorage<T extends (...args: any[]) => any> {
     }
 
     create(...args: Parameters<T>) {
+
+        if (this.result !== never) {
+            return this.result;
+        }
+
         return new Promise<ReturnType<T> extends Promise<any> ? Awaited<ReturnType<T>> : Promise<ReturnType<T>>>((resolve, reject) => {
             if (this.promiseResolvers.length === 0) {
-                this.callback(...args).then(this.doResolve(0), this.doResolve(1));
+                this.callback(...args).then((value: any) => {
+                    this.result = value;
+                }).then(this.doResolve(0), this.doResolve(1));
             }
 
             this.promiseResolvers.push([resolve, reject]);

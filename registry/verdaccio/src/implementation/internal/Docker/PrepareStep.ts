@@ -10,7 +10,6 @@ import Crypto from 'crypto';
 import { DockerBuildStep } from '@veto-party/baum__steps__docker';
 
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
