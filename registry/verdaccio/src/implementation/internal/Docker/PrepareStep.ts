@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import Path from 'path';
 
 import Crypto from 'crypto';
+import { DockerBuildStep } from '@veto-party/baum__steps__docker';
 
 
 
@@ -21,13 +22,13 @@ const configPath = (packageName: string) => Path.join(__dirname, 'configuration'
 const newConfigPath = (packageName: string) => Path.join(__dirname, 'configuration', packageName, 'config.yaml');
 
 @RunOnce()
-export class PrepareStep extends CommandStep {
+export class PrepareStep extends DockerBuildStep {
 
     constructor(
         name: string,
         cwd: string
     ) {
-        super(`docker build . --tag ${name}`, cwd);
+        super(`. --tag ${name}`, cwd);
     }
 
     async execute(workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string): Promise<void> {
