@@ -35,7 +35,6 @@ class RunIntent extends AIntent<[string] | [string, string]> implements IRunInte
     }
 
     validate(): void {
-        console.log(this);
         const result = runIntentValidator.safeParse(this);
         if (!result.success) {
             throw result.error;

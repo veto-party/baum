@@ -25,7 +25,6 @@ export class PrepareStep extends DockerBuildStep {
         cwd: string
     ) {
         super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __dirname);
-        console.log(__dirname);
         this.cwd = cwd;
     }
 
@@ -70,9 +69,7 @@ export class PrepareStep extends DockerBuildStep {
             defaultStringType: 'QUOTE_SINGLE'
         }));
 
-        console.log("a");
         await super.execute(workspace, pm, rootDirectory);
-        console.log("b");
     }
     async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
         // NO-OP
