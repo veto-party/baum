@@ -82,7 +82,6 @@ export class BaumManager implements IBaumManager {
     }
 
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
-    console.log(JSON.stringify(groups.map((group) => group.map((workspace) => [workspace.getName(), workspace.getVersion(), workspace.getDynamicDependents().map((depdent) => [depdent.getName(), depdent.getVersion()])])), undefined, 2));
 
     try {
       await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);

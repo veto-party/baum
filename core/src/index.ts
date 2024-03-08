@@ -15,4 +15,6 @@ export { BaumManager } from './implementation/BaumManager/BaumManager.js';
 export { ParallelStep } from './implementation/Step/ParallelStep.js';
 export { PKGMStep } from './implementation/Step/PKGMStep.js';
 export { GroupStep } from './implementation/Step/GroupStep.js';
+
+export { CachedFN } from './implementation/annotation/Cached.js';
 export { RunOnce } from './implementation/annotation/RunOnce.js';
