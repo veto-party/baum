@@ -11,6 +11,7 @@ export class StartupStep extends DockerRunStep {
         super({
             image: `internal/${name}`,
             paramsForDocker: `--rm -d -p ${port}:4873`,
+            paramsForContainer: 'verdaccio --config /config.yaml --listen http://0.0.0.0:4873'
         }, cwd);
     }
 }
