@@ -1,5 +1,7 @@
 import isEqual from 'lodash.isequal';
 
+const emptySymbol = Symbol(undefined);
+
 export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
@@ -12,15 +14,15 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
 
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
-        (value: Parameters<MapValue[typeof index]>[0]) => {
-          values.forEach((promiseTuple) => promiseTuple[index](value));
-        };
+          (value: Parameters<MapValue[typeof index]>[0]) => {
+            values.forEach((promiseTuple) => promiseTuple[index](value));
+          };
 
       context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
         const currentResult = storage.find((current) => isEqual(current[0], args));
 
         if (currentResult) {
-          return Promise.resolve(currentResult[1]);
+          return Promise.resolve(currentResult[1] === emptySymbol ? undefined : currentResult[1]);
         }
 
         let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], args));
@@ -43,7 +45,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
 
           (async (): Promise<ReturnType<T>> => {
             const result = previous?.bind(this)(...args);
-            storage.push([args, result]);
+            storage.push([args, result ?? emptySymbol]);
             return result;
           })()
             .then(resolveOrReject(promises, 0), resolveOrReject(promises, 1))
@@ -59,11 +61,11 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         const currentResult = storage.find((current) => isEqual(current[0], args));
 
         if (currentResult) {
-          return currentResult[1];
+          return currentResult[1] === emptySymbol ? undefined : currentResult[1];
         }
 
         const result = previous?.bind(this)(...args);
-        storage.push([args, result]);
+        storage.push([args, result ?? emptySymbol]);
         return result;
       } as any;
     }
