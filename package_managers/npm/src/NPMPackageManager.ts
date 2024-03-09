@@ -1,4 +1,6 @@
+import Crypto from 'crypto';
 import OldFileSystem from 'fs';
+import OS from 'node:os';
 import Path from 'path';
 import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
@@ -7,13 +9,10 @@ import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMExecutor } from './NPMExecutor.js';
 import { NPMWorkspace } from './NPMWorkspace.js';
-import OS from 'node:os';
-import Crypto from 'crypto';
 
 const { exec } = shelljs;
 
 export class NPMPackageManager implements IExecutablePackageManager {
-
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
@@ -34,7 +33,6 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   private async checkCopy(rootDirectory: string, reversed: boolean): Promise<void> {
-
     const hash = Crypto.createHash('sha256').update(rootDirectory).digest('hex');
 
     let paths = [Path.join(rootDirectory, 'package.json'), Path.join(OS.tmpdir(), `${hash}-package.json-bak`)] as const;
@@ -42,7 +40,6 @@ export class NPMPackageManager implements IExecutablePackageManager {
     if (reversed) {
       paths = paths.toReversed() as [string, string];
     }
-
 
     await FileSystem.copyFile(...paths);
 

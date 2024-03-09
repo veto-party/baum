@@ -31,7 +31,7 @@ export default async (baum: IBaumManagerConfiguration) => {
       new (class extends PublicRegistryStep {
         modifyJSON(json: any) {
           super.modifyJSON(json);
-          if (json.scripts?.build.includes("tsc")) {
+          if (json.scripts?.build.includes('tsc')) {
             json.main = './dist/index.js';
           }
         }

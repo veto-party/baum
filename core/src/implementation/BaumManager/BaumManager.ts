@@ -40,10 +40,8 @@ export class BaumManager implements IBaumManager {
   }
 
   private async doClean(workspaces: IWorkspace[], steps?: string[]) {
-
     const current_steps = [...this.steps];
     while (current_steps.length > 0) {
-
       const step = current_steps.pop()!;
 
       if (steps !== undefined && !steps.includes(step.name)) {
@@ -96,7 +94,7 @@ export class BaumManager implements IBaumManager {
       this.steps.unshift({ name: 'Internal -- Preparation', step: new GroupStep(internalSteps) });
     }
 
-    let executedGroups: IWorkspace[][] = [];
+    const executedGroups: IWorkspace[][] = [];
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!));
 
     try {
@@ -107,7 +105,6 @@ export class BaumManager implements IBaumManager {
         executedGroups.push(currentGroup);
       }
     } finally {
-
       while (executedGroups.length > 0) {
         const currentGroup = executedGroups.pop()!;
         try {

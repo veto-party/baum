@@ -1,15 +1,12 @@
 import { GroupStep, IExecutablePackageManager, IStep, IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
-
-
 export class PublicRegistryStep extends ARegistryStep {
-
   private initStep?: IStep;
 
   private publishStep?: PKGMStep;
 
-  private hasInstallStep: boolean = false;
+  private hasInstallStep = false;
 
   constructor(
     private pinVersion: string,
@@ -34,12 +31,8 @@ export class PublicRegistryStep extends ARegistryStep {
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-
     if (this.hasInstallStep) {
-      this.initStep ??= new GroupStep([
-        new NPMRCForSpecifiedRegistryStep(`${this.registry}`),
-        new PKGMStep((intent) => intent.install().ci())
-      ]);
+      this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(`${this.registry}`), new PKGMStep((intent) => intent.install().ci())]);
     }
 
     await super.startExecution(workspace, pm, root);

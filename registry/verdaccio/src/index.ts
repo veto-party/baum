@@ -21,7 +21,7 @@ class InitStep extends GroupStep {
   private async init(root: string) {
     const hash = Crypto.createHash('sha256').update(root).digest('hex');
 
-    console.log("should only run once.");
+    console.log('should only run once.');
 
     this.addExecutionStep('prepare', new PrepareStep(hash, root));
     this.addExecutionStep('startup', new StartupStep(hash, (await this.getPort()).toString(), root));
@@ -33,7 +33,7 @@ class InitStep extends GroupStep {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await super.clean(workspace, packageManager, rootDirectory)
+    await super.clean(workspace, packageManager, rootDirectory);
   }
 }
 
@@ -41,7 +41,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: PKGMStep;
   private initStep: InitStep;
 
-  private doInstall: boolean = false;
+  private doInstall = false;
 
   constructor(
     private pinVersion: string,
@@ -70,16 +70,14 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     const port = await this.initStep.getPort();
 
     if (this.doInstall) {
-      this.initStep.addExecutionStep("modify_npmrc", new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}`));
-      this.initStep.addExecutionStep("install", new PKGMStep((intent) => intent.install().ci()));
+      this.initStep.addExecutionStep('modify_npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}`));
+      this.initStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
     }
-
 
     this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-
     await this.prepareExecution();
 
     await this.initStep.execute(workspace, pm, root);
@@ -87,7 +85,6 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   }
 
   public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-
     for (const cleanup of [this.initStep.clean.bind(this.initStep), super.clean.bind(this), this.publishStep?.clean.bind(this.publishStep)]) {
       if (cleanup) {
         await cleanup(workspace, pm, root).catch(console.warn);

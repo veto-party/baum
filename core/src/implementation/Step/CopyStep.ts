@@ -10,19 +10,18 @@ const ensureMapEntry = <T, R>(map: Map<T, R>, key: T, defaultValue: R) => {
   }
 
   return map.get(key)!;
-}
+};
 
 export class CopyStep implements IStep {
   constructor(
     private from: string | ((workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => string[]),
     private to: string | ((workspace: IWorkspace, filename: string) => string),
-    private keepFiles: boolean = true
-  ) { }
+    private keepFiles = true
+  ) {}
 
   private filesThatGotCopied = new Map<IWorkspace, Record<string, string[]>>();
 
   private async doOrderFiles(workspace: IWorkspace, files: string[]) {
-
     await Promise.all(
       files.map(async (source) => {
         const destination = typeof this.to === 'function' ? this.to(workspace, source) : this.to;
@@ -33,7 +32,12 @@ export class CopyStep implements IStep {
 
           const fileSources = (await FileSystem.stat(source)).isDirectory() ? await globby(Path.join(source, '**', '*')) : [source];
 
-          if (await FileSystem.stat(destination).then((stats) => stats.isDirectory(), () => false)) {
+          if (
+            await FileSystem.stat(destination).then(
+              (stats) => stats.isDirectory(),
+              () => false
+            )
+          ) {
             entry[destination].push(...fileSources.map((fileSource) => Path.join(destination, fileSource)));
           } else {
             entry[destination].push(destination);
@@ -73,9 +77,11 @@ export class CopyStep implements IStep {
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.keepFiles) {
-      await Promise.all(Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([, files]) => {
-        await Promise.all(files.map((file) => FileSystem.rm(file)));
-      }));
+      await Promise.all(
+        Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([, files]) => {
+          await Promise.all(files.map((file) => FileSystem.rm(file)));
+        })
+      );
     }
   }
 }

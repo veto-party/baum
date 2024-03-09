@@ -1,18 +1,17 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
 import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
 import yaml from 'yaml';
-import { PNPMWorkspace } from './PNPMWorkspace.js';
-import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import { PNPMExecutor } from './PNPMExecutor.js';
+import { PNPMWorkspace } from './PNPMWorkspace.js';
 
 const { exec } = shelljs;
 
 export class PNPMPackageManager implements IExecutablePackageManager {
-
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'pnpm-lock.yaml'));
     const content = file.toString();
@@ -99,7 +98,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
       startExecutionIntent(): IExecutionIntentBuilder {
         return new TemplateBuilder();
       }
-    })()
+    })();
   }
   getExecutorParser(): IExecutablePackageManagerParser {
     return new PNPMExecutor();
