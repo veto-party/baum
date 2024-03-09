@@ -7,6 +7,8 @@ import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMExecutor } from './NPMExecutor.js';
 import { NPMWorkspace } from './NPMWorkspace.js';
+import OS from 'node:os';
+import Crypto from 'crypto';
 
 const { exec } = shelljs;
 
@@ -31,7 +33,10 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   private async checkCopy(rootDirectory: string, reversed: boolean): Promise<void> {
-    let paths = [Path.join(rootDirectory, 'package.json'), Path.join(rootDirectory, 'package.json-bak')] as const;
+
+    const hash = Crypto.createHash('sha256').update(rootDirectory).digest('hex');
+
+    let paths = [Path.join(rootDirectory, 'package.json'), Path.join(OS.tmpdir(), `${hash}-package.json-bak`)] as const;
 
     if (reversed) {
       paths = paths.toReversed() as [string, string];
