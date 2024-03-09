@@ -33,6 +33,13 @@ export default async (baum: IBaumManagerConfiguration) => {
           if (json.scripts?.build.includes('tsc')) {
             json.main = './dist/index.js';
           }
+
+          json.repository = {
+            type: "git",
+            url: "git+https://github.com/veto-party/baum.git"
+          };
+          json.bugs = "https://github.com/veto-party/baum/issues";
+          json.homepage = "https://github.com/veto-party/baum#readme";
         }
       })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN).addInstallStep()
     );

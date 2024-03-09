@@ -65,11 +65,10 @@ export class CopyStep implements IStep {
       return;
     }
 
-    const source = Path.join(workspace.getDirectory(), this.from);
+    const source = Path.isAbsolute(this.from) ? this.from : Path.join(workspace.getDirectory(), this.from);
 
     if ((await FileSystem.stat(source)).isDirectory()) {
       await this.doOrderFiles(workspace, await globby(Path.join(source, '**', '*')));
-
       return;
     }
 
