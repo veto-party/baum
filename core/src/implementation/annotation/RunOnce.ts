@@ -19,16 +19,23 @@ class PromiseStorage<T extends (...args: any[]) => any> {
       return this.result;
     }
 
-    return new Promise<ReturnType<T> extends Promise<any> ? Awaited<ReturnType<T>> : Promise<ReturnType<T>>>((resolve, reject) => {
+    return new Promise<ReturnType<T> extends Promise<any> ? Awaited<ReturnType<T>> : Promise<ReturnType<T>>>(async (resolve, reject) => {
       if (this.promiseResolvers.length === 0) {
         this.callback(...args)
           .then((value: any) => {
             this.result = value;
           })
-          .then(this.doResolve(0), this.doResolve(1));
+          .then(this.doResolve(0), this.doResolve(1))
+          .finally(() => {
+            this.promiseResolvers = [];
+          });
       }
 
       this.promiseResolvers.push([resolve, reject]);
+
+      while (this.result === never && this.promiseResolvers.length > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
     });
   }
 }
