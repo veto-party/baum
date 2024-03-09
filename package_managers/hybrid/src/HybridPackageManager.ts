@@ -29,16 +29,16 @@ export class HybridPackageManager implements IExecutablePackageManager {
             startExecutionIntent(): IExecutionIntentBuilder {
                 return new class implements IExecutionIntentBuilder {
                     publish(): IPublishIntent {
-                        return (self.executors.publish?.getExecutor() ?? self.getExecutor()).startExecutionIntent().publish();
+                        return (self.executors.publish?.getExecutor() ?? self.primaryPM.getExecutor()).startExecutionIntent().publish();
                     }
                     run(): IRunIntent {
-                        return (self.executors.run?.getExecutor() ?? self.getExecutor()).startExecutionIntent().run();
+                        return (self.executors.run?.getExecutor() ?? self.primaryPM.getExecutor()).startExecutionIntent().run();
                     }
                     command(): ICommandIntent {
-                        return (self.executors.command?.getExecutor() ?? self.getExecutor()).startExecutionIntent().command();
+                        return (self.executors.command?.getExecutor() ?? self.primaryPM.getExecutor()).startExecutionIntent().command();
                     }
                     install(): IInstallIntent {
-                        return (self.executors.install?.getExecutor() ?? self.getExecutor()).startExecutionIntent().install();
+                        return (self.executors.install?.getExecutor() ?? self.primaryPM.getExecutor()).startExecutionIntent().install();
                     }
                 }
             }
