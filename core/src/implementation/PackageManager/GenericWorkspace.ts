@@ -7,7 +7,7 @@ export class GenericWorkspace implements IWorkspace {
     private directory: string,
     private pkgFile: any,
     private modifyToRealVersionValue: (version: string) => string | false | undefined
-  ) {}
+  ) { }
 
   getName(): string {
     return this.pkgFile.name;
@@ -19,6 +19,10 @@ export class GenericWorkspace implements IWorkspace {
 
   getDirectory(): string {
     return this.directory;
+  }
+
+  getPackageFile() {
+    return this.pkgFile;
   }
 
   getDynamicDependents(): IDependent[] {

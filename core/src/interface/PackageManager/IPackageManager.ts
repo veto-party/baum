@@ -12,6 +12,7 @@ export interface IWorkspace {
   getDynamicDependents(): IDependent[];
   getScriptNames(): string[];
   isPublishable(): boolean;
+  getPackageFile(): any;
 }
 
 export interface IPackageManager {
