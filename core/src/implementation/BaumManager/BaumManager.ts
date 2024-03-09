@@ -110,7 +110,7 @@ export class BaumManager implements IBaumManager {
         try {
           await this.doClean(currentGroup, steps);
         } catch (error) {
-          console.warn(`Failed to clean up group.`, error);
+          console.warn('Failed to clean up group.', error);
         }
       }
 
