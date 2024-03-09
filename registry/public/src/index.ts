@@ -4,8 +4,6 @@ import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, Ve
 export class PublicRegistryStep extends ARegistryStep {
   private initStep?: IStep;
 
-  private publishStep?: PKGMStep;
-
   private hasInstallStep = false;
 
   constructor(
@@ -26,28 +24,29 @@ export class PublicRegistryStep extends ARegistryStep {
     return this;
   }
 
-  getPublishStep(): PKGMStep | undefined {
-    return this.publishStep;
+  getPublishStep(): IStep | undefined {
+    return this.initStep;
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
     if (this.hasInstallStep) {
-      this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep((intent) => intent.install().ci())]);
+      this.initStep ??= new GroupStep([
+        new NPMRCForSpecifiedRegistryStep(this.registry),
+        new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired(
+          (intent) => intent.setRegistry(this.registry).setAuthorization(this.token)))
+      ]);
     }
 
     await super.startExecution(workspace, pm, root);
-
-    this.publishStep ??= new PKGMStep((intent) => intent.publish().setRegistry(this.registry).setForcePublic(false).setAuthorization(this.token));
   }
 
   public async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await super.execute(workspace, packageManager, rootDirectory);
     await this.initStep?.execute(workspace, packageManager, rootDirectory);
-    await this.publishStep?.execute(workspace, packageManager, rootDirectory);
   }
 
   public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-    for (const cleanup of [this.initStep?.clean.bind(this.initStep), super.clean.bind(this), this.publishStep?.clean.bind(this.publishStep)]) {
+    for (const cleanup of [this.initStep?.clean.bind(this.initStep), super.clean.bind(this)]) {
       if (cleanup) {
         await cleanup(workspace, pm, root).catch(console.warn);
       }

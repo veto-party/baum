@@ -85,7 +85,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   }
 
   public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-    for (const cleanup of [this.initStep.clean.bind(this.initStep), super.clean.bind(this), this.publishStep?.clean.bind(this.publishStep)]) {
+    for (const cleanup of [this.initStep.clean.bind(this.initStep), super.clean.bind(this)]) {
       if (cleanup) {
         await cleanup(workspace, pm, root).catch(console.warn);
       }
