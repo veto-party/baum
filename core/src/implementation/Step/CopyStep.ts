@@ -62,7 +62,7 @@ export class CopyStep implements IStep {
 
     const source = Path.join(workspace.getDirectory(), this.from);
 
-    if ((await FileSystem.lstat(source)).isDirectory()) {
+    if ((await FileSystem.stat(source)).isDirectory()) {
       await this.doOrderFiles(workspace, await globby(Path.join(source, '**', '*')));
 
       return;
@@ -73,8 +73,8 @@ export class CopyStep implements IStep {
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.keepFiles) {
-      await Promise.all(Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([destination, files]) => {
-        await Promise.all(files.map((file) => FileSystem.rm(Path.join(destination, file))));
+      await Promise.all(Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([, files]) => {
+        await Promise.all(files.map((file) => FileSystem.rm(file)));
       }));
     }
   }

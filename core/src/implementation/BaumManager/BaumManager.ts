@@ -2,6 +2,7 @@ import { GroupStep, IBaumManager, IStep } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 import { CopyAndCleanLockFileStep } from '../Step/internal/CopyAndCleanLockFile.js';
+import { allSettledButNoFailures } from './utility/allSettledButNoFailure.js';
 import { shakeWorkspacesIntoExecutionGroups } from './utility/shakeWorkspacesIntoExecutionGroups.js';
 import { structure } from './validation.js';
 
@@ -43,14 +44,15 @@ export class BaumManager implements IBaumManager {
     const current_steps = [...this.steps];
     while (current_steps.length > 0) {
 
-      const step = current_steps.shift()!;
+      const step = current_steps.pop()!;
 
       if (steps !== undefined && !steps.includes(step.name)) {
         return;
       }
 
       // TODO: Log errors.
-      await Promise.allSettled(workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!, this.rootDirectory!)));
+      console.log(`Cleaning step: ${JSON.stringify(step.name)}`);
+      await allSettledButNoFailures(workspaces.map((workspace) => step.step.clean(workspace, this.packageManager!, this.rootDirectory!)));
     }
   }
 
@@ -76,7 +78,7 @@ export class BaumManager implements IBaumManager {
       while (stepsForReversal.length > 0) {
         // TODO: Log errors.
         const step = stepsForReversal.shift()!;
-        await Promise.allSettled(workspaces.map((workspace) => step.clean(workspace, this.packageManager!, this.rootDirectory!)));
+        await allSettledButNoFailures(workspaces.map((workspace) => step.clean(workspace, this.packageManager!, this.rootDirectory!)));
       }
       throw error;
     }
@@ -108,7 +110,7 @@ export class BaumManager implements IBaumManager {
     } finally {
 
       while (executedGroups.length > 0) {
-        const currentGroup = executedGroups.shift()!;
+        const currentGroup = executedGroups.pop()!;
         try {
           await this.doClean(currentGroup, steps);
         } catch (error) {
