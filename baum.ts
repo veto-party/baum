@@ -5,6 +5,7 @@ import { GroupStep, IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'ba
 import { CopyStep } from './core/src/implementation/Step/CopyStep.js';
 import { PublicRegistryStep } from './registry/public/src/index.js';
 import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
+import { IVersionManager } from '@veto-party/baum__registry';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
@@ -27,8 +28,8 @@ export default async (baum: IBaumManagerConfiguration) => {
     baum.addExecutionStep(
       'publish-npm',
       new (class extends PublicRegistryStep {
-        modifyJSON(json: any) {
-          super.modifyJSON(json);
+        modifyJSON(json: any, versionManager: IVersionManager) {
+          super.modifyJSON(json, versionManager);
           if (json.scripts?.build.includes('tsc')) {
             json.main = './dist/index.js';
           }

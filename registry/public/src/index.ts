@@ -12,7 +12,7 @@ export class PublicRegistryStep extends ARegistryStep {
     private registry: string,
     private token: string
   ) {
-    super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
+    super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
   }
 
   modifyJSON(json: any, versionManager: IVersionManager) {

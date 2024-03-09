@@ -48,7 +48,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     private pinVersion: string,
     private dockerAddress = 'http://localhost'
   ) {
-    super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
+    super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
     this.initStep = new InitStep();
   }
 

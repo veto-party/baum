@@ -1,12 +1,13 @@
-import { IWorkspace } from '@veto-party/baum__core';
+import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import { GenericVersionManager } from './GenericVersionManager.js';
 
 export class VersionManagerVersionOverride extends GenericVersionManager {
   constructor(
     private versionOverride: string,
-    workspaces: IWorkspace[]
+    workspaces: IWorkspace[],
+    pm: IPackageManager
   ) {
-    super(workspaces);
+    super(workspaces, pm);
   }
 
   protected starToVersion(name: string, version: string): string {
