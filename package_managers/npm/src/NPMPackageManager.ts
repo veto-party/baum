@@ -5,10 +5,8 @@ import Path from 'path';
 import { allSettledButFailure, CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, IExecutablePackageManagerParser } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
-import shelljs from 'shelljs';
 import { NPMExecutor } from './NPMExecutor.js';
 
-const { exec } = shelljs;
 
 export class NPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -74,6 +72,9 @@ export class NPMPackageManager implements IExecutablePackageManager {
       })
     );
 
+
+    console.log(resolvedPaths);
+
     return await allSettledButFailure(
       resolvedPaths
         .flat()
@@ -89,6 +90,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
 
   @CachedFN(true)
   async readWorkspace(rootDirectory: string) {
+    debugger;
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package.json'));
     const content = JSON.parse(file.toString());
 

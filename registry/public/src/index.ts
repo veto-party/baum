@@ -15,7 +15,7 @@ export class PublicRegistryStep extends ARegistryStep {
   }
 
   async modifyJSON(json: any, versionManager: IVersionManager) {
-    super.modifyJSON(json, versionManager);
+    await super.modifyJSON(json, versionManager);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   }

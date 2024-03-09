@@ -9,6 +9,15 @@ describe('Basic tree tests', () => {
     const node = new IWorkspaceMock('example01', '0.0.0', [leaf.toDepdendent()]);
     expect(shakeWorkspacesIntoExecutionGroups([leaf, node])).toEqual([[leaf], [node]]);
   });
+
+  it('Should generate some more execution groups', () => {
+    const leaf = new IWorkspaceMock('example02', '*', []);
+    const node = new IWorkspaceMock('example01', '*', [leaf.toDepdendent()]);
+    const node3 = new IWorkspaceMock('example03', '*', [node.toDepdendent()]);
+
+    expect(shakeWorkspacesIntoExecutionGroups([leaf, node, node3])).toEqual([[leaf], [node], [node3]]);
+  });
+
   it('Should generate some more complex execution groups', () => {
     const leaf = new IWorkspaceMock('example-leaf', 'v1.1.1', []);
     const nodeA = new IWorkspaceMock('example-node-A', '1.2.3-pre', [leaf.toDepdendent()]);

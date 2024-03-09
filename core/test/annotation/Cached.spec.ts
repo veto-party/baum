@@ -37,4 +37,59 @@ describe('Should only run once using annotation', () => {
 
     expect(await data.method()).toEqual(1);
   });
+
+  it('multiple instances sync', () => {
+    class Test {
+
+      private counter;
+
+      constructor(startValue: number) {
+        this.counter = startValue;
+      }
+
+      @CachedFN(false)
+      method() {
+        return ++this.counter;
+      }
+    }
+
+    const data = new Test(0);
+    const data2 = new Test(5);
+
+    expect(data.method()).toEqual(1);
+    expect(data.method()).toEqual(1);
+
+    expect(data2.method()).toEqual(6);
+    expect(data2.method()).toEqual(6);
+
+    expect(data.method()).toEqual(1);
+  });
+
+  it('multiple instances sync', async () => {
+    class Test {
+
+      private counter;
+
+      constructor(startValue: number) {
+        this.counter = startValue;
+      }
+
+      @CachedFN(true)
+      async method() {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return ++this.counter;
+      }
+    }
+
+    const data = new Test(0);
+    const data2 = new Test(5);
+
+    expect(await data.method()).toEqual(1);
+    expect(await data.method()).toEqual(1);
+
+    expect(await data2.method()).toEqual(6);
+    expect(await data2.method()).toEqual(6);
+
+    expect(await data.method()).toEqual(1);
+  });
 });

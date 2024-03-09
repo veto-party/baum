@@ -1,13 +1,14 @@
 import { IExecutablePackageManager, IStep, IWorkspace, ModifyNPMRC } from '@veto-party/baum__core';
 
 export class NPMRCForSpecifiedRegistryStep implements IStep {
-  constructor(private registry: string) {}
+  constructor(private registry: string) { }
 
   private workspaceToStep: Map<IWorkspace, IStep> = new Map();
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.workspaceToStep.has(workspace)) {
-      const dependents = (await workspace.getDynamicDependents()).filter((dependent) => dependent.getName().startsWith('@') && dependent.getName().includes('/'));
+      const dependents = workspace.getDynamicDependents().filter((dependent) => dependent.getName().startsWith('@') && dependent.getName().includes('/'));
+      debugger;
       if (dependents.length > 0) {
         this.workspaceToStep.set(
           workspace,

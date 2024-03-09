@@ -5,28 +5,28 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
     const previous = context.value;
 
     if (async) {
-      const storage: [Parameters<T>, any][] = [];
+      const storage: [[T, ...Parameters<T>], any][] = [];
 
       type MapValue = [(value: ReturnType<T>) => any, (error?: any) => any];
-      let storedPromises: [Parameters<T>, MapValue[]][] = [];
+      let storedPromises: [[T, ...Parameters<T>], MapValue[]][] = [];
 
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
-        (value: Parameters<MapValue[typeof index]>[0]) => {
-          values.forEach((promiseTuple) => promiseTuple[index](value));
-        };
+          (value: Parameters<MapValue[typeof index]>[0]) => {
+            values.forEach((promiseTuple) => promiseTuple[index](value));
+          };
 
       context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
-        const currentResult = storage.find((current) => isEqual(current[0], args));
+        const currentResult = storage.find((current) => isEqual(current[0], [this, ...args]));
 
         if (currentResult?.length === 2) {
           return Promise.resolve(currentResult[1]);
         }
 
-        let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], args));
+        let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], [this, ...args]));
 
-        if (!promisesTuple) {
-          promisesTuple = [args, []];
+        if (promisesTuple?.length !== 2) {
+          promisesTuple = [[this, ...args], []];
           storedPromises.push(promisesTuple);
         }
 
@@ -43,7 +43,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
 
           (async (): Promise<ReturnType<T>> => {
             const result = await previous?.bind(this)(...args);
-            storage.push([args, result]);
+            storage.push([[this, ...args], result]);
             return result;
           })()
             .then(resolveOrReject(promises, 0), resolveOrReject(promises, 1))
@@ -53,17 +53,17 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         });
       } as any;
     } else {
-      const storage: [Parameters<T>, any][] = [];
+      const storage: [[T, ...Parameters<T>], any][] = [];
 
       context.value = function (this: any, ...args: Parameters<T>): ReturnType<T> {
-        const currentResult = storage.find((current) => isEqual(current[0], args));
+        const currentResult = storage.find((current) => isEqual(current[0], [this, ...args]));
 
-        if (currentResult?.length === 2) {
+        if (currentResult) {
           return currentResult[1];
         }
 
         const result = previous?.bind(this)(...args);
-        storage.push([args, result]);
+        storage.push([[this, ...args], result]);
         return result;
       } as any;
     }
