@@ -14,10 +14,11 @@
       "resolveJsonModule": true,
       "skipLibCheck": true,
       "strict": true,
-      "target": "ESNext",
+      "target": "ES2020",
       "allowSyntheticDefaultImports": true,
       "allowUmdGlobalAccess": true,
-      "experimentalDecorators": true
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true
     }
   }
   
