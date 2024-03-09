@@ -1,5 +1,5 @@
 import Crypto from 'crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep, IStep } from '@veto-party/baum__core';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep, IStep, ModifyNPMRC } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride, IVersionManager } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
@@ -70,9 +70,15 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   private async prepareExecution(): Promise<void> {
     const port = await this.initStep.getPort();
 
+    const url = new URL(`${this.dockerAddress}:${port}`);
+
     if (this.doInstall) {
       this.publishStep = new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
+        new ModifyNPMRC(`
+          ${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"
+          ${url.toString().substring(url.protocol.length)}:always-auth=true
+        `),
         // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
         new PKGMStep((intent) => intent.install().install()),
         new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'))

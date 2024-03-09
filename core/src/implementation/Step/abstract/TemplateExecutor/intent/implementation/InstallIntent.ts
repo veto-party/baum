@@ -1,9 +1,9 @@
-import FileSystem from 'fs';
+import FileSystem from 'fs/promises';
+import SyncFileSystem from 'fs';
 import Path from 'path';
 import zod from 'zod';
-import { IStep, ParallelStep } from '../../../../../../index.js';
+import { IStep, ModifyNPMRC } from '../../../../../../index.js';
 import { IInstallIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
-import { CopyStep } from '../../../../CopyStep.js';
 import { AIntent } from '../AIntent.js';
 
 const installIntentValidation = zod.object({
@@ -53,11 +53,13 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
   }
 
   getPrepareStep = (): IStep => {
-    const npmRCCopy = new CopyStep(
-      (_, __, rootDirectory) => (FileSystem.existsSync(Path.join(rootDirectory, '.npmrc')) ? [Path.join(rootDirectory, '.npmrc')] : []),
-      (workspace, file) => Path.join(workspace.getDirectory(), Path.basename(file)),
-      false
-    );
+    const npmRCCopy = new ModifyNPMRC(async (_, __, root) => {
+      if (SyncFileSystem.existsSync(Path.join(root, '.npmrc'))) {
+        return (await FileSystem.readFile(Path.join(root, '.npmrc'))).toString();
+      }
+
+      return '';
+    })
 
     return npmRCCopy;
   };
