@@ -9,22 +9,8 @@ import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
-    const file = await FileSystem.readFile(Path.join(rootDirectory, 'pnpm-lock.yaml'));
-    const content = file.toString();
-    const parser = yaml.parse(content);
-
-    Object.values(parser.importers).forEach((dependencyGroup: any) => {
-      Object.values(dependencyGroup).forEach((dependencyType: any) => {
-        Object.entries(dependencyType).forEach(([depdencyName, dependencyDescription]: [string, any]) => {
-          if (dependencyDescription.version.startsWith('link:')) {
-            delete dependencyType[depdencyName];
-          }
-        });
-      });
-    });
-
-    return yaml.stringify(parser);
+  async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
+    return undefined;
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {

@@ -70,7 +70,7 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
         npmRCCopy,
         new CopyStep(
           (_, pm, root) => [Path.join(root, pm.getLockFileName())],
-          (workspace, filename) => Path.join(workspace.getDirectory(), Path.basename(filename)),
+          (workspace, filename) => Path.join(Path.resolve(workspace.getDirectory()), Path.basename(filename)),
           false
         )
       ]);

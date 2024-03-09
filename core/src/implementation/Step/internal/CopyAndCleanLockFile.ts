@@ -6,10 +6,13 @@ import { IWorkspace } from '../../../interface/PackageManager/IPackageManager.js
 
 export class CopyAndCleanLockFileStep implements IStep {
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string) {
-    await FileSystem.writeFile(Path.join(workspace.getDirectory(), packageManager.getLockFileName()), await packageManager.getCleanLockFile(rootDirectory));
+    let file;
+    if (file = await packageManager.getCleanLockFile(rootDirectory)) {
+      await FileSystem.writeFile(Path.join(workspace.getDirectory(), packageManager.getLockFileName()), file);
+    }
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await FileSystem.rm(Path.join(workspace.getDirectory(), packageManager.getLockFileName())).catch(() => {});
+    await FileSystem.rm(Path.join(workspace.getDirectory(), packageManager.getLockFileName())).catch(() => { });
   }
 }
