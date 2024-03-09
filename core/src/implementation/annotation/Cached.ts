@@ -7,12 +7,15 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
     if (async) {
       const storage: [Parameters<T>, any][] = [];
 
-      let promises: [(value: ReturnType<T>) => any, (error?: any) => any][] = [];
+      type MapValue = [(value: ReturnType<T>) => any, (error?: any) => any];
+      let storedPromises: [Parameters<T>, MapValue[]][] = [];
 
       const resolveOrReject =
-        <Index extends 0 | 1>(index: Index) =>
-          (value: Parameters<(typeof promises)[number][typeof index]>[0]) =>
-            promises.forEach((promiseTuple) => promiseTuple[index](value));
+        <Index extends 0 | 1>(values: MapValue[], index: Index) =>
+          (value: Parameters<MapValue[typeof index]>[0]) => {
+            values.forEach((promiseTuple) => promiseTuple[index](value));
+          }
+
 
       context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
         const currentResult = storage.find((current) => isEqual(current[0], args));
@@ -20,6 +23,15 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         if (currentResult) {
           return currentResult[1];
         }
+
+        let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], args));
+
+        if (!promisesTuple) {
+          promisesTuple = [args, []];
+          storedPromises.push(promisesTuple);
+        }
+
+        const [, promises] = promisesTuple;
 
         if (promises.length > 0) {
           return new Promise((resolve, reject) => {
@@ -34,10 +46,10 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
             const result = previous?.bind(this)(...args);
             storage.push([args, result]);
             return result;
-          })().then(resolveOrReject(0), resolveOrReject(1)).finally(() => {
-            promises = [];
+          })().then(resolveOrReject(promises, 0), resolveOrReject(promises, 1)).finally(() => {
+            storedPromises = storedPromises.filter(([lookup]) => !isEqual(lookup, args));
           });
-        }); //.then(resolveOrReject(0), resolveOrReject(1));
+        });
       } as any;
     } else {
       const storage: [Parameters<T>, any][] = [];
