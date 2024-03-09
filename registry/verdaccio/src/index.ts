@@ -21,8 +21,6 @@ class InitStep extends GroupStep {
   public async init(root: string) {
     const hash = Crypto.createHash('sha256').update(root).digest('hex');
 
-    console.log('should only run once.');
-
     this.addExecutionStep('prepare', new PrepareStep(hash, root));
     this.addExecutionStep('startup', new StartupStep(hash, (await this.getPort()).toString(), root));
   }
