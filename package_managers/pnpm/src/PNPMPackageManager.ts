@@ -45,11 +45,12 @@ export class PNPMPackageManager implements IExecutablePackageManager {
       paths = paths.toReversed() as [string, string];
     }
 
-    if (OldFileSystem.existsSync(paths[1])) {
-      await FileSystem.rm(paths[1]);
-    }
-
     await FileSystem.copyFile(...paths);
+
+
+    if (OldFileSystem.existsSync(paths[0])) {
+      await FileSystem.rm(paths[0]);
+    }
   }
 
   async disableGlobalWorkspace(rootDirectory: string) {

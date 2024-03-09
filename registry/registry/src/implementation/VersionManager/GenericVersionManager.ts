@@ -1,4 +1,4 @@
-import { IWorkspace } from '@veto-party/baum__core';
+import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import semver from 'semver';
 import { IVersionManager } from '../../interface/IVersionManager.js';
 
@@ -8,7 +8,9 @@ export class GenericVersionManager implements IVersionManager {
   protected nameToVersionOrder: Record<string, IWorkspace[]> = {};
   protected namesToWorkspaces: Record<string, Record<string, IWorkspace>> = {};
 
-  private mapToVersions(workspaces: IWorkspace[]) {
+  private mapToVersions(
+    workspaces: IWorkspace[]
+  ) {
     for (const workspace of workspaces) {
       this.namesToWorkspaces[workspace.getName()] ??= {};
       this.namesToWorkspaces[workspace.getName()][workspace.getVersion()] = workspace;
@@ -19,7 +21,10 @@ export class GenericVersionManager implements IVersionManager {
     Object.values(this.nameToVersionOrder).forEach((workspaceMapping) => Object.values(workspaceMapping).sort((workspaceA, workspaceB) => semver.compare(workspaceA.getVersion(), workspaceB.getVersion()) || semver.compareBuild(workspaceA.getVersion(), workspaceB.getVersion())));
   }
 
-  constructor(readonly workspaces: IWorkspace[]) {
+  constructor(
+    readonly workspaces: IWorkspace[],
+    private readonly pm: IPackageManager
+  ) {
     this.mapToVersions(workspaces);
   }
 
@@ -28,7 +33,10 @@ export class GenericVersionManager implements IVersionManager {
   }
 
   protected findLatestVersionGenerator(name: string, version: string) {
-    return (workspace: IWorkspace) => semver.satisfies(this.starToVersion(workspace.getName(), workspace.getVersion()), this.starToVersion(name, version));
+    return (workspace: IWorkspace) => {
+      const workspaceVersion = this.pm.modifyToRealVersionValue(workspace.getVersion())
+      return semver.satisfies(this.starToVersion(workspace.getName(), workspaceVersion ? workspaceVersion : workspace.getVersion()), this.starToVersion(name, version));
+    };
   }
 
   getLatestVersionFor(name: string, version: string): string | undefined {

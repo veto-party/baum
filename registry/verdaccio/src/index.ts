@@ -4,6 +4,7 @@ import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, Ve
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
+import { IVersionManager } from '@veto-party/baum__registry/src/interface/IVersionManager.js';
 
 class InitStep extends GroupStep {
   private port?: number;
@@ -56,7 +57,8 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     return this;
   }
 
-  modifyJSON(json: any) {
+  modifyJSON(json: any, versionManager: IVersionManager) {
+    super.modifyJSON(json, versionManager);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   }

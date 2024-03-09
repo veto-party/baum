@@ -1,5 +1,6 @@
 import { GroupStep, IExecutablePackageManager, IStep, IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
+import { IVersionManager } from '@veto-party/baum__registry/src/interface/IVersionManager.js';
 
 export class PublicRegistryStep extends ARegistryStep {
   private initStep?: IStep;
@@ -14,7 +15,8 @@ export class PublicRegistryStep extends ARegistryStep {
     super((workspaces) => new VersionManagerVersionOverride(this.pinVersion, workspaces));
   }
 
-  modifyJSON(json: any) {
+  modifyJSON(json: any, versionManager: IVersionManager) {
+    super.modifyJSON(json, versionManager);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   }

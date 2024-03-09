@@ -58,7 +58,7 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
   getPrepareStep = (): IStep => {
     const npmRCCopy = new CopyStep(
       (_, __, rootDirectory) => (FileSystem.existsSync(Path.join(rootDirectory, '.npmrc')) ? [Path.join(rootDirectory, '.npmrc')] : []),
-      (workspace) => workspace.getDirectory(),
+      (workspace, file) => Path.join(workspace.getDirectory(), Path.basename(file)),
       false
     );
 
