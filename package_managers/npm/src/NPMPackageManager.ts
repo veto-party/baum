@@ -13,6 +13,7 @@ import Crypto from 'crypto';
 const { exec } = shelljs;
 
 export class NPMPackageManager implements IExecutablePackageManager {
+
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();

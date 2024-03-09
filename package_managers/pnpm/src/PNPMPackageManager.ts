@@ -94,36 +94,6 @@ export class PNPMPackageManager implements IExecutablePackageManager {
     return [];
   }
 
-  private doSpawn(cwd: string, command: string) {
-    return new Promise<void>((resolve, reject) => {
-      const process = exec(command, {
-        async: true,
-        cwd
-      });
-
-      process.on('close', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Proeccess exited with code: "${code}"`));
-          return;
-        }
-
-        resolve();
-      });
-    });
-  }
-
-  async executeScript(cwd: string, task: string): Promise<void> {
-    await this.doSpawn(cwd, `npm run ${task}`);
-  }
-
-  async publish(cwd: string, registry?: string | undefined): Promise<void> {
-    if (registry) {
-      await this.doSpawn(cwd, `npm publish --registry=${registry}`);
-    }
-
-    await this.doSpawn(cwd, 'npm publish');
-  }
-
   getExecutor(): IPackageManagerExecutor {
     return new (class implements IPackageManagerExecutor {
       startExecutionIntent(): IExecutionIntentBuilder {
