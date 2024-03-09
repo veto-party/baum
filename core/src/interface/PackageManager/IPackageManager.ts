@@ -24,4 +24,6 @@ export interface IPackageManager {
   disableGlobalWorkspace(rootDirectory: string): any;
 
   enableGlobalWorkspace(rootDirectory: string): any;
+
+  modifyToRealVersionValue(version: string): string | false | undefined
 }

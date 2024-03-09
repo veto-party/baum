@@ -28,6 +28,10 @@ export class PNPMPackageManager implements IExecutablePackageManager {
     return yaml.stringify(parser);
   }
 
+  modifyToRealVersionValue(version: string): string | false | undefined {
+    return version.startsWith("workspace:") ? version.substring('workspace:'.length) : undefined;
+  }
+
   getLockFileName(): string {
     return 'pnpm-lock.yaml';
   }
@@ -76,7 +80,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
 
-          return new GenericWorkspace(path, packageJson, (version) => version.startsWith("workspace:") && version.substring("workspace:".length));
+          return new GenericWorkspace(path, packageJson, this.modifyToRealVersionValue.bind(this));
         })
     );
   }

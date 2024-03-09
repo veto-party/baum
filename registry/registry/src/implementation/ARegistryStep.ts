@@ -1,5 +1,5 @@
 import Path from 'path';
-import { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IStep, IWorkspace } from '@veto-party/baum__core';
+import { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IPackageManagerExecutor, IStep, IWorkspace } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { ICollection } from '../index.js';
 import { IVersionManager } from '../interface/IVersionManager.js';
@@ -10,7 +10,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-  constructor(protected VersionManagerClass: (workspaces: IWorkspace[]) => IVersionManager) {}
+  constructor(protected VersionManagerClass: (workspaces: IWorkspace[]) => IVersionManager) { }
 
   addExecutionStep(name: string, step: IStep): this {
     this.collection.addExecutionStep(name, step);
@@ -19,7 +19,16 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   abstract getPublishStep(): IStep | undefined;
 
-  modifyJSON(file: any, versionManager: IVersionManager) {}
+  private modifyVersion(version: string, pm: IPackageManager) {
+    const resolved = pm.modifyToRealVersionValue(version);
+    if (resolved) {
+      return resolved;
+    }
+
+    return version;
+  }
+
+  modifyJSON(file: any, versionManager: IVersionManager) { }
 
   abstract addInstallStep(): this;
 
@@ -33,21 +42,14 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     const manager = this.VersionManagerClass(await pm.readWorkspace(root));
 
-    Object.entries((jsonFile.dependencies ?? {}) as Record<string, string>).forEach(([k, v]) => {
-      jsonFile.dependencies[k] = manager.getLatestVersionFor(k, v) ?? jsonFile.dependencies[k];
-    });
+    const keysToModify = ['dependency', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 
-    Object.entries((jsonFile.devDependencies ?? {}) as Record<string, string>).forEach(([k, v]) => {
-      jsonFile.devDependencies[k] = manager.getLatestVersionFor(k, v) ?? jsonFile.devDependencies[k];
-    });
-
-    Object.entries((jsonFile.peerDependencies ?? {}) as Record<string, string>).forEach(([k, v]) => {
-      jsonFile.peerDependencies[k] = manager.getLatestVersionFor(k, v) ?? jsonFile.peerDependencies[k];
-    });
-
-    Object.entries((jsonFile.optionalDependencies ?? {}) as Record<string, string>).forEach(([k, v]) => {
-      jsonFile.optionalDependencies[k] = manager.getLatestVersionFor(k, v) ?? jsonFile.optionalDependencies[k];
-    });
+    keysToModify.forEach((key) => {
+      Object.entries((jsonFile[key] ?? {}) as Record<string, string>).forEach(([k, v]) => {
+        const resolved = this.modifyVersion(v, pm);
+        jsonFile[key][k] = resolved ? manager.getLatestVersionFor(k, resolved) ?? jsonFile[key][k] : jsonFile[key][k];
+      });
+    })
 
     await this.modifyJSON?.(jsonFile, manager);
 

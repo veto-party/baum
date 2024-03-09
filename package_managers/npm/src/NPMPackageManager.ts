@@ -27,6 +27,10 @@ export class NPMPackageManager implements IExecutablePackageManager {
     return JSON.stringify(parser);
   }
 
+  modifyToRealVersionValue(version: string): string | false | undefined {
+    return version === "*" && "*";
+  }
+
   getLockFileName(): string {
     return 'package-lock.json';
   }
@@ -79,7 +83,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
         .map<Promise<IWorkspace>>(async (path) => {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
-          return new GenericWorkspace(path, packageJson, (version) => version === "*" && "*");
+          return new GenericWorkspace(path, packageJson, this.modifyToRealVersionValue.bind(this));
         })
     );
   }
