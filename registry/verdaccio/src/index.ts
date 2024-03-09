@@ -25,13 +25,11 @@ class InitStep extends GroupStep {
     this.addExecutionStep('startup', new StartupStep(hash, (await this.getPort()).toString(), root));
   }
 
-  @CachedFN(true)
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
     await this.init(root);
     await super.execute(workspace, packageManager, root);
   }
 
-  @CachedFN(true)
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await super.clean(workspace, packageManager, rootDirectory)
   }
