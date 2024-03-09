@@ -54,7 +54,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     return this;
   }
 
-  modifyJSON(json: any, versionManager: IVersionManager) {
+  async modifyJSON(json: any, versionManager: IVersionManager) {
     super.modifyJSON(json, versionManager);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
@@ -71,7 +71,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     const url = new URL(`${this.dockerAddress}:${port}`);
 
     if (this.doInstall) {
-      this.publishStep = new GroupStep([
+      this.publishStep ??= new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
         new ModifyNPMRC(`
           ${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"

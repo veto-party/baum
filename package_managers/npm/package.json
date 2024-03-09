@@ -17,8 +17,5 @@
         "@veto-party/config": "*",
         "@types/ejs": "^3.1.5",
         "typescript": "^5.4.2"
-    },
-    "workspaces": {
-        "packages": []
     }
 }

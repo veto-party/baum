@@ -1,5 +1,5 @@
 import uniqBy from 'lodash.uniqby';
-import { IDependent, IWorkspace } from '../../index.js';
+import { CachedFN, IDependent, IWorkspace } from '../../index.js';
 import { GenericDependent } from './GenericDependent.js';
 
 export class GenericWorkspace implements IWorkspace {
@@ -7,7 +7,7 @@ export class GenericWorkspace implements IWorkspace {
     private directory: string,
     private pkgFile: any,
     private modifyToRealVersionValue: (version: string) => string | false | undefined
-  ) {}
+  ) { }
 
   getName(): string {
     return this.pkgFile.name;
@@ -25,6 +25,7 @@ export class GenericWorkspace implements IWorkspace {
     return this.pkgFile;
   }
 
+  @CachedFN(false)
   getDynamicDependents(): IDependent[] {
     const dependents = [
       Object.entries(this.pkgFile.dependencies ?? {})

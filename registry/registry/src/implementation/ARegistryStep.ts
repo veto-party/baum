@@ -10,7 +10,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-  constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
+  constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) { }
 
   addExecutionStep(name: string, step: IStep): this {
     this.collection.addExecutionStep(name, step);
@@ -28,7 +28,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     return version;
   }
 
-  modifyJSON(file: any, versionManager: IVersionManager) {
+  async modifyJSON(file: any, versionManager: IVersionManager) {
     // NO-OP (This is for overloading)
   }
 

@@ -106,7 +106,7 @@ export class BaumManager implements IBaumManager {
       }
     } finally {
       while (executedGroups.length > 0) {
-        const currentGroup = executedGroups.pop()!;
+        const currentGroup = executedGroups.shift()!;
         try {
           await this.doClean(currentGroup, steps);
         } catch (error) {

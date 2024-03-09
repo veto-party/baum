@@ -23,7 +23,7 @@ export default async (baum: IBaumManagerConfiguration) => {
     baum.addExecutionStep(
       'publish-npm',
       new (class extends PublicRegistryStep {
-        modifyJSON(json: any, versionManager: IVersionManager) {
+        async modifyJSON(json: any, versionManager: IVersionManager) {
           super.modifyJSON(json, versionManager);
           if (json.scripts?.build.includes('tsc')) {
             json.main = './dist/index.js';

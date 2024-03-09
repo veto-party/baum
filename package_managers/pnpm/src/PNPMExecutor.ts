@@ -69,10 +69,7 @@ export class PNPMExecutor extends ATemplateExecutor {
             }
 
             async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-              await this.awaitBlock();
-              blockPromise = step.clean(workspace, packageManager, rootDirectory);
-              await this.awaitBlockCycle();
-              blockNumber++;
+              await step.clean(workspace, packageManager, rootDirectory);
             }
           })();
         }
