@@ -14,7 +14,7 @@ export class NPMRCForSpecifiedRegistryStep implements IStep {
             if (dependents.length > 0) {
                 this.workspaceToStep.set(workspace, new ModifyNPMRC(dependents.reduce((prev, current) => `
 ${prev}
-${current.getName().substring(current.getName().indexOf("/"))}:registry=${this.registry}
+${current.getName().substring(0, current.getName().indexOf("/"))}:registry=${this.registry}
 
           `, '')));
             }

@@ -33,8 +33,6 @@ class InitStep extends GroupStep {
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await super.clean(workspace, packageManager, rootDirectory)
   }
-
-
 }
 
 export class VerdaccioRegistryStep extends ARegistryStep {
