@@ -73,10 +73,10 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     if (this.doInstall) {
       this.publishStep ??= new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
-        new ModifyNPMRC(`
-          ${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"
-          ${url.toString().substring(url.protocol.length)}:always-auth=true
-        `),
+        new ModifyNPMRC([
+          `${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`,
+          `${url.toString().substring(url.protocol.length)}:always-auth=true`
+        ].join('\n')),
         // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
         new PKGMStep((intent) => intent.install().install()),
         new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'))
