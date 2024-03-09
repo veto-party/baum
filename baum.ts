@@ -19,7 +19,7 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
   baum.addExecutionStep(
     'prepare',
-    new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')), new CopyStep('**/*.report.xml', (_, file) => Path.join(__dirname, 'out', new Date().toISOString(), Path.basename(file)))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))])
+    new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))])
   );
 
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
