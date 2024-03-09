@@ -16,7 +16,7 @@ export interface IWorkspace {
 }
 
 export interface IPackageManager {
-  getCleanLockFile(rootDirectory: string): Promise<Parameters<typeof writeFile>[1] | undefined>;
+  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<typeof writeFile>[1] | undefined>;
 
   getLockFileName(): string;
 

@@ -11,7 +11,7 @@ import { NPMExecutor } from './NPMExecutor.js';
 const { exec } = shelljs;
 
 export class NPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
+  async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
     const parser = JSON.parse(content);
@@ -27,7 +27,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {
-    return version === '*' && '*';
+    return version === '*' ? '*' : undefined;
   }
 
   getLockFileName(): string {

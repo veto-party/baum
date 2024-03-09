@@ -16,12 +16,6 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setPackageManager(pm);
   baum.setRootDirectory(__dirname);
 
-  baum.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
-  baum.addExecutionStep(
-    'prepare',
-    new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))])
-  );
-
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
@@ -44,6 +38,6 @@ export default async (baum: IBaumManagerConfiguration) => {
       })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN).addInstallStep()
     );
   } else if (!process.env.CI) {
-    baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep());
+    baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep().addExecutionStep("prepare", new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))])));
   }
 };
