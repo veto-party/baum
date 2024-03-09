@@ -6,6 +6,8 @@ import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
+import OS from 'node:os';
+import Crypto from 'crypto';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -31,7 +33,10 @@ export class PNPMPackageManager implements IExecutablePackageManager {
   }
 
   private async checkCopy(rootDirectory: string, reversed: boolean): Promise<void> {
-    let paths = [Path.join(rootDirectory, 'pnpm-workspace.yaml'), Path.join(rootDirectory, 'pnpm-workspace.yaml-bak')] as const;
+
+    const hash = Crypto.createHash('md5').update(rootDirectory).digest().toString("hex");
+
+    let paths = [Path.join(rootDirectory, 'pnpm-workspace.yaml'), Path.join(OS.tmpdir(), `${hash}-pnpm-workspace.yaml-bak`)] as const;
 
     if (reversed) {
       paths = paths.toReversed() as [string, string];
