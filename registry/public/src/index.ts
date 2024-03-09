@@ -32,11 +32,25 @@ export class PublicRegistryStep extends ARegistryStep {
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
     if (this.hasInstallStep) {
-      this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(`${this.registry}`), new PKGMStep((intent) => intent.install().ci())]);
+      this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep((intent) => intent.install().ci())]);
     }
 
     await super.startExecution(workspace, pm, root);
 
-    this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(this.registry).setForcePublic(false).setAuthorization(this.token));
+    this.publishStep ??= new PKGMStep((intent) => intent.publish().setRegistry(this.registry).setForcePublic(false).setAuthorization(this.token));
+  }
+
+  public async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    await super.execute(workspace, packageManager, rootDirectory);
+    await this.initStep?.execute(workspace, packageManager, rootDirectory);
+    await this.publishStep?.execute(workspace, packageManager, rootDirectory);
+  }
+
+  public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
+    for (const cleanup of [this.initStep?.clean.bind(this.initStep), super.clean.bind(this), this.publishStep?.clean.bind(this.publishStep)]) {
+      if (cleanup) {
+        await cleanup(workspace, pm, root).catch(console.warn);
+      }
+    }
   }
 }
