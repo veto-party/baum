@@ -1,4 +1,5 @@
 import FileSystem from 'fs/promises';
+import SyncFileSystem from 'fs';
 import Path from 'path';
 import { IStep, IWorkspace } from '../../../../../../../index.js';
 import { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
@@ -28,7 +29,10 @@ class ModifyNPMRC implements IStep {
     console.log(`workspace clean: ${workspace.getDirectory()}`);
 
     if (this.previousFileContent) {
-      await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent);
+      // We should ensure execution order for modifynpmrc cleanup. (Store when which modifier was applied and make sure that we are not older then the latest revert) (static storage)
+      if (SyncFileSystem.existsSync(Path.join(workspace.getDirectory(), '.npmrc'))) {
+        await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent);
+      }
     } else {
       await FileSystem.rm(Path.join(workspace.getDirectory(), '.npmrc'));
     }

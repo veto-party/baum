@@ -1,3 +1,4 @@
+import { cat } from 'shelljs';
 import { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
@@ -12,7 +13,11 @@ export class GroupStep implements IStep, IBaumRegistrable {
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     for (const step of this.steps.toReversed()) {
-      await step.clean(workspace, packageManager, rootDirectory).catch(console.warn);
+      try {
+        await step.clean(workspace, packageManager, rootDirectory);
+      } catch (error) {
+        console.warn(`Failed to clean ${step.constructor.name}:`, error);
+      }
     }
   }
 

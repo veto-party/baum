@@ -73,25 +73,25 @@ export class VerdaccioRegistryStep extends ARegistryStep {
       this.initStep.addExecutionStep("modify_npmrc", new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}`));
       this.initStep.addExecutionStep("install", new PKGMStep((intent) => intent.install().ci()));
     }
+
+
+    this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
 
     await this.prepareExecution();
 
-    const port = await this.initStep.getPort();
-
     await this.initStep.execute(workspace, pm, root);
     await super.startExecution(workspace, pm, root);
-
-    this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
   }
 
   public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-    try {
-      await this.initStep.clean(workspace, pm, root);
-    } finally {
-      await super.clean(workspace, pm, root);
+
+    for (const cleanup of [this.initStep.clean.bind(this.initStep), super.clean.bind(this), this.publishStep?.clean.bind(this.publishStep)]) {
+      if (cleanup) {
+        await cleanup(workspace, pm, root).catch(console.warn);
+      }
     }
   }
 }

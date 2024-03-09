@@ -21,7 +21,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         const currentResult = storage.find((current) => isEqual(current[0], args));
 
         if (currentResult) {
-          return currentResult[1];
+          return Promise.resolve(currentResult[1]);
         }
 
         let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], args));
