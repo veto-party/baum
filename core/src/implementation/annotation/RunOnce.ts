@@ -16,7 +16,7 @@ class PromiseStorage<T extends (...args: any[]) => any> {
 
   create(...args: Parameters<T>) {
     if (this.result !== never) {
-      return this.result;
+      return Promise.resolve(this.result);
     }
 
     return new Promise<ReturnType<T> extends Promise<any> ? Awaited<ReturnType<T>> : Promise<ReturnType<T>>>(async (resolve, reject) => {

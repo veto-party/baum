@@ -5,7 +5,6 @@ import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
 
-@RunOnce()
 class InitStep extends GroupStep {
   private port?: number;
 
