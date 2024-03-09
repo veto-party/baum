@@ -23,8 +23,6 @@ export default async (baum: IBaumManagerConfiguration) => {
 
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
 
-  baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep());
-
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
     baum.addExecutionStep(
       'publish-npm',
@@ -35,7 +33,9 @@ export default async (baum: IBaumManagerConfiguration) => {
             json.main = './dist/index.js';
           }
         }
-      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN)
+      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN).addInstallStep()
     );
+  } else if (!process.env.CI) {
+    baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep());
   }
 };
