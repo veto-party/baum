@@ -1,10 +1,9 @@
 import Crypto from 'crypto';
 import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
+import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride, IVersionManager } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
-import { IVersionManager } from '@veto-party/baum__registry/src/interface/IVersionManager.js';
 
 class InitStep extends GroupStep {
   private port?: number;

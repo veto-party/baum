@@ -5,6 +5,7 @@ export type { IExecutablePackageManager } from './interface/PackageManager/IExec
 
 export type { IStep } from './interface/IStep.js';
 
+export type { IExecutablePackageManagerParser } from './interface/PackageManager/executor/IPackageManagerParser.js';
 export type { IPackageManagerExecutor, ICommandIntent, IExecutionIntent, IExecutionIntentBuilder, IInstallIntent, IPublishIntent, IRunIntent } from './interface/PackageManager/executor/IPackageManagerExecutor.js';
 
 export { CachedFN } from './implementation/annotation/Cached.js';
@@ -23,3 +24,5 @@ export { GroupStep } from './implementation/Step/GroupStep.js';
 
 export { GenericDependent } from './implementation/PackageManager/GenericDependent.js';
 export { GenericWorkspace } from './implementation/PackageManager/GenericWorkspace.js';
+
+export { allSettledButFailure, allSettledButNoFailures } from './implementation/BaumManager/utility/allSettledButNoFailure.js';
