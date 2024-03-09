@@ -6,7 +6,7 @@ class IWorkspaceMock implements IWorkspace {
     private name: string,
     private version: string,
     private dependents: IDependent[]
-  ) { }
+  ) {}
 
   getName(): string {
     return this.name;

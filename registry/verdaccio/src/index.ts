@@ -1,6 +1,6 @@
 import Crypto from 'crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep, IStep, ModifyNPMRC } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride, IVersionManager } from '@veto-party/baum__registry';
+import { CachedFN, GroupStep, type IExecutablePackageManager, IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
+import { ARegistryStep, GenericVersionManager, IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
@@ -83,14 +83,13 @@ export class VerdaccioRegistryStep extends ARegistryStep {
       ]);
     } else {
       this.publishStep ??= new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
-
     }
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
     await this.initStep.init(root);
     await this.prepareExecution();
-    await this.initStep.execute(workspace, pm, root)
+    await this.initStep.execute(workspace, pm, root);
     await super.startExecution(workspace, pm, root);
   }
 

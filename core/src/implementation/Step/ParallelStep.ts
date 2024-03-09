@@ -3,7 +3,7 @@ import { IExecutablePackageManager } from '../../interface/PackageManager/IExecu
 import { allSettledButFailure, allSettledButNoFailures } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 export class ParallelStep implements IStep, IBaumRegistrable {
-  constructor(protected steps: IStep[]) { }
+  constructor(protected steps: IStep[]) {}
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     await allSettledButNoFailures(this.steps.map(async (step) => await step.clean(workspace, packageManager, rootDirectory)));

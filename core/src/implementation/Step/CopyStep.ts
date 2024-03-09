@@ -18,7 +18,7 @@ export class CopyStep implements IStep {
     private from: string | ((workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => string[]),
     private to: string | ((workspace: IWorkspace, filename: string) => string),
     private keepFiles = true
-  ) { }
+  ) {}
 
   private filesThatGotCopied = new Map<IWorkspace, string[]>();
 
@@ -41,7 +41,6 @@ export class CopyStep implements IStep {
   }
 
   private async doExecute(from: string, workspace: IWorkspace) {
-
     from = Path.isAbsolute(from) ? from : Path.join(workspace.getDirectory(), from);
 
     const stats = await FileSystem.stat(from);
@@ -61,7 +60,7 @@ export class CopyStep implements IStep {
       return;
     }
 
-    throw new Error("Unkown FileSystem.stat response.");
+    throw new Error('Unkown FileSystem.stat response.');
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

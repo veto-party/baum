@@ -7,7 +7,7 @@ export class GenericWorkspace implements IWorkspace {
     private directory: string,
     private pkgFile: any,
     private modifyToRealVersionValue: (version: string) => string | false | undefined
-  ) { }
+  ) {}
 
   getName(): string {
     return this.pkgFile.name;

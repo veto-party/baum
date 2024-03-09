@@ -2,7 +2,7 @@ import Crypto from 'crypto';
 import OldFileSystem from 'fs';
 import OS from 'node:os';
 import Path from 'path';
-import { allSettledButFailure, CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import yaml from 'yaml';
@@ -31,7 +31,6 @@ export class PNPMPackageManager implements IExecutablePackageManager {
     }
 
     await FileSystem.copyFile(...paths);
-
 
     if (OldFileSystem.existsSync(paths[0])) {
       await FileSystem.rm(paths[0]);

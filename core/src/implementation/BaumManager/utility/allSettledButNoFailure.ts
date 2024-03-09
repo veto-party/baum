@@ -1,5 +1,3 @@
-import { promise } from "zod";
-
 export const allSettledButNoFailures = async <T>(promises: Promise<T>[]): Promise<T[]> => {
   const results = await Promise.allSettled(promises);
 
@@ -15,15 +13,14 @@ export const allSettledButNoFailures = async <T>(promises: Promise<T>[]): Promis
 export const allSettledButFailure = async <T>(promises: Promise<T>[]): Promise<T[]> => {
   const results = await Promise.allSettled(promises);
 
-
   const failures = results.map((result) => (result.status === 'rejected' ? result.reason : undefined)).filter((failure): failure is Error => !!failure);
 
   if (failures.length > 0) {
     console.warn(failures);
-    throw new Error("There where one or multiple failures.", {
+    throw new Error('There where one or multiple failures.', {
       cause: failures
     });
   }
 
   return results.map((value) => (value.status === 'fulfilled' ? value.value : undefined)).filter(Boolean) as any;
-}
+};

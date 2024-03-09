@@ -1,5 +1,5 @@
 import { GroupStep, IExecutablePackageManager, IStep, IWorkspace, PKGMStep } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride, IVersionManager } from '@veto-party/baum__registry';
+import { ARegistryStep, GenericVersionManager, IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
 export class PublicRegistryStep extends ARegistryStep {
   private initStep?: IStep;

@@ -4,7 +4,6 @@
  * Publishes a package a la "npm publish [--registry=<registry>]".
  */
 export interface IPublishIntent extends IExecutionIntent {
-
   readonly name: 'publish';
 
   /**
@@ -32,8 +31,6 @@ export interface IPublishIntent extends IExecutionIntent {
  * Run as command a la "npm run <command> -- [<parameters>]".
  */
 export interface IRunIntent extends IExecutionIntent {
-
-
   readonly name: 'run';
 
   /**
@@ -60,8 +57,6 @@ export interface IRunIntent extends IExecutionIntent {
  * Runs a command a la "npx <command> <parameters>".
  */
 export interface ICommandIntent extends IExecutionIntent {
-
-
   readonly name: 'command';
 
   /**
@@ -85,8 +80,6 @@ export interface ICommandIntent extends IExecutionIntent {
  * Run a install a la "npm <install|ci|rebuild>"
  */
 export interface IInstallIntent extends IExecutionIntent {
-
-
   readonly name: 'install';
 
   /**
@@ -110,7 +103,6 @@ export interface IInstallIntent extends IExecutionIntent {
  * Any intent that can be executed.
  */
 export interface IExecutionIntent {
-
   readonly name: string;
 
   /**
@@ -125,7 +117,6 @@ export interface IExecutionIntent {
  * Intent factory.
  */
 export interface IExecutionIntentBuilder {
-
   /**
    * Create a publish intent.
    *

@@ -10,7 +10,7 @@ class CommandStep implements IStep {
     private command: string,
     private cwdAddition: string | undefined,
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
-  ) { }
+  ) {}
 
   protected getCleanEnv() {
     const current = {

@@ -8,9 +8,7 @@ export class GenericVersionManager implements IVersionManager {
   protected nameToVersionOrder: Record<string, IWorkspace[]> = {};
   protected namesToWorkspaces: Record<string, Record<string, IWorkspace>> = {};
 
-  private mapToVersions(
-    workspaces: IWorkspace[]
-  ) {
+  private mapToVersions(workspaces: IWorkspace[]) {
     for (const workspace of workspaces) {
       this.namesToWorkspaces[workspace.getName()] ??= {};
       this.namesToWorkspaces[workspace.getName()][workspace.getVersion()] = workspace;
@@ -34,7 +32,7 @@ export class GenericVersionManager implements IVersionManager {
 
   protected findLatestVersionGenerator(name: string, version: string) {
     return (workspace: IWorkspace) => {
-      const workspaceVersion = this.pm.modifyToRealVersionValue(workspace.getVersion())
+      const workspaceVersion = this.pm.modifyToRealVersionValue(workspace.getVersion());
       return semver.satisfies(this.starToVersion(workspace.getName(), workspaceVersion ? workspaceVersion : workspace.getVersion()), this.starToVersion(name, version));
     };
   }

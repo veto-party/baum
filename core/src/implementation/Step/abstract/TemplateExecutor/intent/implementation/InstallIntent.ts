@@ -1,6 +1,6 @@
-import FileSystem from 'fs/promises';
 import SyncFileSystem from 'fs';
 import Path from 'path';
+import FileSystem from 'fs/promises';
 import zod from 'zod';
 import { IStep, ModifyNPMRC } from '../../../../../../index.js';
 import { IInstallIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
@@ -11,12 +11,9 @@ const installIntentValidation = zod.object({
 });
 
 class InstallIntent extends AIntent<[string]> implements IInstallIntent {
-
   readonly name = 'install';
 
-  constructor(
-    private type?: string,
-  ) {
+  constructor(private type?: string) {
     super();
   }
 
@@ -59,7 +56,7 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
       }
 
       return '';
-    })
+    });
 
     return npmRCCopy;
   };

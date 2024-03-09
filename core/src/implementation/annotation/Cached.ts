@@ -12,9 +12,9 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
 
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
-          (value: Parameters<MapValue[typeof index]>[0]) => {
-            values.forEach((promiseTuple) => promiseTuple[index](value));
-          };
+        (value: Parameters<MapValue[typeof index]>[0]) => {
+          values.forEach((promiseTuple) => promiseTuple[index](value));
+        };
 
       context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
         const currentResult = storage.find((current) => isEqual(current[0], args));

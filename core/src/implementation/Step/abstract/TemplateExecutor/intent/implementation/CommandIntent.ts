@@ -8,7 +8,6 @@ const commandIntentValidator = zod.object({
 });
 
 class CommandIntent extends AIntent<[string] | [string, string]> implements ICommandIntent {
-
   readonly name = 'command';
 
   constructor(
