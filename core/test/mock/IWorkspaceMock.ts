@@ -6,7 +6,7 @@ class IWorkspaceMock implements IWorkspace {
     private name: string,
     private version: string,
     private dependents: IDependent[]
-  ) {}
+  ) { }
 
   getName(): string {
     return this.name;
@@ -16,6 +16,11 @@ class IWorkspaceMock implements IWorkspace {
   }
   getDynamicDependents(): IDependent[] {
     return this.dependents;
+  }
+
+  getPackageFile() {
+    // gets the package file as an object. (E.g. package.json content) to be used in the app.
+    throw new Error('Method not implemented.');
   }
 
   toDepdendent() {
