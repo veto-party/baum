@@ -1,5 +1,5 @@
 import Path from 'path';
-import { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IPackageManagerExecutor, IStep, IWorkspace } from '@veto-party/baum__core';
+import { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IStep, IWorkspace } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { ICollection } from '../index.js';
 import { IVersionManager } from '../interface/IVersionManager.js';
@@ -10,7 +10,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-  constructor(protected VersionManagerClass: (workspaces: IWorkspace[]) => IVersionManager) { }
+  constructor(protected VersionManagerClass: (workspaces: IWorkspace[]) => IVersionManager) {}
 
   addExecutionStep(name: string, step: IStep): this {
     this.collection.addExecutionStep(name, step);
@@ -28,7 +28,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     return version;
   }
 
-  modifyJSON(file: any, versionManager: IVersionManager) { }
+  modifyJSON(file: any, versionManager: IVersionManager) {}
 
   abstract addInstallStep(): this;
 
@@ -49,7 +49,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
         const resolved = this.modifyVersion(v, pm);
         jsonFile[key][k] = resolved ? manager.getLatestVersionFor(k, resolved) ?? jsonFile[key][k] : jsonFile[key][k];
       });
-    })
+    });
 
     await this.modifyJSON?.(jsonFile, manager);
 

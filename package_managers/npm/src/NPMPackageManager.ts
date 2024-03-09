@@ -28,7 +28,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {
-    return version === "*" && "*";
+    return version === '*' && '*';
   }
 
   getLockFileName(): string {

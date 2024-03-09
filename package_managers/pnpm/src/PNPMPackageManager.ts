@@ -1,4 +1,6 @@
+import Crypto from 'crypto';
 import OldFileSystem from 'fs';
+import OS from 'node:os';
 import Path from 'path';
 import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
@@ -6,8 +8,6 @@ import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
-import OS from 'node:os';
-import Crypto from 'crypto';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -29,7 +29,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {
-    return version.startsWith("workspace:") ? version.substring('workspace:'.length) : undefined;
+    return version.startsWith('workspace:') ? version.substring('workspace:'.length) : undefined;
   }
 
   getLockFileName(): string {
@@ -37,8 +37,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
   }
 
   private async checkCopy(rootDirectory: string, reversed: boolean): Promise<void> {
-
-    const hash = Crypto.createHash('md5').update(rootDirectory).digest().toString("hex");
+    const hash = Crypto.createHash('md5').update(rootDirectory).digest().toString('hex');
 
     let paths = [Path.join(rootDirectory, 'pnpm-workspace.yaml'), Path.join(OS.tmpdir(), `${hash}-pnpm-workspace.yaml-bak`)] as const;
 
