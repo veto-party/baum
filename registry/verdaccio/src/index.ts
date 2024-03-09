@@ -18,7 +18,7 @@ class InitStep extends GroupStep {
   }
 
   @CachedFN(true)
-  private async init(root: string) {
+  public async init(root: string) {
     const hash = Crypto.createHash('sha256').update(root).digest('hex');
 
     console.log('should only run once.');
@@ -80,6 +80,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
+    await this.initStep.init(root);
     await this.prepareExecution();
     await this.initStep.execute(workspace, pm, root)
     await super.startExecution(workspace, pm, root);
