@@ -1,4 +1,4 @@
-import { GroupStep, ICommandIntent, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntent, IExecutionIntentBuilder, IInstallIntent, IPackageManagerExecutor, IPublishIntent, IRunIntent, IStep, IWorkspace, callbackArgs } from '@veto-party/baum__core';
+import { GroupStep, ICommandIntent, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntent, IExecutionIntentBuilder, IInstallIntent, IPackageManagerExecutor, IPublishIntent, IRunIntent, IStep, IWorkspace, allSettledButFailure, callbackArgs } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 
 type PartialExecutorMap = { [K in keyof callbackArgs]?: IExecutablePackageManager }
@@ -17,7 +17,7 @@ export class HybridPackageManager implements IExecutablePackageManager {
         return this.primaryPM.enableGlobalWorkspace(rootDirectory);
     }
 
-    getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
+    getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
         return this.primaryPM.getCleanLockFile(rootDirectory);
     }
 
