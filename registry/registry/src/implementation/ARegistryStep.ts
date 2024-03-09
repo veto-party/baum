@@ -42,7 +42,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     const manager = this.VersionManagerClass(await pm.readWorkspace(root), pm);
 
-    const keysToModify = ['dependency', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+    const keysToModify = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
 
     keysToModify.forEach((key) => {
       Object.entries((jsonFile[key] ?? {}) as Record<string, string>).forEach(([k, v]) => {

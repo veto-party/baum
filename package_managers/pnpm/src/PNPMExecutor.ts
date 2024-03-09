@@ -44,7 +44,7 @@ export class PNPMExecutor extends ATemplateExecutor {
 
             const currentNo = ++blockNumberCounter;
 
-            while (blockNumber < currentNo) {
+            while (currentNo < blockNumber) {
               if (blockPromise) {
                 this.awaitBlockCycle();
               } else {
