@@ -39,17 +39,4 @@ export class PublicRegistryStep extends ARegistryStep {
 
     await super.startExecution(workspace, pm, root);
   }
-
-  public async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await super.execute(workspace, packageManager, rootDirectory);
-    await this.initStep?.execute(workspace, packageManager, rootDirectory);
-  }
-
-  public async clean(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
-    for (const cleanup of [this.initStep?.clean.bind(this.initStep), super.clean.bind(this)]) {
-      if (cleanup) {
-        await cleanup(workspace, pm, root).catch(console.warn);
-      }
-    }
-  }
 }
