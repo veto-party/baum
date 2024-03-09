@@ -30,11 +30,7 @@ export class PublicRegistryStep extends ARegistryStep {
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
     if (this.hasInstallStep) {
-      this.initStep ??= new GroupStep([
-        new NPMRCForSpecifiedRegistryStep(this.registry),
-        new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired(
-          (intent) => intent.setRegistry(this.registry).setAuthorization(this.token)))
-      ]);
+      this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)))]);
     }
 
     await super.startExecution(workspace, pm, root);
