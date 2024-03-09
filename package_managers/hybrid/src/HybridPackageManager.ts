@@ -17,8 +17,8 @@ export class HybridPackageManager implements IExecutablePackageManager {
         return this.primaryPM.enableGlobalWorkspace(rootDirectory);
     }
 
-    getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
-        return this.primaryPM.getCleanLockFile(rootDirectory);
+    getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
+        return this.primaryPM.getCleanLockFile(rootDirectory, workspace);
     }
 
     getExecutor(): IPackageManagerExecutor {
