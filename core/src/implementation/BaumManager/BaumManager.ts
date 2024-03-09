@@ -2,7 +2,7 @@ import { GroupStep, IBaumManager, IStep } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 import { CopyAndCleanLockFileStep } from '../Step/internal/CopyAndCleanLockFile.js';
-import { allSettledButNoFailures } from './utility/allSettledButNoFailure.js';
+import { allSettledButFailure, allSettledButNoFailures } from './utility/allSettledButNoFailure.js';
 import { shakeWorkspacesIntoExecutionGroups } from './utility/shakeWorkspacesIntoExecutionGroups.js';
 import { structure } from './validation.js';
 
@@ -68,7 +68,7 @@ export class BaumManager implements IBaumManager {
         }
 
         console.log('executing step', step.name);
-        await Promise.all(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
+        await allSettledButFailure(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
       }
     } catch (error) {
       console.warn('Failed, reverting state.');

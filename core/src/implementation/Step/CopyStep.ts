@@ -3,6 +3,7 @@ import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import { IStep, IWorkspace } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import { allSettledButFailure } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 const ensureMapEntry = <T, R>(map: Map<T, R>, key: T, defaultValue: R) => {
   if (!map.has(key)) {
@@ -17,12 +18,12 @@ export class CopyStep implements IStep {
     private from: string | ((workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => string[]),
     private to: string | ((workspace: IWorkspace, filename: string) => string),
     private keepFiles = true
-  ) {}
+  ) { }
 
   private filesThatGotCopied = new Map<IWorkspace, Record<string, string[]>>();
 
   private async doOrderFiles(workspace: IWorkspace, files: string[]) {
-    await Promise.all(
+    await allSettledButFailure(
       files.map(async (source) => {
         const destination = typeof this.to === 'function' ? this.to(workspace, source) : this.to;
 
@@ -77,9 +78,9 @@ export class CopyStep implements IStep {
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.keepFiles) {
-      await Promise.all(
+      await allSettledButFailure(
         Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([, files]) => {
-          await Promise.all(files.map((file) => FileSystem.rm(file)));
+          await allSettledButFailure(files.map((file) => FileSystem.rm(file)));
         })
       );
     }

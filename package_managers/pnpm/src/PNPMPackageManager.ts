@@ -8,6 +8,7 @@ import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
+import { allSettledButFailure } from '@veto-party/baum__core/src/implementation/BaumManager/utility/allSettledButNoFailure.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -62,7 +63,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
   }
 
   private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
-    const resolvedPaths = await Promise.all(
+    const resolvedPaths = await allSettledButFailure(
       workspacePaths.map((path) => {
         if (path.endsWith('/*')) {
           return globby(`${path}/package.json`, { cwd, absolute: true });
@@ -71,7 +72,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
         return globby(path, { cwd, absolute: true });
       })
     );
-    return await Promise.all(
+    return await allSettledButFailure(
       resolvedPaths
         .flat()
         .filter((file) => file.endsWith('package.json'))

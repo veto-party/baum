@@ -14,7 +14,7 @@ export class DockerRunStep implements IStep {
 
   private startStep: IStep;
 
-  private stopSTep: IStep;
+  private stopStep: IStep;
 
   constructor(properties: DockerRunProperties, cwd: string, processValidation: (code: number | null) => boolean = (code) => code === 0) {
     this.tag =
@@ -25,7 +25,7 @@ export class DockerRunStep implements IStep {
         .digest()
         .toString('hex');
     this.startStep = new ADockerStep(`run --name=${this.tag} ${properties.paramsForDocker ?? ''} ${properties.image} ${properties.paramsForContainer ?? ''}`, cwd, processValidation);
-    this.stopSTep = new ADockerStep(`stop ${this.tag}`, cwd, processValidation);
+    this.stopStep = new ADockerStep(`stop ${this.tag}`, cwd, processValidation);
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -33,6 +33,6 @@ export class DockerRunStep implements IStep {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await this.stopSTep.execute(workspace, packageManager, rootDirectory);
+    await this.stopStep.execute(workspace, packageManager, rootDirectory);
   }
 }

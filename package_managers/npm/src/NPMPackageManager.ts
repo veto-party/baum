@@ -8,6 +8,7 @@ import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMExecutor } from './NPMExecutor.js';
+import { allSettledButFailure } from '@veto-party/baum__core/src/implementation/BaumManager/utility/allSettledButNoFailure.js';
 
 const { exec } = shelljs;
 
@@ -65,7 +66,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
   }
 
   private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
-    const resolvedPaths = await Promise.all(
+    const resolvedPaths = await allSettledButFailure(
       workspacePaths.map((path) => {
         if (path.endsWith('/*')) {
           return globby(`${path}/package.json`, { cwd, absolute: true });
@@ -75,7 +76,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
       })
     );
 
-    return await Promise.all(
+    return await allSettledButFailure(
       resolvedPaths
         .flat()
         .filter((file) => file.endsWith('package.json') && !file.includes('node_modules'))

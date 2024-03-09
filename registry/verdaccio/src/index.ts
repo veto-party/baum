@@ -72,7 +72,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     const port = await this.initStep.getPort();
 
     if (this.doInstall) {
-      this.initStep.addExecutionStep('modify_npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}`));
+      this.initStep.addExecutionStep('modify_npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`));
       this.initStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().ci()));
     }
 
@@ -81,6 +81,12 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
     await this.prepareExecution();
+    await this.initStep.execute(workspace, pm, root)
     await super.startExecution(workspace, pm, root);
+  }
+
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    await super.clean(workspace, packageManager, rootDirectory);
+    await this.initStep.clean(workspace, packageManager, rootDirectory);
   }
 }
