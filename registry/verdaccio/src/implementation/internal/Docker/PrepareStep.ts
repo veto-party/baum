@@ -9,17 +9,16 @@ import { fileURLToPath } from 'url';
 import Crypto from 'crypto';
 import { DockerBuildStep } from '@veto-party/baum__steps__docker';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.dirname(__filename);
+const __rootDir = Path.dirname(fileURLToPath(import.meta.resolve('@veto-party/baum__registry__verdaccio/package.json')));
 
-const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...[absolute ? __dirname : undefined, 'configuration', Crypto.createHash('sha256').update(packageName).digest().toString('hex'), 'config.yaml'].filter((value): value is string => typeof value === 'string'));
+const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...[absolute ? __rootDir : undefined, 'configuration', Crypto.createHash('sha256').update(packageName).digest().toString('hex'), 'config.yaml'].filter((value): value is string => typeof value === 'string'));
 
 @RunOnce()
 export class PrepareStep extends DockerBuildStep {
   private cwd: string;
 
   constructor(name: string, cwd: string) {
-    super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __dirname);
+    super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __rootDir);
     this.cwd = cwd;
   }
 
@@ -39,7 +38,7 @@ export class PrepareStep extends DockerBuildStep {
       return prev;
     }, []);
 
-    const base = await FileSystem.readFile(Path.join(__dirname, 'configuration', 'base.config.yaml'));
+    const base = await FileSystem.readFile(Path.join(__rootDir, 'base.config.yaml'));
     const config = yaml.parse(base.toString());
 
     config.storage = '/storage/storage';

@@ -3,7 +3,9 @@
     "type": "module",
     "main": "./src/index.ts",
     "files": [
-        "./dist/**"
+        "./dist/**",
+        "./base.config.yaml",
+        "./Dockerfile"
     ],
     "scripts": {
         "build": "tsc"
