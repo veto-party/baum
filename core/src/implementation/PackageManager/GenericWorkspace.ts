@@ -5,8 +5,9 @@ import { GenericDependent } from './GenericDependent.js';
 export class GenericWorkspace implements IWorkspace {
   constructor(
     private directory: string,
-    private pkgFile: any
-  ) {}
+    private pkgFile: any,
+    private checkForExternal: (version: string) => boolean
+  ) { }
 
   getName(): string {
     return this.pkgFile.name;
@@ -23,16 +24,16 @@ export class GenericWorkspace implements IWorkspace {
   getDynamicDependents(): IDependent[] {
     const dependents = [
       Object.entries(this.pkgFile.dependencies ?? {})
-        .filter(([, version]) => version === '*')
+        .filter(([, version]) => this.checkForExternal(version as string))
         .map(([name, version]) => new GenericDependent(name, version as string)),
       Object.entries(this.pkgFile.devDependencies ?? {})
-        .filter(([, version]) => version === '*')
+        .filter(([, version]) => this.checkForExternal(version as string))
         .map(([name, version]) => new GenericDependent(name, version as string)),
       Object.entries(this.pkgFile.optionalDependencies ?? {})
-        .filter(([, version]) => version === '*')
+        .filter(([, version]) => this.checkForExternal(version as string))
         .map(([name, version]) => new GenericDependent(name, version as string)),
       Object.entries(this.pkgFile.peerDependencies ?? {})
-        .filter(([, version]) => version === '*')
+        .filter(([, version]) => this.checkForExternal(version as string))
         .map(([name, version]) => new GenericDependent(name, version as string))
     ].flat();
 
