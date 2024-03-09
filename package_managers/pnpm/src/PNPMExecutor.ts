@@ -5,7 +5,7 @@ const ifSet = (variableName: string, templateStr: string) => `<%- ${variableName
 
 const raw_commands: Record<keyof callbackArgs, string> = {
   command: `pnpm dlx <%= package %><%= command %> ${ifSet('parameters', '-- <%= parameters %>')}`,
-  install: 'pnpm <%= type === "ci" ? "install --frozen-lockfile" : type %>',
+  install: 'pnpm <%= type === "ci" ? "install --no-frozen-lockfile" : type %>',
   publish: `pnpm publish --no-git-checks ${ifSet('registry', '--registry=<%= registry %>')} ${ifSet('access', 'access=<%= access %>')}`,
   run: `pnpm run <%= command %> ${ifSet('parameters', '<%= parameters %>')}`
 };
