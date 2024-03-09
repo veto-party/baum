@@ -1,1 +1,23 @@
-{"name":"@veto-party/baum","private":true,"version":"1.0.0","type":"module","description":"Tree shaking and building for monorepos","scripts":{"run-publish":"baum"},"devDependencies":{"@biomejs/biome":"1.5.3","baum":"*","@veto-party/baum__package_manager__npm":"*"}}
+{
+    "name": "@veto-party/baum",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "description": "Tree shaking and building for monorepos",
+    "workspaces": [
+        "cli",
+        "config",
+        "core",
+        "package-managers/*",
+        "registry/*",
+        "steps/*"
+    ],
+    "scripts": {
+        "run-publish": "baum"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.5.3",
+        "baum": "*",
+        "@veto-party/baum__package_manager__npm": "*"
+    }
+}

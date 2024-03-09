@@ -21,7 +21,7 @@ else {
     env: {
       ...process.env,
       TS_NODE_PROJECT: __dirname,
-      NODE_OPTIONS: [process.env.NODE_OPTIONS, '--loader ts-node/esm', '--trace-uncaught'].filter((item) => !!item).join(' ')
+      NODE_OPTIONS: [process.env.NODE_OPTIONS, '--loader ts-node/esm', '--trace-uncaught', '--trace-warnings'].filter((item) => !!item).join(' ')
     },
     windowsHide: true
   });

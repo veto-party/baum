@@ -22,7 +22,7 @@ class InitStep extends GroupStep {
 
     this.addExecutionStep('prepare', new PrepareStep(hash, root));
     this.addExecutionStep('startup', new StartupStep(hash, (await this.getPort()).toString(), root));
-    super.execute(workspace, packageManager, root);
+    await super.execute(workspace, packageManager, root);
   }
 }
 
