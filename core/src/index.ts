@@ -20,3 +20,6 @@ export { BaumManager } from './implementation/BaumManager/BaumManager.js';
 export { ParallelStep } from './implementation/Step/ParallelStep.js';
 export { PKGMStep } from './implementation/Step/PKGMStep.js';
 export { GroupStep } from './implementation/Step/GroupStep.js';
+
+export { GenericDependent } from './implementation/PackageManager/GenericDependent.js';
+export { GenericWorkspace } from './implementation/PackageManager/GenericWorkspace.js';

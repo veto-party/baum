@@ -2,13 +2,12 @@ import Crypto from 'crypto';
 import OldFileSystem from 'fs';
 import OS from 'node:os';
 import Path from 'path';
-import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import shelljs from 'shelljs';
 import { NPMExecutor } from './NPMExecutor.js';
-import { NPMWorkspace } from './NPMWorkspace.js';
 
 const { exec } = shelljs;
 
@@ -80,7 +79,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
         .map<Promise<IWorkspace>>(async (path) => {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
-          return new NPMWorkspace(path, packageJson);
+          return new GenericWorkspace(path, packageJson);
         })
     );
   }

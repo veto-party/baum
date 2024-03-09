@@ -1,15 +1,11 @@
 import OldFileSystem from 'fs';
 import Path from 'path';
-import { CachedFN, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { IExecutablePackageManagerParser } from '@veto-party/baum__core/src/interface/PackageManager/executor/IPackageManagerParser.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
-import shelljs from 'shelljs';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
-import { PNPMWorkspace } from './PNPMWorkspace.js';
-
-const { exec } = shelljs;
 
 export class PNPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -75,7 +71,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
           const packageJsonFile = await FileSystem.readFile(Path.join(path, 'package.json'));
           const packageJson = JSON.parse(packageJsonFile.toString());
 
-          return new PNPMWorkspace(path, packageJson);
+          return new GenericWorkspace(path, packageJson);
         })
     );
   }
