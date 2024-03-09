@@ -20,77 +20,53 @@ export class CopyStep implements IStep {
     private keepFiles = true
   ) { }
 
-  private filesThatGotCopied = new Map<IWorkspace, Record<string, string[]>>();
-
-  private async doOrderFiles(workspace: IWorkspace, files: string[]) {
-    await allSettledButFailure(
-      files.map(async (source) => {
-        const destination = typeof this.to === 'function' ? this.to(workspace, source) : this.to;
-
-        if (!this.keepFiles) {
-          const entry = ensureMapEntry(this.filesThatGotCopied, workspace, {});
-          entry[destination] ??= [];
-
-          const fileSources = (await FileSystem.stat(source)).isDirectory() ? await globby(Path.join(source, '**', '*')) : [source];
-
-          if (
-            await FileSystem.stat(destination).then(
-              (stats) => stats.isDirectory(),
-              () => false
-            )
-          ) {
-            entry[destination].push(...fileSources.map((fileSource) => Path.join(destination, fileSource)));
-          } else {
-            entry[destination].push(destination);
-          }
-        }
-
-        await FileSystem.cp(source, destination);
-      })
-    );
-  }
+  private filesThatGotCopied = new Map<IWorkspace, string[]>();
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const from = typeof this.from === 'function' ? this.from(workspace, packageManager, rootDirectory) : this.from;
     await allSettledButFailure([from].flat().map((source) => this.doExecute(source, workspace)));
   }
 
+  private async doCopy(file: string, workspace: IWorkspace) {
+    const entry = ensureMapEntry(this.filesThatGotCopied, workspace, []);
+
+    let to = typeof this.to === 'function' ? this.to(workspace, file) : this.to;
+    to = Path.isAbsolute(to) ? to : Path.join(workspace.getDirectory(), to);
+
+    await FileSystem.copyFile(file, to);
+
+    if (!this.keepFiles) {
+      entry.push(to);
+    }
+  }
+
   private async doExecute(from: string, workspace: IWorkspace) {
 
-    try {
-      const isFile = await FileSystem.stat(from).then((stats) => stats.isFile(), () => false);
-      if (isFile) {
-        await this.doOrderFiles(workspace, [from]);
-      }
-    } catch (error) {
-      throw new Error(`Source directory ${from} does not exist.`);
+    from = Path.isAbsolute(from) ? from : Path.join(workspace.getDirectory(), from);
+
+    const stats = await FileSystem.stat(from);
+    if (stats.isFile()) {
+      this.doCopy(from, workspace)
     }
 
-    if (from.includes('*')) {
-      const files = await globby(from, {
+    if (stats.isDirectory()) {
+      const files = await globby(Path.join(from, '**', '*'), {
         absolute: true,
-        cwd: workspace.getDirectory()
+        cwd: workspace.getDirectory(),
+        onlyFiles: true
       });
 
-      await this.doOrderFiles(workspace, files);
-      return;
+      await allSettledButFailure(files.map((file) => this.doCopy(file, workspace)));
     }
 
-    const source = Path.isAbsolute(from) ? from : Path.join(workspace.getDirectory(), from);
-
-    if ((await FileSystem.stat(source)).isDirectory()) {
-      await this.doOrderFiles(workspace, await globby(Path.join(source, '**', '*')));
-      return;
-    }
-
-    await this.doOrderFiles(workspace, [source]);
+    throw new Error("Unkown FileSystem.stat response.");
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.keepFiles) {
       await allSettledButFailure(
-        Object.entries(ensureMapEntry(this.filesThatGotCopied, workspace, {})).map(async ([, files]) => {
-          await allSettledButFailure(files.map((file) => FileSystem.rm(file)));
+        ensureMapEntry(this.filesThatGotCopied, workspace, []).map(async (file) => {
+          await FileSystem.rm(file);
         })
       );
     }
