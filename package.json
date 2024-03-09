@@ -4,17 +4,17 @@
     "version": "1.0.0",
     "type": "module",
     "description": "Tree shaking and building for monorepos",
-    "workspaces": [
-        "cli",
-        "config",
-        "core",
-        "package-managers/*",
-        "registry/*",
-        "steps/*"
-    ],
     "scripts": {
         "run-publish": "baum"
     },
+    "workspaces": [
+        "config",
+        "core",
+        "cli",
+        "package_managers/*",
+        "registry/*",
+        "steps/*"
+    ],
     "devDependencies": {
         "@biomejs/biome": "1.5.3",
         "baum": "*",
