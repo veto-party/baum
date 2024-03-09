@@ -2,7 +2,6 @@ import Path from 'path';
 import { fileURLToPath } from 'url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import { GroupStep, IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
-import { CopyStep } from './core/src/implementation/Step/CopyStep.js';
 import { PublicRegistryStep } from './registry/public/src/index.js';
 import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
 import { IVersionManager } from '@veto-party/baum__registry';
@@ -17,6 +16,8 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setRootDirectory(__dirname);
 
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
+
+  const commonStep = new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))]);
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
     baum.addExecutionStep(
@@ -35,9 +36,9 @@ export default async (baum: IBaumManagerConfiguration) => {
           json.bugs = "https://github.com/veto-party/baum/issues";
           json.homepage = "https://github.com/veto-party/baum#readme";
         }
-      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN).addInstallStep()
+      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN).addInstallStep().addExecutionStep("prepare", commonStep)
     );
   } else if (!process.env.CI) {
-    baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep().addExecutionStep("prepare", new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))])));
+    baum.addExecutionStep('publish', new VerdaccioRegistryStep(version).addInstallStep().addExecutionStep("prepare", commonStep));
   }
 };
