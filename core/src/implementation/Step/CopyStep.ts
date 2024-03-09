@@ -46,7 +46,8 @@ export class CopyStep implements IStep {
 
     const stats = await FileSystem.stat(from);
     if (stats.isFile()) {
-      this.doCopy(from, workspace)
+      await this.doCopy(from, workspace);
+      return;
     }
 
     if (stats.isDirectory()) {
@@ -57,6 +58,7 @@ export class CopyStep implements IStep {
       });
 
       await allSettledButFailure(files.map((file) => this.doCopy(file, workspace)));
+      return;
     }
 
     throw new Error("Unkown FileSystem.stat response.");
