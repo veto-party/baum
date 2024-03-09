@@ -7,8 +7,7 @@ import { CopyStep } from '../../../../CopyStep.js';
 import { AIntent } from '../AIntent.js';
 
 const installIntentValidation = zod.object({
-  type: zod.string(),
-  keepLockFileFlag: zod.boolean()
+  type: zod.string()
 });
 
 class InstallIntent extends AIntent<[string]> implements IInstallIntent {
@@ -17,34 +16,29 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
 
   constructor(
     private type?: string,
-    private keepLockFileFlag = true
   ) {
     super();
-  }
-
-  keepLockFile(keep: boolean): IInstallIntent {
-    return new InstallIntent(this.type, keep);
   }
 
   /**
    * @inheritdoc
    */
   ci(): IInstallIntent {
-    return new InstallIntent('ci', this.keepLockFileFlag);
+    return new InstallIntent('ci');
   }
 
   /**
    * @inheritdoc
    */
   install(): IInstallIntent {
-    return new InstallIntent('install', this.keepLockFileFlag);
+    return new InstallIntent('install');
   }
 
   /**
    * @inheritdoc
    */
   rebuild(): IInstallIntent {
-    return new InstallIntent('rebuild', this.keepLockFileFlag);
+    return new InstallIntent('rebuild');
   }
 
   /**
@@ -64,17 +58,6 @@ class InstallIntent extends AIntent<[string]> implements IInstallIntent {
       (workspace, file) => Path.join(workspace.getDirectory(), Path.basename(file)),
       false
     );
-
-    if (this.keepLockFileFlag) {
-      return new ParallelStep([
-        npmRCCopy,
-        new CopyStep(
-          (_, pm, root) => [Path.join(root, pm.getLockFileName())],
-          (workspace, filename) => Path.join(Path.resolve(workspace.getDirectory()), Path.basename(filename)),
-          false
-        )
-      ]);
-    }
 
     return npmRCCopy;
   };

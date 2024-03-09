@@ -90,13 +90,6 @@ export interface IInstallIntent extends IExecutionIntent {
   readonly name: 'install';
 
   /**
-   * Keep the lockfile from the root of the workspace to lock all versions properly?
-   *
-   * @param keep
-   */
-  keepLockFile(keep: boolean): IInstallIntent;
-
-  /**
    * Installs with a frozen lockfile.
    */
   ci(): IInstallIntent;

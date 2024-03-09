@@ -42,7 +42,7 @@ export class PNPMExecutor extends ATemplateExecutor {
 
           private async awaitBlock() {
 
-            const currentNo = blockNumberCounter++;
+            const currentNo = ++blockNumberCounter;
 
             while (blockNumber < currentNo) {
               if (blockPromise) {
@@ -66,12 +66,14 @@ export class PNPMExecutor extends ATemplateExecutor {
             await this.awaitBlock();
             blockPromise = step.execute(workspace, packageManager, rootDirectory);
             await this.awaitBlockCycle();
+            blockNumber++;
           }
 
           async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
             await this.awaitBlock();
             blockPromise = step.clean(workspace, packageManager, rootDirectory);
             await this.awaitBlockCycle();
+            blockNumber++;
           }
         }
       }
