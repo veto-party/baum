@@ -51,12 +51,23 @@ export class CopyStep implements IStep {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (typeof this.from === 'function') {
-      return this.doOrderFiles(workspace, this.from(workspace, packageManager, rootDirectory));
+    const from = typeof this.from === 'function' ? this.from(workspace, packageManager, rootDirectory) : this.from;
+    await allSettledButFailure([from].flat().map((source) => this.doExecute(source, workspace)));
+  }
+
+  private async doExecute(from: string, workspace: IWorkspace) {
+
+    try {
+      const isFile = await FileSystem.stat(from).then((stats) => stats.isFile(), () => false);
+      if (isFile) {
+        await this.doOrderFiles(workspace, [from]);
+      }
+    } catch (error) {
+      throw new Error(`Source directory ${from} does not exist.`);
     }
 
-    if (this.from.includes('*')) {
-      const files = await globby(this.from, {
+    if (from.includes('*')) {
+      const files = await globby(from, {
         absolute: true,
         cwd: workspace.getDirectory()
       });
@@ -65,7 +76,7 @@ export class CopyStep implements IStep {
       return;
     }
 
-    const source = Path.isAbsolute(this.from) ? this.from : Path.join(workspace.getDirectory(), this.from);
+    const source = Path.isAbsolute(from) ? from : Path.join(workspace.getDirectory(), from);
 
     if ((await FileSystem.stat(source)).isDirectory()) {
       await this.doOrderFiles(workspace, await globby(Path.join(source, '**', '*')));
