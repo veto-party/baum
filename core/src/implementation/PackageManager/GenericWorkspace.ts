@@ -6,7 +6,7 @@ export class GenericWorkspace implements IWorkspace {
   constructor(
     private directory: string,
     private pkgFile: any,
-    private checkForExternal: (version: string) => boolean
+    private checkForExternal: (version: string) => string | false | undefined
   ) { }
 
   getName(): string {
@@ -24,17 +24,21 @@ export class GenericWorkspace implements IWorkspace {
   getDynamicDependents(): IDependent[] {
     const dependents = [
       Object.entries(this.pkgFile.dependencies ?? {})
-        .filter(([, version]) => this.checkForExternal(version as string))
-        .map(([name, version]) => new GenericDependent(name, version as string)),
+        .map(([name, version]) => [name, this.checkForExternal(version as string)] as const)
+        .filter((pkg): pkg is [string, string] => typeof pkg[1] === "string")
+        .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.devDependencies ?? {})
-        .filter(([, version]) => this.checkForExternal(version as string))
-        .map(([name, version]) => new GenericDependent(name, version as string)),
+        .map(([name, version]) => [name, this.checkForExternal(version as string)] as const)
+        .filter((pkg): pkg is [string, string] => typeof pkg[1] === "string")
+        .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.optionalDependencies ?? {})
-        .filter(([, version]) => this.checkForExternal(version as string))
-        .map(([name, version]) => new GenericDependent(name, version as string)),
+        .map(([name, version]) => [name, this.checkForExternal(version as string)] as const)
+        .filter((pkg): pkg is [string, string] => typeof pkg[1] === "string")
+        .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.peerDependencies ?? {})
-        .filter(([, version]) => this.checkForExternal(version as string))
-        .map(([name, version]) => new GenericDependent(name, version as string))
+        .map(([name, version]) => [name, this.checkForExternal(version as string)] as const)
+        .filter((pkg): pkg is [string, string] => typeof pkg[1] === "string")
+        .map(([name, version]) => new GenericDependent(name, version))
     ].flat();
 
     return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`);
