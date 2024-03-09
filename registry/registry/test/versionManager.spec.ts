@@ -1,7 +1,6 @@
 import { IPackageManager, IWorkspace } from "@veto-party/baum__core";
-import { GenericVersionManager, VersionManagerVersionOverride } from "../dist/index.js";
+import { VersionManagerVersionOverride } from "../src/index.js";
 import IWorkspaceMock from "./mock/IWorkspaceMock.js";
-import { Stream } from "stream";
 import IDependentMock from "./mock/IDependentMock.js";
 
 describe('VersionManager tests', () => {
@@ -15,7 +14,7 @@ describe('VersionManager tests', () => {
             ...dependingVerions,
             ...baseVersions
         ], new class implements IPackageManager {
-            getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream | undefined> {
+            getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<any> {
                 throw new Error("Method not implemented.");
             }
             getLockFileName(): string {
