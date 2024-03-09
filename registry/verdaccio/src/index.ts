@@ -1,5 +1,5 @@
 import Crypto from 'crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace, PKGMStep, IStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride, IVersionManager } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
@@ -38,7 +38,7 @@ class InitStep extends GroupStep {
 }
 
 export class VerdaccioRegistryStep extends ARegistryStep {
-  private publishStep?: PKGMStep;
+  private publishStep?: IStep;
   private initStep: InitStep;
 
   private doInstall = false;
@@ -62,7 +62,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     delete json.private;
   }
 
-  getPublishStep(): PKGMStep | undefined {
+  getPublishStep(): IStep | undefined {
     return this.publishStep;
   }
 
@@ -71,12 +71,16 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     const port = await this.initStep.getPort();
 
     if (this.doInstall) {
-      this.initStep.addExecutionStep('modify_npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`));
-      // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
-      this.initStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().install()));
-    }
+      this.publishStep = new GroupStep([
+        new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
+        // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
+        new PKGMStep((intent) => intent.install().install()),
+        new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'))
+      ]);
+    } else {
+      this.publishStep ??= new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
 
-    this.publishStep = new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
+    }
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {

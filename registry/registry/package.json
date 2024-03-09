@@ -6,13 +6,16 @@
         "./dist/**"
     ],
     "scripts": {
-        "build": "tsc"
+        "build": "tsc --project ./build.tsconfig.json",
+        "test": "vitest run",
+        "test@watch": "vitest"
     },
     "dependencies": {
         "@veto-party/baum__core": "*"
     },
     "devDependencies": {
         "typescript": "^5.4.2",
-        "@veto-party/config": "*"
+        "@veto-party/config": "*",
+        "vitest": "^1.3.1"
     }
 }
