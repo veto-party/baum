@@ -12,6 +12,9 @@ const installIntentValidation = zod.object({
 });
 
 class InstallIntent extends AIntent<[string]> implements IInstallIntent {
+
+  readonly name = 'install';
+
   constructor(
     private type?: string,
     private keepLockFileFlag = true

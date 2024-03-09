@@ -11,6 +11,9 @@ const publishIntentValidation = zod.object({
 });
 
 class PublishIntent extends AIntent<[string] | [string, 'public']> implements IPublishIntent {
+
+  readonly name = 'publish';
+
   constructor(
     private registry?: string,
     private token?: string,

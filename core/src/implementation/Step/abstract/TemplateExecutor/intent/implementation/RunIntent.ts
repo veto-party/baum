@@ -9,6 +9,9 @@ const runIntentValidator = zod.object({
 });
 
 class RunIntent extends AIntent<[string] | [string, string]> implements IRunIntent {
+
+  readonly name = 'run';
+
   constructor(
     private successCodes: number[] = [0],
     private step?: string,
