@@ -1,34 +1,10 @@
-import { IExecutablePackageManager, IStep, IWorkspace, ModifyNPMRC } from '@veto-party/baum__core';
+import { ModifyNPMRC } from '@veto-party/baum__core';
 
-export class NPMRCForSpecifiedRegistryStep implements IStep {
-  constructor(private registry: string) { }
-
-  private workspaceToStep: Map<IWorkspace, IStep> = new Map();
-
-  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (!this.workspaceToStep.has(workspace)) {
-      const dependents = workspace.getDynamicDependents().filter((dependent) => dependent.getName().startsWith('@') && dependent.getName().includes('/'));
-      debugger;
-      if (dependents.length > 0) {
-        this.workspaceToStep.set(
-          workspace,
-          new ModifyNPMRC(
-            dependents.reduce(
-              (prev, current) => `
-${prev}
-${current.getName().substring(0, current.getName().indexOf('/'))}:registry=${this.registry}
-
-          `,
-              ''
-            )
-          )
-        );
-      }
-    }
-
-    return this.workspaceToStep.get(workspace)?.execute(workspace, packageManager, rootDirectory);
-  }
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    return this.workspaceToStep.get(workspace)?.clean(workspace, packageManager, rootDirectory);
+export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
+  constructor(private registry: string) {
+    super(async (workspace, pm, root) => {
+      const packages = await pm.readWorkspace(root);
+      return workspace.getDynamicDependents().map((dependent) => dependent.getName().includes("/") && packages.some((givenPackage) => givenPackage.getName() === dependent.getName()) ? `${dependent.getName().substring(0, dependent.getName().indexOf("/"))}:registry=${this.registry}` : '').filter(Boolean).join("\n");
+    })
   }
 }
