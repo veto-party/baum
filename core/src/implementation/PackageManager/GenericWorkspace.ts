@@ -29,24 +29,24 @@ export class GenericWorkspace implements IWorkspace {
   getDynamicDependents(): IDependent[] {
     const dependents = [
       Object.entries(this.pkgFile.dependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string)] as const)
+        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
         .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
         .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.devDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string)] as const)
+        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
         .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
         .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.optionalDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string)] as const)
+        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
         .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
         .map(([name, version]) => new GenericDependent(name, version)),
       Object.entries(this.pkgFile.peerDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string)] as const)
+        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
         .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
         .map(([name, version]) => new GenericDependent(name, version))
     ].flat();
 
-    return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`);
+    return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`).filter((dependent) => !dependent.getVersion().startsWith("file:"));
   }
 
   getScriptNames(): string[] {

@@ -50,7 +50,7 @@ export class GenericVersionManager implements IVersionManager {
         return this.getLatestVersionFor(name, foundVersion?.getVersion());
       }
 
-      throw new Error('Invalid dependency.');
+      return undefined;
     }
 
     return version;

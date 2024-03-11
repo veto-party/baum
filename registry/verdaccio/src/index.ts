@@ -73,7 +73,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     if (this.doInstall) {
       this.publishStep ??= new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
-        new ModifyNPMRC([
+        new ModifyNPMRC("\n" + [
           `${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`,
           `${url.toString().substring(url.protocol.length)}:always-auth=true`
         ].join('\n')),

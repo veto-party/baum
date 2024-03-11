@@ -1,7 +1,8 @@
 import * as semver from 'semver';
 import { IDependent, IPackageManager, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
+import { IExecutablePackageManager } from '../../../index.js';
 
-export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IWorkspace[][] => {
+export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm: IExecutablePackageManager): IWorkspace[][] => {
   let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
 
   const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
@@ -19,7 +20,8 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
       workspace.getVersion(),
       workspace,
       workspace.getDynamicDependents().filter((depdent) => workspaces.some((workspace) => workspace.getName() === depdent.getName())).map((dependent) => {
-        return [dependent.getVersion(), dependent];
+        const resolvedVersion = pm.modifyToRealVersionValue(dependent.getVersion());
+        return [resolvedVersion || dependent.getVersion(), dependent];
       }),
       index
     ]);
@@ -35,7 +37,20 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
         return false;
       }
 
-      return dependencyMapping[dependent.getName()].some(([version]) => semver.satisfies(dependent.getVersion() === '*' ? '0.0.0' : dependent.getVersion(), version));
+
+      const realVersion = pm.modifyToRealVersionValue(dependent.getVersion()) || dependent.getVersion();
+
+      if (realVersion === "*") {
+        return true;
+      }
+
+      return dependencyMapping[dependent.getName()].some(([version]) => {
+        try {
+          return semver.satisfies(realVersion, version) || semver.eq(realVersion, version);
+        } catch (error) {
+          return semver.satisfies(version, realVersion) || realVersion === version;
+        }
+      });
     });
   });
 
@@ -69,7 +84,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[]): IW
           }
 
           const arr = dependencyMapping[dependent.getName()] ?? [];
-          return semver.satisfies(ver, dependency.getVersion()) && index <= arr.length - 2 && !semver.satisfies(arr[index + 1][0], dependency.getVersion());
+          return semver.satisfies(ver, dependency.getVersion()) && !(index > arr.length - 2 || semver.satisfies(ver, arr[index + 1][1].getVersion()));
         });
 
         if (newDeps.length === 0) {
