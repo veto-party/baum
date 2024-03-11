@@ -85,8 +85,8 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     try {
       await this.doClean(workspace);
     } finally {
-      await this.collection.clean(workspace, packageManager, rootDirectory);
       await this.getPublishStep()?.clean(workspace, packageManager, rootDirectory);
+      await this.collection.clean(workspace, packageManager, rootDirectory);
     }
   }
 }
