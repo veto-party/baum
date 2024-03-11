@@ -35,13 +35,15 @@ export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
         const resolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
 
         const resolvedPackage = mappedPackages[currentDependent.getName()].findLast((workspace, index) => {
-          const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) === "*" ? `${index}.0.0` : pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
-          return semver.satisfies(resolvedVersion, workspaceVersion);
+          const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) === "*" ? `0.0.0` : pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
+          return semver.satisfies(workspaceVersion, resolvedVersion);
         });
 
         if (!resolvedPackage) {
           continue;
         }
+
+        checkedDependents[dependentToKey(currentDependent)] = currentDependent;
 
         allDependentsToParse.push(...resolvedPackage.getDynamicDependents());
 

@@ -90,7 +90,6 @@ export class NPMPackageManager implements IExecutablePackageManager {
 
   @CachedFN(true)
   async readWorkspace(rootDirectory: string) {
-    debugger;
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package.json'));
     const content = JSON.parse(file.toString());
 
