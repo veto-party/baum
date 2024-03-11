@@ -65,10 +65,10 @@ export class NPMPackageManager implements IExecutablePackageManager {
     const resolvedPaths = await allSettledButFailure(
       workspacePaths.map((path) => {
         if (path.endsWith('/*')) {
-          return globby(`${path}/package.json`, { cwd, absolute: true });
+          return globby(Path.join(`${path}*`, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
-        return globby(path, { cwd, absolute: true });
+        return globby(path, { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
       })
     );
 
