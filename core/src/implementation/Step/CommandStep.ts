@@ -2,6 +2,7 @@ import Path from 'path';
 import shelljs from 'shelljs';
 import { IStep, IWorkspace } from '../../index.js';
 import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import OS from 'os';
 
 const { exec } = shelljs;
 
@@ -27,6 +28,13 @@ class CommandStep implements IStep {
     delete current.npm_command;
     delete current.npm_package_name;
     delete current.npm_package_json;
+
+    // TODO: Improve this (for solaris)? (if required)
+    if (current.PATH) {
+      const environmentVarSeparator = OS.platform() === 'win32' ? ';' : ':';
+      current.PATH = current.PATH.split(environmentVarSeparator).filter((path) => !path.endsWith(Path.join('node_modules', '.bin'))).join(environmentVarSeparator);
+    }
+
 
     return current;
   }
