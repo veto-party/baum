@@ -74,6 +74,8 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
     const url = new URL(`${this.dockerAddress}:${port}`);
 
+    const basePublish = new PKGMStep((intent, workspace) => !this.checkForPublish(workspace) ? [] : intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
+
     if (this.doInstall) {
       this.publishStep ??= new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
@@ -83,10 +85,10 @@ export class VerdaccioRegistryStep extends ARegistryStep {
         ].join('\n')),
         // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
         new PKGMStep((intent) => intent.install().install()),
-        new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'))
+        basePublish
       ]);
     } else {
-      this.publishStep ??= new PKGMStep((intent, workspace) => !this.checkForPublish(workspace) ? [] : intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
+      this.publishStep ??= basePublish;
     }
   }
 
