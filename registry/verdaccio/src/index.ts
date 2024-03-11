@@ -54,6 +54,10 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     return this;
   }
 
+  checkForPublish(workspace: IWorkspace) {
+    return true;
+  }
+
   async modifyJSON(json: any, versionManager: IVersionManager) {
     await super.modifyJSON(json, versionManager);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
@@ -82,7 +86,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
         new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'))
       ]);
     } else {
-      this.publishStep ??= new PKGMStep((intent) => intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
+      this.publishStep ??= new PKGMStep((intent, workspace) => !this.checkForPublish(workspace) ? [] : intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
     }
   }
 
