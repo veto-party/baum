@@ -72,9 +72,6 @@ export class NPMPackageManager implements IExecutablePackageManager {
       })
     );
 
-
-    console.log(resolvedPaths);
-
     return await allSettledButFailure(
       resolvedPaths
         .flat()

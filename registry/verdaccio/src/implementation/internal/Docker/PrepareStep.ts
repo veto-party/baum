@@ -18,7 +18,6 @@ export class PrepareStep extends DockerBuildStep {
   private cwd: string;
 
   constructor(name: string, cwd: string) {
-    console.log(newConfigPath(cwd, false));
     super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __rootDir);
     this.cwd = cwd;
   }
