@@ -10,7 +10,7 @@ class CommandStep implements IStep {
     private command: string,
     private cwdAddition: string | undefined,
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
-  ) {}
+  ) { }
 
   protected getCleanEnv() {
     const current = {
@@ -24,6 +24,9 @@ class CommandStep implements IStep {
     delete current.INIT_CWD;
     delete current.TS_NODE_PROJECT;
     delete current.npm_config_user_agent;
+    delete current.npm_command;
+    delete current.npm_package_name;
+    delete current.npm_package_json;
 
     return current;
   }
