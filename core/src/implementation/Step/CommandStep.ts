@@ -29,10 +29,16 @@ class CommandStep implements IStep {
     delete current.npm_package_name;
     delete current.npm_package_json;
 
+
+    const pathKeys = Object.keys(current).filter((key) => key.toLowerCase() === "path");
     // TODO: Improve this (for solaris)? (if required)
-    if (current.PATH) {
+    if (pathKeys.length > 0) {
       const environmentVarSeparator = OS.platform() === 'win32' ? ';' : ':';
-      current.PATH = current.PATH.split(environmentVarSeparator).filter((path) => !path.endsWith(Path.join('node_modules', '.bin'))).join(environmentVarSeparator);
+      const basicPathSuffix = Path.join('node_modules', '.bin');
+      const pathSuffixes = [basicPathSuffix.endsWith(Path.sep) ? basicPathSuffix.substring(0, basicPathSuffix.length - 1) : `${basicPathSuffix}${Path.sep}`, basicPathSuffix];
+      pathKeys.forEach((key) => {
+        current[key] = current[key]!.split(environmentVarSeparator).filter((path) => !pathSuffixes.some((pathSuffix) => path.endsWith(pathSuffix))).join(environmentVarSeparator);
+      })
     }
 
 
