@@ -1,5 +1,5 @@
 import Crypto from 'node:crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
@@ -58,8 +58,8 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     return true;
   }
 
-  async modifyJSON(json: any, versionManager: IVersionManager) {
-    await super.modifyJSON(json, versionManager);
+  async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
+    await super.modifyJSON(json, versionManager, workspace, pm, root);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   }

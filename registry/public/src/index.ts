@@ -1,4 +1,4 @@
-import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
+import { GroupStep, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
 export class PublicRegistryStep extends ARegistryStep {
@@ -14,8 +14,8 @@ export class PublicRegistryStep extends ARegistryStep {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
   }
 
-  async modifyJSON(json: any, versionManager: IVersionManager) {
-    await super.modifyJSON(json, versionManager);
+  async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
+    await super.modifyJSON(json, versionManager, workspace, pm, root);
     json.version = json.version ?? this.pinVersion ?? GenericVersionManager.MIN_VERSION;
     delete json.private;
   }
