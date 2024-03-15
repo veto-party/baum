@@ -1,8 +1,8 @@
 import { RunOnce } from '@veto-party/baum__core';
-import { DockerRunStep } from '@veto-party/baum__steps__docker';
+import { DockerLifecycleStep } from '@veto-party/baum__steps__docker';
 
 @RunOnce()
-export class StartupStep extends DockerRunStep {
+export class StartupStep extends DockerLifecycleStep {
   constructor(name: string, port: string, cwd: string) {
     super(
       {
