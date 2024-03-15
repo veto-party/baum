@@ -2,7 +2,7 @@ import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
-import { GroupStep, type IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
+import { GroupStep, type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
 import { PublicRegistryStep } from './registry/public/src/index.js';
 import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
 
@@ -28,8 +28,8 @@ export default async (baum: IBaumManagerConfiguration) => {
     baum.addExecutionStep(
       'publish-npm',
       new (class extends PublicRegistryStep {
-        async modifyJSON(json: any, versionManager: IVersionManager) {
-          await super.modifyJSON(json, versionManager);
+        async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
+          await super.modifyJSON(json, versionManager, workspace, pm, root);
           if (json.scripts?.build.includes('tsc')) {
             json.main = './dist/index.js';
           }
