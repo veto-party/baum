@@ -5,7 +5,7 @@
     "type": "module",
     "description": "Tree shaking and building for monorepos",
     "scripts": {
-        "run-publish": "baum"
+        "baum": "baum"
     },
     "workspaces": [
         "config",

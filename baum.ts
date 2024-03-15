@@ -15,6 +15,11 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setPackageManager(pm);
   baum.setRootDirectory(__dirname);
 
+  if (process.env.CI_TEST) {
+    baum.addExecutionStep("test", new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')));
+    return;
+  }
+
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
 
   const commonStep = new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build'))]);
