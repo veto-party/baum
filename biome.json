@@ -1,7 +1,11 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
   "files": {
-    "ignore": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*"],
+    "ignore": [
+      "**/node-modules/**/*",
+      "**/dist/**/*",
+      "**/build/**/*"
+    ],
     "ignoreUnknown": true
   },
   "organizeImports": {
@@ -31,14 +35,12 @@
       },
       "correctness": {
         "noVoidTypeReturn": "off",
-        "useExhaustiveDependencies": "off"
+        "useExhaustiveDependencies": "off",
+        "noUnusedImports": "error"
       },
       "a11y": {
         "useKeyWithClickEvents": "off",
         "noSvgWithoutTitle": "off"
-      },
-      "nursery": {
-        "noUnusedImports": "error"
       }
     }
   },
