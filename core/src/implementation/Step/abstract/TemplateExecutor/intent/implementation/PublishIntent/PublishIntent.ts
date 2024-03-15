@@ -48,7 +48,7 @@ class PublishIntent extends AIntent<[string] | [string, 'public']> implements IP
 
     const url = new URL(this.registry!);
 
-    return new ModifyNPMRC('\n' + [`${url.toString().substring(url.protocol.length)}:_authToken="${this.token}"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n'));
+    return new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="${this.token}"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`);
   };
 
   toGroup(): [string] | [string, 'public'] {

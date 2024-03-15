@@ -1,4 +1,4 @@
-import type { writeFile } from 'fs/promises';
+import type { writeFile } from 'node:fs/promises';
 
 export interface IDependent {
   getName(): string;

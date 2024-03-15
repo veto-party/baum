@@ -1,3 +1,4 @@
+import type FileSystem from 'node:fs/promises';
 import {
   GroupStep,
   type ICommandIntent,
@@ -13,7 +14,6 @@ import {
   type IWorkspace,
   type callbackArgs
 } from '@veto-party/baum__core';
-import type FileSystem from 'fs/promises';
 
 type PartialExecutorMap = { [K in keyof callbackArgs]?: IExecutablePackageManager };
 

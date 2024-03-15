@@ -1,5 +1,5 @@
-import Path from 'path';
-import { fileURLToPath } from 'url';
+import Path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { GroupStep, type IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';

@@ -1,5 +1,5 @@
-import FileSystem from 'fs';
-import Path from 'path';
+import FileSystem from 'node:fs';
+import Path from 'node:path';
 import isEqual from 'lodash.isequal';
 import uniqBy from 'lodash.uniqby';
 import { CachedFN, type IDependent, type IWorkspace } from '../../index.js';

@@ -1,6 +1,6 @@
-import SyncFileSystem from 'fs';
-import Path from 'path';
-import FileSystem from 'fs/promises';
+import SyncFileSystem from 'node:fs';
+import FileSystem from 'node:fs/promises';
+import Path from 'node:path';
 import type { IStep, IWorkspace } from '../../../../../../../index.js';
 import type { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
 

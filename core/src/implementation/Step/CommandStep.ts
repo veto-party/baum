@@ -1,5 +1,5 @@
-import OS from 'os';
-import Path from 'path';
+import OS from 'node:os';
+import Path from 'node:path';
 import shelljs from 'shelljs';
 import type { IStep, IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';

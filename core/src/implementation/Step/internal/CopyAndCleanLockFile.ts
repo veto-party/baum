@@ -1,5 +1,5 @@
-import Path from 'path';
-import FileSystem from 'fs/promises';
+import FileSystem from 'node:fs/promises';
+import Path from 'node:path';
 import type { IStep } from '../../../index.js';
 import type { IExecutablePackageManager } from '../../../interface/PackageManager/IExecutablePackageManager.js';
 import type { IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';

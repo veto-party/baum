@@ -1,6 +1,6 @@
-import Path from 'path';
+import FileSystem from 'node:fs/promises';
+import Path from 'node:path';
 import type { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IStep, IWorkspace } from '@veto-party/baum__core';
-import FileSystem from 'fs/promises';
 import type { ICollection } from '../index.js';
 import type { IVersionManager } from '../interface/IVersionManager.js';
 import { GroupCollection } from './GroupCollection.js';

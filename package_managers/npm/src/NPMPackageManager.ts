@@ -1,10 +1,10 @@
-import Crypto from 'crypto';
-import OldFileSystem from 'fs';
+import Crypto from 'node:crypto';
+import OldFileSystem from 'node:fs';
+import FileSystem from 'node:fs/promises';
 import OS from 'node:os';
-import Path from 'path';
+import Path from 'node:path';
 import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
 import { clearCacheForFN } from '@veto-party/baum__core';
-import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
 
