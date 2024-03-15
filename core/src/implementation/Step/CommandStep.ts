@@ -11,7 +11,7 @@ class CommandStep implements IStep {
     private command: string | ((workspace: IWorkspace, pm: IPackageManager, root: string) => string),
     private cwdAddition: string | undefined,
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
-  ) { }
+  ) {}
 
   protected getCleanEnv() {
     const current = {
@@ -48,7 +48,7 @@ class CommandStep implements IStep {
   execute(workspace: IWorkspace, __packageManager: IExecutablePackageManager, __rootDirectory: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       console.log(`Running command: ${JSON.stringify(this.command)} now!`);
-      const newProcess = exec(typeof this.command === "function" ? this.command(workspace, __packageManager, __rootDirectory) : this.command, {
+      const newProcess = exec(typeof this.command === 'function' ? this.command(workspace, __packageManager, __rootDirectory) : this.command, {
         async: true,
         cwd: this.cwdAddition ? (Path.isAbsolute(this.cwdAddition) ? this.cwdAddition : Path.join(workspace.getDirectory(), this.cwdAddition)) : workspace.getDirectory(),
         env: this.getCleanEnv()
