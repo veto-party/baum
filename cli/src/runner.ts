@@ -1,14 +1,14 @@
 import Path from 'node:path';
 import { BaumManager } from '@veto-party/baum__core';
-import yargs from 'yargs/yargs';
 import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs/yargs';
 
 const argv = await yargs(hideBin(process.argv)).argv;
 
 const baum = new BaumManager();
 
 let path: string;
-if (typeof argv.config === "string") {
+if (typeof argv.config === 'string') {
   path = Path.isAbsolute(argv.config) ? argv.config : Path.join(process.cwd(), argv.config);
 } else {
   path = process.cwd();

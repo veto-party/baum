@@ -2,9 +2,9 @@ import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
-import { GroupStep, type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
 import { PublicRegistryStep } from '@veto-party/baum__registry__public';
 import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
+import { GroupStep, type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.join(Path.dirname(__filename), '..');
