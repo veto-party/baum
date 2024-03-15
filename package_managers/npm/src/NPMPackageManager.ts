@@ -3,7 +3,7 @@ import OldFileSystem from 'fs';
 import OS from 'node:os';
 import Path from 'path';
 import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
-import { clearCacheForFN } from '@veto-party/baum__core/src/implementation/annotation/Cached.js';
+import { clearCacheForFN } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
