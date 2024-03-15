@@ -2,13 +2,14 @@ import Crypto from 'crypto';
 import OldFileSystem from 'fs';
 import OS from 'node:os';
 import Path from 'path';
-import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, allSettledButFailure, clearCacheForFN } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
+
   async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
     return undefined;
   }
@@ -67,6 +68,10 @@ export class PNPMPackageManager implements IExecutablePackageManager {
           return new GenericWorkspace(path, packageJson, this.modifyToRealVersionValue.bind(this));
         })
     );
+  }
+
+  clearWorkspaceCache(): void {
+    clearCacheForFN(this, 'readWorkspace');
   }
 
   @CachedFN(true)

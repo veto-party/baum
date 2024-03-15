@@ -7,7 +7,11 @@ export class HybridPackageManager implements IExecutablePackageManager {
   constructor(
     private primaryPM: IExecutablePackageManager,
     private executors: PartialExecutorMap
-  ) {}
+  ) { }
+
+  clearWorkspaceCache(): void {
+    this.primaryPM.clearWorkspaceCache();
+  }
 
   disableGlobalWorkspace(rootDirectory: string) {
     return this.primaryPM.disableGlobalWorkspace(rootDirectory);
