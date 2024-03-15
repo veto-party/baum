@@ -34,7 +34,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   abstract addInstallStep(): this;
 
-  protected async startExecution(workspace: IWorkspace, pm: IPackageManager, root: string) {
+  protected async startExecution(workspace: IWorkspace, pm: IPackageManager, root: string): Promise<boolean> {
     const givenPath = Path.join(workspace.getDirectory(), 'package.json');
     const file = (await FileSystem.readFile(givenPath)).toString();
 
@@ -61,13 +61,15 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     await this.modifyJSON?.(jsonFile, manager);
 
     await FileSystem.writeFile(givenPath, JSON.stringify(jsonFile));
+    return true;
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await this.startExecution(workspace, packageManager, rootDirectory);
-    await this.collection.execute(workspace, packageManager, rootDirectory);
-    await this.getPublishStep()?.execute(workspace, packageManager, rootDirectory);
-    await this.doClean(workspace);
+    if (await this.startExecution(workspace, packageManager, rootDirectory) === false) {
+      await this.collection.execute(workspace, packageManager, rootDirectory);
+      await this.getPublishStep()?.execute(workspace, packageManager, rootDirectory);
+      await this.doClean(workspace);
+    }
   }
 
   protected async doClean(workspace: IWorkspace) {
