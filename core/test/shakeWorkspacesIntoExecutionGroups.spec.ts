@@ -6,7 +6,6 @@ import IWorkspaceMock from './mock/IWorkspaceMock.js';
 
 import type FileSystem from 'node:fs/promises';
 
-
 const pm = new (class implements IExecutablePackageManager {
   getExecutor(): IPackageManagerExecutor {
     throw new Error('Method not implemented.');
