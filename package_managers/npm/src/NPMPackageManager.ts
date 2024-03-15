@@ -2,7 +2,8 @@ import Crypto from 'crypto';
 import OldFileSystem from 'fs';
 import OS from 'node:os';
 import Path from 'path';
-import { allSettledButFailure, CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, IExecutablePackageManagerParser } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
+import { clearCacheForFN } from '@veto-party/baum__core/src/implementation/annotation/Cached.js';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
@@ -83,6 +84,10 @@ export class NPMPackageManager implements IExecutablePackageManager {
           return new GenericWorkspace(path, packageJson, this.modifyToRealVersionValue.bind(this));
         })
     );
+  }
+
+  clearWorkspaceCache() {
+    clearCacheForFN(this, 'readWorkspace');
   }
 
   @CachedFN(true)

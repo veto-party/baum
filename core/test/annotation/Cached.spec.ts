@@ -1,9 +1,13 @@
-import { CachedFN } from '../../src/implementation/annotation/Cached.js';
+import { CachedFN, clearCacheForFN } from '../../src/implementation/annotation/Cached.js';
 
 describe('Should only run once using annotation', () => {
   it('Should be sync', () => {
     class Test {
       private counter = 0;
+
+      clear() {
+        clearCacheForFN(this, 'method');
+      }
 
       @CachedFN(false)
       method() {
@@ -15,11 +19,20 @@ describe('Should only run once using annotation', () => {
 
     expect(data.method()).toEqual(1);
     expect(data.method()).toEqual(1);
+
+    data.clear();
+
+    expect(data.method()).toEqual(2);
+    expect(data.method()).toEqual(2);
   });
 
   it('Should be async', async () => {
     class Test {
       private counter = 0;
+
+      clear() {
+        clearCacheForFN(this, 'method');
+      }
 
       @CachedFN(true)
       async method() {
@@ -36,6 +49,10 @@ describe('Should only run once using annotation', () => {
     expect(ret2).toEqual(1);
 
     expect(await data.method()).toEqual(1);
+
+    data.clear();
+    expect(await data.method()).toEqual(2);
+    expect(await data.method()).toEqual(2);
   });
 
   it('multiple instances sync', () => {
@@ -45,6 +62,10 @@ describe('Should only run once using annotation', () => {
 
       constructor(startValue: number) {
         this.counter = startValue;
+      }
+
+      clear() {
+        clearCacheForFN(this, 'method');
       }
 
       @CachedFN(false)
@@ -63,6 +84,22 @@ describe('Should only run once using annotation', () => {
     expect(data2.method()).toEqual(6);
 
     expect(data.method()).toEqual(1);
+
+    data.clear();
+
+    expect(data.method()).toEqual(2);
+    expect(data.method()).toEqual(2);
+
+    expect(data2.method()).toEqual(6);
+    expect(data2.method()).toEqual(6);
+
+    data2.clear();
+
+    expect(data.method()).toEqual(2);
+    expect(data.method()).toEqual(2);
+
+    expect(data2.method()).toEqual(7);
+    expect(data2.method()).toEqual(7);
   });
 
   it('multiple instances sync', async () => {
@@ -72,6 +109,10 @@ describe('Should only run once using annotation', () => {
 
       constructor(startValue: number) {
         this.counter = startValue;
+      }
+
+      clear() {
+        clearCacheForFN(this, 'method');
       }
 
       @CachedFN(true)
@@ -91,5 +132,17 @@ describe('Should only run once using annotation', () => {
     expect(await data2.method()).toEqual(6);
 
     expect(await data.method()).toEqual(1);
+
+    data.clear();
+    data2.clear();
+
+    expect(await data.method()).toEqual(2);
+    expect(await data.method()).toEqual(2);
+
+    expect(await data2.method()).toEqual(7);
+    expect(await data2.method()).toEqual(7);
+
+    expect(await data.method()).toEqual(2);
+
   });
 });

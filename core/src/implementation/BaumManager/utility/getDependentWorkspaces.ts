@@ -1,8 +1,7 @@
 import semver from 'semver';
 import { IDependent, IPackageManager, IWorkspace } from "../../../index.js";
 
-export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace[], pm: IPackageManager) => {
-    const dependents = workspace.getDynamicDependents();
+export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace[], pm: IPackageManager, getPackagesFor: (workspace: IWorkspace) => IDependent[] = () => workspace.getDynamicDependents()) => {
 
     const mappedPackages = others.reduce<Record<string, IWorkspace[]>>((previous, aPackage) => {
         previous[aPackage.getName()] ??= [];
@@ -42,7 +41,7 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
         }
 
         checkedDependents[dependentToKey(currentDependent)] = resolvedPackage;
-        allDependentsToParse.push(...resolvedPackage.getDynamicDependents());
+        allDependentsToParse.push(...getPackagesFor(resolvedPackage));
     }
 
     return Object.values(checkedDependents);

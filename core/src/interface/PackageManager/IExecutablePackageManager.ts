@@ -19,4 +19,5 @@ export interface IWorkspace {
 export interface IExecutablePackageManager extends IPackageManager {
   getExecutor(): IPackageManagerExecutor;
   getExecutorParser(): IExecutablePackageManagerParser;
+  clearWorkspaceCache(): void;
 }
