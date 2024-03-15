@@ -1,6 +1,6 @@
-import { GroupStep, IStep } from '../../../../index.js';
-import { IExecutionIntent, IExecutionIntentBuilder } from '../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
-import { IExecutablePackageManagerParser } from '../../../../interface/PackageManager/executor/IPackageManagerParser.js';
+import { GroupStep, type IStep } from '../../../../index.js';
+import type { IExecutionIntent, IExecutionIntentBuilder } from '../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
+import type { IExecutablePackageManagerParser } from '../../../../interface/PackageManager/executor/IPackageManagerParser.js';
 import { CommandStep } from '../../CommandStep.js';
 import { AIntent } from './intent/AIntent.js';
 import { CommandIntent } from './intent/implementation/CommandIntent.js';

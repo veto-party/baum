@@ -2,7 +2,7 @@ import FileSystem from 'fs';
 import Path from 'path';
 import isEqual from 'lodash.isequal';
 import uniqBy from 'lodash.uniqby';
-import { CachedFN, IDependent, IWorkspace } from '../../index.js';
+import { CachedFN, type IDependent, type IWorkspace } from '../../index.js';
 import { GenericDependent } from './GenericDependent.js';
 
 export class GenericWorkspace implements IWorkspace {
@@ -10,21 +10,16 @@ export class GenericWorkspace implements IWorkspace {
     private directory: string,
     private pkgFile: any,
     private modifyToRealVersionValue: (version: string) => string | false | undefined
-  ) { }
+  ) {}
 
   getFreshWorkspace(): IWorkspace {
-
     const newPackage = JSON.parse(FileSystem.readFileSync(Path.join(this.directory, 'package.json')).toString());
 
     if (isEqual(newPackage, this.pkgFile)) {
       return this;
     }
 
-    return new GenericWorkspace(
-      this.directory,
-      JSON.parse(FileSystem.readFileSync(Path.join(this.directory, 'package.json')).toString()),
-      this.modifyToRealVersionValue
-    );
+    return new GenericWorkspace(this.directory, JSON.parse(FileSystem.readFileSync(Path.join(this.directory, 'package.json')).toString()), this.modifyToRealVersionValue);
   }
 
   getName(): string {
@@ -64,7 +59,7 @@ export class GenericWorkspace implements IWorkspace {
         .map(([name, version]) => new GenericDependent(name, version))
     ].flat();
 
-    return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`).filter((dependent) => !dependent.getVersion().startsWith("file:"));
+    return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`).filter((dependent) => !dependent.getVersion().startsWith('file:'));
   }
 
   getScriptNames(): string[] {

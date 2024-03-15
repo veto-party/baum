@@ -57,7 +57,6 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', () => {
     class Test {
-
       private counter;
 
       constructor(startValue: number) {
@@ -104,7 +103,6 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', async () => {
     class Test {
-
       private counter;
 
       constructor(startValue: number) {
@@ -143,6 +141,5 @@ describe('Should only run once using annotation', () => {
     expect(await data2.method()).toEqual(7);
 
     expect(await data.method()).toEqual(2);
-
   });
 });

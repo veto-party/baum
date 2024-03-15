@@ -1,6 +1,6 @@
-import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
+import type { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import semver from 'semver';
-import { IVersionManager } from '../../interface/IVersionManager.js';
+import type { IVersionManager } from '../../interface/IVersionManager.js';
 
 export class GenericVersionManager implements IVersionManager {
   public static readonly MIN_VERSION = 'v0.0.0-temp';

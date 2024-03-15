@@ -1,6 +1,6 @@
 import * as semver from 'semver';
-import { IExecutablePackageManager } from '../../../index.js';
-import { IDependent, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
+import type { IExecutablePackageManager } from '../../../index.js';
+import type { IDependent, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
 
 export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm: IExecutablePackageManager): IWorkspace[][] => {
   let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
@@ -19,10 +19,13 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
       workspace.getName(),
       workspace.getVersion(),
       workspace,
-      workspace.getDynamicDependents().filter((depdent) => workspaces.some((workspace) => workspace.getName() === depdent.getName())).map((dependent) => {
-        const resolvedVersion = pm.modifyToRealVersionValue(dependent.getVersion());
-        return [resolvedVersion || dependent.getVersion(), dependent];
-      }),
+      workspace
+        .getDynamicDependents()
+        .filter((depdent) => workspaces.some((workspace) => workspace.getName() === depdent.getName()))
+        .map((dependent) => {
+          const resolvedVersion = pm.modifyToRealVersionValue(dependent.getVersion());
+          return [resolvedVersion || dependent.getVersion(), dependent];
+        }),
       index
     ]);
     return previous;
@@ -37,10 +40,9 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
         return false;
       }
 
-
       const realVersion = pm.modifyToRealVersionValue(dependent.getVersion()) || dependent.getVersion();
 
-      if (realVersion === "*") {
+      if (realVersion === '*') {
         return true;
       }
 

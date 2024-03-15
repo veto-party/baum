@@ -1,5 +1,5 @@
-import { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
-import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 export class GroupStep implements IStep, IBaumRegistrable {
   constructor(protected steps: IStep[]) {}

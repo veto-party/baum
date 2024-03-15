@@ -1,4 +1,4 @@
-import { IExecutablePackageManager, IWorkspace, RunOnce } from '@veto-party/baum__core';
+import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
 
 import FileSystem from 'fs/promises';
 import yaml from 'yaml';

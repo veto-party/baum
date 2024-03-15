@@ -1,11 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
   "files": {
-    "ignore": [
-      "**/node-modules/**/*",
-      "**/dist/**/*",
-      "**/build/**/*"
-    ],
+    "ignore": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*"],
     "ignoreUnknown": true
   },
   "organizeImports": {

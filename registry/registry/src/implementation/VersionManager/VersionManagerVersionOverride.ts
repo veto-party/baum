@@ -1,4 +1,4 @@
-import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
+import type { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import { GenericVersionManager } from './GenericVersionManager.js';
 
 export class VersionManagerVersionOverride extends GenericVersionManager {

@@ -8,28 +8,25 @@ export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) =>
   if (forCallbackKey !== undefined) {
     (scope as any)[generateKey(forCallbackKey.toString())] = [];
   }
-}
+};
 
 export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 
     if (async) {
-
       type MapValue = [(value: ReturnType<T>) => any, (error?: any) => any];
       let storedPromises: [[T, ...Parameters<T>], MapValue[]][] = [];
 
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
-          (value: Parameters<MapValue[typeof index]>[0]) => {
-            values.forEach((promiseTuple) => promiseTuple[index](value));
-          };
+        (value: Parameters<MapValue[typeof index]>[0]) => {
+          values.forEach((promiseTuple) => promiseTuple[index](value));
+        };
 
       context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
-
         this[generateKey(__propertyKey)] ??= [];
         const storage: [[T, ...Parameters<T>], any][] = this[generateKey(__propertyKey)];
-
 
         const currentResult = storage.find((current) => isEqual(current[0], [this, ...args]));
 

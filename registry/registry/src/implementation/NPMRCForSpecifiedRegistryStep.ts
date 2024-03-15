@@ -6,7 +6,10 @@ export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
       const packages = await pm.readWorkspace(root);
 
       const checkedDependents = getDependentWorkspaces(workspace, packages, pm);
-      return `\n${checkedDependents.map((dependent) => dependent.getName().includes("/") && packages.some((givenPackage) => givenPackage.getName() === dependent.getName()) ? `${dependent.getName().substring(0, dependent.getName().indexOf("/"))}:registry=${this.registry}` : '').filter(Boolean).join("\n")}`;
+      return `\n${checkedDependents
+        .map((dependent) => (dependent.getName().includes('/') && packages.some((givenPackage) => givenPackage.getName() === dependent.getName()) ? `${dependent.getName().substring(0, dependent.getName().indexOf('/'))}:registry=${this.registry}` : ''))
+        .filter(Boolean)
+        .join('\n')}`;
     });
   }
 }

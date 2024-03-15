@@ -1,5 +1,5 @@
 import type { IStep } from '../IStep.js';
-import { IExecutablePackageManager } from '../PackageManager/IExecutablePackageManager.js';
+import type { IExecutablePackageManager } from '../PackageManager/IExecutablePackageManager.js';
 
 export interface IBaumRegistrable {
   addExecutionStep(name: string, step: IStep): this;

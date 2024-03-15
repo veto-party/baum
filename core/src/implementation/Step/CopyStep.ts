@@ -1,8 +1,8 @@
 import Path from 'path';
 import FileSystem from 'fs/promises';
 import { globby } from 'globby';
-import { IStep, IWorkspace } from '../../index.js';
-import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IStep, IWorkspace } from '../../index.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import { allSettledButFailure } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 const ensureMapEntry = <T, R>(map: Map<T, R>, key: T, defaultValue: R) => {

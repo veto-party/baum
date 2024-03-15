@@ -1,4 +1,4 @@
-import { IDependent, IWorkspace } from '../../src/index.js';
+import type { IDependent, IWorkspace } from '../../src/index.js';
 import IDependentMock from './IDependentMock.js';
 
 class IWorkspaceMock implements IWorkspace {

@@ -1,8 +1,8 @@
 import SyncFileSystem from 'fs';
 import Path from 'path';
 import FileSystem from 'fs/promises';
-import { IStep, IWorkspace } from '../../../../../../../index.js';
-import { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IStep, IWorkspace } from '../../../../../../../index.js';
+import type { IExecutablePackageManager } from '../../../../../../../interface/PackageManager/IExecutablePackageManager.js';
 
 class ModifyNPMRC implements IStep {
   private hasRun: Map<IWorkspace, true> = new Map();

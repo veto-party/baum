@@ -1,5 +1,5 @@
 import zod from 'zod';
-import { ICommandIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
+import type { ICommandIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
 import { AIntent } from '../AIntent.js';
 
 const commandIntentValidator = zod.object({

@@ -1,8 +1,8 @@
 import Path from 'path';
 import FileSystem from 'fs/promises';
-import { IStep } from '../../../index.js';
-import { IExecutablePackageManager } from '../../../interface/PackageManager/IExecutablePackageManager.js';
-import { IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
+import type { IStep } from '../../../index.js';
+import type { IExecutablePackageManager } from '../../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
 
 export class CopyAndCleanLockFileStep implements IStep {
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string) {

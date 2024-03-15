@@ -1,8 +1,8 @@
 import Path from 'path';
-import { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IStep, IWorkspace } from '@veto-party/baum__core';
+import type { IBaumRegistrable, IExecutablePackageManager, IPackageManager, IStep, IWorkspace } from '@veto-party/baum__core';
 import FileSystem from 'fs/promises';
-import { ICollection } from '../index.js';
-import { IVersionManager } from '../interface/IVersionManager.js';
+import type { ICollection } from '../index.js';
+import type { IVersionManager } from '../interface/IVersionManager.js';
 import { GroupCollection } from './GroupCollection.js';
 
 export abstract class ARegistryStep implements IStep, IBaumRegistrable {
@@ -10,7 +10,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-  constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) { }
+  constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
 
   addExecutionStep(name: string, step: IStep): this {
     this.collection.addExecutionStep(name, step);
@@ -65,7 +65,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (await this.startExecution(workspace, packageManager, rootDirectory) !== false) {
+    if ((await this.startExecution(workspace, packageManager, rootDirectory)) !== false) {
       await this.collection.execute(workspace, packageManager, rootDirectory);
       await this.getPublishStep()?.execute(workspace, packageManager, rootDirectory);
       await this.doClean(workspace);

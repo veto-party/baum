@@ -1,8 +1,8 @@
 import Path from 'path';
 import { fileURLToPath } from 'url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
-import { IVersionManager } from '@veto-party/baum__registry';
-import { GroupStep, IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
+import type { IVersionManager } from '@veto-party/baum__registry';
+import { GroupStep, type IBaumManagerConfiguration, PKGMStep, ParallelStep } from 'baum';
 import { PublicRegistryStep } from './registry/public/src/index.js';
 import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
 
@@ -16,7 +16,7 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setRootDirectory(__dirname);
 
   if (process.env.CI_TEST) {
-    baum.addExecutionStep("test", new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')));
+    baum.addExecutionStep('test', new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')));
     return;
   }
 

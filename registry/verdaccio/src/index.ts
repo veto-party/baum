@@ -1,6 +1,6 @@
 import Crypto from 'crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
+import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 import portFinder from 'portfinder';
 import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
 import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
@@ -74,15 +74,12 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
     const url = new URL(`${this.dockerAddress}:${port}`);
 
-    const basePublish = new PKGMStep((intent, workspace) => !this.checkForPublish(workspace) ? [] : intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty'));
+    const basePublish = new PKGMStep((intent, workspace) => (!this.checkForPublish(workspace) ? [] : intent.publish().setRegistry(`${this.dockerAddress}:${port}`).setForcePublic(false).setAuthorization('not-empty')));
 
     if (this.doInstall) {
       this.publishStep ??= new GroupStep([
         new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
-        new ModifyNPMRC(`\n${[
-          `${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`,
-          `${url.toString().substring(url.protocol.length)}:always-auth=true`
-        ].join('\n')}`),
+        new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`),
         // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
         new PKGMStep((intent) => intent.install().install()),
         basePublish
