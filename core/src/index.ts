@@ -26,3 +26,5 @@ export { GenericDependent } from './implementation/PackageManager/GenericDepende
 export { GenericWorkspace } from './implementation/PackageManager/GenericWorkspace.js';
 
 export { allSettledButFailure, allSettledButNoFailures } from './implementation/BaumManager/utility/allSettledButNoFailure.js';
+
+export { getDependentWorkspaces } from './implementation/BaumManager/utility/getDependentWorkspaces.js';
