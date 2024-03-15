@@ -1,9 +1,20 @@
 import Path from 'node:path';
 import { BaumManager } from '@veto-party/baum__core';
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
+
+const argv = await yargs(hideBin(process.argv)).argv;
 
 const baum = new BaumManager();
 
-await (await import(Path.join(process.cwd(), 'baum.js'))).default(baum);
+let path: string;
+if (typeof argv.config === "string") {
+  path = Path.isAbsolute(argv.config) ? argv.config : Path.join(process.cwd(), argv.config);
+} else {
+  path = process.cwd();
+}
+
+await (await import(path).catch((error) => import(Path.join(path, 'baum.js')))).default(baum);
 
 console.log('Running baum now!');
 const success = await baum.run().then(

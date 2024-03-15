@@ -3,11 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { GroupStep, type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
-import { PublicRegistryStep } from './registry/public/src/index.js';
-import { VerdaccioRegistryStep } from './registry/verdaccio/src/index.js';
+import { PublicRegistryStep } from '@veto-party/baum__registry__public';
+import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.dirname(__filename);
+const __dirname = Path.join(Path.dirname(__filename), '..');
 
 export default async (baum: IBaumManagerConfiguration) => {
   const pm = new NPMPackageManager();

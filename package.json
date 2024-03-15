@@ -5,10 +5,17 @@
   "type": "module",
   "description": "Tree shaking and building for monorepos",
   "scripts": {
-    "baum": "baum",
+    "baum": "baum --config baum_config",
     "biome": "biome"
   },
-  "workspaces": ["config", "core", "cli", "package_managers/*", "registry/*", "steps/*"],
+  "workspaces": [
+    "config",
+    "core",
+    "cli",
+    "package_managers/*",
+    "registry/*",
+    "steps/*"
+  ],
   "devDependencies": {
     "@biomejs/biome": "*",
     "baum": "*",
