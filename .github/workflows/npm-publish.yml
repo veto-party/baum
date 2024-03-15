@@ -16,7 +16,7 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm config -g set access public
-      - run: npm run run-publish
+      - run: npm run baum
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           PUBLISH_VERSION: ${{ github.event.release.tag_name }}
