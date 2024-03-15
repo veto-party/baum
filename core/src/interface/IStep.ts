@@ -1,5 +1,5 @@
-import { IExecutablePackageManager } from './PackageManager/IExecutablePackageManager.js';
-import { IWorkspace } from './PackageManager/IPackageManager.js';
+import type { IExecutablePackageManager } from './PackageManager/IExecutablePackageManager.js';
+import type { IWorkspace } from './PackageManager/IPackageManager.js';
 
 export interface IStep {
   execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void>;

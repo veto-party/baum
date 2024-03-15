@@ -1,9 +1,9 @@
-import SyncFileSystem from 'fs';
-import Path from 'path';
-import FileSystem from 'fs/promises';
+import SyncFileSystem from 'node:fs';
+import FileSystem from 'node:fs/promises';
+import Path from 'node:path';
 import zod from 'zod';
-import { IStep, ModifyNPMRC } from '../../../../../../index.js';
-import { IInstallIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
+import { type IStep, ModifyNPMRC } from '../../../../../../index.js';
+import type { IInstallIntent } from '../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
 import { AIntent } from '../AIntent.js';
 
 const installIntentValidation = zod.object({

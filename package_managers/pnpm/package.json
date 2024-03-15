@@ -1,21 +1,19 @@
 {
-    "name": "@veto-party/baum__package_manager__pnpm",
-    "type": "module",
-    "main": "./src/index.ts",
-    "scripts": {
-        "build": "tsc"
-    },
-    "files": [
-        "./dist/**"
-    ],
-    "dependencies": {
-        "@veto-party/baum__core": "*",
-        "globby": "^14.0.1",
-        "yaml": "^2.4.0",
-        "ejs": "^3.1.9"
-    },
-    "devDependencies": {
-        "@veto-party/config": "*",
-        "typescript": "^5.4.2"
-    }
+  "name": "@veto-party/baum__package_manager__pnpm",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": ["./dist/**"],
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "globby": "^14.0.1",
+    "yaml": "^2.4.0",
+    "ejs": "^3.1.9"
+  },
+  "devDependencies": {
+    "@veto-party/config": "*",
+    "typescript": "^5.4.2"
+  }
 }

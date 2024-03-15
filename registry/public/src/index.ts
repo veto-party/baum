@@ -1,5 +1,5 @@
-import { GroupStep, IExecutablePackageManager, IStep, IWorkspace, PKGMStep } from '@veto-party/baum__core';
-import { ARegistryStep, GenericVersionManager, IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
+import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
+import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
 export class PublicRegistryStep extends ARegistryStep {
   private initStep?: IStep;
@@ -29,11 +29,11 @@ export class PublicRegistryStep extends ARegistryStep {
     return this.initStep;
   }
 
-  protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<void> {
+  protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {
     if (this.hasInstallStep) {
       this.initStep ??= new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)))]);
     }
 
-    await super.startExecution(workspace, pm, root);
+    return await super.startExecution(workspace, pm, root);
   }
 }

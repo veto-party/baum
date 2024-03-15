@@ -1,4 +1,4 @@
-import Path from 'path';
+import Path from 'node:path';
 import { BaumManager } from '@veto-party/baum__core';
 
 const baum = new BaumManager();

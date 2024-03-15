@@ -1,4 +1,4 @@
-import { ATemplateExecutor, callbackArgs } from '@veto-party/baum__core';
+import { ATemplateExecutor, type callbackArgs } from '@veto-party/baum__core';
 import ejs from 'ejs';
 
 const ifSet = (variableName: string, templateStr: string) => `<%- ${variableName} ? include('file', { "$$template": "${Buffer.from(templateStr).toString('base64')}"}) : "" %>`;

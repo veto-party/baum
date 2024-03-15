@@ -1,5 +1,19 @@
-import { GroupStep, ICommandIntent, IExecutablePackageManager, IExecutablePackageManagerParser, IExecutionIntent, IExecutionIntentBuilder, IInstallIntent, IPackageManagerExecutor, IPublishIntent, IRunIntent, IStep, IWorkspace, callbackArgs } from '@veto-party/baum__core';
-import FileSystem from 'fs/promises';
+import type FileSystem from 'node:fs/promises';
+import {
+  GroupStep,
+  type ICommandIntent,
+  type IExecutablePackageManager,
+  type IExecutablePackageManagerParser,
+  type IExecutionIntent,
+  type IExecutionIntentBuilder,
+  type IInstallIntent,
+  type IPackageManagerExecutor,
+  type IPublishIntent,
+  type IRunIntent,
+  type IStep,
+  type IWorkspace,
+  type callbackArgs
+} from '@veto-party/baum__core';
 
 type PartialExecutorMap = { [K in keyof callbackArgs]?: IExecutablePackageManager };
 
@@ -8,6 +22,10 @@ export class HybridPackageManager implements IExecutablePackageManager {
     private primaryPM: IExecutablePackageManager,
     private executors: PartialExecutorMap
   ) {}
+
+  clearWorkspaceCache(): void {
+    this.primaryPM.clearWorkspaceCache();
+  }
 
   disableGlobalWorkspace(rootDirectory: string) {
     return this.primaryPM.disableGlobalWorkspace(rootDirectory);

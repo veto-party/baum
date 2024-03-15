@@ -1,12 +1,12 @@
-import Crypto from 'crypto';
-import OldFileSystem from 'fs';
+import Crypto from 'node:crypto';
+import OldFileSystem from 'node:fs';
+import FileSystem from 'node:fs/promises';
 import OS from 'node:os';
-import Path from 'path';
-import { allSettledButFailure, CachedFN, GenericWorkspace, IExecutablePackageManager, IExecutionIntentBuilder, IPackageManagerExecutor, IWorkspace, TemplateBuilder, IExecutablePackageManagerParser } from '@veto-party/baum__core';
-import FileSystem from 'fs/promises';
+import Path from 'node:path';
+import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
+import { clearCacheForFN } from '@veto-party/baum__core';
 import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
-
 
 export class NPMPackageManager implements IExecutablePackageManager {
   async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
@@ -83,6 +83,10 @@ export class NPMPackageManager implements IExecutablePackageManager {
           return new GenericWorkspace(path, packageJson, this.modifyToRealVersionValue.bind(this));
         })
     );
+  }
+
+  clearWorkspaceCache() {
+    clearCacheForFN(this, 'readWorkspace');
   }
 
   @CachedFN(true)

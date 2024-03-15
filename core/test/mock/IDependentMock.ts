@@ -1,4 +1,4 @@
-import { IDependent } from '../../src/index.js';
+import type { IDependent } from '../../src/index.js';
 
 class IDependentMock implements IDependent {
   constructor(

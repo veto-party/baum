@@ -1,4 +1,4 @@
-import { ATemplateExecutor, GroupStep, IExecutablePackageManager, IExecutionIntent, IStep, IWorkspace, callbackArgs } from '@veto-party/baum__core';
+import { ATemplateExecutor, GroupStep, type IExecutablePackageManager, type IExecutionIntent, type IStep, type IWorkspace, type callbackArgs } from '@veto-party/baum__core';
 import ejs from 'ejs';
 
 const ifSet = (variableName: string, templateStr: string) => `<%- ${variableName} ? include('file', { "$$template": "${Buffer.from(templateStr).toString('base64')}"}) : "" %>`;

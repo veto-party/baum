@@ -1,18 +1,19 @@
 import * as semver from 'semver';
 import { shakeWorkspacesIntoExecutionGroups } from '../src/implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js';
+import type { IExecutablePackageManager, IExecutablePackageManagerParser, IPackageManagerExecutor, IWorkspace } from '../src/index.js';
 import IDependentMock from './mock/IDependentMock.js';
 import IWorkspaceMock from './mock/IWorkspaceMock.js';
-import { IExecutablePackageManager, IExecutablePackageManagerParser, IPackageManagerExecutor, IWorkspace } from '../src/index.js';
-import { Stream } from 'stream';
 
-const pm = new class implements IExecutablePackageManager {
+import type FileSystem from 'node:fs/promises';
+
+const pm = new (class implements IExecutablePackageManager {
   getExecutor(): IPackageManagerExecutor {
     throw new Error('Method not implemented.');
   }
   getExecutorParser(): IExecutablePackageManagerParser {
     throw new Error('Method not implemented.');
   }
-  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<string | NodeJS.ArrayBufferView | Iterable<string | NodeJS.ArrayBufferView> | AsyncIterable<string | NodeJS.ArrayBufferView> | Stream | undefined> {
+  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<ReturnType<(typeof FileSystem)['writeFile']>[1]> | undefined {
     throw new Error('Method not implemented.');
   }
   getLockFileName(): string {
@@ -28,9 +29,9 @@ const pm = new class implements IExecutablePackageManager {
     throw new Error('Method not implemented.');
   }
   modifyToRealVersionValue(version: string): string | false | undefined {
-    return version === "*" ? version : undefined;
+    return version === '*' ? version : undefined;
   }
-}
+})();
 
 describe('Basic tree tests', () => {
   it('Should generate some execution groups', () => {

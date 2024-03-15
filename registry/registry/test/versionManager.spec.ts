@@ -1,4 +1,4 @@
-import { IPackageManager, IWorkspace } from '@veto-party/baum__core';
+import type { IPackageManager, IWorkspace } from '@veto-party/baum__core';
 import { VersionManagerVersionOverride } from '../src/index.js';
 import IDependentMock from './mock/IDependentMock.js';
 import IWorkspaceMock from './mock/IWorkspaceMock.js';

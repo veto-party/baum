@@ -1,6 +1,6 @@
-import { GroupStep, IBaumManager, IStep } from '../../index.js';
-import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
-import { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
+import { GroupStep, type IBaumManager, type IStep } from '../../index.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 import { CopyAndCleanLockFileStep } from '../Step/internal/CopyAndCleanLockFile.js';
 import { allSettledButFailure, allSettledButNoFailures } from './utility/allSettledButNoFailure.js';
 import { shakeWorkspacesIntoExecutionGroups } from './utility/shakeWorkspacesIntoExecutionGroups.js';

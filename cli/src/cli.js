@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { spawnSync } from 'child_process';
-import Path from 'path';
-import { fileURLToPath } from 'url';
-import * as util from 'util';
+import { spawnSync } from 'node:child_process';
+import Path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import * as util from 'node:util';
 
 const __dirname = fileURLToPath(Path.dirname(Path.dirname(import.meta.resolve('baum'))));
 

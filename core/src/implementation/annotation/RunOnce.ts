@@ -1,5 +1,5 @@
-import { IStep, IWorkspace } from '../../index.js';
-import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
+import type { IStep, IWorkspace } from '../../index.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 const never = Symbol('never');
 

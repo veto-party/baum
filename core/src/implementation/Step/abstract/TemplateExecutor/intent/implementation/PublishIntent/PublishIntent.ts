@@ -1,6 +1,6 @@
 import zod from 'zod';
 import { GroupStep } from '../../../../../../../index.js';
-import { IPublishIntent } from '../../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
+import type { IPublishIntent } from '../../../../../../../interface/PackageManager/executor/IPackageManagerExecutor.js';
 import { AIntent } from '../../AIntent.js';
 import { ModifyNPMRC } from './ModifyNPMRC.js';
 
@@ -48,10 +48,7 @@ class PublishIntent extends AIntent<[string] | [string, 'public']> implements IP
 
     const url = new URL(this.registry!);
 
-    return new ModifyNPMRC("\n" + [
-      `${url.toString().substring(url.protocol.length)}:_authToken="${this.token}"`,
-      `${url.toString().substring(url.protocol.length)}:always-auth=true`
-    ].join("\n"));
+    return new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="${this.token}"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`);
   };
 
   toGroup(): [string] | [string, 'public'] {

@@ -1,8 +1,8 @@
-import Path from 'path';
+import OS from 'node:os';
+import Path from 'node:path';
 import shelljs from 'shelljs';
-import { IStep, IWorkspace } from '../../index.js';
-import { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
-import OS from 'os';
+import type { IStep, IWorkspace } from '../../index.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 const { exec } = shelljs;
 
@@ -11,7 +11,7 @@ class CommandStep implements IStep {
     private command: string,
     private cwdAddition: string | undefined,
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
-  ) { }
+  ) {}
 
   protected getCleanEnv() {
     const current = {
@@ -29,18 +29,18 @@ class CommandStep implements IStep {
     delete current.npm_package_name;
     delete current.npm_package_json;
 
-
-    const pathKeys = Object.keys(current).filter((key) => key.toLowerCase() === "path");
+    const pathKeys = Object.keys(current).filter((key) => key.toLowerCase() === 'path');
     // TODO: Improve this (for solaris)? (if required)
     if (pathKeys.length > 0) {
       const environmentVarSeparator = OS.platform() === 'win32' ? ';' : ':';
       const basicPathSuffix = Path.join('node_modules', '.bin');
       const pathSuffixes = [basicPathSuffix.endsWith(Path.sep) ? basicPathSuffix.substring(0, basicPathSuffix.length - 1) : `${basicPathSuffix}${Path.sep}`, basicPathSuffix];
       pathKeys.forEach((key) => {
-        current[key] = current[key]!.split(environmentVarSeparator).filter((path) => !pathSuffixes.some((pathSuffix) => path.endsWith(pathSuffix))).join(environmentVarSeparator);
-      })
+        current[key] = current[key]!.split(environmentVarSeparator)
+          .filter((path) => !pathSuffixes.some((pathSuffix) => path.endsWith(pathSuffix)))
+          .join(environmentVarSeparator);
+      });
     }
-
 
     return current;
   }

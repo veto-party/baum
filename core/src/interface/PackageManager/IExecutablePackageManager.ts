@@ -1,6 +1,6 @@
-import { IPackageManager } from './IPackageManager.js';
+import type { IPackageManager } from './IPackageManager.js';
 import type { IPackageManagerExecutor } from './executor/IPackageManagerExecutor.js';
-import { IExecutablePackageManagerParser } from './executor/IPackageManagerParser.js';
+import type { IExecutablePackageManagerParser } from './executor/IPackageManagerParser.js';
 
 export interface IDependent {
   getName(): string;
@@ -19,4 +19,5 @@ export interface IWorkspace {
 export interface IExecutablePackageManager extends IPackageManager {
   getExecutor(): IPackageManagerExecutor;
   getExecutorParser(): IExecutablePackageManagerParser;
+  clearWorkspaceCache(): void;
 }
