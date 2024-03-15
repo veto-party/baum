@@ -65,7 +65,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (await this.startExecution(workspace, packageManager, rootDirectory) === false) {
+    if (await this.startExecution(workspace, packageManager, rootDirectory) !== false) {
       await this.collection.execute(workspace, packageManager, rootDirectory);
       await this.getPublishStep()?.execute(workspace, packageManager, rootDirectory);
       await this.doClean(workspace);
