@@ -9,33 +9,33 @@ const generatePassword = (len: number) => {
 };
 
 const buildVariableBase = (variableDefinition: VariableType, scopeName: string) => {
-  if (variableDefinition['type'] == 'scoped-name') {
-    if (variableDefinition['case'] == 'snake') {
+  if (variableDefinition.type === 'scoped-name') {
+    if (variableDefinition.case === 'snake') {
       return scopeName.replaceAll('-', '_'); // TODO: camelCase to snake_case
     }
 
     return scopeName;
   }
 
-  if (variableDefinition['generated']) {
-    variableDefinition['default'] = generatePassword(variableDefinition['generated']);
+  if (variableDefinition.generated) {
+    variableDefinition.default = generatePassword(variableDefinition.generated);
   }
 
-  return variableDefinition['default'];
+  return variableDefinition.default;
 };
 
 export const buildVariable = (variableDefinition: VariableType, scopeName: string) => {
   const varDefinition = buildVariableBase(variableDefinition, scopeName);
 
   if (typeof varDefinition === 'string') {
-    return '"' + varDefinition + '"';
+    return `"${varDefinition}"`;
   }
 
-  if (varDefinition == true) {
+  if (varDefinition === true) {
     return 'true';
   }
 
-  if (varDefinition == false) {
+  if (varDefinition === false) {
     return 'false';
   }
 
