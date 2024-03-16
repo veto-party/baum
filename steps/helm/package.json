@@ -1,0 +1,28 @@
+{
+  "name": "@veto-party/baum__steps__helm",
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": [
+    "./dist/**"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "json-schema-to-ts": "^3.0.1",
+    "lodash.set": "^4.3.2",
+    "lodash.isequal": "^4.5.0",
+    "lodash.has": "4.5.2",
+    "semver": "^7.6.0",
+    "ajv": "^8.12.0"
+  },
+  "devDependencies": {
+    "@veto-party/config": "*",
+    "typescript": "^5.4.2",
+    "@types/lodash.set": "^4.3.9",
+    "@types/lodash.isequal": "^4.5.8",
+    "@types/lodash.has": "^4.5.9",
+    "@types/semver": "^7.5.8"
+  }
+}
