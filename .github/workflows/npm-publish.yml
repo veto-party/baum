@@ -23,3 +23,4 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           PUBLISH_VERSION: ${{ github.event.release.tag_name }}
+          NPM_CONFIG_PROVENANCE: true
