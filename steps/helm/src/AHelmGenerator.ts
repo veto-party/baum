@@ -18,7 +18,7 @@ type ExtendedSchemaType = {
   __scope?: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>; 
 }
 
-class HelmGenerator implements IStep {
+export abstract class AHelmGenerator implements IStep {
 
   private getHash(value: string) {
     let hash = 7;
@@ -94,9 +94,7 @@ class HelmGenerator implements IStep {
     return allWorkspaces;
   }
 
-  private getHelmFileName() {
-    return 'helm.json';
-  }
+  abstract getHelmFileName(): string;
 
   @CachedFN(true)
   private async loadFoRWorkspace(workspace: IWorkspace): Promise<SchemaType | undefined> {
@@ -323,14 +321,20 @@ class HelmGenerator implements IStep {
     return undefined;
   }
 
+  abstract getDockerImageForWorkspace(workspace: IWorkspace): string;
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
-    await this.getContext(workspace, workspaceMapping);
+    const context = await this.getContext(workspace, workspaceMapping);
+
+    if (!context) {
+      return;
+    }
+
+
   }
 
   clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
 }
-
-export default HelmGenerator;
