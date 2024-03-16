@@ -1,38 +1,20 @@
-import type { IStep, IWorkspace } from '../../index.js';
+import { CachedFN, type IStep, type IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
-const never = Symbol('never');
-
 class PromiseStorage<T extends (...args: any[]) => any> {
-  private promiseResolvers: [(value: ReturnType<T>) => any, (error?: any) => any][] = [];
-
-  private result: any = never;
+  private result: Promise<any> | undefined = undefined;
 
   constructor(private callback: T) {}
 
-  private doResolve<I extends 0 | 1>(index: I): (typeof this.promiseResolvers)[number][I] {
-    return (param: any) => this.promiseResolvers.map((value) => value[index]).forEach((fnc) => fnc(param));
+  @CachedFN(true)
+  private async resolve() {
+    return await this.result;
   }
 
-  create(...args: Parameters<T>) {
-    if (this.result !== never) {
-      return Promise.resolve(this.result);
-    }
-
-    return new Promise<ReturnType<T> extends Promise<any> ? Awaited<ReturnType<T>> : Promise<ReturnType<T>>>(async (resolve, reject) => {
-      if (this.promiseResolvers.length === 0) {
-        this.callback(...args)
-          .then((value: any) => {
-            this.result = value;
-          })
-          .then(this.doResolve(0), this.doResolve(1))
-          .finally(() => {
-            this.promiseResolvers = [];
-          });
-      }
-
-      this.promiseResolvers.push([resolve, reject]);
-    });
+  public async call(...args: Parameters<T>) {
+    // Explicitly ignore parameters for callback.
+    this.result ??= this.callback(...args);
+    return this.resolve();
   }
 }
 
@@ -44,11 +26,11 @@ export const RunOnce = () => {
       #cleanStorage = new PromiseStorage(super.clean.bind(this));
 
       execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-        return this.#executeStorage.create(workspace, packageManager, rootDirectory);
+        return this.#executeStorage.call(workspace, packageManager, rootDirectory);
       }
 
       clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-        return this.#cleanStorage.create(workspace, packageManager, rootDirectory);
+        return this.#cleanStorage.call(workspace, packageManager, rootDirectory);
       }
     };
   };
