@@ -2,9 +2,7 @@
   "name": "@veto-party/baum__steps__helm",
   "type": "module",
   "main": "./src/index.ts",
-  "files": [
-    "./dist/**"
-  ],
+  "files": ["./dist/**"],
   "scripts": {
     "build": "tsc"
   },
