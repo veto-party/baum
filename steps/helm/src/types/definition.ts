@@ -26,7 +26,17 @@ export const definitions = {
               type: 'boolean'
             },
             default: {
-              type: 'string'
+              anyOf: [
+                {
+                  type: 'boolean'
+                },
+                {
+                  type: 'string'
+                },
+                {
+                  type: 'number'
+                }
+              ]
             },
             generated: {
               type: 'number'

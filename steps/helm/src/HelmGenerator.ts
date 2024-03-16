@@ -3,10 +3,33 @@ import Path from 'node:path';
 import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import semver from 'semver';
 import { type SchemaType, schema } from './types/types.js';
+import cloneDeep from 'lodash.clonedeep';
+import isEqual from 'lodash.isequal';
 
 type HelmFileResult = [hemlFileMapping: Map<IWorkspace, SchemaType>, workspaceMapping: Map<IWorkspace, IWorkspace[]>];
 
+type ExtendedSchemaType = {
+  binding?: SchemaType['binding'];
+  connection?: SchemaType['connection'];
+  expose?: SchemaType['expose'];
+  job?: SchemaType['job'];
+  service?: SchemaType['service'];
+  variable: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>;
+  __scope?: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>; 
+}
+
 class HelmGenerator implements IStep {
+
+  private getHash(value: string) {
+    let hash = 7;
+    for (let i = 0; i < value.length; i++) {
+      hash = hash * 31 + value.charCodeAt(i);
+    }
+
+    const hexHash = hash.toString(16);
+    return hexHash.substring(0, Math.min(6, hexHash.length - 1));
+  }
+
   /**
    * Returns a mix of attached and detached workspaces.
    *
@@ -102,15 +125,192 @@ class HelmGenerator implements IStep {
     return [newMap, workspaces] as const;
   }
 
+  private groupScopes(schema: ExtendedSchemaType[], defaultValue: ExtendedSchemaType): ExtendedSchemaType {
+    return schema.reduce((previous, current) => {
+
+      if (current.binding) {
+        previous.binding ??= current.binding;
+        if (previous.binding !== current.binding) {
+          Object.entries(current.binding).forEach(([key, value]) => {
+            if (previous.binding![key] && previous.binding![key] === value) {
+              console.warn(`binding ${JSON.stringify(key)} got overridden.`);
+            }
+            previous.binding![key] = value;
+          });
+        }
+      }
+
+      if (current.connection) {
+        previous.connection ??= current.connection;
+        if (previous.connection !== current.connection) {
+          previous.connection.forEach((entry) => {
+            if (previous.connection?.some(({ target }) => target === entry.target)) {
+              console.warn(`duplicate ${JSON.stringify(entry.target)}, ignoring.`);
+            } else {
+              previous.connection?.push(entry);
+            }
+          });
+        }
+      }
+
+      if (current.expose) {
+        previous.expose ??= current.expose;
+        if (previous.expose !== current.expose) {
+          Object.entries(current.expose).forEach(([key, value]) => {
+            if (previous.expose![key] && isEqual(previous.expose![key], value)) {
+              return;
+            }
+
+            if (!previous.expose![key]) {
+              console.log(`expose ${JSON.stringify(key)} got overriden.`);
+            }
+
+            previous.expose![key] = value;
+          });
+        }
+      }
+
+      if (current.job) {
+        previous.job ??= current.job;
+        if (previous.job !== current.job) {
+          Object.entries(current.job).forEach(([key, value]) => {
+            if (previous.job![key] && isEqual(previous.job![key], value)) {
+              return;
+            }
+
+            if (!previous.job![key]) {
+              console.log(`job ${JSON.stringify(key)} got overridden.`);
+            }
+
+            previous.job![key] = value;
+          });
+        }
+      }
+
+      if (current.service) {
+        previous.service ??= current.service;
+        if (previous.service !== current.service) {
+          Object.entries(current.service).forEach(([key, value]) => {
+            if (previous.service![key] && isEqual(previous.service![key], value)) {
+              return;
+            }
+
+            if (!previous.service![key]) {
+              console.log(`service ${JSON.stringify(key)} got overridden.`);
+            }
+
+            previous.service![key] = value;
+          });
+        }
+      }
+
+      if (current.variable) {
+        previous.variable ??= current.variable;
+        if (previous.variable !== current.variable) {
+          Object.entries(current.variable).forEach(([key, value]) => {
+            if (previous.variable![key] && isEqual(previous.variable![key], value)) {
+              return;
+            }
+
+            if (!previous.variable![key]) {
+              console.log(`service ${JSON.stringify(key)} got overridden.`);
+            }
+
+            previous.variable![key] = value;
+          });
+        }
+      }
+
+      return previous;
+    }, defaultValue);
+  }
+
   private async getContext(workspace: IWorkspace, map: HelmFileResult, layer = 1) {
     const [helmFiles, workspaceMapping] = map;
 
-    const scopes = await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)));
+    const childScopes = await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)));
+
+    const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
+      global: this.groupScopes(childScopes.map((scope) => scope.global), {
+        variable: {}
+      }),
+      scoped: this.groupScopes(childScopes.map((scope) => scope.global), {
+        variable: {}
+      }),
+    };
 
     // TODO: Combine bases.
     if (helmFiles.has(workspace)) {
-      // TODO: generate new base with bases and helm file. (Also store globals in Context.)
+      const helmFile = helmFiles.get(workspace);
+      Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
+        let realDefinitionName: string|undefined = undefined;
+        if (service.type === "scoped") {
+          realDefinitionName = `k${this.getHash(workspace.getName())}-${definitionName}`;
+        }
+
+        Object.entries(service.environment ?? {}).forEach(([k, v]) => {
+          let cloned: Exclude<typeof environment[keyof typeof environment]['variable'], undefined>[string] = cloneDeep({
+            ...v,
+            type: v.type ?? service.type,
+            external: true
+          });
+
+          let refTarget = environment.global.variable;
+
+          if (realDefinitionName) {
+            refTarget = environment.scoped.variable;
+            refTarget[`${realDefinitionName}.${k}`] == cloneDeep(cloned);
+            cloned = {
+              ref: `${realDefinitionName}.${k}`
+            }
+          }
+
+          const refString = `${definitionName}.${k}`;
+          environment.scoped.__scope ??= {};
+          environment.scoped.__scope[`${definitionName}.environment.${k}`] = {
+            ref: refString,
+          };
+          refTarget[refString] = cloned;
+        });
+
+        let scopedDefinitionName = realDefinitionName ?? definitionName;
+
+        if (service.type !== "global") {
+          scopedDefinitionName = `k${this.getHash(workspace.getName())}-${realDefinitionName ?? definitionName}`;
+        }
+
+        const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
+        environment.global.variable[scopedKey] = {
+          type: service.type,
+          default: scopedDefinitionName
+        };
+        
+        if (realDefinitionName) {
+          environment.scoped.__scope ??= {};
+          environment.scoped.__scope[`${definitionName}..${service.origin_name_var}`] = {
+            ref: scopedKey,
+          };
+        }
+
+        environment.scoped.__scope ??= {};
+        const scopedEnvironmentKey = `${realDefinitionName ?? definitionName}.origin_name_var`;
+        environment.scoped.__scope[scopedEnvironmentKey] = {
+          ref: scopedKey
+        };
+
+        if (realDefinitionName) {
+          const scopedEnvironmentKeyRef = `${definitionName}.origin_name_var`;
+          environment.scoped.__scope[scopedEnvironmentKeyRef] = {
+            ref: scopedEnvironmentKey
+          }
+        }
+
+        environment.scoped.service ??= {};
+        environment.scoped.service[realDefinitionName ?? definitionName] = service;
+      });
     }
+
+    return environment;
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
