@@ -126,7 +126,7 @@ class HelmGenerator implements IStep {
   }
 
   private groupScopes(schema: ExtendedSchemaType[], defaultValue: ExtendedSchemaType): ExtendedSchemaType {
-    return schema.reduce((previous, current) => {
+    return [...schema, defaultValue].reduce<ExtendedSchemaType>((previous, current) => {
 
       if (current.binding) {
         previous.binding ??= current.binding;
@@ -222,26 +222,34 @@ class HelmGenerator implements IStep {
       }
 
       return previous;
-    }, defaultValue);
+    }, {
+      variable: {}
+    });
   }
 
   private async getContext(workspace: IWorkspace, map: HelmFileResult, layer = 1) {
     const [helmFiles, workspaceMapping] = map;
 
-    const childScopes = await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)));
-
-    const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
-      global: this.groupScopes(childScopes.map((scope) => scope.global), {
-        variable: {}
-      }),
-      scoped: this.groupScopes(childScopes.map((scope) => scope.global), {
-        variable: {}
-      }),
-    };
+    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)))).filter(<T>(value: T|undefined): value is T  => value !== undefined);
 
     // TODO: Combine bases.
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
+
+      const defaultValue = {
+        ...helmFile,
+        variable: helmFile?.variable ?? {}
+      }
+
+      const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
+        global: this.groupScopes(childScopes.map((scope) => scope.global), defaultValue),
+        scoped: this.groupScopes(childScopes.map((scope) => scope.global), defaultValue),
+      };
+
+      environment.scoped.binding = helmFile?.binding;
+      environment.scoped.connection = helmFile?.connection;
+      environment.scoped.job = helmFile?.job;
+
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string|undefined = undefined;
         if (service.type === "scoped") {
@@ -308,9 +316,11 @@ class HelmGenerator implements IStep {
         environment.scoped.service ??= {};
         environment.scoped.service[realDefinitionName ?? definitionName] = service;
       });
+
+      return environment;
     }
 
-    return environment;
+    return undefined;
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
