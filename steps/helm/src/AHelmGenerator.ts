@@ -55,6 +55,10 @@ export abstract class AHelmGenerator implements IStep {
     do {
       const workspace = workspaces.shift()!;
 
+      if (!this.workspaceFilter(workspace)) {
+        continue;
+      }
+
       const directoriesToCheck = workspace.getDynamicDependents().flatMap((dependent) => [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())]);
       const filesToCheck = await Promise.all(
         directoriesToCheck.map((directory) =>
@@ -95,6 +99,8 @@ export abstract class AHelmGenerator implements IStep {
   }
 
   abstract getHelmFileName(): string;
+
+  abstract workspaceFilter(workspace: IWorkspace): boolean;
 
   @CachedFN(true)
   private async loadFoRWorkspace(workspace: IWorkspace): Promise<SchemaType | undefined> {
