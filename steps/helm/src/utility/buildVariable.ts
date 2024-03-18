@@ -8,7 +8,7 @@ const generatePassword = (len: number) => {
   return sb.toString();
 };
 
-const buildVariableBase = (variableDefinition: VariableType, scopeName: string) => {
+export const buildVariable = (variableDefinition: Partial<VariableType>, scopeName: string) => {
   if (variableDefinition.type === 'scoped-name') {
     if (variableDefinition.case === 'snake') {
       return scopeName.replaceAll('-', '_'); // TODO: camelCase to snake_case
@@ -24,20 +24,7 @@ const buildVariableBase = (variableDefinition: VariableType, scopeName: string) 
   return variableDefinition.default;
 };
 
-export const buildVariable = (variableDefinition: VariableType, scopeName: string) => {
-  const varDefinition = buildVariableBase(variableDefinition, scopeName);
 
-  if (typeof varDefinition === 'string') {
-    return `"${varDefinition}"`;
-  }
+export const variableResolver = (variableDefinition: VariableType, scopeName: string) => {
 
-  if (varDefinition === true) {
-    return 'true';
-  }
-
-  if (varDefinition === false) {
-    return 'false';
-  }
-
-  return varDefinition;
-};
+}

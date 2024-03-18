@@ -15,13 +15,18 @@ type ExtendedSchemaType = {
   expose?: SchemaType['expose'];
   job?: SchemaType['job'];
   service?: SchemaType['service'];
-  variable: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>;
-  __scope?: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>; 
+  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>;
+  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>; 
 }
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K]) => ExtendedSchemaType[K]; }
 
 export abstract class AHelmGeneratorProvider implements IStep {
+
+
+  protected globalContexts: ExtendedSchemaType[] = [];
+  public contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
+
 
   private getHash(value: string) {
     let hash = 7;
@@ -192,7 +197,7 @@ export abstract class AHelmGeneratorProvider implements IStep {
     });
   }
 
-  private async getContext(workspace: IWorkspace, map: HelmFileResult, layer = 1) {
+  private async getContext(workspace: IWorkspace, map: HelmFileResult, layer = 1): Promise<Record<'global' | 'scoped', ExtendedSchemaType>|undefined> {
     const [helmFiles, workspaceMapping] = map;
 
     const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)))).filter(<T>(value: T|undefined): value is T  => value !== undefined);
@@ -282,37 +287,35 @@ export abstract class AHelmGeneratorProvider implements IStep {
         environment.scoped.service[realDefinitionName ?? definitionName] = service;
       });
 
+      if (helmFile?.variable) {
+        Object.entries(helmFile.variable).map(([k, valueValue]) => {
+          if (valueValue.type.startsWith("global")) {
+            environment.global.variable[k] = valueValue;
+          } else {
+            environment.scoped.variable[k] = valueValue;
+          }
+        });
+      }
+
       return environment;
     }
 
+    if (childScopes.some((scope) => scope)) {
+      const result =  {
+        global: this.groupScopes(childScopes.map((childScope) => childScope.global)),
+        scoped: this.groupScopes(childScopes.map((childScopes) => childScopes.scoped))
+      }
+      return result;
+    }
+    
     return undefined;
   }
 
   abstract getDockerImageForWorkspace(workspace: IWorkspace): string;
 
-  private globalContexts: ExtendedSchemaType[] = [];
-  private contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
-
-  protected getGlobalContext(): ExtendedSchemaType {
+  public get globalContext() {
     return this.groupScopes(this.globalContexts);
-  }
-
-  /**
-   * This task should be executed after this task.
-   */
-  @CachedFN(false)
-  getGlobalWorkspaceTask() {
-    const getGlobalContext = this.getGlobalContext.bind(this);
-    return new class implements IStep {
-      execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-        throw new Error('Method not implemented.');
-      }
-      clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-        throw new Error('Method not implemented.');
-      }
-
-    }
-  }
+  } 
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
