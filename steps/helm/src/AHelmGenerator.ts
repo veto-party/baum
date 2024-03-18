@@ -5,6 +5,7 @@ import semver from 'semver';
 import { type SchemaType, schema } from './types/types.js';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
+import yaml from 'yaml';
 
 type HelmFileResult = [hemlFileMapping: Map<IWorkspace, SchemaType>, workspaceMapping: Map<IWorkspace, IWorkspace[]>];
 
@@ -17,6 +18,8 @@ type ExtendedSchemaType = {
   variable: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>;
   __scope?: Record<string, Exclude<SchemaType['variable'], undefined>[string] | { ref: string; }>; 
 }
+
+type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K]) => ExtendedSchemaType[K]; }
 
 export abstract class AHelmGenerator implements IStep {
 
@@ -129,102 +132,60 @@ export abstract class AHelmGenerator implements IStep {
     return [newMap, workspaces] as const;
   }
 
-  private groupScopes(schema: ExtendedSchemaType[], defaultValue: ExtendedSchemaType): ExtendedSchemaType {
-    return [...schema, defaultValue].reduce<ExtendedSchemaType>((previous, current) => {
-
-      if (current.binding) {
-        previous.binding ??= current.binding;
-        if (previous.binding !== current.binding) {
-          Object.entries(current.binding).forEach(([key, value]) => {
-            if (previous.binding![key] && previous.binding![key] === value) {
-              console.warn(`binding ${JSON.stringify(key)} got overridden.`);
-            }
-            previous.binding![key] = value;
-          });
-        }
+  private static basicOverrideFnc(definitionKey: string) {
+    return <T extends Record<string, any>|undefined>(prev: T, current: T): T => {
+      if (!prev) {
+        return cloneDeep(current);
       }
 
-      if (current.connection) {
-        previous.connection ??= current.connection;
-        if (previous.connection !== current.connection) {
-          previous.connection.forEach((entry) => {
-            if (previous.connection?.some(({ target }) => target === entry.target)) {
-              console.warn(`duplicate ${JSON.stringify(entry.target)}, ignoring.`);
-            } else {
-              previous.connection?.push(entry);
-            }
-          });
+      const resulting = cloneDeep(prev);
+      Object.entries(prev).forEach(([key, value]) => {
+        if (prev[key] && isEqual(prev[key], value)) {
+          return;
         }
+
+        if (prev[key]) {
+          console.warn(`${JSON.stringify(definitionKey)} got overridden ${JSON.stringify(key)}`)
+        }
+
+        (resulting as any)[key] = value;
+      });
+
+      return resulting;
+    }
+  }
+
+  private grouperFunctions: Mappers = {
+    variable: AHelmGenerator.basicOverrideFnc('variable'),
+    expose: AHelmGenerator.basicOverrideFnc('expose'),
+    job: AHelmGenerator.basicOverrideFnc('job'),
+    service: AHelmGenerator.basicOverrideFnc('service'),
+    binding: AHelmGenerator.basicOverrideFnc('binding'),
+    __scope: AHelmGenerator.basicOverrideFnc('#__internal__(__scope)'),
+    connection: (prev, current) => {
+      if (!prev) {
+        return cloneDeep(current);
       }
 
-      if (current.expose) {
-        previous.expose ??= current.expose;
-        if (previous.expose !== current.expose) {
-          Object.entries(current.expose).forEach(([key, value]) => {
-            if (previous.expose![key] && isEqual(previous.expose![key], value)) {
-              return;
-            }
-
-            if (!previous.expose![key]) {
-              console.log(`expose ${JSON.stringify(key)} got overriden.`);
-            }
-
-            previous.expose![key] = value;
-          });
+      const result = cloneDeep(prev);
+      current?.forEach(({ target }) => {
+        if (result.some((lookup) => lookup.target === target)) {
+          console.warn(`connection(${JSON.stringify(target)}) is duplicated.`);
+          return;
         }
-      }
 
-      if (current.job) {
-        previous.job ??= current.job;
-        if (previous.job !== current.job) {
-          Object.entries(current.job).forEach(([key, value]) => {
-            if (previous.job![key] && isEqual(previous.job![key], value)) {
-              return;
-            }
+        result.push({ target });
+      });
 
-            if (!previous.job![key]) {
-              console.log(`job ${JSON.stringify(key)} got overridden.`);
-            }
+      return result;
+    }
+  }
 
-            previous.job![key] = value;
-          });
-        }
-      }
-
-      if (current.service) {
-        previous.service ??= current.service;
-        if (previous.service !== current.service) {
-          Object.entries(current.service).forEach(([key, value]) => {
-            if (previous.service![key] && isEqual(previous.service![key], value)) {
-              return;
-            }
-
-            if (!previous.service![key]) {
-              console.log(`service ${JSON.stringify(key)} got overridden.`);
-            }
-
-            previous.service![key] = value;
-          });
-        }
-      }
-
-      if (current.variable) {
-        previous.variable ??= current.variable;
-        if (previous.variable !== current.variable) {
-          Object.entries(current.variable).forEach(([key, value]) => {
-            if (previous.variable![key] && isEqual(previous.variable![key], value)) {
-              return;
-            }
-
-            if (!previous.variable![key]) {
-              console.log(`service ${JSON.stringify(key)} got overridden.`);
-            }
-
-            previous.variable![key] = value;
-          });
-        }
-      }
-
+  private groupScopes(schema: ExtendedSchemaType[]): ExtendedSchemaType {
+    return [...schema].reduce<ExtendedSchemaType>((previous, current) => {
+      Object.entries(current).forEach(([key, value]) => {
+        (previous as any)[key] = (this.grouperFunctions as any)[key]((previous as any)?.[key], value);
+      });
       return previous;
     }, {
       variable: {}
@@ -246,8 +207,8 @@ export abstract class AHelmGenerator implements IStep {
       }
 
       const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
-        global: this.groupScopes(childScopes.map((scope) => scope.global), defaultValue),
-        scoped: this.groupScopes(childScopes.map((scope) => scope.global), defaultValue),
+        global: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue]),
+        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue]),
       };
 
       environment.scoped.binding = helmFile?.binding;
@@ -329,6 +290,30 @@ export abstract class AHelmGenerator implements IStep {
 
   abstract getDockerImageForWorkspace(workspace: IWorkspace): string;
 
+  private globalContexts: ExtendedSchemaType[] = [];
+  private contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
+
+  protected getGlobalContext(): ExtendedSchemaType {
+    return this.groupScopes(this.globalContexts);
+  }
+
+  /**
+   * This task should be executed after this task.
+   */
+  @CachedFN(false)
+  getGlobalWorkspaceTask() {
+    const getGlobalContext = this.getGlobalContext.bind(this);
+    return new class implements IStep {
+      execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+        throw new Error('Method not implemented.');
+      }
+      clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+        throw new Error('Method not implemented.');
+      }
+
+    }
+  }
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
     const context = await this.getContext(workspace, workspaceMapping);
@@ -337,7 +322,8 @@ export abstract class AHelmGenerator implements IStep {
       return;
     }
 
-
+    this.globalContexts.push(context.global);
+    this.contexts.set(workspace, context.scoped);
   }
 
   clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
