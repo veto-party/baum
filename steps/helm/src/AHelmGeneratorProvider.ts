@@ -21,7 +21,7 @@ type ExtendedSchemaType = {
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K]) => ExtendedSchemaType[K]; }
 
-export abstract class AHelmGenerator implements IStep {
+export abstract class AHelmGeneratorProvider implements IStep {
 
   private getHash(value: string) {
     let hash = 7;
@@ -156,12 +156,12 @@ export abstract class AHelmGenerator implements IStep {
   }
 
   private grouperFunctions: Mappers = {
-    variable: AHelmGenerator.basicOverrideFnc('variable'),
-    expose: AHelmGenerator.basicOverrideFnc('expose'),
-    job: AHelmGenerator.basicOverrideFnc('job'),
-    service: AHelmGenerator.basicOverrideFnc('service'),
-    binding: AHelmGenerator.basicOverrideFnc('binding'),
-    __scope: AHelmGenerator.basicOverrideFnc('#__internal__(__scope)'),
+    variable: AHelmGeneratorProvider.basicOverrideFnc('variable'),
+    expose: AHelmGeneratorProvider.basicOverrideFnc('expose'),
+    job: AHelmGeneratorProvider.basicOverrideFnc('job'),
+    service: AHelmGeneratorProvider.basicOverrideFnc('service'),
+    binding: AHelmGeneratorProvider.basicOverrideFnc('binding'),
+    __scope: AHelmGeneratorProvider.basicOverrideFnc('#__internal__(__scope)'),
     connection: (prev, current) => {
       if (!prev) {
         return cloneDeep(current);
