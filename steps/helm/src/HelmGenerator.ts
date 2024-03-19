@@ -39,8 +39,6 @@ export abstract class HelmGenerator implements IStep {
     });
 
     const valuesYAML: Record<string, any> = {};
-    const secretsYAML:Record<string, any> = {};
-    const configMapYAML: Record<string, any> = {};
 
     // TODO: resolve bindings.
     Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
@@ -158,22 +156,83 @@ export abstract class HelmGenerator implements IStep {
               ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                 containerPort: port
               })),
-              env: Object.entries(scopedContext?.binding ?? {}).map(([k ,v]) => {
+              env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k ,v]) => {
 
-                const resolved = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
+                const [key,resolved] = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
 
-                return {
+                const resulting: any = {
                   name: k,
+                  value: resolved.default,
+                };
 
+                if (resolved.secret) {
+                  resulting.valueFrom = {
+                    secretKeyRef: {
+                      name: k,
+                      key
+                    }
+                  }
+                } else {
+                  resulting.valueFrom = {
+                    configMapKeyRef: {
+                      name: k,
+                      key
+                    }
+                  }
                 }
-              }).filter(Boolean) // TODO: do binding first. --> envrionment.yaml in old version.
+              })
             }]
           }
         }
       }
     };
 
-    const jobYAML = {};
+
+    const secretsYAML = {
+      apiVersion: 'v1',
+      kind: 'secret',
+      metadata: {
+        name
+      },
+      type: 'Opaque',
+      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret).map(([key]) => {
+        return [key, resolveReference(key, scopedContext?.variable ?? {}, globalContext.variable)[1].default!];
+      }))
+    };
+
+
+
+    const configMapYAML = {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name
+      },
+      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret).map(([key]) => {
+        return [key, resolveReference(key, scopedContext?.variable ?? {}, globalContext.variable)[1].default!];
+      }))
+    };
+
+    const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
+      apiVersion: 'batch/v1',
+      kind: 'Job',
+      metadata: {
+        name: key,
+        "helm.sh/hook-delete-policy": "hook-succeeded"
+      },
+      spec: {
+        template: {
+          spec: {
+            restartPolicy: 'OnFailure',
+            containers: [{
+              name: `${key}-container`,
+              image: ''
+            }]
+          }
+        }
+      }
+
+    }));
   }
 
   clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
