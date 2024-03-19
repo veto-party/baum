@@ -21,11 +21,16 @@ type ExtendedSchemaType = {
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K]) => ExtendedSchemaType[K]; }
 
-export abstract class AHelmGeneratorProvider implements IStep {
+export class AHelmGeneratorProvider implements IStep {
 
 
   protected globalContexts: ExtendedSchemaType[] = [];
   public contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
+
+  constructor(
+    private getHelmFileName: (workspace: IWorkspace) => string,
+    private workspaceFilter: (workspace: IWorkspace) => boolean
+  ) { }
 
 
   private getHash(value: string) {
@@ -106,13 +111,9 @@ export abstract class AHelmGeneratorProvider implements IStep {
     return allWorkspaces;
   }
 
-  abstract getHelmFileName(): string;
-
-  abstract workspaceFilter(workspace: IWorkspace): boolean;
-
   @CachedFN(true)
   private async loadFoRWorkspace(workspace: IWorkspace): Promise<SchemaType | undefined> {
-    const file = await FileSystem.readFile(Path.join(Path.dirname(workspace.getDirectory()), this.getHelmFileName())).catch(() => undefined);
+    const file = await FileSystem.readFile(Path.join(Path.dirname(workspace.getDirectory()), this.getHelmFileName(workspace))).catch(() => undefined);
     if (!file) {
       return;
     }
@@ -260,7 +261,8 @@ export abstract class AHelmGeneratorProvider implements IStep {
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
         environment.global.variable[scopedKey] = {
           type: service.type,
-          default: scopedDefinitionName
+          default: scopedDefinitionName,
+          static: true,
         };
         
         if (realDefinitionName) {
@@ -310,8 +312,6 @@ export abstract class AHelmGeneratorProvider implements IStep {
     
     return undefined;
   }
-
-  abstract getDockerImageForWorkspace(workspace: IWorkspace): string;
 
   public get globalContext() {
     return this.groupScopes(this.globalContexts);

@@ -2,15 +2,16 @@ import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import yaml from 'yaml';
-import { AHelmGeneratorProvider } from './AHelmGeneratorProvider.js';
+import { AHelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import set from 'lodash.set';
 import { buildVariable } from './utility/buildVariable.js';
-import { resolveReference } from './utility/resolveReference.js';
+import { resolveBindings, resolveReference } from './utility/resolveReference.js';
 
 export abstract class HelmGenerator implements IStep {
 
   constructor(
     private helmFileGeneratorProvider: AHelmGeneratorProvider,
+    private dockerFileGenerator: (workspace: IWorkspace) => string,
     private version: string
   ) {}
 
@@ -42,19 +43,11 @@ export abstract class HelmGenerator implements IStep {
     const configMapYAML: Record<string, any> = {};
 
     // TODO: resolve bindings.
-    Object.entries(scopedContext?.variable ?? {}).forEach(([k, v]) => {
-
-
+    Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
       const [resolvedKey, resolved] = resolveReference(k, scopedContext!.variable, globalContext.variable) ?? [k, v];
 
       if (resolved.static) {
         set(valuesYAML, k, buildVariable(resolved, k));
-      }
-
-      if (resolved.secret) {
-        secretsYAML[k] = `{{index .Values ${resolvedKey} }}`;
-      } else {
-        configMapYAML[k] = `{{index .Values ${resolvedKey} }}`;
       }
     });
 
@@ -88,7 +81,7 @@ export abstract class HelmGenerator implements IStep {
         selector: {
           app: `${name}-depl`
         },
-        type: 'ClusterIP',
+        type: 'LoadBalancer',
         ports: Object.entries(scopedContext?.expose ?? {}).filter((([, exposed]) => exposed.type === "load-balancer")).map(([port]) => ({
           name: `${name}-${port}`,
           protocol: 'TCP',
@@ -161,11 +154,19 @@ export abstract class HelmGenerator implements IStep {
           },
           spec: {
             containers: [{
-              name: '',// TODO: generate prefix image + version.
+              name: this.dockerFileGenerator(workspace),
               ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                 containerPort: port
               })),
-              env: [] // TODO: do binding first. --> envrionment.yaml in old version.
+              env: Object.entries(scopedContext?.binding ?? {}).map(([k ,v]) => {
+
+                const resolved = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
+
+                return {
+                  name: k,
+
+                }
+              }).filter(Boolean) // TODO: do binding first. --> envrionment.yaml in old version.
             }]
           }
         }
