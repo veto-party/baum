@@ -1,19 +1,38 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
+import { EOL } from 'node:os';
 import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import yaml from 'yaml';
 import { AHelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import set from 'lodash.set';
 import { buildVariable } from './utility/buildVariable.js';
 import { resolveBindings, resolveReference } from './utility/resolveReference.js';
+import { to_structured_data } from './yaml/to_structure_data.js';
+import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
+import { ArrayToken } from './yaml/implementation/ArrayToken.js';
+import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 
 export abstract class HelmGenerator implements IStep {
 
   constructor(
     private helmFileGeneratorProvider: AHelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
+    private dockerFileForJobGenerator: (workspace: IWorkspace, job: string) => string,
     private version: string
   ) {}
+
+  private async writeObjectToFile(root: string, path: string[], obj: any[]) {
+
+    const resulting = Path.join(root, ...path);
+
+    try {
+      await FileSystem.mkdir(Path.dirname(resulting), {
+        recursive: true
+      });
+    } catch (error) {}
+
+    await FileSystem.writeFile(resulting, obj.map(to_structured_data).map((resolved) => resolved.write()).join(`${EOL}---${EOL}`));
+  }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const scopedContext = this.helmFileGeneratorProvider.contexts.get(workspace);
@@ -38,6 +57,8 @@ export abstract class HelmGenerator implements IStep {
       });
     });
 
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'Chart.yaml'], [ChartYAML]);
+
     const valuesYAML: Record<string, any> = {};
 
     // TODO: resolve bindings.
@@ -48,6 +69,9 @@ export abstract class HelmGenerator implements IStep {
         set(valuesYAML, k, buildVariable(resolved, k));
       }
     });
+
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'values.yaml'], [valuesYAML]);
 
     const serviceYAMLInternal = {
       apiVersion: 'v1',
@@ -89,7 +113,7 @@ export abstract class HelmGenerator implements IStep {
       }
     };
 
-    const serviceYAML = [serviceYAMLInternal, serviceYAMLExternal];
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'service.yaml'], [serviceYAMLInternal, serviceYAMLExternal]);
 
     const ingressYAMLStripPrefixes = Object.entries(scopedContext?.expose ?? {}).filter(([, exposed]) => exposed.type === "load-balancer").map(([port, lbType]) => ({
       apiVersion: 'traefik.io/v1alpha1',
@@ -129,7 +153,7 @@ export abstract class HelmGenerator implements IStep {
       },
     };
 
-    const ingressYAML = [ingressYAMLStripPrefixes, ingressYAMLRoutes].flat();
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, ingressYAMLRoutes].flat());
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
@@ -180,13 +204,18 @@ export abstract class HelmGenerator implements IStep {
                     }
                   }
                 }
-              })
+              }),
+              imagePullSecret: new ConditionalToken(`if eq .Values.global.registry.type "secret"`, new ArrayToken([new ObjectToken({
+                name: 'veto-pull-secret'
+              })]))
             }]
           }
         }
       }
     };
 
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
 
     const secretsYAML = {
       apiVersion: 'v1',
@@ -201,6 +230,7 @@ export abstract class HelmGenerator implements IStep {
     };
 
 
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'secret.yaml'], [secretsYAML]);
 
     const configMapYAML = {
       apiVersion: 'v1',
@@ -210,8 +240,11 @@ export abstract class HelmGenerator implements IStep {
       },
       data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret).map(([key]) => {
         return [key, resolveReference(key, scopedContext?.variable ?? {}, globalContext.variable)[1].default!];
-      }))
+      })),
     };
+
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'configMap.yaml'], [configMapYAML]);
 
     const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
       apiVersion: 'batch/v1',
@@ -226,13 +259,43 @@ export abstract class HelmGenerator implements IStep {
             restartPolicy: 'OnFailure',
             containers: [{
               name: `${key}-container`,
-              image: ''
+              image: this.dockerFileForJobGenerator(workspace, key),
+              env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k ,v]) => {
+
+                const [key,resolved] = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
+
+                const resulting: any = {
+                  name: k,
+                  value: resolved.default,
+                };
+
+                if (resolved.secret) {
+                  resulting.valueFrom = {
+                    secretKeyRef: {
+                      name: k,
+                      key
+                    }
+                  }
+                } else {
+                  resulting.valueFrom = {
+                    configMapKeyRef: {
+                      name: k,
+                      key
+                    }
+                  }
+                }
+              }),
+              imagePullSecret: new ConditionalToken(`if eq .Values.global.registry.type "secret"`, new ArrayToken([new ObjectToken({
+                name: 'veto-pull-secret'
+              })]))
             }]
           }
         }
       }
-
     }));
+
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'job.yaml'], [jobYAML]);
   }
 
   clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
