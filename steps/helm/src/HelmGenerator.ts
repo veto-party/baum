@@ -61,7 +61,6 @@ export abstract class HelmGenerator implements IStep {
 
     const valuesYAML: Record<string, any> = {};
 
-    // TODO: resolve bindings.
     Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
       const [resolvedKey, resolved] = resolveReference(k, scopedContext!.variable, globalContext.variable) ?? [k, v];
 
