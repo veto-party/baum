@@ -5,7 +5,6 @@ import semver from 'semver';
 import { type SchemaType, schema } from './types/types.js';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
-import yaml from 'yaml';
 
 type HelmFileResult = [hemlFileMapping: Map<IWorkspace, SchemaType>, workspaceMapping: Map<IWorkspace, IWorkspace[]>];
 
@@ -326,7 +325,7 @@ export class HelmGeneratorProvider implements IStep {
     this.contexts.set(workspace, context.scoped);
   }
 
-  clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    // NO-OP
   }
 }

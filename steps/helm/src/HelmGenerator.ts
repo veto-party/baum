@@ -1,8 +1,7 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import { EOL } from 'node:os';
-import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
-import yaml from 'yaml';
+import { type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import set from 'lodash.set';
 import { buildVariable } from './utility/buildVariable.js';
@@ -297,7 +296,7 @@ export class HelmGenerator implements IStep {
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'job.yaml'], [jobYAML]);
   }
 
-  clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    // NO-OP
   }
 }
