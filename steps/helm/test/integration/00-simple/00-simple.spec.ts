@@ -13,6 +13,7 @@ describe('A simple test', () => {
 
         baum.setRootDirectory(Path.dirname(__filename));
         baum.setPackageManager(new NPMPackageManager());
+        baum.dontCopyLockFile();
 
         const helmfileProvider = new HelmGeneratorProvider(() => 'helm.veto.json', (workspace) => workspace.getPackageFile()['name'].startsWith('@veto/'));
         const helmfileGenerator = new HelmGenerator(helmfileProvider, (workspace) => workspace.getName(), (workspace) => workspace.getName(), '1.0.0');
