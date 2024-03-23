@@ -1,9 +1,6 @@
 {
   "name": "@veto-party/test-helm-00",
-  "type": "module",
-  "devDependencies": {
-    "baum": "*",
-    "@veto-party/baum__package_manager__npm": "*",
-    "@veto-party/config": "*"
-  }
+  "workspaces": [
+    "workspace"
+  ]
 }
