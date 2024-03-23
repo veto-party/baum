@@ -12,7 +12,7 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 
-export abstract class HelmGenerator implements IStep {
+export class HelmGenerator implements IStep {
 
   constructor(
     private helmFileGeneratorProvider: HelmGeneratorProvider,
