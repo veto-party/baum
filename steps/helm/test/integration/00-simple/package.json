@@ -1,5 +1,6 @@
 {
   "name": "@veto-party/test-helm-00",
+  "type": "module",
   "workspaces": [
     "workspace"
   ]
