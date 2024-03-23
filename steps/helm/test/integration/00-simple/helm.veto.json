@@ -1,0 +1,28 @@
+{
+  "variable": {
+    "service-host-address": {
+      "type": "global",
+      "default": "replace-me"
+    },
+    "service-host-port": {
+      "type": "global",
+      "default": "replace-me"
+    },
+    "service-host": {
+      "type": "global",
+      "binding": {
+        "SERVICE_HOST_ADDRESS": "service-host-address",
+        "SERVICE_HOST_PORT": "service-host-port"
+      },
+      "default": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+    },
+    "service-host-domain": {
+      "type": "global",
+      "default": "replace-me"
+    }
+  },
+  "binding": {
+    "example_url": "service-host",
+    "example_host": "service-host-domain"
+  }
+}
