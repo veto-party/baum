@@ -8,18 +8,19 @@ import FileSystem from 'node:fs/promises';
 import FileSystemSync from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.join(Path.dirname(__filename), '..');
+const __dirname = Path.dirname(__filename);
 
 async function compareDirectories(pathA: string, pathB: string) {
     const filesA = FileSystemSync.readdirSync(pathA);
     const filesB = FileSystemSync.readdirSync(pathB);
 
     if (filesA.length !== filesB.length) {
+        console.error(`File count is different....  ${JSON.stringify(filesA)} ${JSON.stringify(filesB)}`)
         return false;
     }
 
     for (const file of filesA) {
-        if ((await FileSystem.stat(file)).isDirectory()) {
+        if ((await FileSystem.stat(Path.join(pathA, file))).isDirectory()) {
             if (!(await compareDirectories(Path.join(pathA, file), Path.join(pathB, file)))) {
                 return false;
             }
@@ -33,6 +34,8 @@ async function compareDirectories(pathA: string, pathB: string) {
             }
         }
     }
+
+    return true;
 }
 
 describe('A simple test', () => {
@@ -51,7 +54,7 @@ describe('A simple test', () => {
 
         await baum.run();
 
-        const testDirectory = Path.join(__dirname, '00-simple');
+        const testDirectory = __dirname;
         const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(testDirectory, 'expected-helm'));
 
         expect(compareResult).toBe(true);
