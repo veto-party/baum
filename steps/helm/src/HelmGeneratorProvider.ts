@@ -13,18 +13,22 @@ type ExtendedSchemaType = {
   binding?: SchemaType['binding'];
   connection?: SchemaType['connection'];
   expose?: SchemaType['expose'];
-  job?: SchemaType['job'];
+  job?: Record<string, Exclude<SchemaType['job'], undefined>[string] & {
+    workspace: IWorkspace;
+  }>;
   service?: SchemaType['service'];
   variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>; 
 }
 
-type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K]) => ExtendedSchemaType[K]; }
+type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K], workspace: IWorkspace) => ExtendedSchemaType[K]; }
 
-export class AHelmGeneratorProvider implements IStep {
+export class HelmGeneratorProvider implements IStep {
 
 
-  protected globalContexts: ExtendedSchemaType[] = [];
+  public globalContext: ExtendedSchemaType = {
+    variable: {}
+  };
   public contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
 
   constructor(
@@ -162,12 +166,12 @@ export class AHelmGeneratorProvider implements IStep {
   }
 
   private grouperFunctions: Mappers = {
-    variable: AHelmGeneratorProvider.basicOverrideFnc('variable'),
-    expose: AHelmGeneratorProvider.basicOverrideFnc('expose'),
-    job: AHelmGeneratorProvider.basicOverrideFnc('job'),
-    service: AHelmGeneratorProvider.basicOverrideFnc('service'),
-    binding: AHelmGeneratorProvider.basicOverrideFnc('binding'),
-    __scope: AHelmGeneratorProvider.basicOverrideFnc('#__internal__(__scope)'),
+    variable: HelmGeneratorProvider.basicOverrideFnc('variable'),
+    expose: HelmGeneratorProvider.basicOverrideFnc('expose'),
+    job: HelmGeneratorProvider.basicOverrideFnc('job'),
+    service: HelmGeneratorProvider.basicOverrideFnc('service'),
+    binding: HelmGeneratorProvider.basicOverrideFnc('binding'),
+    __scope: HelmGeneratorProvider.basicOverrideFnc('#__internal__(__scope)'),
     connection: (prev, current) => {
       if (!prev) {
         return cloneDeep(current);
@@ -187,10 +191,10 @@ export class AHelmGeneratorProvider implements IStep {
     }
   }
 
-  private groupScopes(schema: ExtendedSchemaType[]): ExtendedSchemaType {
+  private groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
     return [...schema].reduce<ExtendedSchemaType>((previous, current) => {
       Object.entries(current).forEach(([key, value]) => {
-        (previous as any)[key] = (this.grouperFunctions as any)[key]((previous as any)?.[key], value);
+        (previous as any)[key] = (this.grouperFunctions as any)[key]((previous as any)?.[key], value, workspace);
       });
       return previous;
     }, {
@@ -207,19 +211,16 @@ export class AHelmGeneratorProvider implements IStep {
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
 
-      const defaultValue = {
+      const defaultValue: ExtendedSchemaType = {
         ...helmFile,
-        variable: helmFile?.variable ?? {}
+        variable: helmFile?.variable ?? {},
+        job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       }
 
       const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
-        global: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue]),
-        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue]),
+        global: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue], workspace),
+        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue], workspace),
       };
-
-      environment.scoped.binding = helmFile?.binding;
-      environment.scoped.connection = helmFile?.connection;
-      environment.scoped.job = helmFile?.job;
 
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string|undefined = undefined;
@@ -304,17 +305,13 @@ export class AHelmGeneratorProvider implements IStep {
 
     if (childScopes.some((scope) => scope)) {
       const result =  {
-        global: this.groupScopes(childScopes.map((childScope) => childScope.global)),
-        scoped: this.groupScopes(childScopes.map((childScopes) => childScopes.scoped))
+        global: this.groupScopes(childScopes.map((childScope) => childScope.global), workspace),
+        scoped: this.groupScopes(childScopes.map((childScopes) => childScopes.scoped), workspace)
       }
       return result;
     }
     
     return undefined;
-  }
-
-  public get globalContext() {
-    return this.groupScopes(this.globalContexts);
   } 
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -325,7 +322,7 @@ export class AHelmGeneratorProvider implements IStep {
       return;
     }
 
-    this.globalContexts.push(context.global);
+    this.globalContext = this.groupScopes([this.globalContext, context.global], workspace);
     this.contexts.set(workspace, context.scoped);
   }
 

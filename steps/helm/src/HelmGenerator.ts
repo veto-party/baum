@@ -3,7 +3,7 @@ import Path from 'node:path';
 import { EOL } from 'node:os';
 import { GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import yaml from 'yaml';
-import { AHelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import set from 'lodash.set';
 import { buildVariable } from './utility/buildVariable.js';
 import { resolveBindings, resolveReference } from './utility/resolveReference.js';
@@ -15,7 +15,7 @@ import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 export abstract class HelmGenerator implements IStep {
 
   constructor(
-    private helmFileGeneratorProvider: AHelmGeneratorProvider,
+    private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (workspace: IWorkspace, job: string) => string,
     private version: string
@@ -258,7 +258,7 @@ export abstract class HelmGenerator implements IStep {
             restartPolicy: 'OnFailure',
             containers: [{
               name: `${key}-container`,
-              image: this.dockerFileForJobGenerator(workspace, key),
+              image: this.dockerFileForJobGenerator(entry.workspace, key),
               env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k ,v]) => {
 
                 const [key,resolved] = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
