@@ -1,0 +1,32 @@
+"apiVersion":"apps/v1"
+"kind":"Deployment"
+"metadata":
+  "name":"workspace-depl"
+  
+"spec":
+  "replicas":1
+  "selector":
+    "matchLabels":
+      "app":"workspace-depl"
+      
+    
+  "template":
+    "metadata":
+      "labels":
+        "app":"workspace-depl"
+        
+      
+    "spec":
+      "containers":
+        - "name":"test_workspace"
+          "ports":
+            
+          "env":
+            
+          "imagePullSecret":
+            - "name":"veto-pull-secret"
+              
+          
+      
+    
+  

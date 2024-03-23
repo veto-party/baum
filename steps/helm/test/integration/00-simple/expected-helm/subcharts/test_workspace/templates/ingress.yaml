@@ -1,0 +1,11 @@
+"apiVersion":"traefik.containo.us/v1alpha1"
+"kind":"IngressRoute"
+"metadata":
+  "name":"workspace--veto-ingress"
+  
+"spec":
+  "entryPoints":
+    - "websecure"
+  "routes":
+    
+  
