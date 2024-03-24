@@ -7,3 +7,7 @@
     "version": "1.0.0"
     "repository": "file:../subcharts/test_workspace"
     
+  - "name": "global-database"
+    "version": "14.x.x"
+    "repository": "https://charts.bitnami.com/bitnami"
+    
