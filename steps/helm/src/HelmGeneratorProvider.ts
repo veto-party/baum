@@ -257,7 +257,7 @@ export class HelmGeneratorProvider implements IStep {
           });
 
           if (realDefinitionName) {
-            refTarget.variable[`${realDefinitionName}.${k}`] == cloneDeep(cloned);
+            refTarget.variable[`${realDefinitionName}.${k}`] = cloneDeep(cloned);
             cloned = {
               ref: `${realDefinitionName}.${k}`
             }
@@ -278,10 +278,10 @@ export class HelmGeneratorProvider implements IStep {
         }
 
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
-        environment.global.variable[scopedKey] = {
+        refTarget.variable[scopedKey] = {
           type: service.type,
           default: scopedDefinitionName,
-          static: true,
+          external: true
         };
         
         if (realDefinitionName) {

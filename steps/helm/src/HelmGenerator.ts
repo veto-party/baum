@@ -75,8 +75,8 @@ export class HelmGenerator implements IStep {
 
     const allBindings = Array.from(contexts.values()).map((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition.variable, context.variable)).map((current) => [resolveReference([current[1], current[0]], definition.variable, context.variable), current] as const)).flat();
 
-    allBindings.forEach(([[resolved],[k, v]]) => {
-      if (v.is_global || v.external) {
+    [allBindings, Object.entries(context.variable).filter(([,variable]) => variable.external).map((entry) => [[entry[1], entry[0]], entry] as const)].flat().forEach(([[resolved],[k, v]]) => {
+      if ((v as any).is_global || v.external) {
         set(valuesYAML, k, buildVariable(resolved, k));
       }
     });
@@ -147,11 +147,16 @@ export class HelmGenerator implements IStep {
 
     const valuesYAML: Record<string, any> = {};
 
-    Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
-      const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
+    [Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)), Object.entries(scopedContext?.variable ?? {}).filter(([,variable]) => variable.external)].flat().forEach(([k, v]) => {
 
-      // TODO: add flag for external variable reference ( of service )
-      if ((!resolved.static && !v.is_global) || v.external) {
+      if (v.external) {
+        console.log(v, k);
+        set(valuesYAML, k, buildVariable(v, k));
+        return;
+      }
+
+      const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
+      if (!resolved.static && !(v as any).is_global) {
         set(valuesYAML, k, buildVariable(resolved, k));
       } 
     });
