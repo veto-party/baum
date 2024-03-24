@@ -46,13 +46,18 @@ export default async (baum: IBaumManagerConfiguration) => {
         .addExecutionStep('prepare', commonStep)
     );
   } else if (!process.env.CI) {
-    baum.addExecutionStep('publish', new (class extends VerdaccioRegistryStep {
-      async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string): Promise<void> {
-        await super.modifyJSON(json, versionManager, workspace, pm, root);
-        if (json.scripts?.build.includes('tsc')) {
-          json.main = './dist/index.js';
+    baum.addExecutionStep(
+      'publish',
+      new (class extends VerdaccioRegistryStep {
+        async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string): Promise<void> {
+          await super.modifyJSON(json, versionManager, workspace, pm, root);
+          if (json.scripts?.build.includes('tsc')) {
+            json.main = './dist/index.js';
+          }
         }
-      }
-    })(version).addInstallStep().addExecutionStep('prepare', commonStep));
+      })(version)
+        .addInstallStep()
+        .addExecutionStep('prepare', commonStep)
+    );
   }
 };
