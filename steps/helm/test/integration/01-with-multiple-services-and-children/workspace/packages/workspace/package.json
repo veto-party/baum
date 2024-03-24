@@ -1,6 +1,6 @@
 {
-    "name": "test_workspace",
-    "dependencies": {
-        "test_workspace_child": "*"
-    }
+  "name": "test_workspace",
+  "dependencies": {
+    "test_workspace_child": "*"
+  }
 }

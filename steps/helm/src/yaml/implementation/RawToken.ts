@@ -1,13 +1,11 @@
-import { AToken } from "../AToken.js";
+import { AToken } from '../AToken.js';
 
 export class RawToken extends AToken {
-    constructor(
-        private value: string
-    ) {
-        super();
-    }
+  constructor(private value: string) {
+    super();
+  }
 
-    write(): string {
-        return this.value;
-    }
+  write(): string {
+    return this.value;
+  }
 }

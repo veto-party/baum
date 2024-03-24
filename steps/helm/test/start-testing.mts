@@ -4,7 +4,6 @@ import type JasmineType from 'jasmine';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-
 const argv = await yargs(hideBin(process.argv)).argv;
 
 const currentPath = process.cwd();
@@ -30,7 +29,7 @@ jasmine.loadConfig(configuration);
 
 jasmine.exitOnCompletion = true;
 
-let f: string|undefined = undefined;
+let f: string | undefined = undefined;
 
 if (argv.f) {
   f = argv.f.toString();

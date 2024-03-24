@@ -1,22 +1,25 @@
-import { ExtendedSchemaType } from "../HelmGeneratorProvider.js";
+import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-export const resolveReference = (variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean; }, string], allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>) => {
+export const resolveReference = (
+  variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean }, string],
+  allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>,
+  allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>
+) => {
   while (variable[0]?.ref !== undefined) {
     if (!variable[0].is_global) {
       variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
     } else {
       variable = [allGlobalVars[variable[0].ref], variable[0].ref];
     }
-  };
+  }
 
   return variable;
-}
+};
 
-export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>) => {
-  const resolvedVars: Record<string, typeof allScopedVars[string] & { is_global: boolean; }> = {
-  };
+export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>) => {
+  const resolvedVars: Record<string, (typeof allScopedVars)[string] & { is_global: boolean }> = {};
 
-  let lookupVars = Object.entries(refName);
+  const lookupVars = Object.entries(refName);
 
   while (lookupVars.length > 0) {
     const [key, lookupKey] = lookupVars.pop()!;
@@ -30,7 +33,7 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
       throw new Error(`Missing lookup for ${JSON.stringify(lookupKey)} is missing in socped + global vars.`);
     }
 
-    resolvedVars[key] =  {
+    resolvedVars[key] = {
       ...lookup,
       is_global: allGlobalVars[lookupKey] === lookup
     };
@@ -41,4 +44,4 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
   }
 
   return resolvedVars;
-}
+};

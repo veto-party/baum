@@ -73,7 +73,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
         }
 
         const packagePath = Path.join(cwd, path);
-        return OldFileSystem.existsSync(packagePath) ? [ packagePath ] : [] as string[];
+        return OldFileSystem.existsSync(packagePath) ? [packagePath] : ([] as string[]);
       })
     );
 

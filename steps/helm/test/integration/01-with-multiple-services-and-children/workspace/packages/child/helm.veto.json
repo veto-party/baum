@@ -7,7 +7,7 @@
     },
     "scoped-variable": {
       "type": "scoped",
-      "default": "example" 
+      "default": "example"
     },
     "service-host-address": {
       "type": "global",

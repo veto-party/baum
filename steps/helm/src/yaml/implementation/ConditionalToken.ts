@@ -1,14 +1,14 @@
-import { AToken } from "../AToken.js";
+import { AToken } from '../AToken.js';
 
 export class ConditionalToken extends AToken {
-    constructor(
-        public condition: string,
-        private value: AToken
-    ) {
-        super();
-    }
+  constructor(
+    public condition: string,
+    private value: AToken
+  ) {
+    super();
+  }
 
-    write(): string {
-        return this.value.write();
-    }
+  write(): string {
+    return this.value.write();
+  }
 }
