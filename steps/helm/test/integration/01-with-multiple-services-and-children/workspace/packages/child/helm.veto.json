@@ -1,0 +1,89 @@
+{
+  "variable": {
+    "static-variable": {
+      "type": "scoped",
+      "static": true,
+      "default": "hello world"
+    },
+    "scoped-variable": {
+      "type": "scoped",
+      "default": "example" 
+    },
+    "service-host-address": {
+      "type": "global",
+      "default": "replace-me"
+    },
+    "service-host-port": {
+      "type": "global",
+      "default": "replace-me"
+    },
+    "service-host": {
+      "type": "global",
+      "binding": {
+        "SERVICE_HOST_ADDRESS": "service-host-address",
+        "SERVICE_HOST_PORT": "service-host-port"
+      },
+      "default": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+    },
+    "service-host-domain": {
+      "type": "global",
+      "default": "replace-me"
+    }
+  },
+  "service": {
+    "global-database": {
+      "type": "global",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        }
+      }
+    },
+    "scoped-database": {
+      "type": "scoped",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        }
+      }
+    }
+  },
+  "expose": {
+    "80": {
+      "type": "load-balancer",
+      "path": "/",
+      "domainPrefix": "test"
+    },
+    "5000": {
+      "type": "internal"
+    }
+  },
+  "binding": {
+    "example_url": "service-host",
+    "scoped_variable": "scoped-variable",
+    "example_host": "service-host-domain",
+    "static-variable": "static-variable"
+  }
+}

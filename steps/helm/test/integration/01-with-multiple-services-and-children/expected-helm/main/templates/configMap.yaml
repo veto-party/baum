@@ -1,0 +1,11 @@
+"apiVersion": "v1"
+"kind": "ConfigMap"
+"metadata": 
+  "name": "global"
+  
+"data": 
+  "example_host": {{ .Global.Values.example_host }}
+  "example_url": {{ .Global.Values.example_url }}
+  "SERVICE_HOST_PORT": {{ .Global.Values.SERVICE_HOST_PORT }}
+  "SERVICE_HOST_ADDRESS": {{ .Global.Values.SERVICE_HOST_ADDRESS }}
+  

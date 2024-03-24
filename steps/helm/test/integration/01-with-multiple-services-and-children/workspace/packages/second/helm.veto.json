@@ -1,0 +1,9 @@
+{
+  "is_service": true,
+  "variable": {
+    "test": {
+      "type": "scoped",
+      "default": "hello-world2"
+    }
+  }
+}

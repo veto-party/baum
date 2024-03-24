@@ -1,0 +1,8 @@
+"apiVersion": "v1"
+"kind": "ConfigMap"
+"metadata": 
+  "name": "packages__workspace"
+  
+"data": 
+  "scoped_variable": {{ .Values.scoped_variable }}
+  
