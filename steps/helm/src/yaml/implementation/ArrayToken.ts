@@ -19,7 +19,7 @@ export class ArrayToken extends AToken {
 
           if (token instanceof ConditionalToken) {
             let calculatedSpaces = 0;
-            while (result[calculatedSpaces] == ' ' && result.length < calculatedSpaces) {
+            while (result[calculatedSpaces] === ' ' && result.length < calculatedSpaces) {
               calculatedSpaces++;
             }
 
@@ -27,9 +27,8 @@ export class ArrayToken extends AToken {
           }
 
           return `- ${result.join(EOL)}`;
-        } else {
-          return `- ${JSON.stringify(token)}`;
         }
+        return `- ${JSON.stringify(token)}`;
       })
       .join(EOL);
   }

@@ -50,7 +50,7 @@ describe('A 01-with-multiple-services-and-children', () => {
 
     const helmfileProvider = new HelmGeneratorProvider(
       () => 'helm.veto.json',
-      (workspace) => workspace.getPackageFile()['name'].startsWith('@veto/')
+      (workspace) => workspace.getPackageFile().name.startsWith('@veto/')
     );
     const helmfileGenerator = new HelmGenerator(
       helmfileProvider,

@@ -238,8 +238,6 @@ export class HelmGeneratorProvider implements IStep {
         scoped: this.groupScopes([...childScopes.map((scope) => scope.scoped), cloneDeep(defaultValue)], workspace)
       };
 
-      debugger;
-
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string | undefined = undefined;
         if (service.type === 'scoped') {
