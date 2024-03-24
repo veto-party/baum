@@ -5,6 +5,10 @@
       "static": true,
       "default": "hello world"
     },
+    "scoped-variable": {
+      "type": "scoped",
+      "default": "example" 
+    },
     "service-host-address": {
       "type": "global",
       "default": "replace-me"
@@ -28,6 +32,7 @@
   },
   "binding": {
     "example_url": "service-host",
+    "scoped_variable": "scoped-variable",
     "example_host": "service-host-domain",
     "static-variable": "static-variable"
   }
