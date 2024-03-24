@@ -2,7 +2,7 @@
 "k1bd42d-scoped-database": 
   "auth": 
     "forcePassword": true
-    "rootPassword": "J8O49T1VXL62N5b3f6UcA8eLKVM4C35R"
+    "rootPassword": "should be generated"
     
   "fullnameOverride": "k1bd42d-k1bd42d-scoped-database"
   

@@ -5,7 +5,7 @@
 "global-database": 
   "auth": 
     "forcePassword": true
-    "rootPassword": "GPPZVKQ6g7gAW9Rf0IfRLH5FXBhBPGEM"
+    "rootPassword": "should be generated"
     
   "fullnameOverride": "global-database"
   

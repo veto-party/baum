@@ -46,7 +46,7 @@
           "default": true
         },
         "auth.rootPassword": {
-          "generated": 32
+          "default": "should be generated"
         }
       }
     },
@@ -65,7 +65,7 @@
           "default": true
         },
         "auth.rootPassword": {
-          "generated": 32
+          "default": "should be generated"
         }
       }
     }
