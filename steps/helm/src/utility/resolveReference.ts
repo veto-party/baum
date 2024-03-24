@@ -1,15 +1,11 @@
 import { VariableType } from "../types/types.js";
 
-export const resolveReference = (refName: string, allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
-
-  let lastKey = refName;
-  let currentVar = allScopedVars[refName] ?? allGlobalVars[refName];
-  while (currentVar?.ref !== undefined) {
-    lastKey = currentVar.ref;
-    currentVar = allScopedVars[currentVar.ref] ?? allGlobalVars[currentVar.ref];
+export const resolveReference = (variable: [Partial<VariableType> & { ref?: string; }, string], allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
+  while (variable[0]?.ref !== undefined) {
+    variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
   };
 
-  return [lastKey, currentVar] as const;
+  return variable;
 }
 
 export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {

@@ -61,7 +61,7 @@ export class HelmGenerator implements IStep {
     const valuesYAML: Record<string, any> = {};
 
     Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
-      const [resolvedKey, resolved] = resolveReference(k, scopedContext!.variable, globalContext.variable) ?? [k, v];
+      const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
 
       if (resolved.static) {
         set(valuesYAML, k, buildVariable(resolved, k));
@@ -180,7 +180,7 @@ export class HelmGenerator implements IStep {
               })),
               env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k ,v]) => {
 
-                const [key,resolved] = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
+                const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
 
                 const resulting: any = {
                   name: k,
@@ -222,8 +222,8 @@ export class HelmGenerator implements IStep {
         name
       },
       type: 'Opaque',
-      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret).map(([key]) => {
-        return [key, resolveReference(key, scopedContext?.variable ?? {}, globalContext.variable)[1].default!];
+      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret).map(([key, value]) => {
+        return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
       }))
     };
 
@@ -236,8 +236,8 @@ export class HelmGenerator implements IStep {
       metadata: {
         name
       },
-      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret).map(([key]) => {
-        return [key, resolveReference(key, scopedContext?.variable ?? {}, globalContext.variable)[1].default!];
+      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret).map(([key, value]) => {
+        return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
       })),
     };
 
@@ -260,7 +260,7 @@ export class HelmGenerator implements IStep {
               image: this.dockerFileForJobGenerator(entry.workspace, key),
               env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k ,v]) => {
 
-                const [key,resolved] = resolveReference(k, scopedContext?.variable ?? {}, globalContext.variable);
+                const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
 
                 const resulting: any = {
                   name: k,
