@@ -21,6 +21,9 @@ export class HelmGenerator implements IStep {
   ) {}
 
   private async writeObjectToFile(root: string, path: string[], obj: any[]) {
+    if (obj.length === 0) {
+      return;
+    }
 
     const resulting = Path.join(root, ...path);
 
@@ -151,7 +154,8 @@ export class HelmGenerator implements IStep {
       },
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, ingressYAMLRoutes].flat());
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
@@ -183,25 +187,28 @@ export class HelmGenerator implements IStep {
                 const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
 
                 const resulting: any = {
-                  name: k,
-                  value: resolved.default,
+                  name: key,
                 };
 
                 if (resolved.secret) {
                   resulting.valueFrom = {
                     secretKeyRef: {
-                      name: k,
+                      name: v.is_global ? 'global' : name,
+                      key
+                    }
+                  }
+                } else if (!resolved.static) {
+                  resulting.valueFrom = {
+                    configMapKeyRef: {
+                      name: v.is_global ? 'global' : name,
                       key
                     }
                   }
                 } else {
-                  resulting.valueFrom = {
-                    configMapKeyRef: {
-                      name: k,
-                      key
-                    }
-                  }
+                  resulting.value = resolved.default;
                 }
+
+                return resulting;
               }),
               imagePullSecret: new ConditionalToken(`if eq .Values.global.registry.type "secret"`, new ArrayToken([new ObjectToken({
                 name: 'veto-pull-secret'
@@ -222,27 +229,29 @@ export class HelmGenerator implements IStep {
         name
       },
       type: 'Opaque',
-      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret).map(([key, value]) => {
+      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret && !value.is_global).map(([key, value]) => {
         return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
       }))
     };
 
-
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'secret.yaml'], [secretsYAML]);
-
+    if (Object.keys(secretsYAML.stringData).length > 0) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'secret.yaml'], [secretsYAML]);
+    }
+    
     const configMapYAML = {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
         name
       },
-      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret).map(([key, value]) => {
+      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret && !value.is_global).map(([key, value]) => {
         return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
       })),
     };
 
-
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'configMap.yaml'], [configMapYAML]);
+    if (Object.keys(configMapYAML.data).length > 0) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'configMap.yaml'], [configMapYAML]);
+    }
 
     const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
       apiVersion: 'batch/v1',

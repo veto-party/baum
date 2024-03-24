@@ -9,7 +9,7 @@ export const resolveReference = (variable: [Partial<VariableType> & { ref?: stri
 }
 
 export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
-  const resolvedVars: typeof allScopedVars = {
+  const resolvedVars: Record<string, typeof allScopedVars[string] & { is_global: boolean; }> = {
   };
 
   let lookupVars = Object.entries(refName);
@@ -26,7 +26,10 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
       throw new Error(`Missing lookup for ${JSON.stringify(lookupKey)} is missing in socped + global vars.`);
     }
 
-    resolvedVars[key] = lookup;
+    resolvedVars[key] =  {
+      ...lookup,
+      is_global: allGlobalVars[lookupKey] === lookup
+    };
 
     if (lookup.binding) {
       lookupVars.push(...Object.entries(lookup.binding));

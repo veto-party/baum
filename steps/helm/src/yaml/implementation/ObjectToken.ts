@@ -12,10 +12,12 @@ export class ObjectToken extends AToken {
         let result = '';
 
         Object.entries(this.value).forEach(([key ,value]) => {
+            const originalValue = value;
             if (value instanceof AToken) {
                 value = EOL + value.write().split(EOL).map((line) => `  ${line}`).join(EOL);
-                if (value instanceof ConditionalToken) {
-                    value = `{{ ${value.condition} }}${EOL}${value}${EOL}{{ end }}`;
+                if (originalValue instanceof ConditionalToken) {
+                    result += `{{ ${originalValue.condition} }}${EOL}${JSON.stringify(key)}: ${value}${EOL}{{ end }}`;
+                    return;
                 }
             } else {
                 value = JSON.stringify(value);
