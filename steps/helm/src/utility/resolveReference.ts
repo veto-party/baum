@@ -1,8 +1,12 @@
 import { VariableType } from "../types/types.js";
 
-export const resolveReference = (variable: [Partial<VariableType> & { ref?: string; }, string], allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
+export const resolveReference = (variable: [Partial<VariableType> & { ref?: string; is_global?: boolean; }, string], allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
   while (variable[0]?.ref !== undefined) {
-    variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
+    if (!variable[0].is_global) {
+      variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
+    } else {
+      variable = [allGlobalVars[variable[0].ref], variable[0].ref];
+    }
   };
 
   return variable;
