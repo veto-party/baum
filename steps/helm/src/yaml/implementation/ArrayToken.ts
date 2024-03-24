@@ -26,15 +26,11 @@ export class ArrayToken extends AToken {
 
                     return `{{ ${token.condition} }}${EOL}${' '.repeat(calculatedSpaces)}- ${result.join(EOL)}${EOL}{{ end }}`
                 }
-                
+
                 return `- ${result.join(EOL)}`;
             } else {
                 return `- ${JSON.stringify(token)}`;
             }
         }).join(EOL);
-    }
-
-    get(key: any) {
-        return this.tokens[key];
     }
 }

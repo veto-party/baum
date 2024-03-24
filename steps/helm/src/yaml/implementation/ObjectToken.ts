@@ -28,8 +28,4 @@ export class ObjectToken extends AToken {
 
         return result;
     }
-
-    get(key: any) {
-        return this.value[key];
-    }
 }

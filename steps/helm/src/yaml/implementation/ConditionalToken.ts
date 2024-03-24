@@ -11,8 +11,4 @@ export class ConditionalToken extends AToken {
     write(): string {
         return this.value.write();
     }
-    
-    get(key: any) {
-        return this.value.get(key);
-    }
 }
