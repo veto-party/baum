@@ -5,6 +5,9 @@ export const definitions = {
     $schema: {
       type: 'string'
     },
+    is_service: {
+      type: 'boolean'
+    }
     variable: {
       type: 'object',
       patternProperties: {
