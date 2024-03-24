@@ -7,7 +7,7 @@ export const definitions = {
     },
     is_service: {
       type: 'boolean'
-    }
+    },
     variable: {
       type: 'object',
       patternProperties: {

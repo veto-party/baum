@@ -17,7 +17,8 @@ export type ExtendedSchemaType = {
   }>;
   service?: SchemaType['service'];
   variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; external?: boolean; }>;
-  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>; 
+  is_service?: boolean;
+  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>;
 }
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K], workspace: IWorkspace) => ExtendedSchemaType[K]; }
@@ -26,7 +27,8 @@ export class HelmGeneratorProvider implements IStep {
 
 
   public globalContext: ExtendedSchemaType = {
-    variable: {}
+    variable: {},
+    is_service: false
   };
   public contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
 
@@ -205,7 +207,8 @@ export class HelmGeneratorProvider implements IStep {
       });
 
       return result;
-    }
+    },
+    is_service: (_, current) => current
   }
 
   private groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
@@ -215,7 +218,8 @@ export class HelmGeneratorProvider implements IStep {
       });
       return previous;
     }, {
-      variable: {}
+      variable: {},
+      is_service: false
     });
   }
 

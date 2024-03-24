@@ -122,6 +122,11 @@ export class HelmGenerator implements IStep {
     const scopedContext = this.helmFileGeneratorProvider.contexts.get(workspace);
     const globalContext = this.helmFileGeneratorProvider.globalContext;
 
+    if (!scopedContext?.is_service) {
+      console.info(`Workspace: ${JSON.stringify(workspace.getName())} is not a service. No helm files will be generated for it.`);
+      return;
+    }
+
     await this.generateGlobalScope(this.helmFileGeneratorProvider.contexts, this.helmFileGeneratorProvider.globalContext, rootDirectory);
 
     const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
