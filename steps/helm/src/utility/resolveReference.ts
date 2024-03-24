@@ -1,6 +1,6 @@
-import { VariableType } from "../types/types.js";
+import { ExtendedSchemaType } from "../HelmGeneratorProvider.js";
 
-export const resolveReference = (variable: [Partial<VariableType> & { ref?: string; is_global?: boolean; }, string], allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
+export const resolveReference = (variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean; }, string], allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>) => {
   while (variable[0]?.ref !== undefined) {
     if (!variable[0].is_global) {
       variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
@@ -12,7 +12,7 @@ export const resolveReference = (variable: [Partial<VariableType> & { ref?: stri
   return variable;
 }
 
-export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<VariableType> & { ref?: string; }>, allGlobalVars: Record<string, Partial<VariableType> & { ref?: string; }>) => {
+export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; }>) => {
   const resolvedVars: Record<string, typeof allScopedVars[string] & { is_global: boolean; }> = {
   };
 

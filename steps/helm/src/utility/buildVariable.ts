@@ -1,5 +1,6 @@
 import Crypto from 'node:crypto';
 import type { VariableType } from '../types/types.js';
+import { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';
 const generatePassword = (len: number) => {
@@ -8,7 +9,7 @@ const generatePassword = (len: number) => {
   return sb.toString();
 };
 
-export const buildVariable = (variableDefinition: Partial<VariableType>, scopeName: string) => {
+export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchemaType['variable'], undefined>[string]>, scopeName: string) => {
   if (variableDefinition.type === 'scoped-name') {
     if (variableDefinition.case === 'snake') {
       return scopeName.replaceAll('-', '_'); // TODO: camelCase to snake_case

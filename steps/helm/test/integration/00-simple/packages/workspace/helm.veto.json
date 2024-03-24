@@ -30,6 +30,46 @@
       "default": "replace-me"
     }
   },
+  "service": {
+    "global-database": {
+      "type": "global",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "generated": 32
+        }
+      }
+    },
+    "scoped-database": {
+      "type": "scoped",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "generated": 32
+        }
+      }
+    }
+  },
   "expose": {
     "80": {
       "type": "load-balancer",

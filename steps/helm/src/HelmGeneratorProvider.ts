@@ -16,7 +16,7 @@ export type ExtendedSchemaType = {
     workspace: IWorkspace;
   }>;
   service?: SchemaType['service'];
-  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>;
+  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; external?: boolean; }>;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; }>; 
 }
 
@@ -231,6 +231,7 @@ export class HelmGeneratorProvider implements IStep {
       const defaultValue: ExtendedSchemaType = {
         ...helmFile,
         variable: {},
+        service: {},
         job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       }
 

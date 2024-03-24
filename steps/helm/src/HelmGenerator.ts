@@ -57,6 +57,18 @@ export class HelmGenerator implements IStep {
       });
     });
 
+    Array.from(contexts.values()).map((schema) => Object.entries(schema.service ?? {})).flat().forEach(([name, service]) => {
+      if (service.type !== "global") {
+        return;
+      }
+
+      ChartYAML.dependencies.push({
+        name,
+        version: service.definition.origin.version,
+        repository: service.definition.origin.repository,
+      });
+    });
+
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
 
@@ -66,9 +78,7 @@ export class HelmGenerator implements IStep {
 
 
     allBindings.forEach(([[resolved],[k, v]]) => {
-
-      // TODO: add flag for external variable reference ( of service )
-      if (v.is_global) {
+      if (v.is_global || v.external) {
         set(valuesYAML, k, buildVariable(resolved, k));
       }
     });
@@ -85,7 +95,7 @@ export class HelmGenerator implements IStep {
         name: 'global'
       },
       type: 'Opaque',
-      stringData: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && value.secret && value.is_global).map(([[, referencedKey],[key, value]]) => {
+      stringData: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && value.secret && value.is_global && !value.external).map(([[, referencedKey],[key, value]]) => {
         return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${referencedKey} }}`)];
       }))
     };
@@ -100,7 +110,7 @@ export class HelmGenerator implements IStep {
       metadata: {
         name: 'global'
       },
-      data: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && !value.secret && value.is_global).map(([[, referencedKey],[key, value]]) => {
+      data: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && !value.secret && value.is_global && !value.external).map(([[, referencedKey],[key, value]]) => {
         return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${referencedKey} }}`)];
       })),
     };
@@ -144,7 +154,7 @@ export class HelmGenerator implements IStep {
       const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
 
       // TODO: add flag for external variable reference ( of service )
-      if (!resolved.static && !v.is_global) {
+      if ((!resolved.static && !v.is_global) || v.external) {
         set(valuesYAML, k, buildVariable(resolved, k));
       } 
     });
@@ -307,7 +317,7 @@ export class HelmGenerator implements IStep {
         name
       },
       type: 'Opaque',
-      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret && !value.is_global).map(([key, value]) => {
+      stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret && !value.is_global && !value.external).map(([key, value]) => {
         return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
       }))
     };
@@ -322,7 +332,7 @@ export class HelmGenerator implements IStep {
       metadata: {
         name
       },
-      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret && !value.is_global).map(([key, value]) => {
+      data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external).map(([key, value]) => {
         return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
       })),
     };
