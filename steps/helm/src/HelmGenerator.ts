@@ -73,7 +73,42 @@ export class HelmGenerator implements IStep {
       }
     });
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'values.yaml'], [valuesYAML]);
+    if (Object.keys(valuesYAML).length > 0) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'values.yaml'], [valuesYAML]);
+    }
+
+
+    const secretsYAML = {
+      apiVersion: 'v1',
+      kind: 'secret',
+      metadata: {
+        name: 'global'
+      },
+      type: 'Opaque',
+      stringData: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && value.secret && value.is_global).map(([[, referencedKey],[key, value]]) => {
+        return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${referencedKey} }}`)];
+      }))
+    };
+
+    if (Object.keys(secretsYAML.stringData).length > 0) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'secret.yaml'], [secretsYAML]);
+    }
+    
+    const configMapYAML = {
+      apiVersion: 'v1',
+      kind: 'ConfigMap',
+      metadata: {
+        name: 'global'
+      },
+      data: Object.fromEntries(allBindings.filter(([,[,value]]) => !value.static && !value.secret && value.is_global).map(([[, referencedKey],[key, value]]) => {
+        return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${referencedKey} }}`)];
+      })),
+    };
+
+    if (Object.keys(configMapYAML.data).length > 0) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configMap.yaml'], [configMapYAML]);
+    }
+
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
