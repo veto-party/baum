@@ -329,7 +329,6 @@ export class HelmGeneratorProvider implements IStep {
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
-    console.log(workspaceMapping);
     const context = await this.getContext(workspace, workspaceMapping);
 
     if (!context) {
