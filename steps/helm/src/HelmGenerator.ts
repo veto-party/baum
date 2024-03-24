@@ -1,8 +1,8 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import { EOL } from 'node:os';
-import { type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
-import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import { type IExecutablePackageManager, type IStep, type IWorkspace, CachedFN } from '@veto-party/baum__core';
+import { type ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import set from 'lodash.set';
 import { buildVariable } from './utility/buildVariable.js';
 import { resolveBindings, resolveReference } from './utility/resolveReference.js';
@@ -10,6 +10,7 @@ import { to_structured_data } from './yaml/to_structure_data.js';
 import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
+import { RawToken } from './yaml/implementation/RawToken.js';
 
 export class HelmGenerator implements IStep {
 
@@ -36,9 +37,50 @@ export class HelmGenerator implements IStep {
     await FileSystem.writeFile(resulting, obj.map(to_structured_data).map((resolved) => resolved.write()).join(`${EOL}---${EOL}`));
   }
 
+  @CachedFN(true)
+  async generateGlobalScope(contexts: Map<IWorkspace, ExtendedSchemaType>, context: ExtendedSchemaType, rootDirectory: string) {
+    const ChartYAML = {
+      apiVersion: 'v2',
+      type: 'application',
+      name: 'root',
+      version: this.version,
+      dependencies: [] as any[]
+    };
+
+    Array.from(contexts.entries()).forEach(([workspace, schema]) => {
+
+    const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
+      ChartYAML.dependencies.push({
+        name,
+        version: this.version,
+        repository: `file:${Path.join('..', 'subcharts', workspace.getName())}`
+      });
+    });
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
+
+
+    const valuesYAML: Record<string, any> = {};
+
+    const allBindings = Array.from(contexts.values()).map((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition.variable, context.variable)).map((current) => [resolveReference([current[1], current[0]], definition.variable, context.variable), current] as const)).flat();
+
+
+    allBindings.forEach(([[resolved],[k, v]]) => {
+
+      // TODO: add flag for external variable reference ( of service )
+      if (v.is_global) {
+        set(valuesYAML, k, buildVariable(resolved, k));
+      }
+    });
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'values.yaml'], [valuesYAML]);
+  }
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const scopedContext = this.helmFileGeneratorProvider.contexts.get(workspace);
     const globalContext = this.helmFileGeneratorProvider.globalContext;
+
+    await this.generateGlobalScope(this.helmFileGeneratorProvider.contexts, this.helmFileGeneratorProvider.globalContext, rootDirectory);
 
     const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
 
@@ -66,9 +108,10 @@ export class HelmGenerator implements IStep {
     Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).forEach(([k, v]) => {
       const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
 
-      if (resolved.static) {
+      // TODO: add flag for external variable reference ( of service )
+      if (!resolved.static && !v.is_global) {
         set(valuesYAML, k, buildVariable(resolved, k));
-      }
+      } 
     });
 
 
@@ -230,7 +273,7 @@ export class HelmGenerator implements IStep {
       },
       type: 'Opaque',
       stringData: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && value.secret && !value.is_global).map(([key, value]) => {
-        return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
+        return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
       }))
     };
 
@@ -245,7 +288,7 @@ export class HelmGenerator implements IStep {
         name
       },
       data: Object.fromEntries(Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).filter(([, value]) => !value.static && !value.secret && !value.is_global).map(([key, value]) => {
-        return [key, resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[0].default!];
+        return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
       })),
     };
 

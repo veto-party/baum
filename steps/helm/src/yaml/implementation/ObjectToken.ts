@@ -14,7 +14,14 @@ export class ObjectToken extends AToken {
         Object.entries(this.value).forEach(([key ,value]) => {
             const originalValue = value;
             if (value instanceof AToken) {
-                value = EOL + value.write().split(EOL).map((line) => `  ${line}`).join(EOL);
+                const resultingValue  = value.write().split(EOL);
+                
+                if (resultingValue.length > 1 || originalValue instanceof ObjectToken) {
+                    value = EOL + resultingValue.map((line) => `  ${line}`).join(EOL);
+                } else {
+                    value = resultingValue.join(EOL);
+                }
+
                 if (originalValue instanceof ConditionalToken) {
                     result += `{{ ${originalValue.condition} }}${EOL}${JSON.stringify(key)}: ${value}${EOL}{{ end }}`;
                     return;
@@ -23,7 +30,7 @@ export class ObjectToken extends AToken {
                 value = JSON.stringify(value);
             }
 
-            result += `${JSON.stringify(key)}:${value}${EOL}`;
+            result += `${JSON.stringify(key)}: ${value}${EOL}`;
         });
 
         return result;

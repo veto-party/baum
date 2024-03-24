@@ -8,7 +8,7 @@ import isEqual from 'lodash.isequal';
 
 type HelmFileResult = [hemlFileMapping: Map<IWorkspace, SchemaType>, workspaceMapping: Map<IWorkspace, IWorkspace[]>];
 
-type ExtendedSchemaType = {
+export type ExtendedSchemaType = {
   binding?: SchemaType['binding'];
   connection?: SchemaType['connection'];
   expose?: SchemaType['expose'];
