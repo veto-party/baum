@@ -1,6 +1,6 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, getDependentWorkspaces, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import semver from 'semver';
 import { type SchemaType, schema } from './types/types.js';
 import cloneDeep from 'lodash.clonedeep';
@@ -63,18 +63,15 @@ export class HelmGeneratorProvider implements IStep {
     // 1. Check node_modules, if present, use node_modules.
     // 2. Check root node_modules, if present, use root node_modules.
 
-    const internalWorkspaces = await pm.readWorkspace(root);
-
-    const pathToWorkspace: Record<string, IWorkspace> = {};
-    const allWorkspaces: Map<IWorkspace, IWorkspace[]> = new Map();
+    const internalWorkspaces = [...await pm.readWorkspace(root)];
 
     internalWorkspaces.forEach((workspace) =>  {
       allWorkspaces.set(workspace, []);
     });
 
-    const workspaces = [...internalWorkspaces];
+    let workspaces = [...internalWorkspaces];
 
-    do {
+    while (workspaces.length > 0) {
       const workspace = workspaces.shift()!;
 
       if (!this.workspaceFilter(workspace)) {
@@ -91,31 +88,26 @@ export class HelmGeneratorProvider implements IStep {
       );
       const resultingContents = filesToCheck.filter(<T>(file: T | undefined): file is T => file !== undefined);
 
-      if (resultingContents.length === 0) {
-        continue;
-      }
+      if (resultingContents.length !== 0) {
+        await Promise.all(
+          resultingContents.map(([directory, content]) => {
+            const newWorkspace = new GenericWorkspace(directory, JSON.parse(content.toString()), pm.modifyToRealVersionValue.bind(pm));
+            internalWorkspaces.push(newWorkspace);
+          })
+        );
+    }
+   };
 
-      await Promise.all(
-        resultingContents.map(([directory, content]) => {
-          const newWorkspace = new GenericWorkspace(directory, JSON.parse(content.toString()), pm.modifyToRealVersionValue.bind(pm));
+   workspaces = [...internalWorkspaces];
 
-          let internalWorkspace =
-            [...internalWorkspaces, ...Object.values(pathToWorkspace)].find((internalWorkspace) => internalWorkspace.getDirectory() === directory || internalWorkspace.getVersion() === newWorkspace.getVersion() || semver.satisfies(newWorkspace.getVersion(), internalWorkspace.getVersion())) ?? newWorkspace;
 
-          if (pathToWorkspace[internalWorkspace.getDirectory()] === undefined) {
-            pathToWorkspace[internalWorkspace.getDirectory()] = internalWorkspace;
-          } else {
-            internalWorkspace = pathToWorkspace[internalWorkspace.getDirectory()];
-          }
+   const allWorkspaces: Map<IWorkspace, IWorkspace[]> = new Map();
+   
+   while (workspaces.length > 0 ) {
+    const workspace = workspaces.pop()!;
 
-          if (!allWorkspaces.has(workspace)) {
-            allWorkspaces.set(workspace, [internalWorkspace]);
-          } else {
-            allWorkspaces.get(workspace)!.push(internalWorkspace);
-          }
-        })
-      );
-    } while (workspaces.length > 0);
+    allWorkspaces.set(workspace, getDependentWorkspaces(workspace, internalWorkspaces, pm));
+   }
 
     return allWorkspaces;
   }
@@ -241,8 +233,10 @@ export class HelmGeneratorProvider implements IStep {
 
       const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
         global: this.groupScopes([...childScopes.map((scope) => scope.global), cloneDeep(defaultValue)], workspace),
-        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), cloneDeep(defaultValue)], workspace),
+        scoped: this.groupScopes([...childScopes.map((scope) => scope.scoped), cloneDeep(defaultValue)], workspace),
       };
+
+      debugger;
 
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string|undefined = undefined;
