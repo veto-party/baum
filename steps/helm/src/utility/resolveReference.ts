@@ -24,7 +24,7 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
       throw new Error(`Duplicate assignment whilist resolving (${JSON.stringify(key)})`);
     }
 
-    const lookup = allScopedVars[lookupKey] ?? allGlobalVars[key];
+    const lookup = allScopedVars[lookupKey] ?? allGlobalVars[lookupKey];
 
     if (!lookup) {
       throw new Error(`Missing lookup for ${JSON.stringify(lookupKey)} is missing in socped + global vars.`);
@@ -37,6 +37,5 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
     }
   }
 
-  console.log(resolvedVars, lookupVars, refName);
   return resolvedVars;
 }

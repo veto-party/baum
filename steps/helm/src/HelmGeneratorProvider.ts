@@ -161,8 +161,12 @@ export class HelmGeneratorProvider implements IStep {
         return cloneDeep(current);
       }
 
+      if (!current) {
+        return cloneDeep(prev);
+      }
+
       const resulting = cloneDeep(prev);
-      Object.entries(prev).forEach(([key, value]) => {
+      Object.entries(current).forEach(([key, value]) => {
         if (prev[key] && isEqual(prev[key], value)) {
           return;
         }
@@ -226,13 +230,13 @@ export class HelmGeneratorProvider implements IStep {
 
       const defaultValue: ExtendedSchemaType = {
         ...helmFile,
-        variable: helmFile?.variable ?? {},
+        variable: {},
         job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       }
 
       const environment: Record<'global'|'scoped', ExtendedSchemaType> = {
-        global: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue], workspace),
-        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), defaultValue], workspace),
+        global: this.groupScopes([...childScopes.map((scope) => scope.global), cloneDeep(defaultValue)], workspace),
+        scoped: this.groupScopes([...childScopes.map((scope) => scope.global), cloneDeep(defaultValue)], workspace),
       };
 
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
