@@ -57,7 +57,7 @@ export class HelmGenerator implements IStep {
       });
     });
 
-    Array.from(contexts.values()).map((schema) => Object.entries(schema.service ?? {})).flat().forEach(([name, service]) => {
+    [...Array.from(contexts.values()), context].map((schema) => Object.entries(schema.service ?? {})).flat().forEach(([name, service]) => {
       if (service.type !== "global") {
         return;
       }
@@ -71,11 +71,9 @@ export class HelmGenerator implements IStep {
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
-
     const valuesYAML: Record<string, any> = {};
 
     const allBindings = Array.from(contexts.values()).map((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition.variable, context.variable)).map((current) => [resolveReference([current[1], current[0]], definition.variable, context.variable), current] as const)).flat();
-
 
     allBindings.forEach(([[resolved],[k, v]]) => {
       if (v.is_global || v.external) {
@@ -86,7 +84,6 @@ export class HelmGenerator implements IStep {
     if (Object.keys(valuesYAML).length > 0) {
       await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'values.yaml'], [valuesYAML]);
     }
-
 
     const secretsYAML = {
       apiVersion: 'v1',

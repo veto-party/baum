@@ -246,6 +246,9 @@ export class HelmGeneratorProvider implements IStep {
           realDefinitionName = `k${this.getHash(workspace.getName())}-${definitionName}`;
         }
 
+
+        const refTarget = realDefinitionName ? environment.scoped : environment.global;
+
         Object.entries(service.environment ?? {}).forEach(([k, v]) => {
           let cloned: Exclude<typeof environment[keyof typeof environment]['variable'], undefined>[string] = cloneDeep({
             ...v,
@@ -253,22 +256,19 @@ export class HelmGeneratorProvider implements IStep {
             external: true
           });
 
-          let refTarget = environment.global.variable;
-
           if (realDefinitionName) {
-            refTarget = environment.scoped.variable;
-            refTarget[`${realDefinitionName}.${k}`] == cloneDeep(cloned);
+            refTarget.variable[`${realDefinitionName}.${k}`] == cloneDeep(cloned);
             cloned = {
               ref: `${realDefinitionName}.${k}`
             }
           }
 
           const refString = `${definitionName}.${k}`;
-          environment.scoped.__scope ??= {};
-          environment.scoped.__scope[`${definitionName}.environment.${k}`] = {
+          refTarget.__scope ??= {};
+          refTarget.__scope[`${definitionName}.environment.${k}`] = {
             ref: refString,
           };
-          refTarget[refString] = cloned;
+          refTarget.variable[refString] = cloned;
         });
 
         let scopedDefinitionName = realDefinitionName ?? definitionName;
@@ -285,27 +285,27 @@ export class HelmGeneratorProvider implements IStep {
         };
         
         if (realDefinitionName) {
-          environment.scoped.__scope ??= {};
-          environment.scoped.__scope[`${definitionName}..${service.origin_name_var}`] = {
+          refTarget.__scope ??= {};
+          refTarget.__scope[`${definitionName}..${service.origin_name_var}`] = {
             ref: scopedKey,
           };
         }
 
-        environment.scoped.__scope ??= {};
+        refTarget.__scope ??= {};
         const scopedEnvironmentKey = `${realDefinitionName ?? definitionName}.origin_name_var`;
-        environment.scoped.__scope[scopedEnvironmentKey] = {
+        refTarget.__scope[scopedEnvironmentKey] = {
           ref: scopedKey
         };
 
         if (realDefinitionName) {
           const scopedEnvironmentKeyRef = `${definitionName}.origin_name_var`;
-          environment.scoped.__scope[scopedEnvironmentKeyRef] = {
+          refTarget.__scope[scopedEnvironmentKeyRef] = {
             ref: scopedEnvironmentKey
           }
         }
 
-        environment.scoped.service ??= {};
-        environment.scoped.service[realDefinitionName ?? definitionName] = service;
+        refTarget.service ??= {};
+        refTarget.service[realDefinitionName ?? definitionName] = service;
       });
 
       if (helmFile?.variable) {
