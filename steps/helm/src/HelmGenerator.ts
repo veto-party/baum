@@ -114,7 +114,7 @@ export class HelmGenerator implements IStep {
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'service.yaml'], [serviceYAMLInternal, serviceYAMLExternal]);
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'service.yaml'], [serviceYAMLInternal.spec.ports.length > 0 ? serviceYAMLInternal : undefined, serviceYAMLExternal.spec.ports.length > 0 ? serviceYAMLExternal : undefined].filter(Boolean));
 
     const ingressYAMLStripPrefixes = Object.entries(scopedContext?.expose ?? {}).filter(([, exposed]) => exposed.type === "load-balancer").map(([port, lbType]) => ({
       apiVersion: 'traefik.io/v1alpha1',
@@ -302,7 +302,7 @@ export class HelmGenerator implements IStep {
     }));
 
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'job.yaml'], [jobYAML]);
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'job.yaml'], [...jobYAML]);
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
