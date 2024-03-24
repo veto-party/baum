@@ -6,5 +6,5 @@
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
-    "alias": "k1bd42d-scoped-database"
+    "alias": "k5c0204-scoped-database"
     
