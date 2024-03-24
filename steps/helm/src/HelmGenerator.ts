@@ -150,7 +150,6 @@ export class HelmGenerator implements IStep {
     [Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)), Object.entries(scopedContext?.variable ?? {}).filter(([,variable]) => variable.external)].flat().forEach(([k, v]) => {
 
       if (v.external) {
-        console.log(v, k);
         set(valuesYAML, k, buildVariable(v, k));
         return;
       }
