@@ -97,17 +97,12 @@ export class HelmGeneratorProvider implements IStep {
 
    workspaces = [...internalWorkspaces];
 
-
-   console.log(workspaces.length);
-
    const allWorkspaces: Map<IWorkspace, IWorkspace[]> = new Map();
    
    while (workspaces.length > 0 ) {
     const workspace = workspaces.pop()!;
 
     allWorkspaces.set(workspace, getDependentWorkspaces(workspace, internalWorkspaces, pm));
-
-    console.log(workspace.getName(), allWorkspaces.get(workspace)?.length);
    }
 
     return allWorkspaces;
