@@ -11,8 +11,6 @@ const currentPath = process.cwd();
 
 const json = JSON.parse(FileSystem.readFileSync(Path.join(currentPath, 'package.json')).toString());
 
-const fullName = `${json.name.replace('/', '--')}__${json.version}`;
-
 let configuration: any = {};
 
 if (FileSystem.existsSync(Path.join(currentPath, 'jasmine.json'))) {

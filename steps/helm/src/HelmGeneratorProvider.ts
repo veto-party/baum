@@ -66,6 +66,10 @@ export class HelmGeneratorProvider implements IStep {
     const pathToWorkspace: Record<string, IWorkspace> = {};
     const allWorkspaces: Map<IWorkspace, IWorkspace[]> = new Map();
 
+    internalWorkspaces.forEach((workspace) =>  {
+      allWorkspaces.set(workspace, []);
+    });
+
     const workspaces = [...internalWorkspaces];
 
     do {
@@ -116,7 +120,7 @@ export class HelmGeneratorProvider implements IStep {
 
   @CachedFN(true)
   private async loadFoRWorkspace(workspace: IWorkspace): Promise<SchemaType | undefined> {
-    const file = await FileSystem.readFile(Path.join(Path.dirname(workspace.getDirectory()), this.getHelmFileName(workspace))).catch(() => undefined);
+    const file = await FileSystem.readFile(Path.join(workspace.getDirectory(), this.getHelmFileName(workspace))).catch(() => undefined);
     if (!file) {
       return;
     }
@@ -124,6 +128,7 @@ export class HelmGeneratorProvider implements IStep {
     const content = JSON.parse(file.toString());
     const valid = schema(content);
     if (!valid) {
+      console.log(schema.errors);
       throw new Error('Invalid json schema!');
     }
 
@@ -134,9 +139,18 @@ export class HelmGeneratorProvider implements IStep {
   private async collectHelmFiles(pm: IExecutablePackageManager, root: string): Promise<HelmFileResult> {
     const workspaces = await this.collectAllWorkspaces(pm, root);
 
-    const values = await Promise.all(Array.from(workspaces.entries()).map(async ([k, values]) => (await Promise.all(values.map(async (workspace) => [workspace, await this.loadFoRWorkspace(workspace)]))).flat(1)));
+    const values: [IWorkspace, SchemaType][] = [];
 
-    const newMap = new Map<IWorkspace, SchemaType>((values as [IWorkspace, SchemaType][]).values());
+    await Promise.all(Array.from(workspaces.keys()).flat().map(async (workspace) => {
+      const helmFile = await this.loadFoRWorkspace(workspace);
+
+      if (!helmFile) {
+        return;
+      }
+      values.push([workspace, helmFile]);
+    }));
+
+    const newMap = new Map<IWorkspace, SchemaType>(values);
 
     return [newMap, workspaces] as const;
   }
@@ -315,9 +329,11 @@ export class HelmGeneratorProvider implements IStep {
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
+    console.log(workspaceMapping);
     const context = await this.getContext(workspace, workspaceMapping);
 
     if (!context) {
+      console.warn(`No context found for ${workspace.getName()}`);
       return;
     }
 

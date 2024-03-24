@@ -30,12 +30,13 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
       throw new Error(`Missing lookup for ${JSON.stringify(lookupKey)} is missing in socped + global vars.`);
     }
 
-    resolvedVars[lookupKey] = lookup;
+    resolvedVars[key] = lookup;
 
     if (lookup.binding) {
       lookupVars.push(...Object.entries(lookup.binding));
     }
   }
 
+  console.log(resolvedVars, lookupVars, refName);
   return resolvedVars;
 }
