@@ -47,14 +47,20 @@ export class PNPMPackageManager implements IExecutablePackageManager {
 
   private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
     const resolvedPaths = await allSettledButFailure(
-      workspacePaths.map((path) => {
-        if (path.endsWith('/*')) {
-          return globby(`${path}/package.json`, { cwd, absolute: true });
+      workspacePaths.map(async (path) => {
+        if (path.endsWith('/*') || path.endsWith('**')) {
+          return globby(Path.join(path, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
-        return globby(path, { cwd, absolute: true });
+        if (path.endsWith('/**')) {
+          return globby(path, { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+        }
+
+        const packagePath = Path.join(cwd, path);
+        return OldFileSystem.existsSync(packagePath) ? [ packagePath ] : [] as string[];
       })
     );
+
     return await allSettledButFailure(
       resolvedPaths
         .flat()
