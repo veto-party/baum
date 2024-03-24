@@ -42,7 +42,9 @@ describe('A simple test', () => {
     it('Should run successfully', async () => {
         const baum = new BaumManager();
 
-        baum.setRootDirectory(Path.dirname(__filename));
+        const testDirectory = Path.join(__dirname, 'workspace');
+
+        baum.setRootDirectory(testDirectory);
         baum.setPackageManager(new NPMPackageManager());
         baum.dontCopyLockFile();
 
@@ -54,8 +56,7 @@ describe('A simple test', () => {
 
         await baum.run();
 
-        const testDirectory = __dirname;
-        const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(testDirectory, 'expected-helm'));
+        const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
         expect(compareResult).toBe(true);
 
