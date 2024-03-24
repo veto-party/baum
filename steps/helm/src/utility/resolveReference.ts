@@ -16,8 +16,6 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
   const resolvedVars: Record<string, typeof allScopedVars[string] & { is_global: boolean; }> = {
   };
 
-  console.log(allScopedVars, allGlobalVars);
-
   let lookupVars = Object.entries(refName);
 
   while (lookupVars.length > 0) {
