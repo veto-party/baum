@@ -1,0 +1,9 @@
+"apiVersion": "v2"
+"type": "application"
+"name": "root"
+"version": "1.0.0"
+"dependencies": 
+  - "name": "packages__workspace"
+    "version": "1.0.0"
+    "repository": "file:../subcharts/test_workspace"
+    

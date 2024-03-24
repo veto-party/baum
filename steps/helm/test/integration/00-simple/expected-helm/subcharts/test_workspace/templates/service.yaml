@@ -1,28 +1,36 @@
-"apiVersion":"v1"
-"kind":"service"
-"metadata":
-  "name":"workspace"
+"apiVersion": "v1"
+"kind": "service"
+"metadata": 
+  "name": "packages__workspace"
   
-"spec":
-  "selector":
-    "app":"workspace-depl"
+"spec": 
+  "selector": 
+    "app": "packages__workspace-depl"
     
-  "type":"ClusterIP"
-  "ports":
-    
+  "type": "ClusterIP"
+  "ports": 
+    - "name": "packages__workspace-5000"
+      "protocol": "TCP"
+      "port": "5000"
+      "targetPort": "5000"
+      
   
 
 ---
-"apiVersion":"v1"
-"kind":"service"
-"metadata":
-  "name":"workspace"
+"apiVersion": "v1"
+"kind": "service"
+"metadata": 
+  "name": "packages__workspace"
   
-"spec":
-  "selector":
-    "app":"workspace-depl"
+"spec": 
+  "selector": 
+    "app": "packages__workspace-depl"
     
-  "type":"LoadBalancer"
-  "ports":
-    
+  "type": "LoadBalancer"
+  "ports": 
+    - "name": "packages__workspace-80"
+      "protocol": "TCP"
+      "port": "80"
+      "targetPort": "80"
+      
   

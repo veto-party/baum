@@ -1,32 +1,78 @@
-"apiVersion":"apps/v1"
-"kind":"Deployment"
-"metadata":
-  "name":"workspace-depl"
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata": 
+  "name": "packages__workspace-depl"
   
-"spec":
-  "replicas":1
-  "selector":
-    "matchLabels":
-      "app":"workspace-depl"
+"spec": 
+  "replicas": 1
+  "selector": 
+    "matchLabels": 
+      "app": "packages__workspace-depl"
       
     
-  "template":
-    "metadata":
-      "labels":
-        "app":"workspace-depl"
+  "template": 
+    "metadata": 
+      "labels": 
+        "app": "packages__workspace-depl"
         
       
-    "spec":
-      "containers":
-        - "name":"test_workspace"
-          "ports":
-            
-          "env":
-            
-          "imagePullSecret":
-            - "name":"veto-pull-secret"
+    "spec": 
+      "containers": 
+        - "name": "test_workspace"
+          "ports": 
+            - "containerPort": "80"
               
-          
+            - "containerPort": "5000"
+              
+          "env": 
+            - "name": "static-variable"
+              "value": "hello world"
+              
+            - "name": "example_host"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "example_host"
+                  
+                
+              
+            - "name": "scoped_variable"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "packages__workspace"
+                  "key": "scoped_variable"
+                  
+                
+              
+            - "name": "example_url"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "example_url"
+                  
+                
+              
+            - "name": "SERVICE_HOST_PORT"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "SERVICE_HOST_PORT"
+                  
+                
+              
+            - "name": "SERVICE_HOST_ADDRESS"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "SERVICE_HOST_ADDRESS"
+                  
+                
+              
+          {{ if eq .Values.global.registry.type "secret" }}
+          "imagePullSecret": 
+            - "name": "veto-pull-secret"
+              
+          {{ end }}
       
     
   

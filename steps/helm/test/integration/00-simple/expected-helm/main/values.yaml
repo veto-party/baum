@@ -1,0 +1,4 @@
+"example_host": "replace-me"
+"example_url": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+"SERVICE_HOST_PORT": "replace-me"
+"SERVICE_HOST_ADDRESS": "replace-me"

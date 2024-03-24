@@ -1,6 +1,6 @@
-"apiVersion":"v2"
-"type":"application"
-"name":"workspace"
-"version":"1.0.0"
-"dependencies":
+"apiVersion": "v2"
+"type": "application"
+"name": "packages__workspace"
+"version": "1.0.0"
+"dependencies": 
   
