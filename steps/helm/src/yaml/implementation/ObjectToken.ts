@@ -1,6 +1,7 @@
 import { AToken } from "../AToken.js";
 import { EOL } from 'node:os';
 import { ConditionalToken } from "./ConditionalToken.js";
+import { ArrayToken } from "./ArrayToken.js";
 
 export class ObjectToken extends AToken {
     constructor(
@@ -16,7 +17,7 @@ export class ObjectToken extends AToken {
             if (value instanceof AToken) {
                 const resultingValue  = value.write().split(EOL);
                 
-                if (resultingValue.length > 1 || originalValue instanceof ObjectToken) {
+                if (resultingValue.length > 1 || originalValue instanceof ObjectToken || originalValue instanceof ArrayToken) {
                     value = EOL + resultingValue.map((line) => `  ${line}`).join(EOL);
                 } else {
                     value = resultingValue.join(EOL);

@@ -30,6 +30,16 @@
       "default": "replace-me"
     }
   },
+  "expose": {
+    "80": {
+      "type": "load-balancer",
+      "path": "/",
+      "domainPrefix": "test"
+    },
+    "5000": {
+      "type": "internal"
+    }
+  },
   "binding": {
     "example_url": "service-host",
     "scoped_variable": "scoped-variable",

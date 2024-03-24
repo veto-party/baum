@@ -217,7 +217,7 @@ export class HelmGenerator implements IStep {
         entryPoints: [
           'websecure'
         ],
-        routes: Object.entries(scopedContext?.expose ?? {}).filter(([port, exposed]) => ({
+        routes: Object.entries(scopedContext?.expose ?? {}).filter(([, exposed]) => exposed.type === 'load-balancer').map(([port, exposed]) => ({
           kind: 'Rule',
           match: `Host(\`${exposed.domainPrefix}\`) && PathPrefix(\`${exposed.path}\`)`,
           services: [{
