@@ -65,10 +65,6 @@ export class HelmGeneratorProvider implements IStep {
 
     const internalWorkspaces = [...await pm.readWorkspace(root)];
 
-    internalWorkspaces.forEach((workspace) =>  {
-      allWorkspaces.set(workspace, []);
-    });
-
     let workspaces = [...internalWorkspaces];
 
     while (workspaces.length > 0) {
@@ -93,6 +89,7 @@ export class HelmGeneratorProvider implements IStep {
           resultingContents.map(([directory, content]) => {
             const newWorkspace = new GenericWorkspace(directory, JSON.parse(content.toString()), pm.modifyToRealVersionValue.bind(pm));
             internalWorkspaces.push(newWorkspace);
+            workspaces.push(newWorkspace);
           })
         );
     }
@@ -101,12 +98,16 @@ export class HelmGeneratorProvider implements IStep {
    workspaces = [...internalWorkspaces];
 
 
+   console.log(workspaces.length);
+
    const allWorkspaces: Map<IWorkspace, IWorkspace[]> = new Map();
    
    while (workspaces.length > 0 ) {
     const workspace = workspaces.pop()!;
 
     allWorkspaces.set(workspace, getDependentWorkspaces(workspace, internalWorkspaces, pm));
+
+    console.log(workspace.getName(), allWorkspaces.get(workspace)?.length);
    }
 
     return allWorkspaces;
