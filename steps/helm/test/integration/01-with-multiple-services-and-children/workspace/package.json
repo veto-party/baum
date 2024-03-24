@@ -1,5 +1,5 @@
 {
-  "name": "@veto-party/test-helm-00",
+  "name": "@veto-party/test-helm-01",
   "type": "module",
   "workspaces": ["./packages/**"]
 }

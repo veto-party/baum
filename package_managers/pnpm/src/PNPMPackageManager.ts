@@ -52,11 +52,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
           return globby(Path.join(path, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
-        if (path.endsWith('/**')) {
-          return globby(path, { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
-        }
-
-        const packagePath = Path.join(cwd, path);
+        const packagePath = Path.join(cwd, path, 'package.json');
         return OldFileSystem.existsSync(packagePath) ? [packagePath] : ([] as string[]);
       })
     );
