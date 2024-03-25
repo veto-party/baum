@@ -64,6 +64,7 @@ describe('A simple test', () => {
 
     await baum.run();
 
+    await new Promise((resolve) => setTimeout(resolve, 50));
     const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
     expect(compareResult).toBe(true);
