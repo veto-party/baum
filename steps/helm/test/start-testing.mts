@@ -35,5 +35,5 @@ if (argv.f) {
   f = argv.f.toString();
 }
 
-console.log("RUNNING JASMINE NOW!");
+console.log('RUNNING JASMINE NOW!');
 await jasmine.execute(undefined, f);

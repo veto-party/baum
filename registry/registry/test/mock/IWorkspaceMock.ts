@@ -7,7 +7,7 @@ class IWorkspaceMock implements IWorkspace {
     private version: string,
     private dependents: IDependent[]
   ) {}
-  
+
   getFreshWorkspace(): IWorkspace {
     throw new Error('Method not implemented.');
   }
