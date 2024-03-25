@@ -4,7 +4,6 @@ import { CommandStep, GroupStep, type IExecutablePackageManager, type IStep, typ
 
 @RunOnce()
 export class HelmPacker implements IStep {
-
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
 
