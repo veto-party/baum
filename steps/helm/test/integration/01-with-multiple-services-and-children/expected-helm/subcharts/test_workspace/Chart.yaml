@@ -1,0 +1,10 @@
+"apiVersion": "v2"
+"type": "application"
+"name": "packages__workspace"
+"version": "1.0.0"
+"dependencies": 
+  - "name": "mariadb"
+    "version": "14.x.x"
+    "repository": "https://charts.bitnami.com/bitnami"
+    "alias": "k5c0204-scoped-database"
+    

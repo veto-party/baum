@@ -1,0 +1,33 @@
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata": 
+  "name": "packages__second-depl"
+  
+"spec": 
+  "replicas": 1
+  "selector": 
+    "matchLabels": 
+      "app": "packages__second-depl"
+      
+    
+  "template": 
+    "metadata": 
+      "labels": 
+        "app": "packages__second-depl"
+        
+      
+    "spec": 
+      "containers": 
+        - "name": "test_workspace_second"
+          "ports": 
+            
+          "env": 
+            
+          {{ if eq .Values.global.registry.type "secret" }}
+          "imagePullSecret": 
+            - "name": "veto-pull-secret"
+              
+          {{ end }}
+      
+    
+  

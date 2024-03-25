@@ -63,12 +63,13 @@ export class NPMPackageManager implements IExecutablePackageManager {
 
   private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
     const resolvedPaths = await allSettledButFailure(
-      workspacePaths.map((path) => {
-        if (path.endsWith('/*')) {
-          return globby(Path.join(`${path}*`, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+      workspacePaths.map(async (path) => {
+        if (path.endsWith('/*') || path.endsWith('**')) {
+          return globby(Path.join(path, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
-        return globby(path, { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+        const packagePath = Path.join(cwd, path, 'package.json');
+        return OldFileSystem.existsSync(packagePath) ? [packagePath] : ([] as string[]);
       })
     );
 

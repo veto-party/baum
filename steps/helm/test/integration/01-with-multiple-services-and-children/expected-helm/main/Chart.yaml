@@ -1,0 +1,17 @@
+"apiVersion": "v2"
+"type": "application"
+"name": "root"
+"version": "1.0.0"
+"dependencies": 
+  - "name": "packages__child"
+    "version": "1.0.0"
+    "repository": "file:../subcharts/test_workspace_child"
+    
+  - "name": "packages__second"
+    "version": "1.0.0"
+    "repository": "file:../subcharts/test_workspace_second"
+    
+  - "name": "global-database"
+    "version": "14.x.x"
+    "repository": "https://charts.bitnami.com/bitnami"
+    

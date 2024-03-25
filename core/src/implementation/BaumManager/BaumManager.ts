@@ -71,7 +71,7 @@ export class BaumManager implements IBaumManager {
         await allSettledButFailure(workspaces.map((workspace) => step.step.execute(workspace, this.packageManager!, this.rootDirectory!)));
       }
     } catch (error) {
-      console.warn('Failed, reverting state.');
+      console.warn('Failed, reverting state due to: ', error);
 
       while (stepsForReversal.length > 0) {
         const step = stepsForReversal.shift()!;

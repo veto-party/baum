@@ -19,7 +19,8 @@
         "noExplicitAny": "off",
         "noSparseArray": "off",
         "noAsyncPromiseExecutor": "off",
-        "noConfusingVoidType": "off"
+        "noConfusingVoidType": "off",
+        "noThenProperty": "off"
       },
       "complexity": {
         "noUselessEmptyExport": "off",

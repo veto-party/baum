@@ -1,0 +1,8 @@
+"scoped_variable": "example"
+"k5c0204-scoped-database": 
+  "auth": 
+    "forcePassword": true
+    "rootPassword": "should be generated"
+    
+  "fullnameOverride": "k5c0204-k5c0204-scoped-database"
+  
