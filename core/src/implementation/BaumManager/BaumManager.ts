@@ -101,6 +101,7 @@ export class BaumManager implements IBaumManager {
       await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);
       while (groups.length > 0) {
         const currentGroup = groups.shift()!;
+        console.log(`Executing group: "${JSON.stringify(currentGroup.map((group) => group.getName()))}"`);
         await this.executeGroup(currentGroup, steps);
         executedGroups.push(currentGroup);
       }
