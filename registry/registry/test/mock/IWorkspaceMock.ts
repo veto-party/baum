@@ -1,4 +1,4 @@
-import type { IDependent, IWorkspace } from '../../src/index.js';
+import type { IDependent, IWorkspace } from '@veto-party/baum__core';
 import IDependentMock from './IDependentMock.js';
 
 class IWorkspaceMock implements IWorkspace {
@@ -7,6 +7,10 @@ class IWorkspaceMock implements IWorkspace {
     private version: string,
     private dependents: IDependent[]
   ) {}
+  
+  getFreshWorkspace(): IWorkspace {
+    throw new Error('Method not implemented.');
+  }
 
   getName(): string {
     return this.name;
