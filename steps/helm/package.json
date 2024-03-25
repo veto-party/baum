@@ -28,6 +28,10 @@
     "@types/semver": "^7.5.8",
     "@types/lodash.clonedeep": "^4.5.9",
     "jasmine": "^5.1.0",
-    "@types/jasmine": "^5.1.4"
+    "@types/jasmine": "^5.1.4",
+    "diff": "^5.2.0",
+    "@types/diff": "^5.0.9",
+    "colors": "^1.4.0",
+    "@types/colors": "^1.2.1"
   }
 }
