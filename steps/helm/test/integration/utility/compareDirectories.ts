@@ -2,7 +2,7 @@ import 'colors';
 import Path from 'node:path';
 import FileSystemSync from 'node:fs';
 import FileSystem from 'node:fs/promises';
-import Diff from 'diff';
+import * as Diff from 'diff';
 
 export async function compareDirectories(pathA: string, pathB: string) {
     const filesA = FileSystemSync.readdirSync(pathA);
