@@ -32,4 +32,4 @@ jobs:
           git config user.name "<41898282+github-actions[bot]@users.noreply.github.com>"
           git add $GITHUB_WORKSPACE/docs/schema/steps/helm/${{ github.event.release.tag_name }}/schema.json
           git commit -m "helm schema for version ${{ github.event.release.tag_name }}"
-          git push
+          git push origin HEAD:main
