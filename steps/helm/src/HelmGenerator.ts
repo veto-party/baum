@@ -4,6 +4,7 @@ import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import type { SchemaType } from './types/types.js';
 import { buildVariable } from './utility/buildVariable.js';
 import { resolveBindings, resolveReference } from './utility/resolveReference.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
@@ -16,7 +17,7 @@ export class HelmGenerator implements IStep {
   constructor(
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
-    private dockerFileForJobGenerator: (workspace: IWorkspace, job: string) => string,
+    private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
     private version: string
   ) {}
 
@@ -401,7 +402,7 @@ export class HelmGenerator implements IStep {
             containers: [
               {
                 name: `${key}-container`,
-                image: this.dockerFileForJobGenerator(entry.workspace, key),
+                image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k, v]) => {
                   const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
 

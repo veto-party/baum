@@ -26,7 +26,7 @@ describe('A simple test', () => {
     const helmfileGenerator = new HelmGenerator(
       helmfileProvider,
       (workspace) => workspace.getName(),
-      (workspace) => workspace.getName(),
+      (metadata) => metadata.definition?.image ?? '',
       '1.0.0'
     );
 
