@@ -26,11 +26,25 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
       continue;
     }
 
-    const resolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
+    let resolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
 
-    const resolvedPackage = mappedPackages[currentDependent.getName()].findLast((workspace, index) => {
-      const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) === '*' ? '0.0.0' : pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
-      return semver.satisfies(workspaceVersion, resolvedVersion);
+    if (resolvedVersion === '*') {
+      const highestVersion = mappedPackages[currentDependent.getName()][mappedPackages[currentDependent.getName()].length - 1].getVersion();
+
+      if (highestVersion === '*') {
+        resolvedVersion = '0.0.0';
+      } else {
+        const newVersionSplitted = highestVersion.split('.');
+        const minorVersion = newVersionSplitted[2].split('-');
+        minorVersion[0] = (Number(minorVersion[0]) + 1).toString();
+        newVersionSplitted[2] = minorVersion.join('-');
+        resolvedVersion = newVersionSplitted.join('.');
+      }
+    }
+
+    const resolvedPackage = mappedPackages[currentDependent.getName()].findLast((workspace) => {
+      const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
+      return semver.satisfies(resolvedVersion, workspaceVersion);
     });
 
     if (!resolvedPackage) {
