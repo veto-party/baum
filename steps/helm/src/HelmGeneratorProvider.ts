@@ -64,7 +64,7 @@ export class HelmGeneratorProvider implements IStep {
 
     const internalWorkspaces = [...(await pm.readWorkspace(root))];
 
-    const checkedDirectories: Record<string, true|undefined> = {};
+    const checkedDirectories: Record<string, true | undefined> = {};
     let workspaces = [...internalWorkspaces];
 
     while (workspaces.length > 0) {
