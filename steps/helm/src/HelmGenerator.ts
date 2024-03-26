@@ -4,6 +4,7 @@ import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import type { SchemaType } from './types/types.js';
 import { buildVariable } from './utility/buildVariable.js';
 import { resolveBindings, resolveReference } from './utility/resolveReference.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
@@ -11,7 +12,6 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
-import type { SchemaType } from './types/types.js';
 
 export class HelmGenerator implements IStep {
   constructor(
