@@ -64,6 +64,7 @@ export class HelmGeneratorProvider implements IStep {
 
     const internalWorkspaces = [...(await pm.readWorkspace(root))];
 
+    const checkedDirectories: Record<string, true|undefined> = {};
     let workspaces = [...internalWorkspaces];
 
     while (workspaces.length > 0) {
@@ -86,6 +87,12 @@ export class HelmGeneratorProvider implements IStep {
       if (resultingContents.length !== 0) {
         await Promise.all(
           resultingContents.map(([directory, content]) => {
+            if (checkedDirectories[directory]) {
+              return;
+            }
+
+            checkedDirectories[directory] = true;
+
             const newWorkspace = new GenericWorkspace(directory, JSON.parse(content.toString()), pm.modifyToRealVersionValue.bind(pm));
             internalWorkspaces.push(newWorkspace);
             workspaces.push(newWorkspace);
