@@ -9,7 +9,44 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
   }, {});
 
   // Sort (mutate) arrays.
-  Object.values(mappedPackages).forEach((entries) => entries.sort((a, b) => semver.compare(a.getVersion(), b.getVersion()) || semver.compareBuild(a.getVersion(), b.getVersion())));
+  Object.values(mappedPackages).forEach((entries) =>
+    entries.sort((a, b) => {
+      const resolvedA = pm.modifyToRealVersionValue(a.getVersion()) || a.getVersion();
+      const resolvedB = pm.modifyToRealVersionValue(b.getVersion()) || b.getVersion();
+
+      if (resolvedA === '*' && resolvedB === '*') {
+        return 0;
+      }
+
+      if (resolvedA === '*') {
+        return 1;
+      }
+
+      if (resolvedB === '*') {
+        return -1;
+      }
+
+      return semver.compare(a.getVersion(), b.getVersion()) || semver.compareBuild(a.getVersion(), b.getVersion());
+    })
+  );
+
+  const resolveToVersion = (name: string, version: string) => {
+    if (version === '*') {
+      const highestVersion = (mappedPackages[name].findLast((workspace) => workspace.getVersion() !== '*') ?? mappedPackages[name][mappedPackages[name].length - 1]).getVersion();
+
+      if (highestVersion === '*') {
+        return '0.0.0';
+      }
+
+      const newVersionSplitted = highestVersion.split('.');
+      const minorVersion = newVersionSplitted[2].split('-');
+      minorVersion[0] = (Number(minorVersion[0]) + 1).toString();
+      newVersionSplitted[2] = minorVersion.join('-');
+      return newVersionSplitted.join('.');
+    }
+
+    return version;
+  };
 
   const allDependentsToParse = [...workspace.getDynamicDependents()];
   const checkedDependents: Record<string, IWorkspace> = {};
@@ -26,21 +63,8 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
       continue;
     }
 
-    let resolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
-
-    if (resolvedVersion === '*') {
-      const highestVersion = mappedPackages[currentDependent.getName()][mappedPackages[currentDependent.getName()].length - 1].getVersion();
-
-      if (highestVersion === '*') {
-        resolvedVersion = '0.0.0';
-      } else {
-        const newVersionSplitted = highestVersion.split('.');
-        const minorVersion = newVersionSplitted[2].split('-');
-        minorVersion[0] = (Number(minorVersion[0]) + 1).toString();
-        newVersionSplitted[2] = minorVersion.join('-');
-        resolvedVersion = newVersionSplitted.join('.');
-      }
-    }
+    const unResolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
+    const resolvedVersion = resolveToVersion(currentDependent.getName(), unResolvedVersion);
 
     const resolvedPackage = mappedPackages[currentDependent.getName()].findLast((workspace) => {
       const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
