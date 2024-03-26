@@ -53,14 +53,16 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    Array.from(contexts.entries()).sort(([workspaceA], [workspaceB]) => workspaceA.getDirectory().localeCompare(workspaceB.getDirectory())).forEach(([workspace, schema]) => {
-      const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
-      ChartYAML.dependencies.push({
-        name,
-        version: this.version,
-        repository: `file:${Path.join('..', 'subcharts', workspace.getName())}`
+    Array.from(contexts.entries())
+      .sort(([workspaceA], [workspaceB]) => workspaceA.getDirectory().localeCompare(workspaceB.getDirectory()))
+      .forEach(([workspace, schema]) => {
+        const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
+        ChartYAML.dependencies.push({
+          name,
+          version: this.version,
+          repository: `file:${Path.join('..', 'subcharts', workspace.getName())}`
+        });
       });
-    });
 
     [...Array.from(contexts.values()), context]
       .flatMap((schema) => Object.entries(schema.service ?? {}))
@@ -161,14 +163,16 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    Object.entries(scopedContext?.service ?? {}).sort(([kA], [kB]) => kA.localeCompare(kB)).forEach(([k, v]) => {
-      ChartYAML.dependencies.push({
-        name: v.definition.origin.name,
-        version: v.definition.origin.version,
-        repository: v.definition.origin.repository,
-        alias: k
+    Object.entries(scopedContext?.service ?? {})
+      .sort(([kA], [kB]) => kA.localeCompare(kB))
+      .forEach(([k, v]) => {
+        ChartYAML.dependencies.push({
+          name: v.definition.origin.name,
+          version: v.definition.origin.version,
+          repository: v.definition.origin.repository,
+          alias: k
+        });
       });
-    });
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'Chart.yaml'], [ChartYAML]);
 
