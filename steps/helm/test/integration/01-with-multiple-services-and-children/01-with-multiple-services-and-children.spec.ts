@@ -26,7 +26,7 @@ describe('A 01-with-multiple-services-and-children', () => {
     const helmfileGenerator = new HelmGenerator(
       helmfileProvider,
       (workspace) => workspace.getName(),
-      (workspace) => workspace.getName(),
+      (metadata) => metadata.definition?.image ?? '',
       '1.0.0'
     );
 
