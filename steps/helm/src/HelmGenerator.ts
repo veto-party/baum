@@ -53,7 +53,7 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    Array.from(contexts.entries()).forEach(([workspace, schema]) => {
+    Array.from(contexts.entries()).sort(([workspaceA], [workspaceB]) => workspaceA.getDirectory().localeCompare(workspaceB.getDirectory())).forEach(([workspace, schema]) => {
       const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
       ChartYAML.dependencies.push({
         name,
@@ -64,6 +64,7 @@ export class HelmGenerator implements IStep {
 
     [...Array.from(contexts.values()), context]
       .flatMap((schema) => Object.entries(schema.service ?? {}))
+      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .forEach(([name, service]) => {
         if (service.type !== 'global') {
           return;
@@ -160,7 +161,7 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    Object.entries(scopedContext?.service ?? {}).forEach(([k, v]) => {
+    Object.entries(scopedContext?.service ?? {}).sort(([kA], [kB]) => kA.localeCompare(kB)).forEach(([k, v]) => {
       ChartYAML.dependencies.push({
         name: v.definition.origin.name,
         version: v.definition.origin.version,
