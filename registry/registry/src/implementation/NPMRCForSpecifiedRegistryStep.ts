@@ -9,9 +9,9 @@ export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
 
       let currentIndex = 0;
       do {
-       const newDependents =  getDependentWorkspaces(Array.from(currentDependentsToCheck.values())[currentIndex], packages, pm);
-       checkedDependents.push(...newDependents);
-       newDependents.forEach((dependent) => currentDependentsToCheck.add(dependent));
+        const newDependents = getDependentWorkspaces(Array.from(currentDependentsToCheck.values())[currentIndex], packages, pm);
+        checkedDependents.push(...newDependents);
+        newDependents.forEach((dependent) => currentDependentsToCheck.add(dependent));
       } while (currentDependentsToCheck.size <= currentIndex++);
 
       return `\n${checkedDependents
