@@ -12,7 +12,7 @@ export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
         const newDependents = getDependentWorkspaces(Array.from(currentDependentsToCheck.values())[currentIndex], packages, pm);
         checkedDependents.push(...newDependents);
         newDependents.forEach((dependent) => currentDependentsToCheck.add(dependent));
-      } while (currentDependentsToCheck.size <= currentIndex++);
+      } while (currentDependentsToCheck.size > ++currentIndex);
 
       return `\n${checkedDependents
         .map((dependent) => (dependent.getName().includes('/') && packages.some((givenPackage) => givenPackage.getName() === dependent.getName()) ? `${dependent.getName().substring(0, dependent.getName().indexOf('/'))}:registry=${this.registry}` : ''))
