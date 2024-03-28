@@ -6,7 +6,7 @@ import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import type { SchemaType } from './types/types.js';
 import { buildVariable } from './utility/buildVariable.js';
-import { resolveBindings, } from './utility/resolveReference.js';
+import { resolveBindings } from './utility/resolveReference.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
@@ -94,13 +94,15 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, resolved]) => {
       if (resolved.is_global || resolved.external) {
-        set(valuesYAML, key, buildVariable(resolved, key))
+        set(valuesYAML, key, buildVariable(resolved, key));
       }
     });
-    
-    Object.entries(context.variable).filter(([, v]) => v.external).forEach(([key, value]) => {
-      set(valuesYAML, key, buildVariable(value, key));
-    });
+
+    Object.entries(context.variable)
+      .filter(([, v]) => v.external)
+      .forEach(([key, value]) => {
+        set(valuesYAML, key, buildVariable(value, key));
+      });
 
     if (Object.keys(valuesYAML).length > 0) {
       await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'values.yaml'], [valuesYAML]);
@@ -115,7 +117,7 @@ export class HelmGenerator implements IStep {
       type: 'Opaque',
       stringData: Object.fromEntries(
         allBindings
-          .filter(([ ,value]) => !value.static && value.secret && value.is_global && !value.external)
+          .filter(([, value]) => !value.static && value.secret && value.is_global && !value.external)
           .map(([key, value]) => {
             return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${value.referenced} }}`)];
           })

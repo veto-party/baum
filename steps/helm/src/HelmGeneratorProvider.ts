@@ -233,7 +233,7 @@ export class HelmGeneratorProvider implements IStep {
 
   private async getContext(workspace: IWorkspace, map: HelmFileResult): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
-    
+
     const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
     // TODO: Combine bases.
@@ -354,17 +354,19 @@ export class HelmGeneratorProvider implements IStep {
 
     const [helmFiles] = workspaceMapping;
 
-    await Promise.all(Array.from(helmFiles.keys()).map(async (workspace) => {
-      const context = await this.getContext(workspace, workspaceMapping);
+    await Promise.all(
+      Array.from(helmFiles.keys()).map(async (workspace) => {
+        const context = await this.getContext(workspace, workspaceMapping);
 
-      if (!context) {
-        console.warn(`No context found for ${workspace.getName()}`);
-        return;
-      }
+        if (!context) {
+          console.warn(`No context found for ${workspace.getName()}`);
+          return;
+        }
 
-      this.globalContext = this.groupScopes([this.globalContext, context.global], workspace);
-      this.contexts.set(workspace, context.scoped);
-    }));
+        this.globalContext = this.groupScopes([this.globalContext, context.global], workspace);
+        this.contexts.set(workspace, context.scoped);
+      })
+    );
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

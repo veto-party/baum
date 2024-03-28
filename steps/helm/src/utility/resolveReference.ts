@@ -1,14 +1,15 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
 export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
-  
-  let variable: [ExtendedSchemaType['variable'][string] & { is_global: boolean; }, string] = [{
-    ref,
-    is_global: is_global ?? false,
-  }, 'INITIAL'];
+  let variable: [ExtendedSchemaType['variable'][string] & { is_global: boolean }, string] = [
+    {
+      ref,
+      is_global: is_global ?? false
+    },
+    'INITIAL'
+  ];
 
   while (variable[0]?.ref !== undefined) {
-
     if (variable[0].ref === variable[1]) {
       throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)}, circular depdency detected.`);
     }
@@ -16,10 +17,13 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
     if (!variable[0].is_global) {
       const scopedResult = scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref];
       if (scopedResult) {
-        variable = [{
-          ...scopedResult,
-          is_global: false
-        }, variable[0].ref];
+        variable = [
+          {
+            ...scopedResult,
+            is_global: false
+          },
+          variable[0].ref
+        ];
         continue;
       }
 
@@ -50,7 +54,6 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
       continue;
     }
 
-
     throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)} --> ${JSON.stringify(variable[0].ref)}, checked global context.`);
   }
 
@@ -62,7 +65,7 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
 };
 
 export const resolveBindings = (refName: Record<string, string>, allScopedVars: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
-  const resolvedVars: Record<string, (typeof allScopedVars)['variable'][string] & { is_global: boolean; referenced: string; }> = {};
+  const resolvedVars: Record<string, (typeof allScopedVars)['variable'][string] & { is_global: boolean; referenced: string }> = {};
 
   const lookupVars = Object.entries(refName);
 
