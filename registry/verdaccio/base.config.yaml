@@ -31,7 +31,7 @@ web:
   # By default all features are displayed
   # login: true
   showInfo: false
-  showSettings: flase
+  showSettings: false
   # In combination with darkMode you can force a specific theme
   # showThemeSwitch: true
   showFooter: false
@@ -146,10 +146,10 @@ server:
 # max_body_size: 10mb
 
 # https://verdaccio.org/docs/configuration#listen-port
-#listen:
+listen:
   # - localhost:4879            # default value
   # - http://localhost:4879     # same thing
-#  - 0.0.0.0:4879 # listen on all addresses (INADDR_ANY)
+  - 0.0.0.0:4879 # listen on all addresses (INADDR_ANY)
   # - https://example.org:4879  # if you want to use https
   #- "[::1]:4879" # ipv6
 # - unix:/tmp/verdaccio.sock    # unix socket

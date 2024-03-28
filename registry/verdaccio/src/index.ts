@@ -8,21 +8,30 @@ import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
 class InitStep extends GroupStep {
   private port?: number;
 
-  constructor() {
+  constructor(
+    private address: string
+  ) {
     super([]);
   }
 
   async getPort() {
-    this.port ??= await portFinder.getPortPromise();
+
+    const url = new URL(this.address);
+
+    this.port ??= await portFinder.getPortPromise({
+      host: url.host,
+    });
+
     return this.port;
   }
 
   @CachedFN(true)
   public async init(root: string) {
-    const hash = Crypto.createHash('sha256').update(root).digest('hex');
+    const port = await this.getPort();
+    const hash = Crypto.createHash('sha256').update(root).update(port.toString()).update(this.address).digest('hex');
 
-    this.addExecutionStep('prepare', new PrepareStep(hash, root));
-    this.addExecutionStep('startup', new StartupStep(hash, (await this.getPort()).toString(), root));
+    this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${(port.toString())}`));
+    this.addExecutionStep('startup', new StartupStep(hash, port.toString(), root));
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
@@ -46,7 +55,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     private dockerAddress = 'http://localhost'
   ) {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
-    this.initStep = new InitStep();
+    this.initStep = new InitStep(this.dockerAddress);
   }
 
   addInstallStep(): this {

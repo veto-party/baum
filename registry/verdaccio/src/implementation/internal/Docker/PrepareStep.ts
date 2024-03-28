@@ -15,11 +15,8 @@ const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...
 
 @RunOnce()
 export class PrepareStep extends DockerBuildStep {
-  private cwd: string;
-
-  constructor(name: string, cwd: string) {
+  constructor(name: string, private cwd: string, private public_address: string) {
     super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __rootDir);
-    this.cwd = cwd;
   }
 
   async execute(workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -43,6 +40,8 @@ export class PrepareStep extends DockerBuildStep {
 
     config.storage = '/storage/storage';
     config.plugins = '/storage/plugins';
+
+    config.VERDACCIO_PUBLIC_URL = this.public_address;
 
     config.packages = {};
 
