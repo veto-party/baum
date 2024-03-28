@@ -216,13 +216,11 @@ export class HelmGeneratorProvider implements IStep {
     return [...schema].reduce<ExtendedSchemaType>(
       (previous, current) => {
         Object.entries(current).forEach(([key, value]) => {
-
           if ((this.grouperFunctions as any)[key]) {
             (previous as any)[key] = (this.grouperFunctions as any)[key]((previous as any)?.[key], value, workspace);
           } else {
             console.log(`${key} was not found...`);
           }
-
         });
         return previous;
       },
