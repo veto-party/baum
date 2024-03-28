@@ -35,7 +35,7 @@ describe('A 01-with-multiple-services-and-children', () => {
 
     await baum.run();
 
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for file handles to flush.
     const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
     expect(compareResult).toBe(true);
