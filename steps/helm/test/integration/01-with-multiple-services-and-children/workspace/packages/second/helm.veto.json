@@ -1,16 +1,3 @@
 {
-  "is_service": true,
-  "variable": {
-    "test": {
-      "binding": {
-        "test3": "scoped-database.origin_name_var",
-        "test4": "global-database.origin_name_var"
-      },
-      "type": "scoped",
-      "default": "hello-world2"
-    }
-  },
-  "binding": {
-    "test2": "test"
-  }
+  "is_service": true
 }

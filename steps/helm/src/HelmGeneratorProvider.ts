@@ -1,6 +1,7 @@
+import OldFileSystem from 'node:fs';
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IStep, type IWorkspace, getDependentWorkspaces } from '@veto-party/baum__core';
+import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IStep, type IWorkspace, RunOnce, getDependentWorkspaces } from '@veto-party/baum__core';
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
 import { type SchemaType, schema } from './types/types.js';
@@ -25,6 +26,7 @@ export type ExtendedSchemaType = {
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K], workspace: IWorkspace) => ExtendedSchemaType[K] };
 
+@RunOnce()
 export class HelmGeneratorProvider implements IStep {
   public globalContext: ExtendedSchemaType = {
     variable: {},
@@ -87,7 +89,8 @@ export class HelmGeneratorProvider implements IStep {
       if (resultingContents.length !== 0) {
         await Promise.all(
           resultingContents.map(([directory, content]) => {
-            if (checkedDirectories[directory]) {
+            if (checkedDirectories[directory] || internalWorkspaces.some((workspace) => OldFileSystem.realpathSync(workspace.getDirectory()) === OldFileSystem.realpathSync(directory))) {
+              checkedDirectories[directory] = true;
               return;
             }
 
@@ -228,10 +231,12 @@ export class HelmGeneratorProvider implements IStep {
     );
   }
 
-  private async getContext(workspace: IWorkspace, map: HelmFileResult, layer = 1): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
+  private async getContext(workspace: IWorkspace, map: HelmFileResult): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
 
-    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, layer + 1)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
+    console.log(workspace, workspaceMapping.get(workspace));
+
+    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
     // TODO: Combine bases.
     if (helmFiles.has(workspace)) {
@@ -346,17 +351,22 @@ export class HelmGeneratorProvider implements IStep {
     return undefined;
   }
 
-  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async execute(__workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaceMapping = await this.collectHelmFiles(packageManager, rootDirectory);
-    const context = await this.getContext(workspace, workspaceMapping);
 
-    if (!context) {
-      console.warn(`No context found for ${workspace.getName()}`);
-      return;
-    }
+    const [helmFiles] = workspaceMapping;
 
-    this.globalContext = this.groupScopes([this.globalContext, context.global], workspace);
-    this.contexts.set(workspace, context.scoped);
+    await Promise.all(Array.from(helmFiles.keys()).map(async (workspace) => {
+      const context = await this.getContext(workspace, workspaceMapping);
+
+      if (!context) {
+        console.warn(`No context found for ${workspace.getName()}`);
+        return;
+      }
+
+      this.globalContext = this.groupScopes([this.globalContext, context.global], workspace);
+      this.contexts.set(workspace, context.scoped);
+    }));
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

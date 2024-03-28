@@ -7,11 +7,6 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
     is_global: is_global ?? false,
   }, 'INITIAL'];
 
-  console.log("---RESOLIVE(", ref, ")--");
-  console.log(scope);
-  console.log(allGlobalVars);
-  console.log('--END--')
-
   while (variable[0]?.ref !== undefined) {
 
     if (variable[0].ref === variable[1]) {
@@ -27,6 +22,7 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
         }, variable[0].ref];
         continue;
       }
+
       const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
       if (globalResult) {
         variable = [
@@ -41,7 +37,7 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
 
       throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)} --> ${JSON.stringify(variable[0].ref)}, checked global and scoped context.`);
     }
-    
+
     const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
     if (globalResult) {
       variable = [
@@ -51,6 +47,7 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
         },
         variable[0].ref
       ];
+      continue;
     }
 
 
