@@ -34,7 +34,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   abstract addInstallStep(): this;
 
-  abstract getInstallStep(): Promise<IStep|undefined>;
+  abstract getInstallStep(): Promise<IStep | undefined>;
 
   protected async startExecution(workspace: IWorkspace, pm: IPackageManager, root: string): Promise<boolean> {
     const givenPath = Path.join(workspace.getDirectory(), 'package.json');

@@ -31,10 +31,7 @@ export class PublicRegistryStep extends ARegistryStep {
 
   @CachedFN(true)
   async getInstallStep(): Promise<IStep | undefined> {
-    return new GroupStep([
-      new NPMRCForSpecifiedRegistryStep(this.registry),
-      new PKGMStep((intent) => intent.install().install()),
-    ]);
+    return new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep((intent) => intent.install().install())]);
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {

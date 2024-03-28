@@ -36,7 +36,6 @@ class InitStep extends GroupStep {
 }
 
 export class VerdaccioRegistryStep extends ARegistryStep {
-
   private publishStep?: IStep;
   private initStep: InitStep;
 
@@ -62,10 +61,10 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
     return new GroupStep([
       new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
-        new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`),
-        // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
-        new PKGMStep((intent) => intent.install().install())
-    ])
+      new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`),
+      // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
+      new PKGMStep((intent) => intent.install().install())
+    ]);
   }
 
   checkForPublish(workspace: IWorkspace) {
