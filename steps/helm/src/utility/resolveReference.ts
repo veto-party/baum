@@ -1,35 +1,71 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-export const resolveReference = (variable: [(Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean }) | undefined, string], scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType) => {
+export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
+  
+  let variable: [ExtendedSchemaType['variable'][string] & { is_global: boolean; }, string] = [{
+    ref,
+    is_global: is_global ?? false,
+  }, 'INITIAL'];
+
+  console.log("---RESOLIVE(", ref, ")--");
+  console.log(scope);
+  console.log(allGlobalVars);
+  console.log('--END--')
+
   while (variable[0]?.ref !== undefined) {
+
+    if (variable[0].ref === variable[1]) {
+      throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)}, circular depdency detected.`);
+    }
+
     if (!variable[0].is_global) {
       const scopedResult = scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref];
       if (scopedResult) {
-        variable = [scopedResult, variable[0].ref];
-      } else {
-        const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
-        if (globalResult) {
-          variable = [
-            {
-              ...globalResult,
-              is_global: true
-            },
-            variable[0].ref
-          ];
-        } else {
-          variable = [undefined, variable[0].ref];
-        }
+        variable = [{
+          ...scopedResult,
+          is_global: false
+        }, variable[0].ref];
+        continue;
       }
-    } else {
-      variable = [allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref], variable[0].ref];
+      const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
+      if (globalResult) {
+        variable = [
+          {
+            ...globalResult,
+            is_global: true
+          },
+          variable[0].ref
+        ];
+        continue;
+      }
+
+      throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)} --> ${JSON.stringify(variable[0].ref)}, checked global and scoped context.`);
     }
+    
+    const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
+    if (globalResult) {
+      variable = [
+        {
+          ...globalResult,
+          is_global: true
+        },
+        variable[0].ref
+      ];
+    }
+
+
+    throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)} --> ${JSON.stringify(variable[0].ref)}, checked global context.`);
+  }
+
+  if (variable[0].ref) {
+    throw new Error(`Cannot resolve reference: ${JSON.stringify(ref)}`);
   }
 
   return variable;
 };
 
-export const resolveBindings = (refName: Record<string, string>, allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>, allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>) => {
-  const resolvedVars: Record<string, (typeof allScopedVars)[string] & { is_global: boolean }> = {};
+export const resolveBindings = (refName: Record<string, string>, allScopedVars: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
+  const resolvedVars: Record<string, (typeof allScopedVars)['variable'][string] & { is_global: boolean; referenced: string; }> = {};
 
   const lookupVars = Object.entries(refName);
 
@@ -39,15 +75,11 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
       throw new Error(`Duplicate assignment whilist resolving (${JSON.stringify(key)})`);
     }
 
-    const lookup = allScopedVars[lookupKey] ?? allGlobalVars[lookupKey];
-
-    if (!lookup) {
-      throw new Error(`Missing lookup for ${JSON.stringify(lookupKey)} is missing in socped + global vars.`);
-    }
+    const [lookup, referenced] = resolveReference(lookupKey, allScopedVars, allGlobalVars, is_global);
 
     resolvedVars[key] = {
       ...lookup,
-      is_global: allGlobalVars[lookupKey] === lookup
+      referenced
     };
 
     if (lookup.binding) {

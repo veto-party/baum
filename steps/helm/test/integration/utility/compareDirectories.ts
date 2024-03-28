@@ -25,7 +25,7 @@ export async function compareDirectories(pathA: string, pathB: string) {
       const diff = Diff.diffLines(fileA, fileB);
 
       if (diff.some((value) => value.added || value.removed)) {
-        console.error(`File ${file} is different`);
+        console.error(`File [${Path.join(pathA, file)}] is different to [${Path.join(pathB, file)}]`);
         diff.forEach((change, lineNo) => {
           if (change.added) {
             console.log(`(+) (${file}:${lineNo}): ${change.value}`.bgGreen.white);

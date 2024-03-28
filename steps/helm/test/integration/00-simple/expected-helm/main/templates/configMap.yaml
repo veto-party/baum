@@ -4,8 +4,8 @@
   "name": "global"
   
 "data": 
-  "example_host": {{ .Global.Values.example_host }}
-  "example_url": {{ .Global.Values.example_url }}
-  "SERVICE_HOST_PORT": {{ .Global.Values.SERVICE_HOST_PORT }}
-  "SERVICE_HOST_ADDRESS": {{ .Global.Values.SERVICE_HOST_ADDRESS }}
+  "example_host": {{ .Global.Values.service-host-domain }}
+  "example_url": {{ .Global.Values.service-host }}
+  "SERVICE_HOST_PORT": {{ .Global.Values.service-host-port }}
+  "SERVICE_HOST_ADDRESS": {{ .Global.Values.service-host-address }}
   

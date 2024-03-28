@@ -209,7 +209,7 @@ export class HelmGeneratorProvider implements IStep {
     is_service: (_, current) => current
   };
 
-  private groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
+  public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
     return [...schema].reduce<ExtendedSchemaType>(
       (previous, current) => {
         Object.entries(current).forEach(([key, value]) => {
@@ -294,7 +294,7 @@ export class HelmGeneratorProvider implements IStep {
 
         if (realDefinitionName) {
           refTarget.__scope ??= {};
-          refTarget.__scope[`${definitionName}..${service.origin_name_var}`] = {
+          refTarget.__scope[`${definitionName}.${service.origin_name_var}`] = {
             ref: scopedKey
           };
         }
