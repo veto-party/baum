@@ -62,7 +62,6 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
   @CachedFN(true)
   async getInstallStep(): Promise<IStep | undefined> {
-
     if (!this.doInstall) {
       return undefined;
     }
