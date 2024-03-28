@@ -1,4 +1,4 @@
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
+import { CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
 export class PublicRegistryStep extends ARegistryStep {
@@ -31,7 +31,7 @@ export class PublicRegistryStep extends ARegistryStep {
 
   @CachedFN(true)
   async getInstallStep(): Promise<IStep | undefined> {
-    return new GroupStep([new NPMRCForSpecifiedRegistryStep(this.registry), new PKGMStep((intent) => intent.install().install())]);
+    return new NPMRCForSpecifiedRegistryStep(this.registry);
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {
