@@ -4,5 +4,6 @@
   "name": "packages__workspace"
   
 "data": 
-  "scoped_variable": {{ .Values.scoped_variable }}
+  "test2": {{ .Values.test }}
+  "scoped_variable": {{ .Values.scoped-variable }}
   

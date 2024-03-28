@@ -25,6 +25,30 @@
             - "containerPort": "5000"
               
           "env": 
+            - "name": "test2"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "packages__workspace"
+                  "key": "test2"
+                  
+                
+              
+            - "name": "test4"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "test4"
+                  
+                
+              
+            - "name": "test3"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "packages__workspace"
+                  "key": "test3"
+                  
+                
+              
             - "name": "static-variable"
               "value": "hello world"
               

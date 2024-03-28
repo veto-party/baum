@@ -233,9 +233,7 @@ export class HelmGeneratorProvider implements IStep {
 
   private async getContext(workspace: IWorkspace, map: HelmFileResult): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
-
-    console.log(workspace, workspaceMapping.get(workspace));
-
+    
     const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
     // TODO: Combine bases.

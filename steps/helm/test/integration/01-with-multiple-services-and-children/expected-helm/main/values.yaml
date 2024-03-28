@@ -2,6 +2,8 @@
 "example_url": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
 "SERVICE_HOST_PORT": "replace-me"
 "SERVICE_HOST_ADDRESS": "replace-me"
+"test4": "global-database"
+"test3": "k5c0204-k5c0204-scoped-database"
 "global-database": 
   "auth": 
     "forcePassword": true
