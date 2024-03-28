@@ -83,7 +83,7 @@ export class HelmGenerator implements IStep {
 
     const valuesYAML: Record<string, any> = {};
 
-    const allBindings = Array.from(contexts.values()).flatMap((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition.variable, context.variable)).map((current) => [resolveReference([current[1], current[0]], definition.variable, context.variable), current] as const));
+    const allBindings = Array.from(contexts.values()).flatMap((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition.variable, context.variable)).map((current) => [resolveReference([current[1], current[0]], definition, context), current] as const));
 
     [
       allBindings,
@@ -184,7 +184,7 @@ export class HelmGenerator implements IStep {
         return;
       }
 
-      const [resolved] = resolveReference([v, k], scopedContext!.variable, globalContext.variable) ?? [k, v];
+      const [resolved] = resolveReference([v, k], scopedContext!, globalContext) ?? [k, v];
       if (!resolved.static && !(v as any).is_global) {
         set(valuesYAML, k, buildVariable(resolved, k));
       }
@@ -311,7 +311,7 @@ export class HelmGenerator implements IStep {
                   containerPort: port
                 })),
                 env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k, v]) => {
-                  const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
+                  const [resolved, key] = resolveReference([v, k], scopedContext, globalContext);
 
                   const resulting: any = {
                     name: key
@@ -365,7 +365,7 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable))
           .filter(([, value]) => !value.static && value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
+            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext!, globalContext)[1]} }}`)];
           })
       )
     };
@@ -384,7 +384,7 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable))
           .filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext?.variable ?? {}, globalContext.variable)[1]} }}`)];
+            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${resolveReference([value, key], scopedContext, globalContext)[1]} }}`)];
           })
       )
     };
@@ -409,7 +409,7 @@ export class HelmGenerator implements IStep {
                 name: `${key}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext?.variable ?? {}, globalContext.variable)).map(([k, v]) => {
-                  const [resolved, key] = resolveReference([v, k], scopedContext?.variable ?? {}, globalContext.variable);
+                  const [resolved, key] = resolveReference([v, k], scopedContext, globalContext);
 
                   const resulting: any = {
                     name: k,

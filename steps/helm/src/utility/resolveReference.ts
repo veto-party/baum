@@ -1,15 +1,11 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-export const resolveReference = (
-  variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean }, string],
-  allScopedVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>,
-  allGlobalVars: Record<string, Partial<ExtendedSchemaType['variable']>[string] & { ref?: string }>
-) => {
+export const resolveReference = (variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean }, string], scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType) => {
   while (variable[0]?.ref !== undefined) {
     if (!variable[0].is_global) {
-      variable = [allScopedVars[variable[0].ref] ?? allGlobalVars[variable[0].ref], variable[0].ref];
+      variable = [scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref] ?? allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref], variable[0].ref];
     } else {
-      variable = [allGlobalVars[variable[0].ref], variable[0].ref];
+      variable = [allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref], variable[0].ref];
     }
   }
 
