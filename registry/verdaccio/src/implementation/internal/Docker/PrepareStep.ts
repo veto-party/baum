@@ -45,7 +45,7 @@ export class PrepareStep extends DockerBuildStep {
     config.storage = '/storage/storage';
     config.plugins = '/storage/plugins';
 
-    config.VERDACCIO_PUBLIC_URL = this.public_address;
+    //config.VERDACCIO_PUBLIC_URL = this.public_address;
 
     config.packages = {};
 

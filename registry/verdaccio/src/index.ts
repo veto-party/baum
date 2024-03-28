@@ -28,7 +28,7 @@ class InitStep extends GroupStep {
     const hash = Crypto.createHash('sha256').update(root).update(port.toString()).update(this.address).digest('hex');
 
     this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${port.toString()}`));
-    this.addExecutionStep('startup', new StartupStep(hash, port.toString(), root));
+    this.addExecutionStep('startup', new StartupStep(hash, port.toString(), root, `${this.address}:${port.toString()}`));
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
@@ -62,6 +62,11 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
   @CachedFN(true)
   async getInstallStep(): Promise<IStep | undefined> {
+
+    if (!this.doInstall) {
+      return undefined;
+    }
+
     const port = await this.initStep.getPort();
     const url = new URL(`${this.dockerAddress}:${port}`);
 
