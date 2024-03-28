@@ -213,7 +213,7 @@ export class HelmGeneratorProvider implements IStep {
     return [...schema].reduce<ExtendedSchemaType>(
       (previous, current) => {
         Object.entries(current).forEach(([key, value]) => {
-          if (key === "$schema") {
+          if (key === '$schema') {
             return;
           }
 

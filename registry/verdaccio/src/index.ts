@@ -8,18 +8,15 @@ import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
 class InitStep extends GroupStep {
   private port?: number;
 
-  constructor(
-    private address: string
-  ) {
+  constructor(private address: string) {
     super([]);
   }
 
   async getPort() {
-
     const url = new URL(this.address);
 
     this.port ??= await portFinder.getPortPromise({
-      host: url.host,
+      host: url.host
     });
 
     return this.port;
@@ -30,7 +27,7 @@ class InitStep extends GroupStep {
     const port = await this.getPort();
     const hash = Crypto.createHash('sha256').update(root).update(port.toString()).update(this.address).digest('hex');
 
-    this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${(port.toString())}`));
+    this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${port.toString()}`));
     this.addExecutionStep('startup', new StartupStep(hash, port.toString(), root));
   }
 

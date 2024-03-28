@@ -15,7 +15,11 @@ const newConfigPath = (packageName: string, absolute?: boolean) => Path.join(...
 
 @RunOnce()
 export class PrepareStep extends DockerBuildStep {
-  constructor(name: string, private cwd: string, private public_address: string) {
+  constructor(
+    name: string,
+    private cwd: string,
+    private public_address: string
+  ) {
     super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __rootDir);
   }
 
