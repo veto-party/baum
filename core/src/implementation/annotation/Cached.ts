@@ -28,13 +28,13 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         this[generateKey(__propertyKey)] ??= [];
         const storage: [[T, ...Parameters<T>], any][] = this[generateKey(__propertyKey)];
 
-        const currentResult = storage.find((current) => isEqual(current[0], [this, ...args]));
+        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), args)).find((current) => current[0][0] === this);
 
         if (currentResult?.length === 2) {
           return Promise.resolve(currentResult[1]);
         }
 
-        let promisesTuple = storedPromises.find((storedPromise) => isEqual(storedPromise[0], [this, ...args]));
+        let promisesTuple = storedPromises.filter((storedPromise) => isEqual(storedPromise[0].slice(1), args)).find((current) => current[0][0] === this);
 
         if (promisesTuple?.length !== 2) {
           promisesTuple = [[this, ...args], []];
@@ -59,7 +59,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           })()
             .then(resolveOrReject(promises, 0), resolveOrReject(promises, 1))
             .finally(() => {
-              storedPromises = storedPromises.filter(([lookup]) => !isEqual(lookup, [this, ...args]));
+              storedPromises = storedPromises.filter(([lookup]) => !(isEqual(lookup.slice(1), args) && lookup[0] === this));
             });
         });
       } as any;
@@ -68,7 +68,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         this[`storage__cache__${__propertyKey}`] ??= [];
         const storage: [[T, ...Parameters<T>], any][] = this[`storage__cache__${__propertyKey}`];
 
-        const currentResult = storage.find((current) => isEqual(current[0], [this, ...args]));
+        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), args)).find((current) => current[0][0] === this);
 
         if (currentResult) {
           return currentResult[1];
