@@ -1,9 +1,23 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-export const resolveReference = (variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean }, string], scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType) => {
+export const resolveReference = (variable: [Partial<ExtendedSchemaType['variable']>[string] & { ref?: string; is_global?: boolean } | undefined, string], scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType) => {
   while (variable[0]?.ref !== undefined) {
     if (!variable[0].is_global) {
-      variable = [scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref] ?? allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref], variable[0].ref];
+      const scopedResult = scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref];
+      if (scopedResult) {
+        variable = [scopedResult, variable[0].ref];
+      } else {
+
+        const globalResult = allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref];
+        if (globalResult) {
+          variable = [{
+            ...globalResult,
+            is_global: true
+          }, variable[0].ref];
+        } else {
+          variable = [undefined, variable[0].ref];
+        }
+      }
     } else {
       variable = [allGlobalVars.variable[variable[0].ref] ?? allGlobalVars.__scope?.[variable[0].ref], variable[0].ref];
     }

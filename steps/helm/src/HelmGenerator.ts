@@ -94,7 +94,7 @@ export class HelmGenerator implements IStep {
       .flat()
       .forEach(([[resolved], [k, v]]) => {
         if ((v as any).is_global || v.external) {
-          set(valuesYAML, k, buildVariable(resolved, k));
+          set(valuesYAML, k, buildVariable(resolved!, k));
         }
       });
 
@@ -185,8 +185,8 @@ export class HelmGenerator implements IStep {
       }
 
       const [resolved] = resolveReference([v, k], scopedContext!, globalContext) ?? [k, v];
-      if (!resolved.static && !(v as any).is_global) {
-        set(valuesYAML, k, buildVariable(resolved, k));
+      if (!resolved!.static && !(v as any).is_global) {
+        set(valuesYAML, k, buildVariable(resolved!, k));
       }
     });
 
@@ -317,14 +317,14 @@ export class HelmGenerator implements IStep {
                     name: key
                   };
 
-                  if (resolved.secret) {
+                  if (resolved!.secret) {
                     resulting.valueFrom = {
                       secretKeyRef: {
                         name: v.is_global ? 'global' : name,
                         key
                       }
                     };
-                  } else if (!resolved.static) {
+                  } else if (!resolved!.static) {
                     resulting.valueFrom = {
                       configMapKeyRef: {
                         name: v.is_global ? 'global' : name,
@@ -332,7 +332,7 @@ export class HelmGenerator implements IStep {
                       }
                     };
                   } else {
-                    resulting.value = resolved.default;
+                    resulting.value = resolved!.default;
                   }
 
                   return resulting;
@@ -413,10 +413,10 @@ export class HelmGenerator implements IStep {
 
                   const resulting: any = {
                     name: k,
-                    value: resolved.default
+                    value: resolved!.default
                   };
 
-                  if (resolved.secret) {
+                  if (resolved!.secret) {
                     resulting.valueFrom = {
                       secretKeyRef: {
                         name: k,
