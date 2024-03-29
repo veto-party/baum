@@ -255,7 +255,6 @@ export class HelmGeneratorProvider implements IStep {
 
     const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, root)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
-    // TODO: Combine bases.
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
 
