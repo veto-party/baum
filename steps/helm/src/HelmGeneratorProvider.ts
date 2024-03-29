@@ -32,6 +32,7 @@ export type ExtendedSchemaType = {
   is_service?: boolean;
   alias: string;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string }>;
+  $schema?: string;
 };
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K], workspace: IWorkspace) => ExtendedSchemaType[K] };
@@ -49,7 +50,7 @@ export class HelmGeneratorProvider implements IStep {
   constructor(
     private getHelmFileName: (workspace: IWorkspace) => string,
     private workspaceFilter: (workspace: IWorkspace) => boolean,
-    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string = (workspace, rootDirectory) => Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__')
+    private workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string = (workspace, rootDirectory) => Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__')
   ) {}
 
   private getHash(value: string) {
@@ -61,6 +62,16 @@ export class HelmGeneratorProvider implements IStep {
     const hexHash = hash.toString(16);
     return hexHash.substring(0, Math.min(6, hexHash.length - 1));
   }
+
+  public getHelmDefinitionForWorkspace(workspace: IWorkspace) {
+    const basePath = this.getHelmFileName(workspace);
+
+    if (Path.isAbsolute(basePath)) {
+      return basePath;
+    } 
+
+    return Path.join(basePath, workspace.getDirectory()); 
+   }
 
   /**
    * Returns a mix of attached and detached workspaces.
@@ -132,7 +143,7 @@ export class HelmGeneratorProvider implements IStep {
 
   @CachedFN(true)
   private async loadFoRWorkspace(workspace: IWorkspace): Promise<SchemaType | undefined> {
-    const file = await FileSystem.readFile(Path.join(workspace.getDirectory(), this.getHelmFileName(workspace))).catch(() => undefined);
+    const file = await FileSystem.readFile(this.getHelmDefinitionForWorkspace(workspace)).catch(() => undefined);
     if (!file) {
       return;
     }
@@ -223,7 +234,8 @@ export class HelmGeneratorProvider implements IStep {
       return result;
     },
     is_service: (_, current) => current,
-    alias: (_, current) => current
+    alias: (_, current) => current,
+    $schema: (_, current) => current,
   };
 
   public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
