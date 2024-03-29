@@ -35,10 +35,10 @@ export class HelmDefinitionUpdator implements IStep {
 
     const file = JSON.parse((await FileSystem.readFile(this.provider.getHelmDefinitionForWorkspace(workspace))).toString());
     file.$schema = current;
-    await FileSystem.writeFile(this.provider.getHelmDefinitionForWorkspace(workspace), JSON.stringify(file));
+    await FileSystem.writeFile(this.provider.getHelmDefinitionForWorkspace(workspace), JSON.stringify(file, undefined, 2));
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    throw new Error('Method not implemented.');
+    // NO-OP
   }
 }
