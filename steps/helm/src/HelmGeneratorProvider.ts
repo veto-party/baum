@@ -18,12 +18,16 @@ export type ExtendedSchemaType = {
       workspace: IWorkspace;
     }
   >;
-  service?: Record<string, (Exclude<SchemaType['service'], undefined | null>[string] & {
-    is_local: false;
-  }) | ({
-    is_local: true;
-    workspace: IWorkspace;
-  })>;
+  service?: Record<
+    string,
+    | (Exclude<SchemaType['service'], undefined | null>[string] & {
+        is_local: false;
+      })
+    | {
+        is_local: true;
+        workspace: IWorkspace;
+      }
+  >;
   variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; external?: boolean }>;
   is_service?: boolean;
   alias: string;
@@ -45,7 +49,7 @@ export class HelmGeneratorProvider implements IStep {
   constructor(
     private getHelmFileName: (workspace: IWorkspace) => string,
     private workspaceFilter: (workspace: IWorkspace) => boolean,
-    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string,
+    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string
   ) {}
 
   private getHash(value: string) {
@@ -334,7 +338,7 @@ export class HelmGeneratorProvider implements IStep {
         refTarget.service ??= {};
         refTarget.service[realDefinitionName ?? definitionName] = {
           ...service,
-          is_local: false,
+          is_local: false
         };
       });
 
@@ -359,9 +363,9 @@ export class HelmGeneratorProvider implements IStep {
           type: 'global',
           static: true,
           default: alias
-        }
+        };
       }
-      
+
       return environment;
     }
 

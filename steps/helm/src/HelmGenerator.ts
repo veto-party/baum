@@ -56,13 +56,12 @@ export class HelmGenerator implements IStep {
     Object.entries(context.service ?? {})
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .forEach(([name, service]) => {
-
         if (service.is_local) {
           ChartYAML.dependencies.push({
             name: name,
             version: this.version,
-            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName())}`,            
-          })
+            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName())}`
+          });
           return;
         }
 

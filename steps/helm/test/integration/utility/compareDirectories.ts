@@ -13,7 +13,6 @@ export async function compareDirectories(pathA: string, pathB: string) {
 
   const files = uniq([filesA, filesB].flat());
 
-
   for (const file of files) {
     if (!filesB.includes(file) || !filesA.includes(file)) {
       console.error(`File is invalid: ${Path.join(pathB, file)}`.red);
