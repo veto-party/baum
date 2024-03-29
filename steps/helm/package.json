@@ -34,6 +34,8 @@
     "colors": "^1.4.0",
     "@types/colors": "^1.2.1",
     "ts-node": "^10.9.2",
-    "@veto-party/baum__package_manager__npm": "*"
+    "@veto-party/baum__package_manager__npm": "*",
+    "lodash.uniq": "^4.5.0",
+    "@types/lodash.uniq": "^4.5.9"
   }
 }
