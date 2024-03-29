@@ -1,4 +1,5 @@
 import FileSystem from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import type { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 
@@ -7,9 +8,15 @@ export class HelmDefinitionUpdator implements IStep {
 
   @CachedFN(true)
   private async readVersion() {
-    const packageJsonPath = await import.meta.resolve('@veto-party/baum__steps__helm/package.json');
+    const packageJsonPath = fileURLToPath(await import.meta.resolve('@veto-party/baum__steps__helm/package.json'));
     const json = await FileSystem.readFile(packageJsonPath);
-    return JSON.parse(json.toString()).version ?? '0.0.0'; // 0.0.0 for baum development.
+    const version = JSON.parse(json.toString()).version;
+
+    if (!version) {
+        throw new Error("Development mode or faulty package.json");
+    }
+
+    return version;
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
