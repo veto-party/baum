@@ -13,7 +13,7 @@ export class HelmDefinitionUpdator implements IStep {
     const version = JSON.parse(json.toString()).version;
 
     if (!version) {
-        throw new Error("Development mode or faulty package.json");
+      throw new Error('Development mode or faulty package.json');
     }
 
     return version;
