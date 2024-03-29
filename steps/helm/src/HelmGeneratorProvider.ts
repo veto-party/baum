@@ -70,7 +70,7 @@ export class HelmGeneratorProvider implements IStep {
       return basePath;
     }
 
-    return Path.join(basePath, workspace.getDirectory());
+    return Path.join(workspace.getDirectory(), basePath);
   }
 
   /**
