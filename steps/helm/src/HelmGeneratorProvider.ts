@@ -49,7 +49,7 @@ export class HelmGeneratorProvider implements IStep {
   constructor(
     private getHelmFileName: (workspace: IWorkspace) => string,
     private workspaceFilter: (workspace: IWorkspace) => boolean,
-    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string
+    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string = (workspace, rootDirectory) => Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__')
   ) {}
 
   private getHash(value: string) {
