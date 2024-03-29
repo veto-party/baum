@@ -19,7 +19,7 @@ export class HelmGenerator implements IStep {
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
     private version: string,
-    private name = 'root',
+    private name = 'root'
   ) {}
 
   private async writeObjectToFile(root: string, path: string[], obj: any[]) {

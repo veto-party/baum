@@ -280,10 +280,10 @@ export const definitions = {
   if: {
     properties: {
       alias: {
-        type: "string"
-      },
+        type: 'string'
+      }
     },
-    required: ["alias"]
+    required: ['alias']
   },
   then: {
     properties: {
@@ -291,7 +291,7 @@ export const definitions = {
         const: true
       }
     },
-    required: ["is_service"]
+    required: ['is_service']
   },
   additionalProperties: false
 } as const;
