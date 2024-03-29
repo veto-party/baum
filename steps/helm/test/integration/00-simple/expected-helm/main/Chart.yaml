@@ -3,11 +3,12 @@
 "name": "root"
 "version": "1.0.0"
 "dependencies": 
-  - "name": "global-database"
+  - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
+    "alias": "global-database"
     
   - "name": "test_workspace"
     "version": "1.0.0"
-    "repository": "file:../subcharts/test_workspace"
+    "repository": "file://../subcharts/test_workspace"
     
