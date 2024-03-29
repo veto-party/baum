@@ -68,10 +68,10 @@ export class HelmGeneratorProvider implements IStep {
 
     if (Path.isAbsolute(basePath)) {
       return basePath;
-    } 
+    }
 
-    return Path.join(basePath, workspace.getDirectory()); 
-   }
+    return Path.join(basePath, workspace.getDirectory());
+  }
 
   /**
    * Returns a mix of attached and detached workspaces.
@@ -235,7 +235,7 @@ export class HelmGeneratorProvider implements IStep {
     },
     is_service: (_, current) => current,
     alias: (_, current) => current,
-    $schema: (_, current) => current,
+    $schema: (_, current) => current
   };
 
   public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
