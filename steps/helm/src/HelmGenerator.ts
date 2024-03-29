@@ -60,7 +60,7 @@ export class HelmGenerator implements IStep {
           ChartYAML.dependencies.push({
             name: name,
             version: this.version,
-            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName())}`
+            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`
           });
           return;
         }
@@ -181,7 +181,7 @@ export class HelmGenerator implements IStep {
         });
       });
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'Chart.yaml'], [ChartYAML]);
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'Chart.yaml'], [ChartYAML]);
 
     const valuesYAML: Record<string, any> = {};
 
@@ -196,7 +196,7 @@ export class HelmGenerator implements IStep {
       }
     });
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'values.yaml'], [valuesYAML]);
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'values.yaml'], [valuesYAML]);
 
     const serviceYAMLInternal = {
       apiVersion: 'v1',
@@ -242,7 +242,7 @@ export class HelmGenerator implements IStep {
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'service.yaml'], [serviceYAMLInternal.spec.ports.length > 0 ? serviceYAMLInternal : undefined, serviceYAMLExternal.spec.ports.length > 0 ? serviceYAMLExternal : undefined].filter(Boolean));
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'service.yaml'], [serviceYAMLInternal.spec.ports.length > 0 ? serviceYAMLInternal : undefined, serviceYAMLExternal.spec.ports.length > 0 ? serviceYAMLExternal : undefined].filter(Boolean));
 
     const ingressYAMLStripPrefixes = Object.entries(scopedContext?.expose ?? {})
       .filter(([, exposed]) => exposed.type === 'load-balancer')
@@ -288,7 +288,7 @@ export class HelmGenerator implements IStep {
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
@@ -356,7 +356,7 @@ export class HelmGenerator implements IStep {
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
 
     const secretsYAML = {
       apiVersion: 'v1',
@@ -375,7 +375,7 @@ export class HelmGenerator implements IStep {
     };
 
     if (Object.keys(secretsYAML.stringData).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'secret.yaml'], [secretsYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'secret.yaml'], [secretsYAML]);
     }
 
     const configMapYAML = {
@@ -394,7 +394,7 @@ export class HelmGenerator implements IStep {
     };
 
     if (Object.keys(configMapYAML.data).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'configMap.yaml'], [configMapYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configMap.yaml'], [configMapYAML]);
     }
 
     const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
@@ -451,7 +451,7 @@ export class HelmGenerator implements IStep {
       }
     }));
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName(), 'templates', 'job.yaml'], [...jobYAML]);
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
