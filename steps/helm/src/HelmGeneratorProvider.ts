@@ -18,9 +18,19 @@ export type ExtendedSchemaType = {
       workspace: IWorkspace;
     }
   >;
-  service?: SchemaType['service'];
+  service?: Record<
+    string,
+    | (Exclude<SchemaType['service'], undefined | null>[string] & {
+        is_local: false;
+      })
+    | {
+        is_local: true;
+        workspace: IWorkspace;
+      }
+  >;
   variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; external?: boolean }>;
   is_service?: boolean;
+  alias: string;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string }>;
 };
 
@@ -30,13 +40,16 @@ type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: Ext
 export class HelmGeneratorProvider implements IStep {
   public globalContext: ExtendedSchemaType = {
     variable: {},
+    alias: 'global',
     is_service: false
   };
+
   public contexts: Map<IWorkspace, ExtendedSchemaType> = new Map();
 
   constructor(
     private getHelmFileName: (workspace: IWorkspace) => string,
-    private workspaceFilter: (workspace: IWorkspace) => boolean
+    private workspaceFilter: (workspace: IWorkspace) => boolean,
+    public workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string = (workspace, rootDirectory) => Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__')
   ) {}
 
   private getHash(value: string) {
@@ -209,7 +222,8 @@ export class HelmGeneratorProvider implements IStep {
 
       return result;
     },
-    is_service: (_, current) => current
+    is_service: (_, current) => current,
+    alias: (_, current) => current
   };
 
   public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
@@ -226,17 +240,21 @@ export class HelmGeneratorProvider implements IStep {
       },
       {
         variable: {},
-        is_service: false
+        is_service: false,
+        alias: ''
       }
     );
   }
 
-  private async getContext(workspace: IWorkspace, map: HelmFileResult): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
+  public getAlias(workspace: IWorkspace, root: string) {
+    return this.workspaceAliasGenerator(workspace, root);
+  }
+
+  private async getContext(workspace: IWorkspace, map: HelmFileResult, root: string): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
 
-    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
+    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, root)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
-    // TODO: Combine bases.
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
 
@@ -244,6 +262,7 @@ export class HelmGeneratorProvider implements IStep {
         ...helmFile,
         variable: {},
         service: {},
+        alias: helmFile?.alias ?? this.getAlias(workspace, root),
         job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       };
 
@@ -316,7 +335,10 @@ export class HelmGeneratorProvider implements IStep {
         }
 
         refTarget.service ??= {};
-        refTarget.service[realDefinitionName ?? definitionName] = service;
+        refTarget.service[realDefinitionName ?? definitionName] = {
+          ...service,
+          is_local: false
+        };
       });
 
       if (helmFile?.variable) {
@@ -327,6 +349,20 @@ export class HelmGeneratorProvider implements IStep {
             environment.scoped.variable[k] = valueValue;
           }
         });
+      }
+
+      if (helmFile?.is_service) {
+        const alias = environment.scoped.alias;
+        environment.global.service ??= {};
+        environment.global.service[alias] = {
+          is_local: true,
+          workspace: workspace
+        };
+        environment.global.variable[`${alias}.origin_name_var`] = {
+          type: 'global',
+          static: true,
+          default: alias
+        };
       }
 
       return environment;
@@ -356,7 +392,7 @@ export class HelmGeneratorProvider implements IStep {
 
     await Promise.all(
       Array.from(helmFiles.keys()).map(async (workspace) => {
-        const context = await this.getContext(workspace, workspaceMapping);
+        const context = await this.getContext(workspace, workspaceMapping, rootDirectory);
 
         if (!context) {
           console.warn(`No context found for ${workspace.getName()}`);

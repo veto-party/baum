@@ -1,7 +1,7 @@
 "apiVersion": "v1"
 "kind": "ConfigMap"
 "metadata": 
-  "name": "packages__workspace"
+  "name": "test_workspace"
   
 "data": 
   "scoped_variable": {{ .Values.scoped-variable }}

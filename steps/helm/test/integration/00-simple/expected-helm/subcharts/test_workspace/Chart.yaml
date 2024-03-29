@@ -1,6 +1,6 @@
 "apiVersion": "v2"
 "type": "application"
-"name": "packages__workspace"
+"name": "test_workspace"
 "version": "1.0.0"
 "dependencies": 
   - "name": "mariadb"

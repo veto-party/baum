@@ -8,6 +8,9 @@ export const definitions = {
     is_service: {
       type: 'boolean'
     },
+    alias: {
+      type: 'string'
+    },
     variable: {
       type: 'object',
       patternProperties: {
@@ -272,6 +275,22 @@ export const definitions = {
       },
       additionalProperties: false
     }
+  },
+  if: {
+    properties: {
+      alias: {
+        type: 'string'
+      }
+    },
+    required: ['alias']
+  },
+  then: {
+    properties: {
+      is_service: {
+        const: true
+      }
+    },
+    required: ['is_service']
   },
   additionalProperties: false
 } as const;

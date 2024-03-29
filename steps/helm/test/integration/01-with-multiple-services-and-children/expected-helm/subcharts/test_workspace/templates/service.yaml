@@ -1,15 +1,15 @@
 "apiVersion": "v1"
 "kind": "service"
 "metadata": 
-  "name": "packages__workspace"
+  "name": "some_service"
   
 "spec": 
   "selector": 
-    "app": "packages__workspace-depl"
+    "app": "some_service-depl"
     
   "type": "ClusterIP"
   "ports": 
-    - "name": "packages__workspace-5000"
+    - "name": "some_service-5000"
       "protocol": "TCP"
       "port": "5000"
       "targetPort": "5000"
@@ -20,15 +20,15 @@
 "apiVersion": "v1"
 "kind": "service"
 "metadata": 
-  "name": "packages__workspace"
+  "name": "some_service"
   
 "spec": 
   "selector": 
-    "app": "packages__workspace-depl"
+    "app": "some_service-depl"
     
   "type": "LoadBalancer"
   "ports": 
-    - "name": "packages__workspace-80"
+    - "name": "some_service-80"
       "protocol": "TCP"
       "port": "80"
       "targetPort": "80"

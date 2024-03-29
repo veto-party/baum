@@ -48,8 +48,11 @@ export class PNPMPackageManager implements IExecutablePackageManager {
   private async parseWorkspaces(workspacePaths: string[], cwd: string): Promise<IWorkspace[]> {
     const resolvedPaths = await allSettledButFailure(
       workspacePaths.map(async (path) => {
-        if (path.endsWith('/*') || path.endsWith('**')) {
-          return globby(Path.join(path, 'package.json'), { cwd, absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+        path = path.replaceAll(/\//g, Path.sep);
+        if (path.endsWith(`${Path.sep}*`) || path.endsWith('**')) {
+          // https://github.com/sindresorhus/globby/issues/155
+          // globby is b0rked on Windows: .sync nor .async deliver /any/ result.
+          return globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
         const packagePath = Path.join(cwd, path, 'package.json');
