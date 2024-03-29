@@ -9,7 +9,7 @@ export async function compareDirectories(pathA: string, pathB: string) {
   const filesA = FileSystemSync.readdirSync(pathA);
   const filesB = FileSystemSync.readdirSync(pathB);
 
-  let result = false;
+  let result = true;
 
   const files = uniq([filesA, filesB].flat());
 

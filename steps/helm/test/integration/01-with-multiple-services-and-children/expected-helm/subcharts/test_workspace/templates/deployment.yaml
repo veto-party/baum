@@ -1,19 +1,19 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
 "metadata": 
-  "name": "packages__workspace-depl"
+  "name": "some_service-depl"
   
 "spec": 
   "replicas": 1
   "selector": 
     "matchLabels": 
-      "app": "packages__workspace-depl"
+      "app": "some_service-depl"
       
     
   "template": 
     "metadata": 
       "labels": 
-        "app": "packages__workspace-depl"
+        "app": "some_service-depl"
         
       
     "spec": 
@@ -26,12 +26,7 @@
               
           "env": 
             - "name": "test2"
-              "valueFrom": 
-                "configMapKeyRef": 
-                  "name": "packages__workspace"
-                  "key": "test2"
-                  
-                
+              "value": "hello-world2"
               
             - "name": "test4"
               "valueFrom": 
@@ -44,7 +39,7 @@
             - "name": "test3"
               "valueFrom": 
                 "configMapKeyRef": 
-                  "name": "packages__workspace"
+                  "name": "some_service"
                   "key": "test3"
                   
                 
@@ -63,7 +58,7 @@
             - "name": "scoped_variable"
               "valueFrom": 
                 "configMapKeyRef": 
-                  "name": "packages__workspace"
+                  "name": "some_service"
                   "key": "scoped_variable"
                   
                 

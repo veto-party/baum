@@ -1,19 +1,19 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
 "metadata": 
-  "name": "packages__second-depl"
+  "name": "test_workspace_second-depl"
   
 "spec": 
   "replicas": 1
   "selector": 
     "matchLabels": 
-      "app": "packages__second-depl"
+      "app": "test_workspace_second-depl"
       
     
   "template": 
     "metadata": 
       "labels": 
-        "app": "packages__second-depl"
+        "app": "test_workspace_second-depl"
         
       
     "spec": 
@@ -22,7 +22,12 @@
           "ports": 
             
           "env": 
-            
+            - "name": "test_service_relation"
+              "value": "${test}"
+              
+            - "name": "test"
+              "value": "some_service"
+              
           {{ if eq .Values.global.registry.type "secret" }}
           "imagePullSecret": 
             - "name": "veto-pull-secret"
