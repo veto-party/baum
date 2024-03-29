@@ -72,7 +72,8 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
   while (lookupVars.length > 0) {
     const [key, lookupKey] = lookupVars.pop()!;
     if (resolvedVars[key]) {
-      throw new Error(`Duplicate assignment whilist resolving (${JSON.stringify(key)})`);
+      console.warn(`Duplicate assignment whilist resolving (${JSON.stringify(key)})`);
+      continue;
     }
 
     const [lookup, referenced] = resolveReference(lookupKey, allScopedVars, allGlobalVars, is_global);
