@@ -18,7 +18,8 @@ export class HelmGenerator implements IStep {
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
-    private version: string
+    private version: string,
+    private name = 'root',
   ) {}
 
   private async writeObjectToFile(root: string, path: string[], obj: any[]) {
@@ -48,7 +49,7 @@ export class HelmGenerator implements IStep {
     const ChartYAML = {
       apiVersion: 'v2',
       type: 'application',
-      name: 'root',
+      name: this.name,
       version: this.version,
       dependencies: [] as any[]
     };
