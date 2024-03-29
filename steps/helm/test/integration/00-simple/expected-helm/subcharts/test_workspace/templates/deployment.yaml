@@ -1,19 +1,19 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
 "metadata": 
-  "name": "packages__workspace-depl"
+  "name": "test_workspace-depl"
   
 "spec": 
   "replicas": 1
   "selector": 
     "matchLabels": 
-      "app": "packages__workspace-depl"
+      "app": "test_workspace-depl"
       
     
   "template": 
     "metadata": 
       "labels": 
-        "app": "packages__workspace-depl"
+        "app": "test_workspace-depl"
         
       
     "spec": 
@@ -39,7 +39,7 @@
             - "name": "scoped_variable"
               "valueFrom": 
                 "configMapKeyRef": 
-                  "name": "packages__workspace"
+                  "name": "test_workspace"
                   "key": "scoped_variable"
                   
                 

@@ -21,7 +21,8 @@ describe('A 01-with-multiple-services-and-children', () => {
 
     const helmfileProvider = new HelmGeneratorProvider(
       () => 'helm.veto.json',
-      () => true
+      () => true,
+      (workspace, root) => workspace.getName().replaceAll('/', '__').replaceAll('@', '') 
     );
     const helmfileGenerator = new HelmGenerator(
       helmfileProvider,

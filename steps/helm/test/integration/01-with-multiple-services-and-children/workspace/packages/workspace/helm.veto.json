@@ -1,5 +1,6 @@
 {
   "is_service": true,
+  "alias": "some_service",
   "variable": {
     "test": {
       "binding": {

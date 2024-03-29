@@ -8,6 +8,10 @@ export const definitions = {
     is_service: {
       type: 'boolean'
     },
+    // TODO: Alias should only be avilable for is_service = true.
+    alias: {
+      type: 'string'
+    },
     variable: {
       type: 'object',
       patternProperties: {

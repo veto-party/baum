@@ -53,21 +53,19 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    Array.from(contexts.entries())
-      .sort(([workspaceA], [workspaceB]) => workspaceA.getDirectory().localeCompare(workspaceB.getDirectory()))
-      .forEach(([workspace, schema]) => {
-        const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
-        ChartYAML.dependencies.push({
-          name,
-          version: this.version,
-          repository: `file:${Path.join('..', 'subcharts', workspace.getName())}`
-        });
-      });
-
-    [...Array.from(contexts.values()), context]
-      .flatMap((schema) => Object.entries(schema.service ?? {}))
+    Object.entries(context.service ?? {})
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
       .forEach(([name, service]) => {
+
+        if (service.is_local) {
+          ChartYAML.dependencies.push({
+            name: name,
+            version: this.version,
+            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName())}`,            
+          })
+          return;
+        }
+
         if (service.type !== 'global') {
           return;
         }
@@ -159,7 +157,7 @@ export class HelmGenerator implements IStep {
 
     await this.generateGlobalScope(this.helmFileGeneratorProvider.contexts, this.helmFileGeneratorProvider.globalContext, rootDirectory);
 
-    const name = Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__');
+    const name = scopedContext.alias;
 
     const ChartYAML = {
       apiVersion: 'v2',
@@ -172,6 +170,10 @@ export class HelmGenerator implements IStep {
     Object.entries(scopedContext?.service ?? {})
       .sort(([kA], [kB]) => kA.localeCompare(kB))
       .forEach(([k, v]) => {
+        if (v.is_local) {
+          return;
+        }
+
         ChartYAML.dependencies.push({
           name: v.definition.origin.name,
           version: v.definition.origin.version,
