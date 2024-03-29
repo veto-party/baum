@@ -60,7 +60,7 @@ export class HelmGenerator implements IStep {
           ChartYAML.dependencies.push({
             name: name,
             version: this.version,
-            repository: `file:${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`
+            repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`
           });
           return;
         }
@@ -70,9 +70,10 @@ export class HelmGenerator implements IStep {
         }
 
         ChartYAML.dependencies.push({
-          name,
+          name: service.definition.origin.name,
           version: service.definition.origin.version,
-          repository: service.definition.origin.repository
+          repository: service.definition.origin.repository,
+          alias: name
         });
       });
 
