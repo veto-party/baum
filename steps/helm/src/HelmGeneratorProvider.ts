@@ -350,7 +350,6 @@ export class HelmGeneratorProvider implements IStep {
 
       if (helmFile?.is_service) {
         const alias = environment.scoped.alias;
-        console.log(alias.blue);
         environment.global.service ??= {};
         environment.global.service[alias] = {
           is_local: true,
