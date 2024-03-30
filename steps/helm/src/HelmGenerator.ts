@@ -82,6 +82,8 @@ export class HelmGenerator implements IStep {
 
     const valuesYAML: Record<string, any> = {};
 
+    set(valuesYAML, 'global.registry.type', 'local');
+
     const allBindings = Array.from(contexts.values()).flatMap((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition, context)).filter(([, value]) => value.is_global));
 
     const finalizedSCopedContext = Array.from(contexts.entries()).reduce((prev, [workspace, schema]) => this.helmFileGeneratorProvider.groupScopes([schema, prev], workspace), {
@@ -118,7 +120,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${value.referenced} }}`)];
+            return [key, new RawToken(`{{ .Values.${key} }}`)];
           })
       )
     };
@@ -137,7 +139,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${value.referenced} }}`)];
+            return [key, new RawToken(`{{ .Values.${key} }}`)];
           })
       )
     };
@@ -371,7 +373,7 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
           .filter(([, value]) => !value.static && value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${value.referenced} }}`)];
+            return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
           })
       )
     };
@@ -390,7 +392,7 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
           .filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ ${value.is_global ? '.Global' : ''}.Values.${value.referenced} }}`)];
+            return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
           })
       )
     };
