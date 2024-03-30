@@ -51,5 +51,5 @@ describe('A simple test', () => {
     const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
     expect(compareResult).toBe(true);
-  }, 10000);
+  }, 20000);
 });

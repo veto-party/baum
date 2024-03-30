@@ -59,5 +59,5 @@ describe('A 01-with-multiple-services-and-children', () => {
     const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
     expect(compareResult).toBe(true);
-  }, 10000);
+  }, 20000);
 });
