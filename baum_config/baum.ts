@@ -4,7 +4,7 @@ import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { PublicRegistryStep } from '@veto-party/baum__registry__public';
 import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
-import { GroupStep, type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
+import { type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.join(Path.dirname(__filename), '..');
@@ -15,14 +15,16 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setPackageManager(pm);
   baum.setRootDirectory(__dirname);
 
-  if (process.env.CI_TEST) {
+  if (process.env.CI_TEST || !process.env.CI) {
     baum.addExecutionStep('test', new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')));
-    return;
+    if (process.env.CI_TEST) {
+      return;
+    }
   }
 
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
 
-  const commonStep = new ParallelStep([new GroupStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test'))]), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build')), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('generate'))]);
+  const commonStep = new ParallelStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build')), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('generate'))]);
 
   if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
     baum.addExecutionStep(
