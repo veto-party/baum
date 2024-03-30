@@ -14,7 +14,7 @@ const __dirname = Path.dirname(__filename);
 describe('A simple test', () => {
   const testDirectory = Path.join(__dirname, 'workspace');
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await FileSystem.rm(Path.join(testDirectory, 'helm'), {
       recursive: true
     });

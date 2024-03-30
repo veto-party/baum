@@ -14,7 +14,7 @@ const __dirname = Path.dirname(__filename);
 describe('A 01-with-multiple-services-and-children', () => {
   const testDirectory = Path.join(__dirname, 'workspace');
 
-  beforeEach(async () => {
+  afterEach(async () => {
     await FileSystem.rm(Path.join(testDirectory, 'helm'), {
       recursive: true
     });
