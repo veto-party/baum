@@ -12,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 describe('A 01-with-multiple-services-and-children', () => {
-
   const testDirectory = Path.join(__dirname, 'workspace');
 
   beforeEach(async () => {
@@ -50,7 +49,6 @@ describe('A 01-with-multiple-services-and-children', () => {
     stage1.setRootDirectory(testDirectory);
     stage1.setPackageManager(new NPMPackageManager());
     stage1.dontCopyLockFile();
-
 
     stage1.addExecutionStep('pack helm files', new HelmPacker());
     stage1.addExecutionStep('validate helm files', new CommandStep('helm lint .', Path.join(Path.resolve(testDirectory), 'helm', 'main')));

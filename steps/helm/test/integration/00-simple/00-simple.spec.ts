@@ -12,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 describe('A simple test', () => {
-
   const testDirectory = Path.join(__dirname, 'workspace');
 
   beforeEach(async () => {

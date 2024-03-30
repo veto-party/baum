@@ -14,9 +14,8 @@ export async function compareDirectories(pathA: string, pathB: string) {
   const files = uniq([filesA, filesB].flat());
 
   for (const file of files) {
-
-    if (file.endsWith('.tgz') || file === "charts") {
-      console.log("Ingoring ", file, " while comparing.");
+    if (file.endsWith('.tgz') || file === 'charts') {
+      console.log('Ingoring ', file, ' while comparing.');
       continue;
     }
 
