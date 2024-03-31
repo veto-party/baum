@@ -22,7 +22,7 @@ export class HelmPacker implements IStep {
     const groupStep = new GroupStep([installSteps, validationStep]);
 
     groupStep.addExecutionStep('Install main helm dependencies', new CommandStep('helm dep update .', Path.join(rootDirectory, 'helm', 'main')));
-    groupStep.addExecutionStep('Package main helm chart (including deps)', new CommandStep('helm package . ', Path.join(rootDirectory, 'helm', 'main')));
+    groupStep.addExecutionStep('Package main helm chart (including deps)', new CommandStep(`helm package ${Path.join(rootDirectory, 'helm', 'main')}`, rootDirectory));
 
     await groupStep.execute(workspace, packageManager, rootDirectory);
   }
