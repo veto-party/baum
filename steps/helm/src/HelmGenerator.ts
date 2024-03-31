@@ -188,7 +188,7 @@ export class HelmGenerator implements IStep {
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'Chart.yaml'], [ChartYAML]);
 
     const valuesYAML: Record<string, any> = {};
-    
+
     set(valuesYAML, 'global.registry.type', 'local');
 
     [Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext!, globalContext)), Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external)].flat().forEach(([key, value]) => {
