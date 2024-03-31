@@ -2,4 +2,7 @@
   "registry": 
     "type": "local"
     
+  "host": 
+    "domain": "localhost"
+    
   

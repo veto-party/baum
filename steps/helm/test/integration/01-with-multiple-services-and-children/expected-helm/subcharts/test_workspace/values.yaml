@@ -2,6 +2,9 @@
   "registry": 
     "type": "local"
     
+  "host": 
+    "domain": "localhost"
+    
   
 "test4": "global-database"
 "test3": "k5c0204-k5c0204-scoped-database"
