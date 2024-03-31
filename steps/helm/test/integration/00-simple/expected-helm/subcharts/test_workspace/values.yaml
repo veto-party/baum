@@ -1,3 +1,8 @@
+"global": 
+  "registry": 
+    "type": "local"
+    
+  
 "scoped_variable": "example"
 "k1bd42d-scoped-database": 
   "auth": 
