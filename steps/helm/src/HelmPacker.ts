@@ -7,13 +7,19 @@ export class HelmPacker implements IStep {
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
 
-    const parallelStep = new ParallelStep([]);
+    const possibleSteps = await FileSystem.readdir(subChartsDir);
 
-    (await FileSystem.readdir(subChartsDir)).forEach((chart) => {
-      parallelStep.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new CommandStep('helm dep update .', Path.join(subChartsDir, chart)));
+    const installSteps = new ParallelStep([]);
+    possibleSteps.forEach((chart) => {
+      installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new CommandStep('helm dep update .', Path.join(subChartsDir, chart)));
+    });
+    const validationStep = new ParallelStep([]);
+
+    possibleSteps.forEach((chart) => {
+      installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new CommandStep('helm lint .', Path.join(subChartsDir, chart)));
     });
 
-    const groupStep = new GroupStep([parallelStep]);
+    const groupStep = new GroupStep([installSteps, validationStep]);
 
     groupStep.addExecutionStep('Install main helm dependencies', new CommandStep('helm dep update .', Path.join(rootDirectory, 'helm', 'main')));
     groupStep.addExecutionStep('Package main helm chart (including deps)', new CommandStep('helm package . ', Path.join(rootDirectory, 'helm', 'main')));
