@@ -21,7 +21,7 @@
     - "websecure"
   "routes": 
     - "kind": "Rule"
-      "match": "Host(`test`) && PathPrefix(`/`)"
+      "match": Host(`test{{.Values.global.host.domain}}`) && PathPrefix(`/`)
       "services": 
         - "name": "test_workspace-80-exp"
           "port": "80"

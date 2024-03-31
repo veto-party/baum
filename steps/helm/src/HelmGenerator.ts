@@ -83,6 +83,7 @@ export class HelmGenerator implements IStep {
     const valuesYAML: Record<string, any> = {};
 
     set(valuesYAML, 'global.registry.type', 'local');
+    set(valuesYAML, 'global.host.domain', 'localhost');
 
     const allBindings = Array.from(contexts.values()).flatMap((definition) => Object.entries(resolveBindings(definition.binding ?? {}, definition, context)).filter(([, value]) => value.is_global));
 
@@ -190,6 +191,7 @@ export class HelmGenerator implements IStep {
     const valuesYAML: Record<string, any> = {};
 
     set(valuesYAML, 'global.registry.type', 'local');
+    set(valuesYAML, 'global.host.domain', 'localhost');
 
     [Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext!, globalContext)), Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external)].flat().forEach(([key, value]) => {
       if (value.external) {
@@ -277,7 +279,7 @@ export class HelmGenerator implements IStep {
           .filter(([, exposed]) => exposed.type === 'load-balancer')
           .map(([port, exposed]) => ({
             kind: 'Rule',
-            match: `Host(\`${exposed.domainPrefix}\`) && PathPrefix(\`${exposed.path}\`)`,
+            match: new RawToken(`Host(\`${exposed.domainPrefix}{{.Values.global.host.domain}}\`) && PathPrefix(\`${exposed.path}\`)`),
             services: [
               {
                 name: `${name}-${port}-exp`,

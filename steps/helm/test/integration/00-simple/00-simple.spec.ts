@@ -14,10 +14,10 @@ const __dirname = Path.dirname(__filename);
 describe('A simple test', () => {
   const testDirectory = Path.join(__dirname, 'workspace');
 
-  afterEach(async () => {
+  beforeEach(async () => {
     await FileSystem.rm(Path.join(testDirectory, 'helm'), {
       recursive: true
-    });
+    }).catch(() => undefined);
   });
 
   it('Should run successfully', async () => {

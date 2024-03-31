@@ -2,6 +2,9 @@
   "registry": 
     "type": "local"
     
+  "host": 
+    "domain": "localhost"
+    
   
 "scoped_variable": "example"
 "k1bd42d-scoped-database": 
