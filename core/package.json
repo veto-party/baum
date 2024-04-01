@@ -15,7 +15,8 @@
     "shelljs": "^0.8.5",
     "lodash.isequal": "^4.5.0",
     "globby": "^14.0.1",
-    "lodash.uniqby": "^4.7.0"
+    "lodash.uniqby": "^4.7.0",
+    "colors": "^1.4.0"
   },
   "devDependencies": {
     "@veto-party/config": "*",
