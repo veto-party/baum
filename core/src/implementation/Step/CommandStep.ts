@@ -19,14 +19,13 @@ class CommandStep implements IStep {
     colors.yellow,
     colors.blue,
     colors.magenta,
-    colors.cyan,
-    colors.white
+    colors.cyan
   ];
 
   private static colorIndex = 0;
 
   private static getColor() {
-    if (CommandStep.colorIndex > CommandStep.colors.length) {
+    if (CommandStep.colorIndex >= CommandStep.colors.length) {
       CommandStep.colorIndex = 0;
     }
 
