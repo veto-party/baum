@@ -14,13 +14,7 @@ class CommandStep implements IStep {
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
   ) {}
 
-  private static colors = [
-    colors.green,
-    colors.yellow,
-    colors.blue,
-    colors.magenta,
-    colors.cyan
-  ];
+  private static colors = [colors.green, colors.yellow, colors.blue, colors.magenta, colors.cyan];
 
   private static colorIndex = 0;
 
@@ -65,7 +59,6 @@ class CommandStep implements IStep {
   }
 
   execute(workspace: IWorkspace, __packageManager: IExecutablePackageManager, __rootDirectory: string): Promise<void> {
-
     const color = CommandStep.getColor();
 
     return new Promise<void>((resolve, reject) => {
@@ -75,7 +68,7 @@ class CommandStep implements IStep {
         async: true,
         cwd: this.cwdAddition ? (Path.isAbsolute(this.cwdAddition) ? this.cwdAddition : Path.join(workspace.getDirectory(), this.cwdAddition)) : workspace.getDirectory(),
         env: this.getCleanEnv(),
-        silent: true,
+        silent: true
       });
 
       newProcess.stdout?.addListener('data', (datas: string) => {
