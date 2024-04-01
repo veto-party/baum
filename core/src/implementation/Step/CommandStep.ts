@@ -1,5 +1,6 @@
 import OS from 'node:os';
 import Path from 'node:path';
+import colors from 'colors';
 import shelljs from 'shelljs';
 import type { IPackageManager, IStep, IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
@@ -12,6 +13,25 @@ class CommandStep implements IStep {
     private cwdAddition: string | undefined,
     private processCodeValidation: (code: number | null) => boolean = (code) => code === 0
   ) {}
+
+  private static colors = [
+    colors.green,
+    colors.yellow,
+    colors.blue,
+    colors.magenta,
+    colors.cyan,
+    colors.white
+  ];
+
+  private static colorIndex = 0;
+
+  private static getColor() {
+    if (CommandStep.colorIndex > CommandStep.colors.length) {
+      CommandStep.colorIndex = 0;
+    }
+
+    return CommandStep.colors[CommandStep.colorIndex++].bind(colors);
+  }
 
   protected getCleanEnv() {
     const current = {
@@ -46,13 +66,29 @@ class CommandStep implements IStep {
   }
 
   execute(workspace: IWorkspace, __packageManager: IExecutablePackageManager, __rootDirectory: string): Promise<void> {
+
+    const color = CommandStep.getColor();
+
     return new Promise<void>((resolve, reject) => {
       const command = typeof this.command === 'function' ? this.command(workspace, __packageManager, __rootDirectory) : this.command;
       console.log(`Running command: ${JSON.stringify(command)}(${JSON.stringify(workspace.getName())}) now!`);
       const newProcess = exec(command, {
         async: true,
         cwd: this.cwdAddition ? (Path.isAbsolute(this.cwdAddition) ? this.cwdAddition : Path.join(workspace.getDirectory(), this.cwdAddition)) : workspace.getDirectory(),
-        env: this.getCleanEnv()
+        env: this.getCleanEnv(),
+        silent: true,
+      });
+
+      newProcess.stdout?.addListener('data', (datas: string) => {
+        datas.split('\n').forEach((data) => {
+          console.log(color(`(${JSON.stringify(workspace.getName())}): `), data);
+        });
+      });
+
+      newProcess.stderr?.addListener('data', (datas: string) => {
+        datas.split('\n').forEach((data) => {
+          console.log(color(`(${JSON.stringify(workspace.getName())}): `), colors.red(data));
+        });
       });
 
       newProcess.addListener('close', (code) => {
