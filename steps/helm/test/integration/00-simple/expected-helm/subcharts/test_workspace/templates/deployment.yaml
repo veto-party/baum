@@ -20,9 +20,9 @@
       "containers": 
         - "name": "test_workspace"
           "ports": 
-            - "containerPort": "80"
+            - "containerPort": 80
               
-            - "containerPort": "5000"
+            - "containerPort": 5000
               
           "env": 
             - "name": "static-variable"
