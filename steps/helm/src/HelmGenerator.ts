@@ -410,7 +410,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
-        name: key,
+        name: `${name}-${key}`,
         'helm.sh/hook-delete-policy': 'hook-succeeded'
       },
       spec: {
