@@ -32,4 +32,4 @@ export const getHash = (value: string) => {
 
   const hexHash = hash.toString(16);
   return hexHash.substring(0, Math.min(6, hexHash.length - 1));
-}
+};
