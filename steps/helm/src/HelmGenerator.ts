@@ -112,7 +112,7 @@ export class HelmGenerator implements IStep {
 
     const secretsYAML = {
       apiVersion: 'v1',
-      kind: 'secret',
+      kind: 'Secret',
       metadata: {
         name: 'global'
       },
@@ -140,13 +140,13 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values.${key} }}`)];
+            return [key, `{{ .Values.${key} }}`];
           })
       )
     };
 
     if (Object.keys(configMapYAML.data).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configMap.yaml'], [configMapYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configmap.yaml'], [configMapYAML]);
     }
   }
 
@@ -208,7 +208,7 @@ export class HelmGenerator implements IStep {
 
     const serviceYAMLInternal = {
       apiVersion: 'v1',
-      kind: 'service',
+      kind: 'Service',
       metadata: {
         name
       },
@@ -230,7 +230,7 @@ export class HelmGenerator implements IStep {
 
     const serviceYAMLExternal = {
       apiVersion: 'v1',
-      kind: 'service',
+      kind: 'Service',
       metadata: {
         name
       },
@@ -322,7 +322,7 @@ export class HelmGenerator implements IStep {
               {
                 name: this.dockerFileGenerator(workspace),
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
-                  containerPort: port
+                  containerPort: Number(port)
                 })),
                 env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
                   const resulting: any = {
@@ -368,7 +368,7 @@ export class HelmGenerator implements IStep {
 
     const secretsYAML = {
       apiVersion: 'v1',
-      kind: 'secret',
+      kind: 'Secret',
       metadata: {
         name
       },
@@ -396,13 +396,13 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
           .filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
+            return [key, `{{ .Values${value.is_global ? '.global' : ''}.${key} }}`];
           })
       )
     };
 
     if (Object.keys(configMapYAML.data).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configMap.yaml'], [configMapYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
     const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
@@ -423,26 +423,34 @@ export class HelmGenerator implements IStep {
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
                   const k = resolved.referenced;
 
-                  const resulting: any = {
-                    name: k,
-                    value: resolved!.default
-                  };
+                  if (resolved.static) {
+                    return {
+                      name: k,
+                      value: buildVariable(resolved!, key)
+                    };
+                  }
 
                   if (resolved!.secret) {
-                    resulting.valueFrom = {
-                      secretKeyRef: {
-                        name: k,
-                        key
+                    return {
+                      name: k,
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: k,
+                          key
+                        }
                       }
                     };
-                  } else {
-                    resulting.valueFrom = {
+                  }
+
+                  return {
+                    name: k,
+                    valueFrom: {
                       configMapKeyRef: {
                         name: k,
                         key
                       }
-                    };
-                  }
+                    }
+                  };
                 }),
                 imagePullSecret: new ConditionalToken(
                   `if eq .Values.global.registry.type "secret"`,
