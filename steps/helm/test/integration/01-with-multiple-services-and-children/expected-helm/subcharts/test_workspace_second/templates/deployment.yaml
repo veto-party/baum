@@ -18,7 +18,8 @@
       
     "spec": 
       "containers": 
-        - "name": "test_workspace_second"
+        - "name": "test_workspace_second-b243e7-depl"
+          "image": "test_workspace_second"
           "ports": 
             
           "env": 
