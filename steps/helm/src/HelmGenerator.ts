@@ -140,13 +140,13 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values.${key} }}`)];
+            return [key, `{{ .Values.${key} }}`];
           })
       )
     };
 
     if (Object.keys(configMapYAML.data).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configMap.yaml'], [configMapYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configmap.yaml'], [configMapYAML]);
     }
   }
 
@@ -396,13 +396,13 @@ export class HelmGenerator implements IStep {
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
           .filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
+            return [key, `{{ .Values${value.is_global ? '.global' : ''}.${key} }}`];
           })
       )
     };
 
     if (Object.keys(configMapYAML.data).length > 0) {
-      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configMap.yaml'], [configMapYAML]);
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
     const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({

@@ -1,6 +1,5 @@
 import Crypto from 'node:crypto';
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
-import type { VariableType } from '../types/types.js';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';
 const generatePassword = (len: number) => {
@@ -25,4 +24,3 @@ export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchema
   return variableDefinition.default;
 };
 
-export const variableResolver = (variableDefinition: VariableType, scopeName: string) => {};
