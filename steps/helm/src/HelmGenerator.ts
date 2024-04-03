@@ -222,8 +222,8 @@ export class HelmGenerator implements IStep {
           .map(([port]) => ({
             name: `${name}-${port}`,
             protocol: 'TCP',
-            port,
-            targetPort: port
+            port: Number(port),
+            targetPort: Number(port)
           }))
       }
     };
