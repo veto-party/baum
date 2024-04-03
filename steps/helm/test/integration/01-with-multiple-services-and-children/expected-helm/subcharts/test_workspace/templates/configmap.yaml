@@ -4,5 +4,5 @@
   "name": "some_service"
   
 "data": 
-  "scoped_variable": {{ .Values.scoped_variable }}
+  "scoped_variable": "{{ .Values.scoped_variable }}"
   
