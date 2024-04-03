@@ -422,21 +422,20 @@ export class HelmGenerator implements IStep {
                 name: `${key}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
-                  const k = resolved.referenced;
 
                   if (resolved.static) {
                     return {
-                      name: k,
+                      name: key,
                       value: buildVariable(resolved!, key)
                     };
                   }
 
                   if (resolved!.secret) {
                     return {
-                      name: k,
+                      name: key,
                       valueFrom: {
                         secretKeyRef: {
-                          name: k,
+                          name: resolved.is_global ? 'global' : name,
                           key
                         }
                       }
@@ -444,10 +443,10 @@ export class HelmGenerator implements IStep {
                   }
 
                   return {
-                    name: k,
+                    name: key,
                     valueFrom: {
                       configMapKeyRef: {
-                        name: k,
+                        name: resolved.is_global ? 'global' : name,
                         key
                       }
                     }
