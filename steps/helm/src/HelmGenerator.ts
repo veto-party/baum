@@ -208,7 +208,7 @@ export class HelmGenerator implements IStep {
 
     const serviceYAMLInternal = {
       apiVersion: 'v1',
-      kind: 'service',
+      kind: 'Service',
       metadata: {
         name
       },
@@ -230,7 +230,7 @@ export class HelmGenerator implements IStep {
 
     const serviceYAMLExternal = {
       apiVersion: 'v1',
-      kind: 'service',
+      kind: 'Service',
       metadata: {
         name
       },
@@ -451,7 +451,7 @@ export class HelmGenerator implements IStep {
                       }
                     }
                   };
-                  
+
                 }),
                 imagePullSecret: new ConditionalToken(
                   `if eq .Values.global.registry.type "secret"`,
