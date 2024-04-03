@@ -426,8 +426,8 @@ export class HelmGenerator implements IStep {
                   if (resolved.static) {
                     return {
                       name: k,
-                      value: buildVariable(resolved!, key)  
-                    }
+                      value: buildVariable(resolved!, key)
+                    };
                   }
 
                   if (resolved!.secret) {
@@ -451,7 +451,6 @@ export class HelmGenerator implements IStep {
                       }
                     }
                   };
-
                 }),
                 imagePullSecret: new ConditionalToken(
                   `if eq .Values.global.registry.type "secret"`,

@@ -23,4 +23,3 @@ export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchema
 
   return variableDefinition.default;
 };
-
