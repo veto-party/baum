@@ -5,7 +5,7 @@ import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace }
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import type { SchemaType } from './types/types.js';
-import { buildVariable } from './utility/buildVariable.js';
+import { buildVariable, getHash } from './utility/buildVariable.js';
 import { resolveBindings } from './utility/resolveReference.js';
 import { ArrayToken } from './yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
@@ -320,7 +320,8 @@ export class HelmGenerator implements IStep {
           spec: {
             containers: [
               {
-                name: this.dockerFileGenerator(workspace),
+                name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
+                image: this.dockerFileGenerator(workspace),
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                   containerPort: Number(port)
                 })),

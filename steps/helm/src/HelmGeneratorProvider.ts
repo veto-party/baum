@@ -5,6 +5,7 @@ import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IStep,
 import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
 import { type SchemaType, schema } from './types/types.js';
+import { getHash } from './utility/buildVariable.js';
 
 type HelmFileResult = [hemlFileMapping: Map<IWorkspace, SchemaType>, workspaceMapping: Map<IWorkspace, IWorkspace[]>];
 
@@ -52,16 +53,6 @@ export class HelmGeneratorProvider implements IStep {
     private workspaceFilter: (workspace: IWorkspace) => boolean,
     private workspaceAliasGenerator: (workspace: IWorkspace, rootDirectory: string) => string = (workspace, rootDirectory) => Path.relative(rootDirectory, workspace.getDirectory()).replaceAll(Path.sep, '__')
   ) {}
-
-  private getHash(value: string) {
-    let hash = 7;
-    for (let i = 0; i < value.length; i++) {
-      hash = hash * 31 + value.charCodeAt(i);
-    }
-
-    const hexHash = hash.toString(16);
-    return hexHash.substring(0, Math.min(6, hexHash.length - 1));
-  }
 
   public getHelmDefinitionForWorkspace(workspace: IWorkspace) {
     const basePath = this.getHelmFileName(workspace);
@@ -286,7 +277,7 @@ export class HelmGeneratorProvider implements IStep {
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string | undefined = undefined;
         if (service.type === 'scoped') {
-          realDefinitionName = `k${this.getHash(workspace.getName())}-${definitionName}`;
+          realDefinitionName = `k${getHash(workspace.getName())}-${definitionName}`;
         }
 
         const refTarget = realDefinitionName ? environment.scoped : environment.global;
@@ -316,7 +307,7 @@ export class HelmGeneratorProvider implements IStep {
         let scopedDefinitionName = realDefinitionName ?? definitionName;
 
         if (service.type !== 'global') {
-          scopedDefinitionName = `k${this.getHash(workspace.getName())}-${realDefinitionName ?? definitionName}`;
+          scopedDefinitionName = `k${getHash(workspace.getName())}-${realDefinitionName ?? definitionName}`;
         }
 
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;

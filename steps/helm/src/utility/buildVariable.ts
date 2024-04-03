@@ -23,3 +23,13 @@ export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchema
 
   return variableDefinition.default;
 };
+
+export const getHash = (value: string) => {
+  let hash = 7;
+  for (let i = 0; i < value.length; i++) {
+    hash = hash * 31 + value.charCodeAt(i);
+  }
+
+  const hexHash = hash.toString(16);
+  return hexHash.substring(0, Math.min(6, hexHash.length - 1));
+}
