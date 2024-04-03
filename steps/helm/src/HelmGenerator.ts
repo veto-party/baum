@@ -411,7 +411,10 @@ export class HelmGenerator implements IStep {
       kind: 'Job',
       metadata: {
         name: `${name}-${key}`,
-        'helm.sh/hook-delete-policy': 'hook-succeeded'
+        annotations: {
+          "helm.sh/hook": entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
+          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded')
+        }
       },
       spec: {
         template: {
