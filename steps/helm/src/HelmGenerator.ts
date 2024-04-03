@@ -322,7 +322,7 @@ export class HelmGenerator implements IStep {
               {
                 name: this.dockerFileGenerator(workspace),
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
-                  containerPort: port
+                  containerPort: Number(port)
                 })),
                 env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
                   const resulting: any = {
