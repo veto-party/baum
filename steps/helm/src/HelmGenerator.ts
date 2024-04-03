@@ -112,7 +112,7 @@ export class HelmGenerator implements IStep {
 
     const secretsYAML = {
       apiVersion: 'v1',
-      kind: 'secret',
+      kind: 'Secret',
       metadata: {
         name: 'global'
       },
@@ -368,7 +368,7 @@ export class HelmGenerator implements IStep {
 
     const secretsYAML = {
       apiVersion: 'v1',
-      kind: 'secret',
+      kind: 'Secret',
       metadata: {
         name
       },
@@ -423,26 +423,35 @@ export class HelmGenerator implements IStep {
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
                   const k = resolved.referenced;
 
-                  const resulting: any = {
-                    name: k,
-                    value: resolved!.default
-                  };
+                  if (resolved.static) {
+                    return {
+                      name: k,
+                      value: buildVariable(resolved!, key)  
+                    }
+                  }
 
                   if (resolved!.secret) {
-                    resulting.valueFrom = {
-                      secretKeyRef: {
-                        name: k,
-                        key
+                    return {
+                      name: k,
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: k,
+                          key
+                        }
                       }
                     };
-                  } else {
-                    resulting.valueFrom = {
+                  }
+
+                  return {
+                    name: k,
+                    valueFrom: {
                       configMapKeyRef: {
                         name: k,
                         key
                       }
-                    };
-                  }
+                    }
+                  };
+                  
                 }),
                 imagePullSecret: new ConditionalToken(
                   `if eq .Values.global.registry.type "secret"`,
