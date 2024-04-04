@@ -119,7 +119,7 @@ export class HelmGenerator implements IStep {
       type: 'Opaque',
       stringData: Object.fromEntries(
         allBindings
-          .filter(([, value]) => !value.static && value.secret && value.is_global && !value.external)
+          .filter(([, value]) => !value.static && value.secret && value.is_global)
           .map(([key, value]) => {
             return [key, new RawToken(`{{ .Values.${key} }}`)];
           })
@@ -376,7 +376,7 @@ export class HelmGenerator implements IStep {
       type: 'Opaque',
       stringData: Object.fromEntries(
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
-          .filter(([, value]) => !value.static && value.secret && !value.is_global && !value.external)
+          .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
             return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
           })
@@ -395,7 +395,7 @@ export class HelmGenerator implements IStep {
       },
       data: Object.fromEntries(
         Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
-          .filter(([, value]) => !value.static && !value.secret && !value.is_global && !value.external)
+          .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
             return [key, `{{ .Values${value.is_global ? '.global' : ''}.${key} }}`];
           })
