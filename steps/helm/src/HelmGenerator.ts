@@ -138,7 +138,7 @@ export class HelmGenerator implements IStep {
       },
       data: Object.fromEntries(
         allBindings
-          .filter(([, value]) => !value.static && !value.secret && value.is_global && !value.external)
+          .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
             return [key, `{{ .Values.${key} }}`];
           })
