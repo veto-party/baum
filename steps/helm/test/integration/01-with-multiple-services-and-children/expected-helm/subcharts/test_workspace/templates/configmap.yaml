@@ -4,5 +4,6 @@
   "name": "some_service"
   
 "data": 
+  "test3": "{{ .Values.test3 }}"
   "scoped_variable": "{{ .Values.scoped_variable }}"
   

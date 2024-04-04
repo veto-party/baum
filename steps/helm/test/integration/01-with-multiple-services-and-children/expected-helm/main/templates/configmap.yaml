@@ -8,4 +8,5 @@
   "example_url": "{{ .Values.example_url }}"
   "SERVICE_HOST_PORT": "{{ .Values.SERVICE_HOST_PORT }}"
   "SERVICE_HOST_ADDRESS": "{{ .Values.SERVICE_HOST_ADDRESS }}"
+  "test4": "{{ .Values.test4 }}"
   
