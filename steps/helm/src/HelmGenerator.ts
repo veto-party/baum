@@ -412,7 +412,7 @@ export class HelmGenerator implements IStep {
       metadata: {
         name: `${name}-${key}`,
         annotations: {
-          "helm.sh/hook": entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
+          'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
           'helm.sh/hook-delete-policy': new RawToken('hook-succeeded')
         }
       },
