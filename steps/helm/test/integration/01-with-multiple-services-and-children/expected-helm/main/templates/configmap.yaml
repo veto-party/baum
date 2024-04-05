@@ -4,9 +4,9 @@
   "name": "global"
   
 "data": 
-  "example_host": "{{ .Values.example_host }}"
-  "example_url": "{{ .Values.example_url }}"
-  "SERVICE_HOST_PORT": "{{ .Values.SERVICE_HOST_PORT }}"
-  "SERVICE_HOST_ADDRESS": "{{ .Values.SERVICE_HOST_ADDRESS }}"
-  "test4": "{{ .Values.test4 }}"
+  "example_host": "{{index .Values "service-host-domain" }}"
+  "example_url": "{{index .Values "service-host" }}"
+  "SERVICE_HOST_PORT": "{{index .Values "service-host-port" }}"
+  "SERVICE_HOST_ADDRESS": "{{index .Values "service-host-address" }}"
+  "test4": "{{index .Values "global-database" "fullnameOverride" }}"
   

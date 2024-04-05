@@ -25,6 +25,11 @@
       },
       "default": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
     },
+    "some-secret": {
+      "type": "scoped",
+      "secret": true,
+      "default": "replace-me"
+    },
     "service-host-domain": {
       "type": "global",
       "default": "replace-me"
@@ -84,6 +89,7 @@
     "example_url": "service-host",
     "scoped_variable": "scoped-variable",
     "example_host": "service-host-domain",
-    "static-variable": "static-variable"
+    "static-variable": "static-variable",
+    "my_variable": "some-secret"
   }
 }

@@ -44,6 +44,17 @@ export class HelmGenerator implements IStep {
     );
   }
 
+  private static buildVariablePath(variable: string) {
+    const parts = variable.split('.');
+
+    let result = '';
+    for (const part of parts) {
+      result += ` "${part}"`
+    }
+
+    return result;
+  }
+
   @CachedFN(true)
   async generateGlobalScope(contexts: Map<IWorkspace, ExtendedSchemaType>, context: ExtendedSchemaType, rootDirectory: string) {
     const ChartYAML = {
@@ -121,7 +132,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values.${key} }}`)];
+            return [key, new RawToken(`"{{index .Values${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };
@@ -140,7 +151,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, `{{ .Values.${key} }}`];
+            return [key, new RawToken(`"{{index .Values${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };
@@ -384,7 +395,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
+            return [key, new RawToken(`"{{index .Values${value.is_global ? ' ".global"' : ''}${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };
@@ -403,7 +414,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, `{{ .Values${value.is_global ? '.global' : ''}.${key} }}`];
+            return [key, new RawToken(`"{{index .Values ${value.is_global ? ' ".global"' : ''}${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };

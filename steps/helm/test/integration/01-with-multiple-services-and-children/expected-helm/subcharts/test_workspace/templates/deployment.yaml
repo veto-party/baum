@@ -45,6 +45,14 @@
                   
                 
               
+            - "name": "my_variable"
+              "valueFrom": 
+                "secretKeyRef": 
+                  "name": "some_service"
+                  "key": "my_variable"
+                  
+                
+              
             - "name": "static-variable"
               "value": "hello world"
               
