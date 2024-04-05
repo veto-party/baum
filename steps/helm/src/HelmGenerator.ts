@@ -49,7 +49,7 @@ export class HelmGenerator implements IStep {
 
     let result = '';
     for (const part of parts) {
-      result += ` "${part}"`
+      result += ` "${part}"`;
     }
 
     return result;
