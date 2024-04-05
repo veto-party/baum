@@ -193,7 +193,14 @@ export class HelmGenerator implements IStep {
     set(valuesYAML, 'global.registry.type', 'local');
     set(valuesYAML, 'global.host.domain', 'localhost');
 
-    [Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext!, globalContext)), Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external)].flat().forEach(([key, value]) => {
+
+    const allBindings = Object.entries(resolveBindings(scopedContext.binding ?? {}, scopedContext, globalContext));
+
+    Object.values(scopedContext.job ?? {}).forEach((job) => {
+      allBindings.push(...Object.entries(resolveBindings(job?.binding ?? {}, scopedContext, globalContext)));
+    });
+
+    [allBindings, Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external)].flat().forEach(([key, value]) => {
       if (value.external) {
         set(valuesYAML, key, buildVariable(value, key));
         return;
@@ -366,12 +373,6 @@ export class HelmGenerator implements IStep {
     };
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
-
-    const allBindings = Object.entries(resolveBindings(scopedContext.binding ?? {}, scopedContext, globalContext));
-
-    Object.values(scopedContext.job ?? {}).forEach((job) => {
-      allBindings.push(...Object.entries(resolveBindings(job?.binding ?? {}, scopedContext, globalContext)));
-    });
 
     const secretsYAML = {
       apiVersion: 'v1',
