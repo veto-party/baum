@@ -105,6 +105,12 @@ export class HelmGenerator implements IStep {
 
     allBindings.push(...Object.entries(resolveBindings(context.binding ?? {}, finalizedSCopedContext, context)));
 
+    Array.from(contexts.values()).forEach((current) => {
+      Object.values(current.job ?? {}).forEach((job) => {
+        allBindings.push(...Object.entries(resolveBindings(job.binding ?? {}, current, context)));
+      });
+    });
+
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
         set(valuesYAML, key, buildVariable(resolved, key));
