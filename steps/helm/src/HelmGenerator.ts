@@ -193,7 +193,6 @@ export class HelmGenerator implements IStep {
     set(valuesYAML, 'global.registry.type', 'local');
     set(valuesYAML, 'global.host.domain', 'localhost');
 
-
     const allBindings = Object.entries(resolveBindings(scopedContext.binding ?? {}, scopedContext, globalContext));
 
     Object.values(scopedContext.job ?? {}).forEach((job) => {
