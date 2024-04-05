@@ -367,6 +367,12 @@ export class HelmGenerator implements IStep {
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
 
+    const allBindings = Object.entries(resolveBindings(scopedContext.binding ?? {}, scopedContext, globalContext));
+
+    Object.values(scopedContext.job ?? {}).forEach((job) => {
+      allBindings.push(...Object.entries(resolveBindings(job?.binding ?? {}, scopedContext, globalContext)));
+    });
+
     const secretsYAML = {
       apiVersion: 'v1',
       kind: 'Secret',
@@ -375,7 +381,7 @@ export class HelmGenerator implements IStep {
       },
       type: 'Opaque',
       stringData: Object.fromEntries(
-        Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
+        allBindings
           .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
             return [key, new RawToken(`{{ .Values${value.is_global ? '.global' : ''}.${key} }}`)];
@@ -394,7 +400,7 @@ export class HelmGenerator implements IStep {
         name
       },
       data: Object.fromEntries(
-        Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext))
+        allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
             return [key, `{{ .Values${value.is_global ? '.global' : ''}.${key} }}`];
