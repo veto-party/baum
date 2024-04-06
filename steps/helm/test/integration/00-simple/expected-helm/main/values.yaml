@@ -6,10 +6,10 @@
     "domain": "localhost"
     
   
-"example_host": "replace-me"
-"example_url": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
-"SERVICE_HOST_PORT": "replace-me"
-"SERVICE_HOST_ADDRESS": "replace-me"
+"service-host-domain": "replace-me"
+"service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+"service-host-port": "replace-me"
+"service-host-address": "replace-me"
 "global-database": 
   "auth": 
     "forcePassword": true

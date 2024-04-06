@@ -6,16 +6,17 @@
     "domain": "localhost"
     
   
-"example_host": "replace-me"
-"example_url": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
-"SERVICE_HOST_PORT": "replace-me"
-"SERVICE_HOST_ADDRESS": "replace-me"
-"test4": "global-database"
-"test3": "k5c0204-k5c0204-scoped-database"
+"service-host-domain": "replace-me"
+"service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+"service-host-port": "replace-me"
+"service-host-address": "replace-me"
 "global-database": 
+  "fullnameOverride": "global-database"
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
-  "fullnameOverride": "global-database"
+  
+"k5c0204-scoped-database": 
+  "fullnameOverride": "k5c0204-k5c0204-scoped-database"
   

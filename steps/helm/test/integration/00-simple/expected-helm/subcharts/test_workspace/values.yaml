@@ -6,7 +6,7 @@
     "domain": "localhost"
     
   
-"scoped_variable": "example"
+"scoped-variable": "example"
 "k1bd42d-scoped-database": 
   "auth": 
     "forcePassword": true
