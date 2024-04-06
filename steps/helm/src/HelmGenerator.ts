@@ -113,7 +113,7 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
-        set(valuesYAML, key, buildVariable(resolved, key));
+        set(valuesYAML, resolved.referenced, buildVariable(resolved, key));
       }
     });
 
@@ -216,15 +216,18 @@ export class HelmGenerator implements IStep {
       allBindings.push(...Object.entries(resolveBindings(job?.binding ?? {}, scopedContext, globalContext)));
     });
 
-    [allBindings, Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external)].flat().forEach(([key, value]) => {
+    allBindings.forEach(([key, value]) => {
+      if (!value!.static && !value.is_global) {
+        set(valuesYAML, value.referenced, buildVariable(value, key));
+      }
+    });
+
+    Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external).forEach(([key, value]) => {
       if (value.external) {
         set(valuesYAML, key, buildVariable(value, key));
         return;
-      }
-
-      if (!value!.static && !(value as any).is_global) {
-        set(valuesYAML, key, buildVariable(value, key));
-      }
+      }      
+      
     });
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'values.yaml'], [valuesYAML]);
@@ -436,7 +439,7 @@ export class HelmGenerator implements IStep {
         name: `${name}-${key}`,
         annotations: {
           'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
-          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded')
+          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
         }
       },
       spec: {
