@@ -222,13 +222,14 @@ export class HelmGenerator implements IStep {
       }
     });
 
-    Object.entries(scopedContext?.variable ?? {}).filter(([, variable]) => variable.external).forEach(([key, value]) => {
-      if (value.external) {
-        set(valuesYAML, key, buildVariable(value, key));
-        return;
-      }      
-      
-    });
+    Object.entries(scopedContext?.variable ?? {})
+      .filter(([, variable]) => variable.external)
+      .forEach(([key, value]) => {
+        if (value.external) {
+          set(valuesYAML, key, buildVariable(value, key));
+          return;
+        }
+      });
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'values.yaml'], [valuesYAML]);
 
@@ -375,8 +376,8 @@ export class HelmGenerator implements IStep {
                   }
 
                   return resulting;
-                }),
-              },
+                })
+              }
             ],
             imagePullSecret: new ConditionalToken(
               `if eq .Values.global.registry.type "secret"`,
