@@ -113,14 +113,14 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
-        set(valuesYAML, resolved.referenced, buildVariable(resolved, key));
+        set(valuesYAML, resolved.referenced, buildVariable(resolved, 'global'));
       }
     });
 
     Object.entries(context.variable)
       .filter(([, v]) => v.external)
       .forEach(([key, value]) => {
-        set(valuesYAML, key, buildVariable(value, key));
+        set(valuesYAML, key, buildVariable(value, 'global'));
       });
 
     if (Object.keys(valuesYAML).length > 0) {
@@ -218,7 +218,7 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, value]) => {
       if (!value!.static && !value.is_global) {
-        set(valuesYAML, value.referenced, buildVariable(value, key));
+        set(valuesYAML, value.referenced, buildVariable(value, name));
       }
     });
 
@@ -226,7 +226,7 @@ export class HelmGenerator implements IStep {
       .filter(([, variable]) => variable.external)
       .forEach(([key, value]) => {
         if (value.external) {
-          set(valuesYAML, key, buildVariable(value, key));
+          set(valuesYAML, key, buildVariable(value, name));
           return;
         }
       });
@@ -310,7 +310,7 @@ export class HelmGenerator implements IStep {
             services: [
               {
                 name: `${name}-${port}-exp`,
-                port,
+                port: Number(port),
                 passHostHeader: true
               }
             ],
@@ -455,7 +455,7 @@ export class HelmGenerator implements IStep {
                   if (resolved.static) {
                     return {
                       name: key,
-                      value: buildVariable(resolved!, key)
+                      value: buildVariable(resolved!, name)
                     };
                   }
 
