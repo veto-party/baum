@@ -6,14 +6,12 @@
     "domain": "localhost"
     
   
-"test4": "global-database"
-"test3": "k5c0204-k5c0204-scoped-database"
-"my_variable": "replace-me"
-"scoped_variable": "example"
 "k5c0204-scoped-database": 
+  "fullnameOverride": "k5c0204-k5c0204-scoped-database"
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
-  "fullnameOverride": "k5c0204-k5c0204-scoped-database"
   
+"some-secret": "replace-me"
+"scoped-variable": "example"

@@ -376,16 +376,16 @@ export class HelmGenerator implements IStep {
 
                   return resulting;
                 }),
-                imagePullSecret: new ConditionalToken(
-                  `if eq .Values.global.registry.type "secret"`,
-                  new ArrayToken([
-                    new ObjectToken({
-                      name: 'veto-pull-secret'
-                    })
-                  ])
-                )
-              }
-            ]
+              },
+            ],
+            imagePullSecret: new ConditionalToken(
+              `if eq .Values.global.registry.type "secret"`,
+              new ArrayToken([
+                new ObjectToken({
+                  name: 'veto-pull-secret'
+                })
+              ])
+            )
           }
         }
       }

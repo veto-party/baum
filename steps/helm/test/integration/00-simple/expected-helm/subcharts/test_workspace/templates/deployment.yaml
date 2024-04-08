@@ -69,11 +69,11 @@
                   
                 
               
-          {{ if eq .Values.global.registry.type "secret" }}
-          "imagePullSecret": 
-            - "name": "veto-pull-secret"
-              
-          {{ end }}
-      
+          
+      {{ if eq .Values.global.registry.type "secret" }}
+      "imagePullSecret": 
+        - "name": "veto-pull-secret"
+          
+      {{ end }}
     
   
