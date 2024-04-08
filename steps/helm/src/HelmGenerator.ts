@@ -480,7 +480,7 @@ export class HelmGenerator implements IStep {
                       }
                     }
                   };
-                }),
+                })
               }
             ],
             imagePullSecrets: new ConditionalToken(
