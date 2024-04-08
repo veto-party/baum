@@ -98,7 +98,7 @@
               
           
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecret": 
+      "imagePullSecrets": 
         - "name": "veto-pull-secret"
           
       {{ end }}
