@@ -265,7 +265,7 @@ export class HelmGenerator implements IStep {
         selector: {
           app: `${name}-depl`
         },
-        type: 'LoadBalancer',
+        type: 'ClusterIP',
         ports: Object.entries(scopedContext?.expose ?? {})
           .filter(([, exposed]) => exposed.type === 'load-balancer')
           .map(([port]) => ({
