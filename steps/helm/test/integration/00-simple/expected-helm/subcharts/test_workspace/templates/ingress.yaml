@@ -23,7 +23,7 @@
     - "kind": "Rule"
       "match": Host(`test{{.Values.global.host.domain}}`) && PathPrefix(`/`)
       "services": 
-        - "name": "test_workspace-80-exp"
+        - "name": "test_workspace-ext"
           "port": 80
           "passHostHeader": true
           
