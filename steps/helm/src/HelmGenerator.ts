@@ -309,7 +309,7 @@ export class HelmGenerator implements IStep {
             match: new RawToken(`Host(\`${exposed.domainPrefix}{{.Values.global.host.domain}}\`) && PathPrefix(\`${exposed.path}\`)`),
             services: [
               {
-                name: `${name}-${port}-exp`,
+                name: `${name}-ext`,
                 port: Number(port),
                 passHostHeader: true
               }
