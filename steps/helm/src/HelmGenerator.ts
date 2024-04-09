@@ -237,7 +237,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name: `${name}-int`
+        name
       },
       spec: {
         selector: {
