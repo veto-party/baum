@@ -33,7 +33,9 @@ export class HelmGenerator implements IStep {
       await FileSystem.mkdir(Path.dirname(resulting), {
         recursive: true
       });
-    } catch (error) {}
+    } catch (error) {
+      console.warn(error);
+    }
 
     await FileSystem.writeFile(
       resulting,
