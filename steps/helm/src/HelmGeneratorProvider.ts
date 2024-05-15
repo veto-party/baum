@@ -112,6 +112,11 @@ export class HelmGeneratorProvider implements IStep {
             checkedDirectories[directory] = true;
 
             const newWorkspace = new GenericWorkspace(directory, JSON.parse(content.toString()), pm.modifyToRealVersionValue.bind(pm));
+
+            if (!this.workspaceFilter(newWorkspace)) {
+              return;
+            }
+
             internalWorkspaces.push(newWorkspace);
             workspaces.push(newWorkspace);
           })
