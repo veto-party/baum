@@ -268,10 +268,11 @@ export class HelmGeneratorProvider implements IStep {
     return this.workspaceAliasGenerator(workspace, root);
   }
 
-  private async getContext(workspace: IWorkspace, map: HelmFileResult, root: string): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
+  private async getContext(workspace: IWorkspace, map: HelmFileResult, root: string, checkingDependencies: IWorkspace[] = []): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
 
-    const childScopes = (await Promise.all((workspaceMapping.get(workspace) ?? []).map((workspace) => this.getContext(workspace, map, root)))).filter(<T>(value: T | undefined): value is T => value !== undefined);
+    const dependenciesToCheck = (workspaceMapping.get(workspace) ?? []).filter((workspace) => !checkingDependencies.includes(workspace));
+    const childScopes = (await Promise.all(dependenciesToCheck.map((workspace) => this.getContext(workspace, map, root, [dependenciesToCheck, checkingDependencies].flat())))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
