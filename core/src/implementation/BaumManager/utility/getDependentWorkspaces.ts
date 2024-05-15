@@ -1,10 +1,15 @@
 import semver from 'semver';
 import type { IDependent, IPackageManager, IWorkspace } from '../../../index.js';
 
+const dependentToKey = (name: string, version: string) => `${name}@${version}`;
+
 export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace[], pm: IPackageManager, getPackagesFor: (workspace: IWorkspace) => IDependent[] = () => workspace.getDynamicDependents()) => {
   const mappedPackages = others.reduce<Record<string, IWorkspace[]>>((previous, aPackage) => {
-    previous[aPackage.getName()] ??= [];
-    previous[aPackage.getName()].push(aPackage);
+
+    const name = aPackage.getVersion().startsWith("node:") ? aPackage.getVersion().substring('node:'.length, aPackage.getVersion().indexOf('@')) : aPackage.getName();
+
+    previous[name] ??= [];
+    previous[name].push(aPackage);
     return previous;
   }, {});
 
@@ -51,22 +56,25 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
   const allDependentsToParse = [...workspace.getDynamicDependents()];
   const checkedDependents: Record<string, IWorkspace> = {};
 
-  const dependentToKey = (dependent: IDependent) => `${dependent.getName()}@${dependent.getVersion()}`;
 
   while (allDependentsToParse.length > 0) {
     const currentDependent = allDependentsToParse.shift()!;
-    if (!mappedPackages[currentDependent.getName()]) {
+
+    const name = currentDependent.getVersion().startsWith("node:") ? currentDependent.getVersion().substring('node:'.length, currentDependent.getVersion().indexOf('@')) : currentDependent.getName();
+    const version = currentDependent.getVersion().startsWith('node:') ? currentDependent.getVersion().substring(currentDependent.getVersion().indexOf('@')) : currentDependent.getVersion();
+
+    if (!mappedPackages[name]) {
       continue;
     }
 
-    if (checkedDependents[dependentToKey(currentDependent)]) {
+    if (checkedDependents[dependentToKey(name, version)]) {
       continue;
     }
 
-    const unResolvedVersion = pm.modifyToRealVersionValue(currentDependent.getVersion()) || currentDependent.getVersion();
-    const resolvedVersion = resolveToVersion(currentDependent.getName(), unResolvedVersion);
+    const unResolvedVersion = pm.modifyToRealVersionValue(version) || version;
+    const resolvedVersion = resolveToVersion(name, unResolvedVersion);
 
-    const resolvedPackage = mappedPackages[currentDependent.getName()].findLast((workspace) => {
+    const resolvedPackage = (mappedPackages[name] ?? []).findLast((workspace) => {
       const workspaceVersion = pm.modifyToRealVersionValue(workspace.getVersion()) || workspace.getVersion();
       return semver.satisfies(resolvedVersion, workspaceVersion);
     });
@@ -75,7 +83,7 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
       continue;
     }
 
-    checkedDependents[dependentToKey(currentDependent)] = resolvedPackage;
+    checkedDependents[dependentToKey(name, version)] = resolvedPackage;
     allDependentsToParse.push(...getPackagesFor(resolvedPackage));
   }
 
