@@ -5,8 +5,7 @@ const dependentToKey = (name: string, version: string) => `${name}@${version}`;
 
 export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace[], pm: IPackageManager, getPackagesFor: (workspace: IWorkspace) => IDependent[] = () => workspace.getDynamicDependents()) => {
   const mappedPackages = others.reduce<Record<string, IWorkspace[]>>((previous, aPackage) => {
-
-    const name = aPackage.getVersion().startsWith("node:") ? aPackage.getVersion().substring('node:'.length, aPackage.getVersion().indexOf('@')) : aPackage.getName();
+    const name = aPackage.getVersion().startsWith('node:') ? aPackage.getVersion().substring('node:'.length, aPackage.getVersion().indexOf('@')) : aPackage.getName();
 
     previous[name] ??= [];
     previous[name].push(aPackage);
@@ -56,11 +55,10 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
   const allDependentsToParse = [...workspace.getDynamicDependents()];
   const checkedDependents: Record<string, IWorkspace> = {};
 
-
   while (allDependentsToParse.length > 0) {
     const currentDependent = allDependentsToParse.shift()!;
 
-    const name = currentDependent.getVersion().startsWith("node:") ? currentDependent.getVersion().substring('node:'.length, currentDependent.getVersion().indexOf('@')) : currentDependent.getName();
+    const name = currentDependent.getVersion().startsWith('node:') ? currentDependent.getVersion().substring('node:'.length, currentDependent.getVersion().indexOf('@')) : currentDependent.getName();
     const version = currentDependent.getVersion().startsWith('node:') ? currentDependent.getVersion().substring(currentDependent.getVersion().indexOf('@')) : currentDependent.getVersion();
 
     if (!mappedPackages[name]) {
