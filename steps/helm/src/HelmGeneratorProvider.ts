@@ -92,6 +92,10 @@ export class HelmGeneratorProvider implements IStep {
       }
 
       const directoriesToCheck = workspace.getDynamicDependents().flatMap((dependent) => {
+        if (internalWorkspaces.some((workpace) => workpace.getName() === dependent.getName() && pm.modifyToRealVersionValue(dependent.getVersion()) === '*')) {
+          return [];
+        }
+
         if (!dependent.getVersion().startsWith('node:')) {
           return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())];
         }
