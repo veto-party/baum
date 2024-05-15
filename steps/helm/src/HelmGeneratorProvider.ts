@@ -92,12 +92,11 @@ export class HelmGeneratorProvider implements IStep {
       }
 
       const directoriesToCheck = workspace.getDynamicDependents().flatMap((dependent) => {
-
-        if (!dependent.getVersion().startsWith("node:")) {
-          return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())]
+        if (!dependent.getVersion().startsWith('node:')) {
+          return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())];
         }
-        
-        return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getVersion().substring('node:'.length)), Path.join(root, 'node_modules', dependent.getVersion().substring('node:'.length))]
+
+        return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getVersion().substring('node:'.length)), Path.join(root, 'node_modules', dependent.getVersion().substring('node:'.length))];
       });
       const filesToCheck = await Promise.all(
         directoriesToCheck.map((directory) =>
