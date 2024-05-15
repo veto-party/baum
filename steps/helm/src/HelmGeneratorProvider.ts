@@ -91,7 +91,14 @@ export class HelmGeneratorProvider implements IStep {
         continue;
       }
 
-      const directoriesToCheck = workspace.getDynamicDependents().flatMap((dependent) => [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())]);
+      const directoriesToCheck = workspace.getDynamicDependents().flatMap((dependent) => {
+
+        if (!dependent.getVersion().startsWith("node:")) {
+          return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getName()), Path.join(root, 'node_modules', dependent.getName())]
+        }
+        
+        return [Path.join(workspace.getDirectory(), 'node_modules', dependent.getVersion().substring('node:'.length)), Path.join(root, 'node_modules', dependent.getVersion().substring('node:'.length))]
+      });
       const filesToCheck = await Promise.all(
         directoriesToCheck.map((directory) =>
           FileSystem.readFile(Path.join(directory, 'package.json'))
