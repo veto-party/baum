@@ -1,6 +1,6 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { CommandStep, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ParallelStep, RunOnce } from '@veto-party/baum__core';
+import { CommandStep, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ParallelStep, RunOnce, RetryStep } from '@veto-party/baum__core';
 
 @RunOnce()
 export class HelmPacker implements IStep {
@@ -11,7 +11,7 @@ export class HelmPacker implements IStep {
 
     const installSteps = new ParallelStep([]);
     possibleSteps.forEach((chart) => {
-      installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new CommandStep('helm dep update .', Path.join(subChartsDir, chart)));
+      installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new RetryStep(new CommandStep('helm dep update .', Path.join(subChartsDir, chart))));
     });
 
     const validationStep = new ParallelStep([]);
