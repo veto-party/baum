@@ -40,7 +40,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
     step: IStep,
     private targetBranchGetter: (root: string) => string | Promise<string>
   ) {
-    super(step, async (workspace, pm, rootDirectory) => {
+    super(step, async (workspace, _pm, rootDirectory) => {
       const path = Path.resolve(workspace.getDirectory());
       return (await this.ensureGitDiff(rootDirectory)).some((file) => file.startsWith(path));
     });
