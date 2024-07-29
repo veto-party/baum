@@ -10,7 +10,7 @@
     "@veto-party/baum__core": "*",
     "globby": "^14.0.1",
     "yaml": "^2.4.0",
-    "ejs": "^3.1.9"
+    "ejs": "^3.1.10"
   },
   "devDependencies": {
     "@veto-party/config": "*",
