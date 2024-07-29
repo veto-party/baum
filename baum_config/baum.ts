@@ -4,8 +4,8 @@ import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { PublicRegistryStep } from '@veto-party/baum__registry__public';
 import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
-import { ConditionalGitDiffStep } from '../steps/git_diff/src/index.js';
 import { type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
+import { ConditionalGitDiffStep } from '../steps/git_diff/src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.join(Path.dirname(__filename), '..');
@@ -17,11 +17,14 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setRootDirectory(__dirname);
 
   if (process.env.CI_TEST || !process.env.CI) {
-    baum.addExecutionStep('test', new ConditionalGitDiffStep(
-      new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
-      () => 'main',
-      async (_, git) => (await git.branchLocal()).current !== (process.env['github.event.repository.default_branch'] ?? 'main')
-    ));
+    baum.addExecutionStep(
+      'test',
+      new ConditionalGitDiffStep(
+        new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
+        () => 'main',
+        async (_, git) => (await git.branchLocal()).current !== (process.env['github.event.repository.default_branch'] ?? 'main')
+      )
+    );
     if (process.env.CI_TEST) {
       return;
     }
