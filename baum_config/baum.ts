@@ -19,7 +19,7 @@ export default async (baum: IBaumManagerConfiguration) => {
   if (process.env.CI_TEST || !process.env.CI) {
     baum.addExecutionStep('test', new ConditionalGitDiffStep(
       new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
-      () => process.env['github.event.repository.default_branch'] ? `origin/${process.env['github.event.repository.default_branch']}` :'origin/main',
+      () => 'main',
       async (_, git) => (await git.branchLocal()).current !== (process.env['github.event.repository.default_branch'] ?? 'main')
     ));
     if (process.env.CI_TEST) {
