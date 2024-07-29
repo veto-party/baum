@@ -23,12 +23,14 @@ export class ConditionalGitDiffStep extends ConditionalStep {
       git.raw(['diff', `HEAD..${this.targetBranchGetter(root)}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
     });
 
-    const line_changes = raw_changes.split('\n').map(String.prototype.trim.bind(String));
+    const line_changes = raw_changes.split('\n').map((str) => str.trim());
+
+    line_changes.pop();
 
     return line_changes
       .map((line) => {
         try {
-          return Path.resolve(line);
+          return Path.resolve(Path.join(root, line));
         } catch (error) {
           return '';
         }
@@ -50,7 +52,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
       const path = Path.resolve(workspace.getDirectory());
       const diff = await this.ensureGitDiff(rootDirectory);
 
-      console.log(diff);
+      console.log(diff, path);
       return diff.some((file) => file.startsWith(path));
     });
   }
