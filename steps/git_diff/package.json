@@ -5,8 +5,7 @@
   "files": ["./dist/**"],
   "scripts": {
     "build": "tsc --project ./build.tsconfig.json",
-    "test": "node --loader ts-node/esm ./test/start-testing.mjs",
-    "generate": "node --loader ts-node/esm ./scripts/export-json.mjs"
+    "test": "node --loader ts-node/esm ./test/start-testing.mjs"
   },
   "dependencies": {
     "@veto-party/baum__core": "*",
