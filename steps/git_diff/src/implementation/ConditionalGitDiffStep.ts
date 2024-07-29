@@ -30,7 +30,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
 
         const defaultBranch = await this.targetBranchGetter(root, git);
 
-        await git.fetch('origin', `${defaultBranch}:refs/remotes/origin/${defaultBranch}`);
+        await git.fetch('origin', `${defaultBranch}:refs/remotes/origin/${defaultBranch}`).catch(() => undefined);
 
         const raw_changes = await new Promise<string>(async (resolve, reject) => {
             git.raw(['diff', `${defaultBranch}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
