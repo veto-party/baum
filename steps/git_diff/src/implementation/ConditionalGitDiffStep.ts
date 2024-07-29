@@ -1,6 +1,6 @@
 import Path from 'node:path';
 import { ConditionalStep, type IStep } from '@veto-party/baum__core';
-import { simpleGit } from 'simple-git';
+import { type SimpleGit, simpleGit } from 'simple-git';
 
 export class ConditionalGitDiffStep extends ConditionalStep {
   private diffMap = new Map<string, string[]>();
@@ -15,12 +15,21 @@ export class ConditionalGitDiffStep extends ConditionalStep {
   }
 
   private async getGitDiff(root: string): Promise<string[]> {
+    if (typeof this.enabled === "boolean" && !this.enabled) {
+        return [];
+    }
+
+
     const git = simpleGit({
       baseDir: root
     });
 
-    const raw_changes = await new Promise<string>((resolve, reject) => {
-      git.raw(['diff', `HEAD..${this.targetBranchGetter(root)}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
+    if (typeof this.enabled === "function" && !await this.enabled(root, git)) {
+        return [];
+    }
+
+    const raw_changes = await new Promise<string>(async (resolve, reject) => {
+      git.raw(['diff', `HEAD..${await this.targetBranchGetter(root, git)}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
     });
 
     const line_changes = raw_changes.split('\n').map((str) => str.trim());
@@ -40,14 +49,10 @@ export class ConditionalGitDiffStep extends ConditionalStep {
 
   constructor(
     step: IStep,
-    private targetBranchGetter: (root: string) => string | Promise<string>,
-    private enabled: boolean = true
+    private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
+    private enabled: boolean|((root: string, git: SimpleGit) => boolean|Promise<boolean>) = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {
-
-      if (!this.enabled) {
-        return true;
-      }
 
       const path = Path.resolve(workspace.getDirectory());
       const diff = await this.ensureGitDiff(rootDirectory);
