@@ -20,10 +20,10 @@ export class ConditionalGitDiffStep extends ConditionalStep {
     });
 
     const raw_changes = await new Promise<string>((resolve, reject) => {
-      git.raw([`diff HEAD..${this.targetBranchGetter(root)} --name-only`], (err, data) => (err ? reject(err) : resolve(data!)));
+      git.raw(['diff', `HEAD..${this.targetBranchGetter(root)}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
     });
 
-    const line_changes = raw_changes.split('\n').map(String.prototype.trim);
+    const line_changes = raw_changes.split('\n').map(String.prototype.trim.bind(String));
 
     return line_changes
       .map((line) => {
@@ -38,11 +38,20 @@ export class ConditionalGitDiffStep extends ConditionalStep {
 
   constructor(
     step: IStep,
-    private targetBranchGetter: (root: string) => string | Promise<string>
+    private targetBranchGetter: (root: string) => string | Promise<string>,
+    private enabled: boolean = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {
+
+      if (!this.enabled) {
+        return true;
+      }
+
       const path = Path.resolve(workspace.getDirectory());
-      return (await this.ensureGitDiff(rootDirectory)).some((file) => file.startsWith(path));
+      const diff = await this.ensureGitDiff(rootDirectory);
+
+      console.log(diff);
+      return diff.some((file) => file.startsWith(path));
     });
   }
 }

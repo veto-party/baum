@@ -1,0 +1,6 @@
+{
+    "name": "@veto-party/test-git-diff-00",
+    "type": "module",
+    "workspaces": ["./packages/**"]
+  }
+  
