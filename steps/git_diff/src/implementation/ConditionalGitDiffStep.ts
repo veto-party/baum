@@ -59,7 +59,6 @@ export class ConditionalGitDiffStep extends ConditionalStep {
       const path = Path.resolve(workspace.getDirectory());
       const diff = await this.ensureGitDiff(rootDirectory);
 
-      console.log(diff, path);
       return diff.some((file) => file.startsWith(path));
     });
   }
