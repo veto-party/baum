@@ -26,6 +26,10 @@ describe('Simple test', () => {
         })
 
         await git.init(['-b', 'main']);
+
+        await git.addConfig('user.email', 'example@example.com');
+        await git.addConfig('user.name', 'Example example');
+        
         await git.add('*');
         await git.commit('initial commit example');
         await git.checkoutBranch('example', 'main');
