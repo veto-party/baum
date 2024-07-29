@@ -20,5 +20,4 @@ export class ConditionalStep implements IStep {
             return this.step.clean(workspace, packageManager, rootDirectory);
         }
     }
-
 }
