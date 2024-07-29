@@ -28,6 +28,8 @@ export class ConditionalGitDiffStep extends ConditionalStep {
             return [];
         }
 
+        await git.fetch('origin', 'main');
+
         const raw_changes = await new Promise<string>(async (resolve, reject) => {
             git.raw(['diff', `HEAD..${await this.targetBranchGetter(root, git)}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
         });
