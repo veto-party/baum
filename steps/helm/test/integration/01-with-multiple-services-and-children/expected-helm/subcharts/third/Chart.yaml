@@ -1,10 +1,10 @@
 "apiVersion": "v2"
 "type": "application"
-"name": "some_service"
+"name": "third"
 "version": "1.0.0"
 "dependencies": 
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
-    "alias": "kMjgubjdn-scoped-database"
+    "alias": "kMmkuZmpv-scoped-database"
     

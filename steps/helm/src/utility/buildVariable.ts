@@ -24,12 +24,26 @@ export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchema
   return variableDefinition.default;
 };
 
-export const getHash = (value: string) => {
+const doHash = (value: string|number) => {
   let hash = 7;
-  for (let i = 0; i < value.length; i++) {
-    hash = hash * 31 + value.charCodeAt(i);
+
+  if (typeof value === "number") {
+    value = value.toString(32);
   }
 
-  const hexHash = hash.toString(16);
-  return hexHash.substring(0, Math.min(6, hexHash.length - 1));
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash + value.charCodeAt(i)) / 2;
+  }
+
+  return hash;
+}
+
+export const getHash = (value: string) => {
+
+  let hash: string|number = value;
+  do {
+    hash = doHash(hash);
+  } while (hash.toString(16).length > 6);
+
+  return Buffer.from(hash.toString(32)).toString('base64').replaceAll('=', '');
 };

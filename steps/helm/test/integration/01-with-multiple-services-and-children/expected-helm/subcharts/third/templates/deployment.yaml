@@ -1,31 +1,39 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
 "metadata": 
-  "name": "test_workspace-depl"
+  "name": "third-depl"
   
 "spec": 
   "replicas": 1
   "selector": 
     "matchLabels": 
-      "app": "test_workspace-depl"
+      "app": "third-depl"
       
     
   "template": 
     "metadata": 
       "labels": 
-        "app": "test_workspace-depl"
+        "app": "third-depl"
         
       
     "spec": 
       "containers": 
-        - "name": "test_workspace-MjUuaQ-depl"
-          "image": "test_workspace"
+        - "name": "third-MzUudg-depl"
+          "image": "third"
           "ports": 
             - "containerPort": 80
               
             - "containerPort": 5000
               
           "env": 
+            - "name": "my_variable"
+              "valueFrom": 
+                "secretKeyRef": 
+                  "name": "third"
+                  "key": "my_variable"
+                  
+                
+              
             - "name": "static-variable"
               "value": "hello world"
               
@@ -40,7 +48,7 @@
             - "name": "scoped_variable"
               "valueFrom": 
                 "configMapKeyRef": 
-                  "name": "test_workspace"
+                  "name": "third"
                   "key": "scoped_variable"
                   
                 

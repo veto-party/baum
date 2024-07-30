@@ -272,7 +272,7 @@ export class HelmGeneratorProvider implements IStep {
     const [helmFiles, workspaceMapping] = map;
 
     const dependenciesToCheck = (workspaceMapping.get(workspace) ?? []).filter((workspace) => !checkingDependencies.includes(workspace));
-    const childScopes = (await Promise.all(dependenciesToCheck.map((workspace) => this.getContext(workspace, map, root, [dependenciesToCheck, checkingDependencies].flat())))).filter(<T>(value: T | undefined): value is T => value !== undefined);
+    const childScopes = (await Promise.all(dependenciesToCheck.map((childWorkspace) => this.getContext(childWorkspace, map, root, [workspace, dependenciesToCheck, checkingDependencies].flat())))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
     if (helmFiles.has(workspace)) {
       const helmFile = helmFiles.get(workspace);
@@ -292,11 +292,12 @@ export class HelmGeneratorProvider implements IStep {
 
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string | undefined = undefined;
+        const hash = getHash(workspace.getName() + checkingDependencies.map((dep) => dep.getName()));
         if (service.type === 'scoped') {
-          realDefinitionName = `k${getHash(workspace.getName())}-${definitionName}`;
+          realDefinitionName = `k${hash}-${definitionName}`;
         }
 
-        const refTarget = realDefinitionName ? environment.scoped : environment.global;
+        const refTarget = service.type === 'scoped' ? environment.scoped : environment.global;
 
         Object.entries(service.environment ?? {}).forEach(([k, v]) => {
           let cloned: Exclude<(typeof environment)[keyof typeof environment]['variable'], undefined>[string] = cloneDeep({
@@ -323,7 +324,7 @@ export class HelmGeneratorProvider implements IStep {
         let scopedDefinitionName = realDefinitionName ?? definitionName;
 
         if (service.type !== 'global') {
-          scopedDefinitionName = `k${getHash(workspace.getName())}-${realDefinitionName ?? definitionName}`;
+          scopedDefinitionName = `k${hash}-${realDefinitionName ?? definitionName}`;
         }
 
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;

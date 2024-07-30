@@ -6,8 +6,8 @@
     "domain": "localhost"
     
   
-"k5c0204-scoped-database": 
-  "fullnameOverride": "k5c0204-k5c0204-scoped-database"
+"kMjgubjdn-scoped-database": 
+  "fullnameOverride": "kMjgubjdn-kMjgubjdn-scoped-database"
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"

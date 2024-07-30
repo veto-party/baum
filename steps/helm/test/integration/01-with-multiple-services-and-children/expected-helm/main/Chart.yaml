@@ -16,3 +16,7 @@
     "version": "1.0.0"
     "repository": "file://../subcharts/test_workspace_second"
     
+  - "name": "third"
+    "version": "1.0.0"
+    "repository": "file://../subcharts/third"
+    
