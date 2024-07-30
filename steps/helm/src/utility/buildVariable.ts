@@ -24,10 +24,10 @@ export const buildVariable = (variableDefinition: Partial<Exclude<ExtendedSchema
   return variableDefinition.default;
 };
 
-const doHash = (value: string|number) => {
+const doHash = (value: string | number) => {
   let hash = 7;
 
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     value = value.toString(32);
   }
 
@@ -36,11 +36,10 @@ const doHash = (value: string|number) => {
   }
 
   return hash;
-}
+};
 
 export const getHash = (value: string) => {
-
-  let hash: string|number = value;
+  let hash: string | number = value;
   do {
     hash = doHash(hash);
   } while (hash.toString(16).length > 6);
