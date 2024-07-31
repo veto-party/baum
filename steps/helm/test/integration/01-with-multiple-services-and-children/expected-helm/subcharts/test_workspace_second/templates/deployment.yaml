@@ -18,7 +18,7 @@
       
     "spec": 
       "containers": 
-        - "name": "test_workspace_second-mmyubdg-depl"
+        - "name": "test_workspace_second-duap0fh7-depl"
           "image": "test_workspace_second"
           "ports": 
             

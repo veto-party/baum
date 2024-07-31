@@ -6,8 +6,8 @@
     "domain": "localhost"
     
   
-"kmjgubjdn-scoped-database": 
-  "fullnameOverride": "kmjgubjdn-kmjgubjdn-scoped-database"
+"kdr17cin6-scoped-database": 
+  "fullnameOverride": "kdr17cin6-kdr17cin6-scoped-database"
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
