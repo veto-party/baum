@@ -6,11 +6,12 @@
     "domain": "localhost"
     
   
+"some-secret": "replace-me"
 "scoped-variable": "example"
-"kMjUuaQ-scoped-database": 
+"kMmkuZmpv-scoped-database": 
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
-  "fullnameOverride": "kMjUuaQ-kMjUuaQ-scoped-database"
+  "fullnameOverride": "kMmkuZmpv-kMmkuZmpv-scoped-database"
   

@@ -1,9 +1,8 @@
 "apiVersion": "v1"
 "kind": "ConfigMap"
 "metadata": 
-  "name": "some_service"
+  "name": "third"
   
 "data": 
-  "test3": "{{index .Values  "kMjgubjdn-scoped-database" "fullnameOverride" }}"
   "scoped_variable": "{{index .Values  "scoped-variable" }}"
   
