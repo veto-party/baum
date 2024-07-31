@@ -8,10 +8,10 @@
   
 "some-secret": "replace-me"
 "scoped-variable": "example"
-"kMmkuZmpv-scoped-database": 
+"kmmkuzmpv-scoped-database": 
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
-  "fullnameOverride": "kMmkuZmpv-kMmkuZmpv-scoped-database"
+  "fullnameOverride": "kmmkuzmpv-kmmkuzmpv-scoped-database"
   

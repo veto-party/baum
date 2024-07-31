@@ -18,7 +18,7 @@
       
     "spec": 
       "containers": 
-        - "name": "some_service-MjUuaQ-depl"
+        - "name": "some_service-mjuuaq-depl"
           "image": "test_workspace"
           "ports": 
             - "containerPort": 80

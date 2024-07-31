@@ -7,10 +7,10 @@
     
   
 "scoped-variable": "example"
-"kMjUuaQ-scoped-database": 
+"kmjuuaq-scoped-database": 
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
-  "fullnameOverride": "kMjUuaQ-kMjUuaQ-scoped-database"
+  "fullnameOverride": "kmjuuaq-kmjuuaq-scoped-database"
   

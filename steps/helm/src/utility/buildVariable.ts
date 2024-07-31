@@ -44,5 +44,5 @@ export const getHash = (value: string) => {
     hash = doHash(hash);
   } while (hash.toString(16).length > 6);
 
-  return Buffer.from(hash.toString(32)).toString('base64').replaceAll('=', '');
+  return Buffer.from(hash.toString(32)).toString('base64').replaceAll('=', '').toLowerCase();
 };

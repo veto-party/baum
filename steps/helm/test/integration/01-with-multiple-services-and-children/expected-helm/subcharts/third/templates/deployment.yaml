@@ -18,7 +18,7 @@
       
     "spec": 
       "containers": 
-        - "name": "third-MzUudg-depl"
+        - "name": "third-mzuudg-depl"
           "image": "third"
           "ports": 
             - "containerPort": 80
