@@ -1,6 +1,6 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
+export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'variable' | '__scope'>|Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
   let variable: [ExtendedSchemaType['variable'][string] & { is_global: boolean }, string] = [
     {
       ref,
@@ -15,11 +15,12 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
     }
 
     if (!variable[0].is_global) {
-      const scopedResult = scope.variable[variable[0].ref] ?? scope.__scope?.[variable[0].ref];
+      const ref = variable[0].ref;
+      const scopedResult = Array.isArray(scope) ? scope.find((scope) => scope.variable[ref] ?? scope.__scope?.[ref]) : scope.variable[ref] ?? scope.__scope?.[ref];
       if (scopedResult) {
         variable = [
           {
-            ...scopedResult,
+            ...scopedResult as any,
             is_global: false
           },
           variable[0].ref
@@ -64,8 +65,8 @@ export const resolveReference = (ref: string, scope: ExtendedSchemaType, allGlob
   return variable;
 };
 
-export const resolveBindings = (refName: Record<string, string>, allScopedVars: ExtendedSchemaType, allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
-  const resolvedVars: Record<string, (typeof allScopedVars)['variable'][string] & { is_global: boolean; referenced: string }> = {};
+export const resolveBindings = (refName: Record<string, string>, allScopedVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: ExtendedSchemaType, is_global?: boolean) => {
+  const resolvedVars: Record<string, Exclude<Pick<ExtendedSchemaType, 'variable' | '__scope'>['variable'], undefined>[string] & { is_global: boolean; referenced: string }> = {};
 
   const lookupVars = Object.entries(refName);
 

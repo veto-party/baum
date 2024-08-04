@@ -15,8 +15,10 @@ export type ExtendedSchemaType = {
   expose?: SchemaType['expose'];
   job?: Record<
     string,
-    Exclude<SchemaType['job'], undefined>[string] & {
+    Omit<Exclude<SchemaType['job'], undefined>[string], 'variable'> & {
       workspace: IWorkspace;
+      variable:  Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; }) & { external?: boolean; }>;
+      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; })>;
     }
   >;
   service?: Record<
@@ -29,10 +31,10 @@ export type ExtendedSchemaType = {
         workspace: IWorkspace;
       }
   >;
-  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string; external?: boolean }>;
+  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; }) & { external?: boolean; }>;
   is_service?: boolean;
   alias: string;
-  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & { ref?: string }>;
+  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; })>;
   $schema?: string;
 };
 
@@ -271,6 +273,9 @@ export class HelmGeneratorProvider implements IStep {
   private async getContext(workspace: IWorkspace, map: HelmFileResult, root: string, checkingDependencies: IWorkspace[] = []): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
 
+
+    const hash = getHash(workspace.getName() + checkingDependencies.map((dep) => dep.getName()));
+
     const dependenciesToCheck = (workspaceMapping.get(workspace) ?? []).filter((workspace) => !checkingDependencies.includes(workspace));
     const childScopes = (await Promise.all(dependenciesToCheck.map((childWorkspace) => this.getContext(childWorkspace, map, root, [workspace, dependenciesToCheck, checkingDependencies].flat())))).filter(<T>(value: T | undefined): value is T => value !== undefined);
 
@@ -282,7 +287,8 @@ export class HelmGeneratorProvider implements IStep {
         variable: {},
         service: {},
         alias: helmFile?.alias ?? this.getAlias(workspace, root),
-        job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
+        job: {},
+        //job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       };
 
       const environment: Record<'global' | 'scoped', ExtendedSchemaType> = {
@@ -292,7 +298,6 @@ export class HelmGeneratorProvider implements IStep {
 
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string | undefined = undefined;
-        const hash = getHash(workspace.getName() + checkingDependencies.map((dep) => dep.getName()));
         if (service.type === 'scoped') {
           realDefinitionName = `k${hash}-${definitionName}`;
         }
@@ -300,8 +305,9 @@ export class HelmGeneratorProvider implements IStep {
         const refTarget = service.type === 'scoped' ? environment.scoped : environment.global;
 
         Object.entries(service.environment ?? {}).forEach(([k, v]) => {
-          let cloned: Exclude<(typeof environment)[keyof typeof environment]['variable'], undefined>[string] = cloneDeep({
+          let cloned: Exclude<ExtendedSchemaType['variable'], undefined>[string] = cloneDeep({
             ...v,
+            sourcePath: workspace.getDirectory(),
             type: v.type ?? service.type,
             external: true
           });
@@ -309,7 +315,7 @@ export class HelmGeneratorProvider implements IStep {
           if (realDefinitionName) {
             refTarget.variable[`${realDefinitionName}.${k}`] = cloneDeep(cloned);
             cloned = {
-              ref: `${realDefinitionName}.${k}`
+              ref: `${realDefinitionName}.${k}`,
             };
           }
 
@@ -331,7 +337,8 @@ export class HelmGeneratorProvider implements IStep {
         refTarget.variable[scopedKey] = {
           type: service.type,
           default: scopedDefinitionName,
-          external: true
+          external: true,
+          sourcePath: workspace.getDirectory(),
         };
 
         if (realDefinitionName) {
@@ -364,10 +371,42 @@ export class HelmGeneratorProvider implements IStep {
       if (helmFile?.variable) {
         Object.entries(helmFile.variable).map(([k, valueValue]) => {
           if (valueValue.type.startsWith('global')) {
-            environment.global.variable[k] = valueValue;
+            environment.global.variable[k] = {
+              sourcePath: workspace.getDirectory(),
+              ...valueValue,
+            };
           } else {
-            environment.scoped.variable[k] = valueValue;
+            environment.scoped.variable[k] = {
+              sourcePath: workspace.getDirectory(),
+              ...valueValue,
+            };
           }
+        });
+      }
+
+      if (helmFile?.job) {
+        environment.global.job ??= {};
+        environment.scoped.job ??= {};
+        Object.entries(helmFile.job).map(([k, valueValue]) => {
+          let scope = environment.scoped;
+          if (valueValue.type.startsWith('global')) {
+            scope = environment.global;
+          }
+
+          scope.job![k] = {
+            workspace,
+            ...valueValue,
+            variable: {}
+          };
+
+
+          Object.entries(valueValue.variable ?? {}).forEach(([key, variable]) => {
+            const innerContext = variable.type === "global" ? environment.global.variable! : scope.job![k].variable!;
+            innerContext[key] = {
+              sourcePath: workspace.getDirectory(),
+              ...variable
+            };
+          });
         });
       }
 
@@ -379,9 +418,10 @@ export class HelmGeneratorProvider implements IStep {
           workspace: workspace
         };
         environment.global.variable[`${alias}.origin_name_var`] = {
+          sourcePath: workspace.getDirectory(),
           type: 'global',
           static: true,
-          default: alias
+          default: alias,
         };
       }
 
