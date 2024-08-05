@@ -2,8 +2,8 @@ import Crypto from 'node:crypto';
 import FS from 'node:fs';
 import Path from 'node:path';
 import { CachedFN } from '@veto-party/baum__core';
-import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 import { snakeCase } from 'change-case';
+import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';
 const generatePassword = (len: number) => {
