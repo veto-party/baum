@@ -1,5 +1,15 @@
 {
   "is_service": true,
+  "system_usage": {
+    "limit": {
+      "cpu": "0.5",
+      "memory": "123"
+    },
+    "requested": {
+      "cpu": "0.2",
+      "memory": "100"
+    }
+  },
   "variable": {
     "variable-config": {
       "type": "global",
