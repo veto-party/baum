@@ -35,6 +35,8 @@ export type ExtendedSchemaType = {
   is_service?: boolean;
   alias: string;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string })>;
+  update_strategy?: SchemaType['update_strategy'];
+  system_usage?: SchemaType['system_usage'];
   $schema?: string;
 };
 
@@ -218,6 +220,8 @@ export class HelmGeneratorProvider implements IStep {
   }
 
   private grouperFunctions: Mappers = {
+    system_usage: HelmGeneratorProvider.basicOverrideFnc('system_usage'),
+    update_strategy: HelmGeneratorProvider.basicOverrideFnc('update_strategy'),
     variable: HelmGeneratorProvider.basicOverrideFnc('variable'),
     expose: HelmGeneratorProvider.basicOverrideFnc('expose'),
     job: HelmGeneratorProvider.basicOverrideFnc('job'),
@@ -243,7 +247,7 @@ export class HelmGeneratorProvider implements IStep {
     },
     is_service: (_, current) => current,
     alias: (_, current) => current,
-    $schema: (_, current) => current
+    $schema: (_, current) => current,
   };
 
   public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {

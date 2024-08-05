@@ -419,6 +419,16 @@ export class HelmGenerator implements IStep {
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                   containerPort: Number(port)
                 })),
+                resources: !scopedContext.system_usage ? undefined : {
+                  limits: !scopedContext.system_usage.limit ? undefined : {
+                    cpu: scopedContext.system_usage.limit.cpu,
+                    memory: scopedContext.system_usage.limit.memory
+                  },
+                  requests: !scopedContext.system_usage.requested ? undefined : {
+                    cpu: scopedContext.system_usage.requested.cpu,
+                    memory: scopedContext.system_usage.requested.memory
+                  },
+                },
                 env: Object.entries(resolveBindings(scopedContext?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
                   const resulting: any = {
                     name: key

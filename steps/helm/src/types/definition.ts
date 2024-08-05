@@ -8,6 +8,60 @@ export const definitions = {
     is_service: {
       type: 'boolean'
     },
+    update_strategy: {
+      type: 'object',
+      required: ['type'],
+      oneOf: [{
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['RollingUpdate']
+          },
+          maxSurge: {
+            type: 'string'
+          },
+          maxUnavailable: {
+            type: 'string'
+          }
+        }
+      }, {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['Rereate']
+          }
+        }
+      }]
+    },
+    system_usage: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'object',
+          properties: {
+            cpu: {
+              type: 'string'
+            },
+            memory: {
+              type: 'string'
+            }
+          }
+        },
+        requested: {
+          type: 'object',
+          properties: {
+            cpu: {
+              type: 'string'
+            },
+            memory: {
+              type: 'string'
+            }
+          }
+        }
+      }
+    },
     alias: {
       type: 'string'
     },
