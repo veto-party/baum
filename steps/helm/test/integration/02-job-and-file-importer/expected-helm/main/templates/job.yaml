@@ -3,8 +3,8 @@
 "metadata": 
   "name": "global-backup-sql"
   "annotations": 
-    "helm.sh/hook":   pre-upgrade
-    "helm.sh/hook-delete-policy":   hook-succeeded, hook-failed
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded, hook-failed
     
   
 "spec": 
@@ -12,24 +12,24 @@
     "spec": 
       "restartPolicy": "OnFailure"
       "containers": 
+        
         - "name": "backup-sql-container"
           "image": "app__backend__packages__node__app__module__orm__migrator__backup__source"
           "env": 
-            - "name": "var_example"
+            
+            - "name": "example_data"
               "valueFrom": 
                 "configMapKeyRef": 
                   "name": "global"
-                  "key": "var_example"
+                  "key": "example_data"
                   
                 
               
-            
           
-        
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   - "name": "veto-pull-secret"
+      "imagePullSecrets":   
+        - "name": "veto-pull-secret"
           
-        
       {{ end }}
     
   

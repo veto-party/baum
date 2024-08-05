@@ -5,6 +5,7 @@
   "host": 
     "domain": "localhost"
     
+  "example": "{\n  \"foo\": \"bar\"\n}\n"
   
 "global-database": 
   "fullnameOverride": "global-database"
@@ -16,4 +17,3 @@
     "config": "{\n  \"foo\": \"bar\"\n}\n"
     
   
-"var-example": "{\n  \"foo\": \"bar\"\n}\n"

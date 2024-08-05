@@ -3,6 +3,7 @@
 "name": "root"
 "version": "1.0.0"
 "dependencies": 
+  
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
@@ -13,4 +14,3 @@
     "version": "1.0.0"
     "repository": "file://../subcharts/test_workspace"
     
-  

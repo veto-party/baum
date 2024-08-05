@@ -1,22 +1,21 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+
+  "host":
     "domain": "localhost"
-    
-  
-"service-host-domain": "replace-me"
-"service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
-"service-host-port": "replace-me"
-"service-host-address": "replace-me"
-"global-database": 
+
+  "service-host-domain": "replace-me"
+  "service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+  "service-host-port": "replace-me"
+  "service-host-address": "replace-me"
+
+"global-database":
   "fullnameOverride": "global-database"
-  "auth": 
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  
-"ke0y32oxa-scoped-database": 
+
+
+"ke0y32oxa-scoped-database":
   "fullnameOverride": "ke0y32oxa-ke0y32oxa-scoped-database"
-  

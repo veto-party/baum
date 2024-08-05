@@ -18,23 +18,23 @@
       
     "spec": 
       "containers": 
+        
         - "name": "test_workspace-frhlijri-depl"
           "image": "test_workspace"
           "ports": 
+            
             - "containerPort": 80
               
             
             - "containerPort": 5000
               
-            
           "env": 
-            
           
-        
+          
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   - "name": "veto-pull-secret"
+      "imagePullSecrets":   
+        - "name": "veto-pull-secret"
           
-        
       {{ end }}
     
   

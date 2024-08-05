@@ -3,8 +3,8 @@
 "metadata": 
   "name": "test_workspace-sql-default-migration"
   "annotations": 
-    "helm.sh/hook":   post-install, post-upgrade
-    "helm.sh/hook-delete-policy":   hook-succeeded, hook-failed
+    "helm.sh/hook": post-install, post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded, hook-failed
     
   
 "spec": 
@@ -12,9 +12,11 @@
     "spec": 
       "restartPolicy": "OnFailure"
       "containers": 
+        
         - "name": "sql-default-migration-container"
           "image": "app__backend__packages__node__app__module__orm__migrator__source"
           "env": 
+            
             - "name": "DATABASE_ADDRESS"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -32,13 +34,11 @@
                   
                 
               
-            
           
-        
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   - "name": "veto-pull-secret"
+      "imagePullSecrets":   
+        - "name": "veto-pull-secret"
           
-        
       {{ end }}
     
   
