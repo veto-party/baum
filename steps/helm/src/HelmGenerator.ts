@@ -574,6 +574,26 @@ export class HelmGenerator implements IStep {
     }));
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
+
+    const podAutoScaling = {
+      apiVersion: 'autoscaling/v2',
+      kind: 'HorizontalPodAutoScaler',
+      metadata: {
+        name: `${name}-scaler`
+      },
+      spec: {
+        ...(scopedContext.scaling ?? {}),
+        scaleTargetRef: {
+          apiVersion: 'apps/v1',
+          kind: 'Deployment',
+          name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
+        }
+      }
+    }
+
+    if (scopedContext.scaling) {
+      await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'pod-autoscaling.yaml'], [podAutoScaling]);
+    }
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

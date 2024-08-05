@@ -62,6 +62,9 @@ export const definitions = {
         }
       }
     },
+    scaling: {
+      type: 'object'
+    },
     alias: {
       type: 'string'
     },
