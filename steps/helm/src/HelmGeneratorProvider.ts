@@ -287,7 +287,6 @@ export class HelmGeneratorProvider implements IStep {
         service: {},
         alias: helmFile?.alias ?? this.getAlias(workspace, root),
         job: {}
-        //job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       };
 
       const environment: Record<'global' | 'scoped', ExtendedSchemaType> = {
