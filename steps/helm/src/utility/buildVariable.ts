@@ -3,6 +3,7 @@ import FS from 'node:fs';
 import Path from 'node:path';
 import { CachedFN } from '@veto-party/baum__core';
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
+import { snakeCase } from 'change-case';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';
 const generatePassword = (len: number) => {
@@ -41,7 +42,7 @@ class VariablePrepareLogic {
 
     if (variableDefinition.type === 'scoped-name') {
       if (variableDefinition.case === 'snake') {
-        variableDefinition.default = scopeName.replaceAll('-', '_'); // TODO: camelCase to snake_case
+        variableDefinition.default = snakeCase(scopeName);
       } else {
         variableDefinition.default = scopeName;
       }
