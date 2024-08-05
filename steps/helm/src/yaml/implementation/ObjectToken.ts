@@ -16,10 +16,10 @@ export class ObjectToken extends AToken {
       if (value instanceof AToken) {
         const resultingValue = value.write().split(EOL);
 
-        if (resultingValue.length > 1 || originalValue instanceof ObjectToken || originalValue instanceof ArrayToken) {
-          value = EOL + resultingValue.map((line) => `  ${line}`).join(EOL);
-        } else {
-          value = resultingValue.join(EOL);
+
+        value = (resultingValue.length > 1 ? resultingValue.map((line) => `  ${line}`) : resultingValue).join(EOL);
+        if (originalValue instanceof ObjectToken || originalValue instanceof ArrayToken) {
+          value = EOL + value;
         }
 
         if (originalValue instanceof ConditionalToken) {

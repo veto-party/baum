@@ -393,20 +393,23 @@ export class HelmGeneratorProvider implements IStep {
             scope = environment.global;
           }
 
+          const variable: typeof scope['variable'] = {};
+          const __scope: Exclude<typeof scope['__scope'], undefined> = {};
+
+          Object.entries(valueValue.variable ?? {}).forEach(([key, value]) => {
+            variable[key] = {
+              ...value,
+              type: 'global',
+              sourcePath: workspace.getDirectory()
+            };
+          });
+
           scope.job![k] = {
             workspace,
             ...valueValue,
-            variable: {}
+            variable,
+            __scope
           };
-
-
-          Object.entries(valueValue.variable ?? {}).forEach(([key, variable]) => {
-            const innerContext = variable.type === "global" ? environment.global.variable! : scope.job![k].variable!;
-            innerContext[key] = {
-              sourcePath: workspace.getDirectory(),
-              ...variable
-            };
-          });
         });
       }
 

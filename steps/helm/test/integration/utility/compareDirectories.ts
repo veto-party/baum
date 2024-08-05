@@ -4,6 +4,7 @@ import Path from 'node:path';
 import 'colors';
 import * as Diff from 'diff';
 import uniq from 'lodash.uniq';
+import { EOL } from 'node:os';
 
 export async function compareDirectories(pathA: string, pathB: string) {
   const filesA = FileSystemSync.readdirSync(pathA);
@@ -30,8 +31,11 @@ export async function compareDirectories(pathA: string, pathB: string) {
         result = false;
       }
     } else {
-      const fileA = FileSystemSync.readFileSync(Path.join(pathA, file), 'utf-8');
-      const fileB = FileSystemSync.readFileSync(Path.join(pathB, file), 'utf-8');
+
+      const cleanFile = (content: string) => content.split(EOL).map((line) => line.trimEnd()).filter((line) => line !== '').join(EOL); 
+
+      const fileA = cleanFile(FileSystemSync.readFileSync(Path.join(pathA, file), 'utf-8'));
+      const fileB = cleanFile(FileSystemSync.readFileSync(Path.join(pathB, file), 'utf-8'));
 
       const diff = Diff.diffLines(fileB, fileA);
 

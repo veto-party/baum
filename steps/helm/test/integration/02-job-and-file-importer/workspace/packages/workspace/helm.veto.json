@@ -1,0 +1,94 @@
+{
+  "is_service": true,
+  "variable": {
+    "variable-config": {
+      "type": "global",
+      "file": "foo.json"
+    }
+  },
+  "job": {
+    "sql-default-migration": {
+      "type": "scoped",
+      "definition": {
+        "on": "post-install, post-upgrade",
+        "image": "app__backend__packages__node__app__module__orm__migrator__source"
+      },
+      "binding": {
+        "ROOT_PASSWORD": "global-database.environment.auth.rootPassword",
+        "DATABASE_ADDRESS": "global-database.origin_name_var"
+      }
+    },
+    "backup-sql": {
+      "type": "global",
+      "definition": {
+        "on": "pre-upgrade",
+        "image": "app__backend__packages__node__app__module__orm__migrator__backup__source"
+      },
+      "binding": {
+        "example_data": "example"
+      },
+      "variable": {
+        "example": {
+          "type": "global",
+          "file": "foo.json"
+        }
+      }
+    }
+  },
+  "service": {
+    "global-database": {
+      "type": "global",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        },
+        "example.config": {
+          "file": "foo.json"
+        }
+      }
+    },
+    "scoped-database": {
+      "type": "scoped",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "environment": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        },
+        "example.config": {
+          "file": "foo.json"
+        }
+      }
+    }
+  },
+  "expose": {
+    "80": {
+      "type": "load-balancer",
+      "path": "/",
+      "domainPrefix": "test"
+    },
+    "5000": {
+      "type": "internal"
+    }
+  }
+}

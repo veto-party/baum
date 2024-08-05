@@ -10,5 +10,6 @@ export const to_structured_data = (value: any): ObjectToken | ArrayToken => {
   if (Array.isArray(value)) {
     return new ArrayToken(value.map(to_structured_data));
   }
+
   return new ObjectToken(Object.fromEntries(Object.entries(value).map(([k, v]) => [k, to_structured_data(v)] as const)));
 };
