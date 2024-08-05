@@ -475,7 +475,7 @@ export class HelmGenerator implements IStep {
       }
     };
 
-    deploymentYAML.spec.template.spec.containers.forEach(c => !c.resources && delete c.resources);
+    deploymentYAML.spec.template.spec.containers.forEach((c) => !c.resources && delete c.resources);
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
 
