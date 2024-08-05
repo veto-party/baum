@@ -83,8 +83,6 @@ export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'v
 export const resolveBindings = (refName: Record<string, string>, allScopedVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], is_global?: boolean) => {
   const resolvedVars: Record<string, Exclude<Pick<ExtendedSchemaType, 'variable' | '__scope'>['variable'], undefined>[string] & { is_global: boolean; referenced: string }> = {};
 
-  console.log(refName);
-
   const lookupVars = Object.entries(refName);
 
   while (lookupVars.length > 0) {
@@ -102,12 +100,9 @@ export const resolveBindings = (refName: Record<string, string>, allScopedVars: 
     };
 
     if (lookup.binding) {
-      console.log(lookup.binding);
       lookupVars.push(...Object.entries(lookup.binding));
     }
   }
-
-  console.log(resolvedVars);
 
   return resolvedVars;
 };
