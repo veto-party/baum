@@ -11,29 +11,32 @@ export const definitions = {
     update_strategy: {
       type: 'object',
       required: ['type'],
-      oneOf: [{
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['RollingUpdate']
-          },
-          maxSurge: {
-            type: 'string'
-          },
-          maxUnavailable: {
-            type: 'string'
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['RollingUpdate']
+            },
+            maxSurge: {
+              type: 'string'
+            },
+            maxUnavailable: {
+              type: 'string'
+            }
+          }
+        },
+        {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['Rereate']
+            }
           }
         }
-      }, {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['Rereate']
-          }
-        }
-      }]
+      ]
     },
     system_usage: {
       type: 'object',

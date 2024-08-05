@@ -249,7 +249,7 @@ export class HelmGeneratorProvider implements IStep {
     },
     is_service: (_, current) => current,
     alias: (_, current) => current,
-    $schema: (_, current) => current,
+    $schema: (_, current) => current
   };
 
   public groupScopes(schema: ExtendedSchemaType[], workspace: IWorkspace): ExtendedSchemaType {
