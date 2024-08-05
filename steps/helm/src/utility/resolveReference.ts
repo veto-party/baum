@@ -1,6 +1,6 @@
 import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
-const resolveFromArray = (refName: string, scope: Pick<ExtendedSchemaType, 'variable' | '__scope'>|Pick<ExtendedSchemaType, 'variable' | '__scope'>[]) => {
+const resolveFromArray = (refName: string, scope: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[]) => {
   if (Array.isArray(scope)) {
     const lookup = scope.find((scope) => (scope.variable[refName] ?? scope.__scope?.[refName]) !== undefined);
 
@@ -12,9 +12,9 @@ const resolveFromArray = (refName: string, scope: Pick<ExtendedSchemaType, 'vari
   }
 
   return scope.variable[refName] ?? scope.__scope?.[refName];
-}
+};
 
-export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'variable' | '__scope'>|Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], is_global?: boolean) => {
+export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], is_global?: boolean) => {
   let variable: [ExtendedSchemaType['variable'][string] & { is_global: boolean }, string] = [
     {
       ref,
@@ -41,7 +41,6 @@ export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'v
         ];
         continue;
       }
-
 
       const globalResult = resolveFromArray(refName, allGlobalVars);
       if (globalResult) {
@@ -80,7 +79,12 @@ export const resolveReference = (ref: string, scope: Pick<ExtendedSchemaType, 'v
   return variable;
 };
 
-export const resolveBindings = (refName: Record<string, string>, allScopedVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], allGlobalVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[], is_global?: boolean) => {
+export const resolveBindings = (
+  refName: Record<string, string>,
+  allScopedVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[],
+  allGlobalVars: Pick<ExtendedSchemaType, 'variable' | '__scope'> | Pick<ExtendedSchemaType, 'variable' | '__scope'>[],
+  is_global?: boolean
+) => {
   const resolvedVars: Record<string, Exclude<Pick<ExtendedSchemaType, 'variable' | '__scope'>['variable'], undefined>[string] & { is_global: boolean; referenced: string }> = {};
 
   const lookupVars = Object.entries(refName);

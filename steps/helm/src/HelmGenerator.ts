@@ -109,7 +109,7 @@ export class HelmGenerator implements IStep {
 
     [...Array.from(contexts.values()).map((context) => [context, false] as const), [context, true] as const].forEach(([current, is_global]) => {
       Object.values(current.job ?? {}).forEach((job) => {
-        allBindings.push(...Object.entries(resolveBindings(job.binding ?? {}, !is_global ? job.variable ? [current, job] : current : current, is_global ? job.variable ? [context, job] : context : context, is_global)));
+        allBindings.push(...Object.entries(resolveBindings(job.binding ?? {}, !is_global ? (job.variable ? [current, job] : current) : current, is_global ? (job.variable ? [context, job] : context) : context, is_global)));
       });
     });
 
@@ -187,7 +187,6 @@ export class HelmGenerator implements IStep {
                 name: `${key}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
-
                   if (resolved.static) {
                     return {
                       name: key,

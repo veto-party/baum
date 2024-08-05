@@ -16,7 +16,6 @@ export class ObjectToken extends AToken {
       if (value instanceof AToken) {
         const resultingValue = value.write().split(EOL);
 
-
         value = (resultingValue.length > 1 ? resultingValue.map((line) => `  ${line}`) : resultingValue).join(EOL);
         if (originalValue instanceof ObjectToken || originalValue instanceof ArrayToken) {
           value = EOL + value;

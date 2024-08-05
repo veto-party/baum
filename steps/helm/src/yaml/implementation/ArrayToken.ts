@@ -11,7 +11,6 @@ export class ArrayToken extends AToken {
     return this.tokens
       .map((token) => {
         if (token instanceof AToken) {
-
           const result = token.write().split(EOL);
 
           if (token instanceof ConditionalToken) {

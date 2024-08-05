@@ -1,8 +1,8 @@
 import Crypto from 'node:crypto';
-import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
-import FS from 'fs';
-import Path from 'path';
+import FS from 'node:fs';
+import Path from 'node:path';
 import { CachedFN } from '@veto-party/baum__core';
+import type { ExtendedSchemaType } from '../HelmGeneratorProvider.js';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';
 const generatePassword = (len: number) => {
@@ -11,22 +11,21 @@ const generatePassword = (len: number) => {
   return sb.toString();
 };
 
-
 /**
 class required for caching decorator
 */
+// biome-ignore lint/complexity/noStaticOnlyClass: we need the annation.
 class VariablePrepareLogic {
   @CachedFN(false)
   static prepareVariable(variableDefinition: Exclude<ExtendedSchemaType['variable'], undefined>[string], scopeName: string) {
     if (variableDefinition.file) {
       if (!Path.isAbsolute(variableDefinition.file)) {
-
         if (variableDefinition.ref !== undefined) {
-          throw new Error("Should not have to resolve a ref. not possible here.");
+          throw new Error('Should not have to resolve a ref. not possible here.');
         }
 
         if (!variableDefinition.sourcePath) {
-          throw new Error("Source path is missing go generate relative path.");
+          throw new Error('Source path is missing go generate relative path.');
         }
         variableDefinition.file = Path.join(variableDefinition.sourcePath, variableDefinition.file);
       }

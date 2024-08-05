@@ -17,8 +17,8 @@ export type ExtendedSchemaType = {
     string,
     Omit<Exclude<SchemaType['job'], undefined>[string], 'variable'> & {
       workspace: IWorkspace;
-      variable:  Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; }) & { external?: boolean; }>;
-      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; })>;
+      variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
+      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string })>;
     }
   >;
   service?: Record<
@@ -31,10 +31,10 @@ export type ExtendedSchemaType = {
         workspace: IWorkspace;
       }
   >;
-  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; }) & { external?: boolean; }>;
+  variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
   is_service?: boolean;
   alias: string;
-  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; } | { ref?: undefined; sourcePath: string; })>;
+  __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string })>;
   $schema?: string;
 };
 
@@ -273,7 +273,6 @@ export class HelmGeneratorProvider implements IStep {
   private async getContext(workspace: IWorkspace, map: HelmFileResult, root: string, checkingDependencies: IWorkspace[] = []): Promise<Record<'global' | 'scoped', ExtendedSchemaType> | undefined> {
     const [helmFiles, workspaceMapping] = map;
 
-
     const hash = getHash(workspace.getName() + checkingDependencies.map((dep) => dep.getName()));
 
     const dependenciesToCheck = (workspaceMapping.get(workspace) ?? []).filter((workspace) => !checkingDependencies.includes(workspace));
@@ -287,7 +286,7 @@ export class HelmGeneratorProvider implements IStep {
         variable: {},
         service: {},
         alias: helmFile?.alias ?? this.getAlias(workspace, root),
-        job: {},
+        job: {}
         //job: Object.fromEntries(Object.entries(helmFile?.job ?? {}).map(([key, value]) => [key, { ...value, workspace }] as const))
       };
 
@@ -315,7 +314,7 @@ export class HelmGeneratorProvider implements IStep {
           if (realDefinitionName) {
             refTarget.variable[`${realDefinitionName}.${k}`] = cloneDeep(cloned);
             cloned = {
-              ref: `${realDefinitionName}.${k}`,
+              ref: `${realDefinitionName}.${k}`
             };
           }
 
@@ -338,7 +337,7 @@ export class HelmGeneratorProvider implements IStep {
           type: service.type,
           default: scopedDefinitionName,
           external: true,
-          sourcePath: workspace.getDirectory(),
+          sourcePath: workspace.getDirectory()
         };
 
         if (realDefinitionName) {
@@ -373,12 +372,12 @@ export class HelmGeneratorProvider implements IStep {
           if (valueValue.type.startsWith('global')) {
             environment.global.variable[k] = {
               sourcePath: workspace.getDirectory(),
-              ...valueValue,
+              ...valueValue
             };
           } else {
             environment.scoped.variable[k] = {
               sourcePath: workspace.getDirectory(),
-              ...valueValue,
+              ...valueValue
             };
           }
         });
@@ -393,8 +392,8 @@ export class HelmGeneratorProvider implements IStep {
             scope = environment.global;
           }
 
-          const variable: typeof scope['variable'] = {};
-          const __scope: Exclude<typeof scope['__scope'], undefined> = {};
+          const variable: (typeof scope)['variable'] = {};
+          const __scope: Exclude<(typeof scope)['__scope'], undefined> = {};
 
           Object.entries(valueValue.variable ?? {}).forEach(([key, value]) => {
             variable[key] = {
@@ -424,7 +423,7 @@ export class HelmGeneratorProvider implements IStep {
           sourcePath: workspace.getDirectory(),
           type: 'global',
           static: true,
-          default: alias,
+          default: alias
         };
       }
 
