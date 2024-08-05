@@ -1,0 +1,19 @@
+"apiVersion": "autoscaling/v2"
+"kind": "HorizontalPodAutoScaler"
+"metadata": 
+  "name": "test_workspace-scaler"
+  
+"spec": 
+  "01": 
+    "01-a": "foo"
+    
+  "02": 
+    "02-a": "bar"
+    "02-b": "baz"
+    
+  "scaleTargetRef": 
+    "apiVersion": "apps/v1"
+    "kind": "Deployment"
+    "name": "test_workspace-frhlijri-depl"
+    
+  

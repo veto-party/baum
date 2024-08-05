@@ -10,6 +10,15 @@
       "memory": "100"
     }
   },
+  "scaling": {
+    "01": {
+      "01-a": "foo"
+    },
+    "02": {
+      "02-a": "bar",
+      "02-b": "baz"
+    }
+  },
   "variable": {
     "variable-config": {
       "type": "global",
