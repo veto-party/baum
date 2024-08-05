@@ -1,0 +1,40 @@
+"apiVersion": "apps/v1"
+"kind": "Deployment"
+"metadata": 
+  "name": "test_workspace-depl"
+  
+"spec": 
+  "replicas": 1
+  "selector": 
+    "matchLabels": 
+      "app": "test_workspace-depl"
+      
+    
+  "template": 
+    "metadata": 
+      "labels": 
+        "app": "test_workspace-depl"
+        
+      
+    "spec": 
+      "containers": 
+        
+        - "name": "test_workspace-frhlijri-depl"
+          "image": "test_workspace"
+          "ports": 
+            
+            - "containerPort": 80
+              
+            
+            - "containerPort": 5000
+              
+          "env": 
+          
+          
+      {{ if eq .Values.global.registry.type "secret" }}
+      "imagePullSecrets":   
+        - "name": "veto-pull-secret"
+          
+      {{ end }}
+    
+  

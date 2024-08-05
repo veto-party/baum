@@ -1,0 +1,39 @@
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata": 
+  "name": "test_workspace-80-strip-prefix"
+  
+"spec": 
+  "stripPrefix": 
+    "prefixes": 
+      
+      - "/"
+    
+  
+
+---
+"apiVersion": "traefik.containo.us/v1alpha1"
+"kind": "IngressRoute"
+"metadata": 
+  "name": "test_workspace--veto-ingress"
+  
+"spec": 
+  "entryPoints": 
+    
+    - "websecure"
+  "routes": 
+    
+    - "kind": "Rule"
+      "match": Host(`test{{.Values.global.host.domain}}`) && PathPrefix(`/`)
+      "services": 
+        
+        - "name": "test_workspace-ext"
+          "port": 80
+          "passHostHeader": true
+          
+      "middlewares": 
+        
+        - "name": "test_workspace-80-strip-prefix"
+          
+      
+  

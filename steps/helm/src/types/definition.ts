@@ -47,6 +47,9 @@ export const definitions = {
             generated: {
               type: 'number'
             },
+            file: {
+              type: 'string'
+            },
             binding: {
               type: 'object',
               patternProperties: {
@@ -150,6 +153,9 @@ export const definitions = {
                     },
                     generated: {
                       type: 'number'
+                    },
+                    file: {
+                      type: 'string'
                     }
                   },
                   additionalProperties: false
@@ -185,6 +191,73 @@ export const definitions = {
                 },
                 image: {
                   type: 'string'
+                }
+              },
+              additionalProperties: false
+            },
+            variable: {
+              type: 'object',
+              patternProperties: {
+                '^[a-z0-9-]*$': {
+                  type: 'object',
+                  properties: {
+                    type: {
+                      type: 'string',
+                      enum: ['global', 'scoped', 'scoped-name']
+                    },
+                    case: {
+                      type: 'string',
+                      enum: ['snake']
+                    },
+                    static: {
+                      type: 'boolean'
+                    },
+                    secret: {
+                      type: 'boolean'
+                    },
+                    default: {
+                      anyOf: [
+                        {
+                          type: 'boolean'
+                        },
+                        {
+                          type: 'string'
+                        },
+                        {
+                          type: 'number'
+                        }
+                      ]
+                    },
+                    generated: {
+                      type: 'number'
+                    },
+                    file: {
+                      type: 'string'
+                    },
+                    binding: {
+                      type: 'object',
+                      patternProperties: {
+                        '.*': {
+                          type: 'string'
+                        }
+                      },
+                      additionalProperties: false
+                    }
+                  },
+                  required: ['type'],
+                  additionalProperties: false,
+                  if: {
+                    properties: {
+                      type: {
+                        const: 'scoped-name'
+                      }
+                    }
+                  },
+                  then: {
+                    not: {
+                      required: ['static', 'secret', 'default', 'case']
+                    }
+                  }
                 }
               },
               additionalProperties: false

@@ -1,0 +1,44 @@
+"apiVersion": "batch/v1"
+"kind": "Job"
+"metadata": 
+  "name": "test_workspace-sql-default-migration"
+  "annotations": 
+    "helm.sh/hook": post-install, post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded, hook-failed
+    
+  
+"spec": 
+  "template": 
+    "spec": 
+      "restartPolicy": "OnFailure"
+      "containers": 
+        
+        - "name": "sql-default-migration-container"
+          "image": "app__backend__packages__node__app__module__orm__migrator__source"
+          "env": 
+            
+            - "name": "DATABASE_ADDRESS"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "DATABASE_ADDRESS"
+                  
+                
+              
+            
+            - "name": "ROOT_PASSWORD"
+              "valueFrom": 
+                "configMapKeyRef": 
+                  "name": "global"
+                  "key": "ROOT_PASSWORD"
+                  
+                
+              
+          
+      {{ if eq .Values.global.registry.type "secret" }}
+      "imagePullSecrets":   
+        - "name": "veto-pull-secret"
+          
+      {{ end }}
+    
+  

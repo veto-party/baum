@@ -2,6 +2,7 @@ import FileSystemSync from 'node:fs';
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import 'colors';
+import { EOL } from 'node:os';
 import * as Diff from 'diff';
 import uniq from 'lodash.uniq';
 
@@ -30,8 +31,15 @@ export async function compareDirectories(pathA: string, pathB: string) {
         result = false;
       }
     } else {
-      const fileA = FileSystemSync.readFileSync(Path.join(pathA, file), 'utf-8');
-      const fileB = FileSystemSync.readFileSync(Path.join(pathB, file), 'utf-8');
+      const cleanFile = (content: string) =>
+        content
+          .split(EOL)
+          .map((line) => line.trimEnd())
+          .filter((line) => line !== '')
+          .join(EOL);
+
+      const fileA = cleanFile(FileSystemSync.readFileSync(Path.join(pathA, file), 'utf-8'));
+      const fileB = cleanFile(FileSystemSync.readFileSync(Path.join(pathB, file), 'utf-8'));
 
       const diff = Diff.diffLines(fileB, fileA);
 

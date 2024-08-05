@@ -1,0 +1,19 @@
+"global": 
+  "registry": 
+    "type": "local"
+    
+  "host": 
+    "domain": "localhost"
+    
+  "example": "{\n  \"foo\": \"bar\"\n}\n"
+  
+"global-database": 
+  "fullnameOverride": "global-database"
+  "auth": 
+    "rootPassword": "should be generated"
+    "forcePassword": true
+    
+  "example": 
+    "config": "{\n  \"foo\": \"bar\"\n}\n"
+    
+  

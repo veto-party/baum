@@ -107,15 +107,15 @@ export class HelmGenerator implements IStep {
 
     allBindings.push(...Object.entries(resolveBindings(context.binding ?? {}, finalizedSCopedContext, context)));
 
-    Array.from(contexts.values()).forEach((current) => {
+    [...Array.from(contexts.values()).map((context) => [context, false] as const), [context, true] as const].forEach(([current, is_global]) => {
       Object.values(current.job ?? {}).forEach((job) => {
-        allBindings.push(...Object.entries(resolveBindings(job.binding ?? {}, current, context)));
+        allBindings.push(...Object.entries(resolveBindings(job.binding ?? {}, !is_global ? (job.variable ? [current, job] : current) : current, is_global ? (job.variable ? [context, job] : context) : context, is_global)));
       });
     });
 
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
-        set(valuesYAML, resolved.referenced, buildVariable(resolved, 'global'));
+        set(valuesYAML, resolved.external ? resolved.referenced : `global.${resolved.referenced}`, buildVariable(resolved, 'global'));
       }
     });
 
@@ -167,6 +167,71 @@ export class HelmGenerator implements IStep {
     if (Object.keys(configMapYAML.data).length > 0) {
       await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configmap.yaml'], [configMapYAML]);
     }
+
+    const jobYAML = Object.entries(context?.job ?? {}).map(([key, entry]) => ({
+      apiVersion: 'batch/v1',
+      kind: 'Job',
+      metadata: {
+        name: `global-${key}`,
+        annotations: {
+          'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
+          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
+        }
+      },
+      spec: {
+        template: {
+          spec: {
+            restartPolicy: 'OnFailure',
+            containers: [
+              {
+                name: `${key}-container`,
+                image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
+                  if (resolved.static) {
+                    return {
+                      name: key,
+                      value: buildVariable(resolved!, 'global')
+                    };
+                  }
+
+                  if (resolved!.secret) {
+                    return {
+                      name: key,
+                      valueFrom: {
+                        secretKeyRef: {
+                          name: resolved.is_global ? 'global' : 'global',
+                          key
+                        }
+                      }
+                    };
+                  }
+
+                  return {
+                    name: key,
+                    valueFrom: {
+                      configMapKeyRef: {
+                        name: resolved.is_global ? 'global' : 'global',
+                        key
+                      }
+                    }
+                  };
+                })
+              }
+            ],
+            imagePullSecrets: new ConditionalToken(
+              `if eq .Values.global.registry.type "secret"`,
+              new ArrayToken([
+                new ObjectToken({
+                  name: 'veto-pull-secret'
+                })
+              ])
+            )
+          }
+        }
+      }
+    }));
+
+    await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'job.yaml'], [...jobYAML]);
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -453,7 +518,7 @@ export class HelmGenerator implements IStep {
               {
                 name: `${key}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
-                env: Object.entries(resolveBindings(entry?.binding ?? {}, scopedContext, globalContext)).map(([key, resolved]) => {
+                env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
                   if (resolved.static) {
                     return {
                       name: key,
