@@ -1,4 +1,6 @@
-export const definitions = {
+import { asConst } from 'json-schema-to-ts';
+
+export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
   type: 'object',
   properties: {
@@ -7,6 +9,98 @@ export const definitions = {
     },
     is_service: {
       type: 'boolean'
+    },
+    update_strategy: {
+      type: 'object',
+      required: ['type'],
+      oneOf: [
+        {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['RollingUpdate']
+            },
+            maxSurge: {
+              type: 'string'
+            },
+            maxUnavailable: {
+              type: 'string'
+            }
+          },
+          additionalProperties: false
+        },
+        {
+          type: 'object',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['Rereate']
+            }
+          },
+          additionalProperties: false
+        }
+      ]
+    },
+    system_usage: {
+      type: 'object',
+      properties: {
+        limit: {
+          type: 'object',
+          properties: {
+            cpu: {
+              type: 'string'
+            },
+            memory: {
+              type: 'string'
+            }
+          },
+          additionalProperties: false
+        },
+        requested: {
+          type: 'object',
+          properties: {
+            cpu: {
+              type: 'string'
+            },
+            memory: {
+              type: 'string'
+            }
+          },
+          additionalProperties: false
+        }
+      }
+    },
+    scaling: {
+      type: 'object',
+      properties: {
+        minPods: {
+          type: 'number'
+        },
+        maxPods: {
+          type: 'number'
+        },
+        configuration: {
+          type: 'object',
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              required: ['type', 'average'],
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['AverageValue', 'Utilization']
+                },
+                average: {
+                  type: 'string'
+                }
+              },
+              additionalProperties: false
+            }
+          }
+        }
+      },
+      additionalProperties: false
     },
     alias: {
       type: 'string'
@@ -291,7 +385,7 @@ export const definitions = {
     expose: {
       type: 'object',
       patternProperties: {
-        '.*': {
+        '(0-9)+': {
           type: 'object',
           properties: {
             type: {
@@ -323,8 +417,7 @@ export const definitions = {
             }
           }
         }
-      },
-      additionalProperties: false
+      }
     },
     connection: {
       type: 'array',
@@ -366,4 +459,4 @@ export const definitions = {
     required: ['is_service']
   },
   additionalProperties: false
-} as const;
+});

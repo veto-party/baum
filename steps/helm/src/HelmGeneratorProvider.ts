@@ -35,6 +35,9 @@ export type ExtendedSchemaType = {
   is_service?: boolean;
   alias: string;
   __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string })>;
+  update_strategy?: SchemaType['update_strategy'];
+  system_usage?: SchemaType['system_usage'];
+  scaling?: SchemaType['scaling'];
   $schema?: string;
 };
 
@@ -218,12 +221,15 @@ export class HelmGeneratorProvider implements IStep {
   }
 
   private grouperFunctions: Mappers = {
+    system_usage: HelmGeneratorProvider.basicOverrideFnc('system_usage'),
+    update_strategy: HelmGeneratorProvider.basicOverrideFnc('update_strategy'),
     variable: HelmGeneratorProvider.basicOverrideFnc('variable'),
     expose: HelmGeneratorProvider.basicOverrideFnc('expose'),
     job: HelmGeneratorProvider.basicOverrideFnc('job'),
     service: HelmGeneratorProvider.basicOverrideFnc('service'),
     binding: HelmGeneratorProvider.basicOverrideFnc('binding'),
     __scope: HelmGeneratorProvider.basicOverrideFnc('#__internal__(__scope)'),
+    scaling: HelmGeneratorProvider.basicOverrideFnc('scaling'),
     connection: (prev, current) => {
       if (!prev) {
         return cloneDeep(current);

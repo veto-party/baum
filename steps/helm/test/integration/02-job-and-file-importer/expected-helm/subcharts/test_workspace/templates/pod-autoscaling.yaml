@@ -1,0 +1,31 @@
+"apiVersion": "autoscaling/v2"
+"kind": "HorizontalPodAutoScaler"
+"metadata":
+  "name": "test_workspace-scaler"
+
+"spec":
+  "scaleTargetRef":
+    "apiVersion": "apps/v1"
+    "kind": "Deployment"
+    "name": "test_workspace-frhlijri-depl"
+
+  "minReplicas": 1
+  "maxReplicas": 1000
+  "metrics":
+
+    - "type": "Resource"
+      "resource":
+        "name": "01"
+        "target":
+          "type": "AverageValue"
+          "averagevalue": "0.15"
+
+
+
+
+    - "type": "Resource"
+      "resource":
+        "name": "02"
+        "target":
+          "type": "Utilization"
+          "averagevalue": "0.25"
