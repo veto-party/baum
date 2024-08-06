@@ -92,7 +92,7 @@ export const definitions = asConst({
                   enum: ['AverageValue', 'Utilization']
                 },
                 average: {
-                  type: 'number'
+                  type: 'string'
                 }
               },
               additionalProperties: false
@@ -417,8 +417,7 @@ export const definitions = asConst({
             }
           }
         }
-      },
-      additionalProperties: false
+      }
     },
     connection: {
       type: 'array',

@@ -12,11 +12,12 @@
   },
   "scaling": {
     "01": {
-      "01-a": "foo"
+      "type": "AverageValue",
+      "average": "0.15"
     },
     "02": {
-      "02-a": "bar",
-      "02-b": "baz"
+      "type": "Utilization",
+      "average": "0.25"
     }
   },
   "variable": {
