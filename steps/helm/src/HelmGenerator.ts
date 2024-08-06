@@ -405,19 +405,25 @@ export class HelmGenerator implements IStep {
             app: `${name}-depl`
           }
         },
-        updateStrategy: scopedContext.update_strategy?.type === "RollingUpdate" ? {
-          type : 'RollingUpdate',
-          rollingUpdate: {
-            partition: 0
-          }
-        } : undefined,
-        strategy: scopedContext.update_strategy?.type === "RollingUpdate" ? {
-          type: 'RollingUpdate',
-          rollingUpdate: {
-            maxSurge: scopedContext.update_strategy?.maxSurge,
-            maxUnavailable: scopedContext.update_strategy?.maxUnavailable
-          }
-        } : undefined,
+        updateStrategy:
+          scopedContext.update_strategy?.type === 'RollingUpdate'
+            ? {
+                type: 'RollingUpdate',
+                rollingUpdate: {
+                  partition: 0
+                }
+              }
+            : undefined,
+        strategy:
+          scopedContext.update_strategy?.type === 'RollingUpdate'
+            ? {
+                type: 'RollingUpdate',
+                rollingUpdate: {
+                  maxSurge: scopedContext.update_strategy?.maxSurge,
+                  maxUnavailable: scopedContext.update_strategy?.maxUnavailable
+                }
+              }
+            : undefined,
         template: {
           metadata: {
             labels: {
@@ -600,7 +606,7 @@ export class HelmGenerator implements IStep {
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
 
-    const configuration = Object.entries(scopedContext.scaling?.configuration ?? {})
+    const configuration = Object.entries(scopedContext.scaling?.configuration ?? {});
 
     const podAutoScaling = {
       apiVersion: 'autoscaling/v2',
