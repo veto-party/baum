@@ -1,4 +1,6 @@
-export const definitions = {
+import { asConst } from 'json-schema-to-ts';
+
+export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
   type: 'object',
   properties: {
@@ -25,7 +27,8 @@ export const definitions = {
             maxUnavailable: {
               type: 'string'
             }
-          }
+          },
+          additionalProperties: false
         },
         {
           type: 'object',
@@ -34,7 +37,8 @@ export const definitions = {
               type: 'string',
               enum: ['Rereate']
             }
-          }
+          },
+          additionalProperties: false
         }
       ]
     },
@@ -50,7 +54,8 @@ export const definitions = {
             memory: {
               type: 'string'
             }
-          }
+          },
+          additionalProperties: false
         },
         requested: {
           type: 'object',
@@ -61,12 +66,41 @@ export const definitions = {
             memory: {
               type: 'string'
             }
-          }
+          },
+          additionalProperties: false
         }
       }
     },
     scaling: {
-      type: 'object'
+      type: 'object',
+      properties: {
+        minPods: {
+          type: 'number'
+        },
+        maxPods: {
+          type: 'number'
+        },
+        configuration: {
+          type: 'object',
+          patternProperties: {
+            '.*': {
+              type: 'object',
+              required: ['type', 'average'],
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['AverageValue', 'Utilization']
+                },
+                average: {
+                  type: 'number'
+                }
+              },
+              additionalProperties: false
+            }
+          }
+        }
+      },
+      additionalProperties: false
     },
     alias: {
       type: 'string'
@@ -351,7 +385,7 @@ export const definitions = {
     expose: {
       type: 'object',
       patternProperties: {
-        '.*': {
+        '(0-9)+': {
           type: 'object',
           properties: {
             type: {
@@ -426,4 +460,4 @@ export const definitions = {
     required: ['is_service']
   },
   additionalProperties: false
-} as const;
+});

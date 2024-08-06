@@ -399,12 +399,25 @@ export class HelmGenerator implements IStep {
         name: `${name}-depl`
       },
       spec: {
-        replicas: 1,
+        replicas: scopedContext.scaling?.minPods ?? 1,
         selector: {
           matchLabels: {
             app: `${name}-depl`
           }
         },
+        updateStrategy: scopedContext.update_strategy?.type === "RollingUpdate" ? {
+          type : 'RollingUpdate',
+          rollingUpdate: {
+            partition: 0
+          }
+        } : undefined,
+        strategy: scopedContext.update_strategy?.type === "RollingUpdate" ? {
+          type: 'RollingUpdate',
+          rollingUpdate: {
+            maxSurge: scopedContext.update_strategy?.maxSurge,
+            maxUnavailable: scopedContext.update_strategy?.maxUnavailable
+          }
+        } : undefined,
         template: {
           metadata: {
             labels: {
@@ -475,6 +488,10 @@ export class HelmGenerator implements IStep {
       }
     };
 
+    if (scopedContext.update_strategy?.type !== 'RollingUpdate') {
+      delete deploymentYAML.spec.strategy;
+      delete deploymentYAML.spec.updateStrategy;
+    }
     deploymentYAML.spec.template.spec.containers.forEach((c) => !c.resources && delete c.resources);
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'deployment.yaml'], [deploymentYAML].flat());
@@ -583,6 +600,8 @@ export class HelmGenerator implements IStep {
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
 
+    const configuration = Object.entries(scopedContext.scaling?.configuration ?? {})
+
     const podAutoScaling = {
       apiVersion: 'autoscaling/v2',
       kind: 'HorizontalPodAutoScaler',
@@ -590,16 +609,27 @@ export class HelmGenerator implements IStep {
         name: `${name}-scaler`
       },
       spec: {
-        ...(scopedContext.scaling ?? {}),
         scaleTargetRef: {
           apiVersion: 'apps/v1',
           kind: 'Deployment',
           name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`
-        }
+        },
+        minReplicas: scopedContext.scaling?.minPods,
+        maxReplicas: scopedContext.scaling?.maxPods,
+        metrics: configuration.map(([key, value]) => ({
+          type: 'Resource',
+          resource: {
+            name: key,
+            target: {
+              type: value.type,
+              averagevalue: value.average
+            }
+          }
+        }))
       }
     };
 
-    if (scopedContext.scaling) {
+    if (configuration.length > 0) {
       await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'pod-autoscaling.yaml'], [podAutoScaling]);
     }
   }
