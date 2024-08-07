@@ -610,7 +610,7 @@ export class HelmGenerator implements IStep {
 
     const podAutoScaling = {
       apiVersion: 'autoscaling/v2beta1',
-      kind: 'HorizontalPodAutoScaler',
+      kind: 'HorizontalPodAutoscaler',
       metadata: {
         name: `${name}-scaler`
       },

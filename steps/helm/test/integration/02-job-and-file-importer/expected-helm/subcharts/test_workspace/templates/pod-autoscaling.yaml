@@ -1,5 +1,5 @@
 "apiVersion": "autoscaling/v2beta1"
-"kind": "HorizontalPodAutoScaler"
+"kind": "HorizontalPodAutoscaler"
 "metadata":
   "name": "test_workspace-scaler"
 
