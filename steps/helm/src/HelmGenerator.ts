@@ -399,7 +399,7 @@ export class HelmGenerator implements IStep {
         name: `${name}-depl`
       },
       spec: {
-        replicas: (scopedContext.scaling?.minPods ?? 1).toString(),
+        replicas: scopedContext.scaling?.minPods ?? 1,
         selector: {
           matchLabels: {
             app: `${name}-depl`
@@ -620,15 +620,15 @@ export class HelmGenerator implements IStep {
           kind: 'Deployment',
           name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`
         },
-        minReplicas: scopedContext.scaling?.minPods?.toString?.(),
-        maxReplicas: scopedContext.scaling?.maxPods?.toString?.(),
+        minReplicas: scopedContext.scaling?.minPods,
+        maxReplicas: scopedContext.scaling?.maxPods,
         metrics: configuration.map(([key, value]) => ({
           type: 'Resource',
           resource: {
             name: key,
             target: {
               type: value.type,
-              averagevalue: value.average
+              averagevalue: new RawToken(value.average)
             }
           }
         }))
