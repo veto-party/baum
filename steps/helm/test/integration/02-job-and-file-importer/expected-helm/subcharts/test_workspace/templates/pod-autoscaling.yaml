@@ -9,8 +9,8 @@
     "kind": "Deployment"
     "name": "test_workspace-frhlijri-depl"
 
-  "minReplicas": 1
-  "maxReplicas": 1000
+  "minReplicas": "1"
+  "maxReplicas": "1000"
   "metrics":
 
     - "type": "Resource"

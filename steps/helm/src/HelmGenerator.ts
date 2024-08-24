@@ -320,7 +320,7 @@ export class HelmGenerator implements IStep {
             targetPort: Number(port)
           }))
       }
-    };
+    } as const;
 
     const serviceYAMLExternal = {
       apiVersion: 'v1',
@@ -399,7 +399,7 @@ export class HelmGenerator implements IStep {
         name: `${name}-depl`
       },
       spec: {
-        replicas: scopedContext.scaling?.minPods ?? 1,
+        replicas: (scopedContext.scaling?.minPods ?? 1).toString(),
         selector: {
           matchLabels: {
             app: `${name}-depl`
@@ -620,8 +620,8 @@ export class HelmGenerator implements IStep {
           kind: 'Deployment',
           name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`
         },
-        minReplicas: scopedContext.scaling?.minPods,
-        maxReplicas: scopedContext.scaling?.maxPods,
+        minReplicas: scopedContext.scaling?.minPods?.toString?.(),
+        maxReplicas: scopedContext.scaling?.maxPods?.toString?.(),
         metrics: configuration.map(([key, value]) => ({
           type: 'Resource',
           resource: {
