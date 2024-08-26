@@ -628,7 +628,7 @@ export class HelmGenerator implements IStep {
             name: key,
             target: {
               type: value.type,
-              averagevalue: new RawToken(value.average)
+              averagevalue: value.average
             }
           }
         }))
