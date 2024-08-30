@@ -4,5 +4,5 @@
   "name": "test_workspace"
   
 "data": 
-  "scoped_variable": "{{index .Values  "scoped-variable" }}"
+  "scoped_variable": "{{.Valuesscoped_variable }}"
   
