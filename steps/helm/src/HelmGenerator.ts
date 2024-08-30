@@ -405,15 +405,6 @@ export class HelmGenerator implements IStep {
             app: `${name}-depl`
           }
         },
-        updateStrategy:
-          scopedContext.update_strategy?.type === 'RollingUpdate'
-            ? {
-                type: 'RollingUpdate',
-                rollingUpdate: {
-                  partition: 0
-                }
-              }
-            : undefined,
         strategy:
           scopedContext.update_strategy?.type === 'RollingUpdate'
             ? {
@@ -496,7 +487,6 @@ export class HelmGenerator implements IStep {
 
     if (scopedContext.update_strategy?.type !== 'RollingUpdate') {
       delete deploymentYAML.spec.strategy;
-      delete deploymentYAML.spec.updateStrategy;
     }
     deploymentYAML.spec.template.spec.containers.forEach((c) => !c.resources && delete c.resources);
 
