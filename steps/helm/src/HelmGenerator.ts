@@ -159,7 +159,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values "global" ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`"{{index .Values ".global" ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };
@@ -522,7 +522,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values ${value.is_global ? ' ".global"' : ''} ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`"{{index .Values ${value.is_global ? '".global"' : ''} ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
           })
       )
     };
