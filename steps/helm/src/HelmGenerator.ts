@@ -610,7 +610,7 @@ export class HelmGenerator implements IStep {
           kind: 'Deployment',
           name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`
         },
-        minReplicas: scopedContext.scaling?.minPods,
+        minReplicas: scopedContext.scaling?.minPods ?? 1,
         maxReplicas: scopedContext.scaling?.maxPods,
         metrics: configuration.map(([key, value]) => ({
           type: 'Resource',
