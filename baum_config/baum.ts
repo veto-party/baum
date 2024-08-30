@@ -21,8 +21,8 @@ export default async (baum: IBaumManagerConfiguration) => {
       'test',
       new ConditionalGitDiffStep(
         new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
-        () => 'main',
-        async (_, git) => (await git.branchLocal()).current !== (process.env['github.event.repository.default_branch'] ?? 'main')
+        () => process.env.GITHUB_BASE_REF ?? 'main',
+        (_, git) => process.env.GITHUB_BASE_REF !== undefined
       )
     );
     if (process.env.CI_TEST) {
