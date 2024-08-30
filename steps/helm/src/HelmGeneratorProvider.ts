@@ -313,7 +313,7 @@ export class HelmGeneratorProvider implements IStep {
             ...v,
             sourcePath: workspace.getDirectory(),
             type: v.type ?? service.type,
-            external: true
+            external: true,
           });
 
           if (realDefinitionName) {
@@ -341,7 +341,7 @@ export class HelmGeneratorProvider implements IStep {
         refTarget.variable[scopedKey] = {
           type: service.type,
           default: scopedDefinitionName,
-          external: true,
+          static: true,
           sourcePath: workspace.getDirectory()
         };
 
