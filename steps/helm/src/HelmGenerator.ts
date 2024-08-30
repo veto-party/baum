@@ -47,7 +47,10 @@ export class HelmGenerator implements IStep {
   }
 
   private static buildVariablePath(variable: string): string {
-    return variable.split('.').map((variable) => `"${variable}"`).join(' ');
+    return variable
+      .split('.')
+      .map((variable) => `"${variable}"`)
+      .join(' ');
   }
 
   @CachedFN(true)
