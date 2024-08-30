@@ -313,7 +313,7 @@ export class HelmGeneratorProvider implements IStep {
             ...v,
             sourcePath: workspace.getDirectory(),
             type: v.type ?? service.type,
-            external: true,
+            external: true
           });
 
           if (realDefinitionName) {
