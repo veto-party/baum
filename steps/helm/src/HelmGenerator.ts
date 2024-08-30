@@ -46,15 +46,8 @@ export class HelmGenerator implements IStep {
     );
   }
 
-  private static buildVariablePath(variable: string) {
-    const parts = variable.split('.');
-
-    let result = '';
-    for (const part of parts) {
-      result += `"${part}"`;
-    }
-
-    return result;
+  private static buildVariablePath(variable: string): string {
+    return variable.split('.').map((variable) => `"${variable}"`).join(' ');
   }
 
   @CachedFN(true)
