@@ -4,6 +4,5 @@
   "name": "some_service"
   
 "data": 
-  "test3": "{{index .Values  "kdr17cin6-scoped-database" "fullnameOverride" }}"
   "scoped_variable": "{{index .Values  "scoped-variable" }}"
   

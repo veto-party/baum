@@ -9,6 +9,7 @@
     
   "type": "ClusterIP"
   "ports": 
+    
     - "name": "third-5000"
       "protocol": "TCP"
       "port": 5000
@@ -28,6 +29,7 @@
     
   "type": "ClusterIP"
   "ports": 
+    
     - "name": "third-80"
       "protocol": "TCP"
       "port": 80

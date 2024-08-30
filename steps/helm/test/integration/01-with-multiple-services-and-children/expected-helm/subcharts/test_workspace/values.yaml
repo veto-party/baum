@@ -6,12 +6,11 @@
     "domain": "localhost"
     
   
+"some-secret": "replace-me"
+"scoped-variable": "example"
 "kdr17cin6-scoped-database": 
-  "fullnameOverride": "kdr17cin6-kdr17cin6-scoped-database"
   "auth": 
     "forcePassword": true
     "rootPassword": "should be generated"
     
   
-"some-secret": "replace-me"
-"scoped-variable": "example"

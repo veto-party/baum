@@ -18,12 +18,7 @@
           "env": 
             
             - "name": "DATABASE_ADDRESS"
-              "valueFrom": 
-                "configMapKeyRef": 
-                  "name": "global"
-                  "key": "DATABASE_ADDRESS"
-                  
-                
+              "value": "global-database"
               
             
             - "name": "ROOT_PASSWORD"

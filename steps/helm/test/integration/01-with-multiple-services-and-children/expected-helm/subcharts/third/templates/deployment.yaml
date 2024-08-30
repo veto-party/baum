@@ -18,14 +18,18 @@
       
     "spec": 
       "containers": 
+        
         - "name": "third-npszalmn-depl"
           "image": "third"
           "ports": 
+            
             - "containerPort": 80
               
+            
             - "containerPort": 5000
               
           "env": 
+            
             - "name": "my_variable"
               "valueFrom": 
                 "secretKeyRef": 
@@ -34,9 +38,11 @@
                   
                 
               
+            
             - "name": "static-variable"
               "value": "hello world"
               
+            
             - "name": "example_host"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -45,6 +51,7 @@
                   
                 
               
+            
             - "name": "scoped_variable"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -53,6 +60,7 @@
                   
                 
               
+            
             - "name": "example_url"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -61,6 +69,7 @@
                   
                 
               
+            
             - "name": "SERVICE_HOST_PORT"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -69,6 +78,7 @@
                   
                 
               
+            
             - "name": "SERVICE_HOST_ADDRESS"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -79,7 +89,7 @@
               
           
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets": 
+      "imagePullSecrets":   
         - "name": "veto-pull-secret"
           
       {{ end }}

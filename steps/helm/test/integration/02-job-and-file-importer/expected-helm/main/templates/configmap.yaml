@@ -4,7 +4,6 @@
   "name": "global"
   
 "data": 
-  "DATABASE_ADDRESS": "{{index .Values "global-database" "fullnameOverride" }}"
-  "ROOT_PASSWORD": "{{index .Values "global-database" "auth" "rootPassword" }}"
-  "example_data": "{{index .Values "example" }}"
+  "ROOT_PASSWORD": "{{index .Values  "global-database" "auth" "rootPassword" }}"
+  "example_data": "{{index .Values "global" "example" }}"
   

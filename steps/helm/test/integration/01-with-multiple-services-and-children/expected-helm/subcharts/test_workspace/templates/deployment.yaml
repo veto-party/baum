@@ -18,33 +18,30 @@
       
     "spec": 
       "containers": 
+        
         - "name": "some_service-frhlijri-depl"
           "image": "test_workspace"
           "ports": 
+            
             - "containerPort": 80
               
+            
             - "containerPort": 5000
               
           "env": 
+            
             - "name": "test2"
               "value": "hello-world2"
               
+            
             - "name": "test4"
-              "valueFrom": 
-                "configMapKeyRef": 
-                  "name": "global"
-                  "key": "test4"
-                  
-                
+              "value": "global-database"
               
+            
             - "name": "test3"
-              "valueFrom": 
-                "configMapKeyRef": 
-                  "name": "some_service"
-                  "key": "test3"
-                  
-                
+              "value": "kdr17cin6-kdr17cin6-scoped-database"
               
+            
             - "name": "my_variable"
               "valueFrom": 
                 "secretKeyRef": 
@@ -53,9 +50,11 @@
                   
                 
               
+            
             - "name": "static-variable"
               "value": "hello world"
               
+            
             - "name": "example_host"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -64,6 +63,7 @@
                   
                 
               
+            
             - "name": "scoped_variable"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -72,6 +72,7 @@
                   
                 
               
+            
             - "name": "example_url"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -80,6 +81,7 @@
                   
                 
               
+            
             - "name": "SERVICE_HOST_PORT"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -88,6 +90,7 @@
                   
                 
               
+            
             - "name": "SERVICE_HOST_ADDRESS"
               "valueFrom": 
                 "configMapKeyRef": 
@@ -98,7 +101,7 @@
               
           
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets": 
+      "imagePullSecrets":   
         - "name": "veto-pull-secret"
           
       {{ end }}

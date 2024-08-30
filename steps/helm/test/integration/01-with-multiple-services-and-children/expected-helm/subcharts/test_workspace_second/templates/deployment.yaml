@@ -18,20 +18,23 @@
       
     "spec": 
       "containers": 
+        
         - "name": "test_workspace_second-duap0fh7-depl"
           "image": "test_workspace_second"
           "ports": 
-            
+          
           "env": 
+            
             - "name": "test_service_relation"
               "value": "${test}"
               
+            
             - "name": "test"
               "value": "some_service"
               
           
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets": 
+      "imagePullSecrets":   
         - "name": "veto-pull-secret"
           
       {{ end }}

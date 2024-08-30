@@ -6,6 +6,7 @@
 "spec": 
   "stripPrefix": 
     "prefixes": 
+      
       - "/"
     
   
@@ -18,16 +19,20 @@
   
 "spec": 
   "entryPoints": 
+    
     - "websecure"
   "routes": 
+    
     - "kind": "Rule"
       "match": Host(`test{{.Values.global.host.domain}}`) && PathPrefix(`/`)
       "services": 
+        
         - "name": "test_workspace-ext"
           "port": 80
           "passHostHeader": true
           
       "middlewares": 
+        
         - "name": "test_workspace-80-strip-prefix"
           
       
