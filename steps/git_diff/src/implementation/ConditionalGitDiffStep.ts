@@ -17,7 +17,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
   }
 
   private async getGitDiff(root: string): Promise<string[] | typeof skipped> {
-    if (typeof this.skipChangeChecks === 'boolean' && !this.skipChangeChecks) {
+    if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
       return skipped;
     }
 
@@ -25,7 +25,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
       baseDir: root
     });
 
-    if (typeof this.skipChangeChecks === 'function' && !(await this.skipChangeChecks(root, git))) {
+    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
       return skipped;
     }
 
@@ -55,7 +55,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
   constructor(
     step: IStep,
     private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
-    private skipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
+    private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {
       const path = Path.resolve(workspace.getDirectory());
