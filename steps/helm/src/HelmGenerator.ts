@@ -115,7 +115,7 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
-        set(valuesYAML, resolved.external ? resolved.referenced : `global.${resolved.referenced}`, buildVariable(resolved, 'global'));
+        set(valuesYAML, resolved.referenced, buildVariable(resolved, 'global'));
       }
     });
 
