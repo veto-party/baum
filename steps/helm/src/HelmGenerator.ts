@@ -478,7 +478,7 @@ export class HelmGenerator implements IStep {
                 new ObjectToken({
                   name: 'veto-pull-secret'
                 })
-            ])
+              ])
             )
           }
         }
