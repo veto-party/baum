@@ -300,7 +300,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name
+        name: name.replaceAll('_', '-')
       },
       spec: {
         selector: {
@@ -512,7 +512,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name: name.replaceAll('_', '-')
+        name
       },
       data: Object.fromEntries(
         allBindings
