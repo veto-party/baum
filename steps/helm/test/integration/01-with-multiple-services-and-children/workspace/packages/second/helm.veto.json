@@ -1,0 +1,16 @@
+{
+  "is_service": true,
+  "variable": {
+    "my-service-relation": {
+      "type": "scoped",
+      "binding": {
+        "test": "some_service.origin_name_var"
+      },
+      "static": true,
+      "default": "${test}"
+    }
+  },
+  "binding": {
+    "test_service_relation": "my-service-relation"
+  }
+}
