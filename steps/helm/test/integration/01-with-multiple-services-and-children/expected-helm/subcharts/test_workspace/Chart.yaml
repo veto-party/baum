@@ -2,10 +2,8 @@
 "type": "application"
 "name": "some_service"
 "version": "1.0.0"
-"dependencies": 
-  
+"dependencies":
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
-    "alias": "kdr17cin6-scoped-database"
-    
+    "alias": "kdr17cin6_scoped_database"

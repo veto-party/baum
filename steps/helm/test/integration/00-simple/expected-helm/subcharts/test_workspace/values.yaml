@@ -1,15 +1,13 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+
+  "host":
     "domain": "localhost"
-    
-  
+
+
 "scoped-variable": "example"
-"kfrhlijri-scoped-database": 
-  "auth": 
+"kfrhlijri_scoped_database":
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  

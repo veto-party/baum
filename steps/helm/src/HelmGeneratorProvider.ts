@@ -303,7 +303,7 @@ export class HelmGeneratorProvider implements IStep {
       Object.entries(helmFile?.service ?? {}).forEach(([definitionName, service]) => {
         let realDefinitionName: string | undefined = undefined;
         if (service.type === 'scoped') {
-          realDefinitionName = `k${hash}-${definitionName}`;
+          realDefinitionName = `k${hash}_${definitionName}`;
         }
 
         const refTarget = service.type === 'scoped' ? environment.scoped : environment.global;

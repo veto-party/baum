@@ -4,6 +4,6 @@
   "name": "global"
   
 "data": 
-  "ROOT_PASSWORD": "{{index .Values  "global-database" "auth" "rootPassword" }}"
-  "example_data": "{{index .Values "global" "example" }}"
+  "ROOT_PASSWORD": {{.Values.global_database.auth.rootPassword | quote }}
+  "example_data": {{.Values.global.example | quote }}
   

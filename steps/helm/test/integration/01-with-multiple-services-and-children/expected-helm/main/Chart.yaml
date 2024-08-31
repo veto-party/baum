@@ -2,25 +2,17 @@
 "type": "application"
 "name": "root"
 "version": "1.0.0"
-"dependencies": 
-  
+"dependencies":
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
-    "alias": "global-database"
-    
-  
+    "alias": "global_database"
   - "name": "some_service"
     "version": "1.0.0"
     "repository": "file://../subcharts/test_workspace"
-    
-  
   - "name": "test_workspace_second"
     "version": "1.0.0"
     "repository": "file://../subcharts/test_workspace_second"
-    
-  
   - "name": "third"
     "version": "1.0.0"
     "repository": "file://../subcharts/third"
-    

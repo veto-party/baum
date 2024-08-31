@@ -36,7 +36,7 @@
     }
   },
   "service": {
-    "global-database": {
+    "global_database": {
       "type": "global",
       "origin_name_var": "fullnameOverride",
       "definition": {
@@ -55,7 +55,7 @@
         }
       }
     },
-    "scoped-database": {
+    "scoped_database": {
       "type": "scoped",
       "origin_name_var": "fullnameOverride",
       "definition": {

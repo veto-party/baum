@@ -1,17 +1,11 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+  "host":
     "domain": "localhost"
-    
-  
-"kfrhlijri-scoped-database": 
-  "auth": 
+"kfrhlijri_scoped_database":
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  "example": 
+  "example":
     "config": "{\n  \"foo\": \"bar\"\n}\n"
-    
-  

@@ -175,7 +175,7 @@ export const definitions = asConst({
     service: {
       type: 'object',
       patternProperties: {
-        '.*': {
+        '^[a-z0-9_]*$': {
           type: 'object',
           properties: {
             type: {

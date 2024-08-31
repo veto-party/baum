@@ -6,8 +6,8 @@
       "type": "scoped",
       "static": true,
       "binding": {
-        "test3": "scoped-database.origin_name_var",
-        "test4": "global-database.origin_name_var"
+        "test3": "scoped_database.origin_name_var",
+        "test4": "global_database.origin_name_var"
       },
       "default": "hello-world2"
     }
