@@ -22,9 +22,9 @@
             - "name": "test2"
               "value": "hello-world2"
             - "name": "test4"
-              "value": "global_database"
+              "value": "global-database"
             - "name": "test3"
-              "value": "kdr17cin6-kdr17cin6_scoped_database"
+              "value": "kdr17cin6-kdr17cin6-scoped-database"
             - "name": "my_variable"
               "valueFrom":
                 "secretKeyRef":

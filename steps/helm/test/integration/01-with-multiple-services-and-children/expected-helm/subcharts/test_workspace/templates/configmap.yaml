@@ -1,6 +1,6 @@
 "apiVersion": "v1"
 "kind": "ConfigMap"
 "metadata":
-  "name": "some_service"
+  "name": "some-service"
 "data":
   "scoped_variable": "{{.Values.scoped_variable }}"

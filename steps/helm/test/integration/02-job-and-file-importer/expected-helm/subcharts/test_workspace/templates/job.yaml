@@ -14,7 +14,7 @@
           "image": "app__backend__packages__node__app__module__orm__migrator__source"
           "env":
             - "name": "DATABASE_ADDRESS"
-              "value": "global_database"
+              "value": "global-database"
             - "name": "ROOT_PASSWORD"
               "valueFrom":
                 "configMapKeyRef":
