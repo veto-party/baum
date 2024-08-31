@@ -323,7 +323,7 @@ export class HelmGeneratorProvider implements IStep {
             };
           }
 
-          const refString = `${definitionName}.${k}`;
+          const refString = `${definitionName.replaceAll('_', '-')}.${k}`;
           refTarget.__scope ??= {};
           refTarget.__scope[`${definitionName}.environment.${k}`] = {
             ref: refString
@@ -337,7 +337,7 @@ export class HelmGeneratorProvider implements IStep {
           scopedDefinitionName = `k${hash}-${realDefinitionName ?? definitionName}`;
         }
 
-        const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
+        const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`.replaceAll('_', '-');
         refTarget.variable[scopedKey] = {
           type: service.type,
           default: scopedDefinitionName.replaceAll('_', '-'),

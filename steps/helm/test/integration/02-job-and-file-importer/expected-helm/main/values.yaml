@@ -4,7 +4,7 @@
   "host":
     "domain": "localhost"
   "example": "{\n  \"foo\": \"bar\"\n}\n"
-"global_database":
+"global-database":
   "auth":
     "rootPassword": "should be generated"
     "forcePassword": true

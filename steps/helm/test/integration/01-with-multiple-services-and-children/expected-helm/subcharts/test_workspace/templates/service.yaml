@@ -1,7 +1,7 @@
 "apiVersion": "v1"
 "kind": "Service"
 "metadata":
-  "name": "some-service"
+  "name": "some_service"
 "spec":
   "selector":
     "app": "some_service-depl"

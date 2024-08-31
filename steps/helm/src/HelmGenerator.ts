@@ -262,7 +262,7 @@ export class HelmGenerator implements IStep {
           name: v.definition.origin.name,
           version: v.definition.origin.version,
           repository: v.definition.origin.repository,
-          alias: k
+          alias: k.replaceAll('_', '-')
         });
       });
 
@@ -300,7 +300,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name: name.replaceAll('_', '-')
+        name
       },
       spec: {
         selector: {

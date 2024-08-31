@@ -7,7 +7,7 @@
   "service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
   "service-host-port": "replace-me"
   "service-host-address": "replace-me"
-"global_database":
+"global-database":
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
