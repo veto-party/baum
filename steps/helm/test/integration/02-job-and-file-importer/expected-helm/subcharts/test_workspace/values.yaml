@@ -3,7 +3,7 @@
     "type": "local"
   "host":
     "domain": "localhost"
-"kfrhlijri_scoped_database":
+"kfrhlijri-scoped-database":
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"

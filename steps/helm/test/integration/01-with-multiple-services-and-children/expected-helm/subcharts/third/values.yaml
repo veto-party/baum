@@ -5,7 +5,7 @@
     "domain": "localhost"
 "some-secret": "replace-me"
 "scoped-variable": "example"
-"kzq7psv6a_scoped_database":
+"kzq7psv6a-scoped-database":
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"

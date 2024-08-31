@@ -5,7 +5,7 @@
     "domain": "localhost"
 "some-secret": "replace-me"
 "scoped-variable": "example"
-"kdr17cin6_scoped_database":
+"kdr17cin6-scoped-database":
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"

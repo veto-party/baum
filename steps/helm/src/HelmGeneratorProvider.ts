@@ -317,9 +317,9 @@ export class HelmGeneratorProvider implements IStep {
           });
 
           if (realDefinitionName) {
-            refTarget.variable[`${realDefinitionName}.${k}`] = cloneDeep(cloned);
+            refTarget.variable[`${realDefinitionName.replaceAll('_', '-')}.${k}`] = cloneDeep(cloned);
             cloned = {
-              ref: `${realDefinitionName}.${k}`
+              ref: `${realDefinitionName.replaceAll('_', '-')}.${k}`
             };
           }
 
