@@ -512,7 +512,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name
+        name: name.replaceAll('_', '-')
       },
       data: Object.fromEntries(
         allBindings
