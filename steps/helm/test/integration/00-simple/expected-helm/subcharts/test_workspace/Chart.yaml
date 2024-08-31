@@ -2,10 +2,9 @@
 "type": "application"
 "name": "test_workspace"
 "version": "1.0.0"
-"dependencies": 
-  
+"dependencies":
+
   - "name": "mariadb"
     "version": "14.x.x"
     "repository": "https://charts.bitnami.com/bitnami"
-    "alias": "kfrhlijri-scoped-database"
-    
+    "alias": "kfrhlijri_scoped_database"

@@ -1,18 +1,13 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+  "host":
     "domain": "localhost"
-    
   "service-host-domain": "replace-me"
   "service-host": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
   "service-host-port": "replace-me"
   "service-host-address": "replace-me"
-  
-"global-database": 
-  "auth": 
+"global_database":
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  

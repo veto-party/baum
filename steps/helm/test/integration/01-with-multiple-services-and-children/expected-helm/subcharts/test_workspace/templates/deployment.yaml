@@ -1,109 +1,63 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
-"metadata": 
+"metadata":
   "name": "some_service-depl"
-  
-"spec": 
+"spec":
   "replicas": 1
-  "selector": 
-    "matchLabels": 
+  "selector":
+    "matchLabels":
       "app": "some_service-depl"
-      
-    
-  "template": 
-    "metadata": 
-      "labels": 
+  "template":
+    "metadata":
+      "labels":
         "app": "some_service-depl"
-        
-      
-    "spec": 
-      "containers": 
-        
+    "spec":
+      "containers":
         - "name": "some_service-frhlijri-depl"
           "image": "test_workspace"
-          "ports": 
-            
+          "ports":
             - "containerPort": 80
-              
-            
             - "containerPort": 5000
-              
-          "env": 
-            
+          "env":
             - "name": "test2"
               "value": "hello-world2"
-              
-            
             - "name": "test4"
-              "value": "global-database"
-              
-            
+              "value": "global_database"
             - "name": "test3"
-              "value": "kdr17cin6-kdr17cin6-scoped-database"
-              
-            
+              "value": "kdr17cin6-kdr17cin6_scoped_database"
             - "name": "my_variable"
-              "valueFrom": 
-                "secretKeyRef": 
+              "valueFrom":
+                "secretKeyRef":
                   "name": "some_service"
                   "key": "my_variable"
-                  
-                
-              
-            
             - "name": "static-variable"
               "value": "hello world"
-              
-            
             - "name": "example_host"
-              "valueFrom": 
-                "configMapKeyRef": 
+              "valueFrom":
+                "configMapKeyRef":
                   "name": "global"
                   "key": "example_host"
-                  
-                
-              
-            
             - "name": "scoped_variable"
-              "valueFrom": 
-                "configMapKeyRef": 
+              "valueFrom":
+                "configMapKeyRef":
                   "name": "some_service"
                   "key": "scoped_variable"
-                  
-                
-              
-            
             - "name": "example_url"
-              "valueFrom": 
-                "configMapKeyRef": 
+              "valueFrom":
+                "configMapKeyRef":
                   "name": "global"
                   "key": "example_url"
-                  
-                
-              
-            
             - "name": "SERVICE_HOST_PORT"
-              "valueFrom": 
-                "configMapKeyRef": 
+              "valueFrom":
+                "configMapKeyRef":
                   "name": "global"
                   "key": "SERVICE_HOST_PORT"
-                  
-                
-              
-            
             - "name": "SERVICE_HOST_ADDRESS"
-              "valueFrom": 
-                "configMapKeyRef": 
+              "valueFrom":
+                "configMapKeyRef":
                   "name": "global"
                   "key": "SERVICE_HOST_ADDRESS"
-                  
-                
-              
-          
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   
+      "imagePullSecrets":
         - "name": "veto-pull-secret"
-          
       {{ end }}
-    
-  
