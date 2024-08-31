@@ -518,7 +518,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{.Values${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} }}"`)];
+            return [key, new RawToken(`"{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} }}"`)];
           })
       )
     };
