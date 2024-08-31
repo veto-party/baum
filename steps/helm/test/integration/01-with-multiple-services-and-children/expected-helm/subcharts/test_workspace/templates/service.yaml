@@ -1,38 +1,27 @@
 "apiVersion": "v1"
 "kind": "Service"
-"metadata": 
-  "name": "some_service"
-  
-"spec": 
-  "selector": 
+"metadata":
+  "name": "some-service"
+"spec":
+  "selector":
     "app": "some_service-depl"
-    
   "type": "ClusterIP"
-  "ports": 
-    
+  "ports":
     - "name": "some_service-5000"
       "protocol": "TCP"
       "port": 5000
       "targetPort": 5000
-      
-  
-
 ---
 "apiVersion": "v1"
 "kind": "Service"
-"metadata": 
+"metadata":
   "name": "some_service-ext"
-  
-"spec": 
-  "selector": 
+"spec":
+  "selector":
     "app": "some_service-depl"
-    
   "type": "ClusterIP"
-  "ports": 
-    
+  "ports":
     - "name": "some_service-80"
       "protocol": "TCP"
       "port": 80
       "targetPort": 80
-      
-  
