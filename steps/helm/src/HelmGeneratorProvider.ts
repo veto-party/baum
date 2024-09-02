@@ -317,13 +317,13 @@ export class HelmGeneratorProvider implements IStep {
           });
 
           if (realDefinitionName) {
-            refTarget.variable[`${realDefinitionName.replaceAll('_', '-')}.${k}`] = cloneDeep(cloned);
+            refTarget.variable[`${realDefinitionName.replaceAll('-', '_')}.${k}`] = cloneDeep(cloned);
             cloned = {
-              ref: `${realDefinitionName.replaceAll('_', '-')}.${k}`
+              ref: `${realDefinitionName.replaceAll('-', '_')}.${k}`
             };
           }
 
-          const refString = `${definitionName.replaceAll('_', '-')}.${k}`;
+          const refString = `${definitionName.replaceAll('-', '_')}.${k}`;
           refTarget.__scope ??= {};
           refTarget.__scope[`${definitionName}.environment.${k}`] = {
             ref: refString
@@ -337,10 +337,10 @@ export class HelmGeneratorProvider implements IStep {
           scopedDefinitionName = `k${hash}-${realDefinitionName ?? definitionName}`;
         }
 
-        const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`.replaceAll('_', '-');
+        const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`.replaceAll('-', '_');
         refTarget.variable[scopedKey] = {
           type: service.type,
-          default: scopedDefinitionName.replaceAll('_', '-'),
+          default: scopedDefinitionName.replaceAll('-', '_'),
           static: true,
           sourcePath: workspace.getDirectory()
         };

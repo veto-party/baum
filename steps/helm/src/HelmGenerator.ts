@@ -49,7 +49,7 @@ export class HelmGenerator implements IStep {
   private static buildVariablePath(variable: string, sep = '.'): string {
     return variable
       .split('.')
-      .map((variable) => variable.replaceAll('-', '_'))
+      .map((variable) => variable)
       .join(sep);
   }
 
@@ -262,7 +262,7 @@ export class HelmGenerator implements IStep {
           name: v.definition.origin.name,
           version: v.definition.origin.version,
           repository: v.definition.origin.repository,
-          alias: k.replaceAll('-', '_')
+          alias: k
         });
       });
 
