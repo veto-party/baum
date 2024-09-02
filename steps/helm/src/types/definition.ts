@@ -108,7 +108,7 @@ export const definitions = asConst({
     variable: {
       type: 'object',
       patternProperties: {
-        '^[a-z0-9-]*$': {
+        '^[a-z0-9_]*$': {
           type: 'object',
           properties: {
             type: {
@@ -292,7 +292,7 @@ export const definitions = asConst({
             variable: {
               type: 'object',
               patternProperties: {
-                '^[a-z0-9-]*$': {
+                '^[a-z0-9_]*$': {
                   type: 'object',
                   properties: {
                     type: {
@@ -377,7 +377,7 @@ export const definitions = asConst({
       patternProperties: {
         '.*': {
           type: 'string',
-          pattern: '^[a-z0-9-]*$'
+          pattern: '^[a-z0-9_]*$'
         }
       },
       additionalProperties: false

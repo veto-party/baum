@@ -1,16 +1,16 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
 "metadata":
-  "name": "some_service-depl"
+  "name": "some-service-depl"
 "spec":
   "replicas": 1
   "selector":
     "matchLabels":
-      "app": "some_service-depl"
+      "app": "some-service-depl"
   "template":
     "metadata":
       "labels":
-        "app": "some_service-depl"
+        "app": "some-service-depl"
     "spec":
       "containers":
         - "name": "some_service-frhlijri-depl"
@@ -22,15 +22,15 @@
             - "name": "test2"
               "value": "hello-world2"
             - "name": "test4"
-              "value": "global-database"
+              "value": "global_database"
             - "name": "test3"
-              "value": "kdr17cin6-kdr17cin6-scoped-database"
+              "value": "kdr17cin6-kdr17cin6_scoped_database"
             - "name": "my_variable"
               "valueFrom":
                 "secretKeyRef":
-                  "name": "some_service"
+                  "name": "some-service"
                   "key": "my_variable"
-            - "name": "static-variable"
+            - "name": "static_variable"
               "value": "hello world"
             - "name": "example_host"
               "valueFrom":
@@ -40,7 +40,7 @@
             - "name": "scoped_variable"
               "valueFrom":
                 "configMapKeyRef":
-                  "name": "some_service"
+                  "name": "some-service"
                   "key": "scoped_variable"
             - "name": "example_url"
               "valueFrom":

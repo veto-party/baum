@@ -1,50 +1,32 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
-"metadata": 
-  "name": "test_workspace-depl"
-  
-"spec": 
+"metadata":
+  "name": "test-workspace-depl"
+"spec":
   "replicas": 1
-  "selector": 
-    "matchLabels": 
-      "app": "test_workspace-depl"
-      
-    
-  "template": 
-    "metadata": 
-      "labels": 
-        "app": "test_workspace-depl"
-        
-      
-    "spec": 
-      "containers": 
-        
+  "selector":
+    "matchLabels":
+      "app": "test-workspace-depl"
+  "template":
+    "metadata":
+      "labels":
+        "app": "test-workspace-depl"
+    "spec":
+      "containers":
         - "name": "test_workspace-frhlijri-depl"
           "image": "test_workspace"
-          "ports": 
-            
+          "ports":
             - "containerPort": 80
-              
-            
             - "containerPort": 5000
-              
-          "resources": 
-            "limits": 
+          "resources":
+            "limits":
               "cpu": "0.5"
               "memory": "123"
-              
-            "requests": 
+            "requests":
               "cpu": "0.2"
               "memory": "100"
-              
-            
-          "env": 
-          
-          
+          "env":
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   
+      "imagePullSecrets":
         - "name": "veto-pull-secret"
-          
       {{ end }}
-    
-  

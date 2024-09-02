@@ -4,10 +4,10 @@
   "name": "some_service"
 "spec":
   "selector":
-    "app": "some_service-depl"
+    "app": "some-service-depl"
   "type": "ClusterIP"
   "ports":
-    - "name": "some_service-5000"
+    - "name": "some-service-5000"
       "protocol": "TCP"
       "port": 5000
       "targetPort": 5000
@@ -15,10 +15,10 @@
 "apiVersion": "v1"
 "kind": "Service"
 "metadata":
-  "name": "some_service-ext"
+  "name": "some-service-ext"
 "spec":
   "selector":
-    "app": "some_service-depl"
+    "app": "some-service-depl"
   "type": "ClusterIP"
   "ports":
     - "name": "some_service-80"

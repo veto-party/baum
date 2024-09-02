@@ -25,7 +25,7 @@
     }
   },
   "variable": {
-    "variable-config": {
+    "variable_config": {
       "type": "global",
       "file": "foo.json"
     }

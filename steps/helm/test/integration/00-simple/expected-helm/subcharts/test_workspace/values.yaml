@@ -3,8 +3,8 @@
     "type": "local"
   "host":
     "domain": "localhost"
-"scoped-variable": "example"
-"kfrhlijri-scoped-database":
+"scoped_variable": "example"
+"kfrhlijri_scoped_database":
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
