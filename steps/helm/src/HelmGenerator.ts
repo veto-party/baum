@@ -262,7 +262,7 @@ export class HelmGenerator implements IStep {
           name: v.definition.origin.name,
           version: v.definition.origin.version,
           repository: v.definition.origin.repository,
-          alias: k.replaceAll('_', '-')
+          alias: k.replaceAll('-', '_')
         });
       });
 
@@ -518,7 +518,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} }}"`)];
+            return [key, new RawToken(`"{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}"`)];
           })
       )
     };
