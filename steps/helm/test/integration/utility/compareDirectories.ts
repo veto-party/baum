@@ -52,6 +52,11 @@ export async function compareDirectories(pathA: string, pathB: string) {
             console.log(`(-) (${file}:${lineNo}): ${change.value}`.bgRed.white);
           }
         });
+
+        if (process.env.TEST_AUTOFIX) {
+          await FileSystem.writeFile(Path.join(pathB, file), fileA);
+        }
+
         result = false;
       }
     }

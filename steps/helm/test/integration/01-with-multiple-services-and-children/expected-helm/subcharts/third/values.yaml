@@ -1,16 +1,11 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+  "host":
     "domain": "localhost"
-    
-  
-"some-secret": "replace-me"
-"scoped-variable": "example"
-"kzq7psv6a-scoped-database": 
-  "auth": 
+"some_secret": "replace_me"
+"scoped_variable": "example"
+"kzq7psv6a_scoped_database":
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  

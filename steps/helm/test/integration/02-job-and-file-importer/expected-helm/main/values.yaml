@@ -1,18 +1,12 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+  "host":
     "domain": "localhost"
-    
   "example": "{\n  \"foo\": \"bar\"\n}\n"
-  
-"global-database": 
-  "auth": 
+"global_database":
+  "auth":
     "rootPassword": "should be generated"
     "forcePassword": true
-    
-  "example": 
+  "example":
     "config": "{\n  \"foo\": \"bar\"\n}\n"
-    
-  

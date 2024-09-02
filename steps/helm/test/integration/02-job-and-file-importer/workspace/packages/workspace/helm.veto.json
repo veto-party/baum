@@ -25,7 +25,7 @@
     }
   },
   "variable": {
-    "variable-config": {
+    "variable_config": {
       "type": "global",
       "file": "foo.json"
     }
@@ -38,8 +38,8 @@
         "image": "app__backend__packages__node__app__module__orm__migrator__source"
       },
       "binding": {
-        "ROOT_PASSWORD": "global-database.environment.auth.rootPassword",
-        "DATABASE_ADDRESS": "global-database.origin_name_var"
+        "ROOT_PASSWORD": "global_database.environment.auth.rootPassword",
+        "DATABASE_ADDRESS": "global_database.origin_name_var"
       }
     },
     "backup-sql": {
@@ -60,7 +60,7 @@
     }
   },
   "service": {
-    "global-database": {
+    "global_database": {
       "type": "global",
       "origin_name_var": "fullnameOverride",
       "definition": {
@@ -82,7 +82,7 @@
         }
       }
     },
-    "scoped-database": {
+    "scoped_database": {
       "type": "scoped",
       "origin_name_var": "fullnameOverride",
       "definition": {

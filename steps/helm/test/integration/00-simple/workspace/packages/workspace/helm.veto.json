@@ -1,38 +1,38 @@
 {
   "is_service": true,
   "variable": {
-    "static-variable": {
+    "static_variable": {
       "type": "scoped",
       "static": true,
       "default": "hello world"
     },
-    "scoped-variable": {
+    "scoped_variable": {
       "type": "scoped",
       "default": "example"
     },
-    "service-host-address": {
+    "service_host_address": {
       "type": "global",
-      "default": "replace-me"
+      "default": "replace_me"
     },
-    "service-host-port": {
+    "service_host_port": {
       "type": "global",
-      "default": "replace-me"
+      "default": "replace_me"
     },
-    "service-host": {
+    "service_host": {
       "type": "global",
       "binding": {
-        "SERVICE_HOST_ADDRESS": "service-host-address",
-        "SERVICE_HOST_PORT": "service-host-port"
+        "SERVICE_HOST_ADDRESS": "service_host_address",
+        "SERVICE_HOST_PORT": "service_host_port"
       },
       "default": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
     },
-    "service-host-domain": {
+    "service_host_domain": {
       "type": "global",
       "default": "replace-me"
     }
   },
   "service": {
-    "global-database": {
+    "global_database": {
       "type": "global",
       "origin_name_var": "fullnameOverride",
       "definition": {
@@ -51,7 +51,7 @@
         }
       }
     },
-    "scoped-database": {
+    "scoped_database": {
       "type": "scoped",
       "origin_name_var": "fullnameOverride",
       "definition": {
@@ -82,9 +82,9 @@
     }
   },
   "binding": {
-    "example_url": "service-host",
-    "scoped_variable": "scoped-variable",
-    "example_host": "service-host-domain",
-    "static-variable": "static-variable"
+    "example_url": "service_host",
+    "scoped_variable": "scoped_variable",
+    "example_host": "service_host_domain",
+    "static_variable": "static_variable"
   }
 }

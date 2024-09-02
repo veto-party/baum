@@ -46,11 +46,8 @@ export class HelmGenerator implements IStep {
     );
   }
 
-  private static buildVariablePath(variable: string): string {
-    return variable
-      .split('.')
-      .map((variable) => `"${variable}"`)
-      .join(' ');
+  private static buildVariablePath(variable: string, sep = '.'): string {
+    return variable.split('.').join(sep);
   }
 
   @CachedFN(true)
@@ -70,7 +67,8 @@ export class HelmGenerator implements IStep {
           ChartYAML.dependencies.push({
             name: name,
             version: this.version,
-            repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`
+            repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
+            alias: name
           });
           return;
         }
@@ -136,7 +134,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`{{.Values.${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
           })
       )
     };
@@ -155,7 +153,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values ${value.external ? '' : '"global"'} ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
           })
       )
     };
@@ -300,17 +298,17 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name
+        name: name.replaceAll('_', '-')
       },
       spec: {
         selector: {
-          app: `${name}-depl`
+          app: `${name.replaceAll('_', '-')}-depl`
         },
         type: 'ClusterIP',
         ports: Object.entries(scopedContext?.expose ?? {})
           .filter(([, exposed]) => exposed.type === 'internal')
           .map(([port]) => ({
-            name: `${name}-${port}`,
+            name: `${name.replaceAll('_', '-')}-${port}`,
             protocol: 'TCP',
             port: Number(port),
             targetPort: Number(port)
@@ -322,17 +320,17 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Service',
       metadata: {
-        name: `${name}-ext`
+        name: `${name.replaceAll('_', '-')}-ext`
       },
       spec: {
         selector: {
-          app: `${name}-depl`
+          app: `${name.replaceAll('_', '-')}-depl`
         },
         type: 'ClusterIP',
         ports: Object.entries(scopedContext?.expose ?? {})
           .filter(([, exposed]) => exposed.type === 'load-balancer')
           .map(([port]) => ({
-            name: `${name}-${port}`,
+            name: `${name.replaceAll('_', '-')}-${port}`,
             protocol: 'TCP',
             port: Number(port),
             targetPort: Number(port)
@@ -348,7 +346,7 @@ export class HelmGenerator implements IStep {
         apiVersion: 'traefik.io/v1alpha1',
         kind: 'Middleware',
         metadata: {
-          name: `${name}-${port}-strip-prefix`
+          name: `${name.replaceAll('_', '-')}-${port}-strip-prefix`
         },
         spec: {
           stripPrefix: {
@@ -361,7 +359,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'traefik.containo.us/v1alpha1',
       kind: 'IngressRoute',
       metadata: {
-        name: `${name}--veto-ingress`
+        name: `${name.replaceAll('_', '-')}--veto-ingress`
       },
       spec: {
         entryPoints: ['websecure'],
@@ -372,14 +370,14 @@ export class HelmGenerator implements IStep {
             match: new RawToken(`Host(\`${exposed.domainPrefix}{{.Values.global.host.domain}}\`) && PathPrefix(\`${exposed.path}\`)`),
             services: [
               {
-                name: `${name}-ext`,
+                name: `${name.replaceAll('_', '-')}-ext`,
                 port: Number(port),
                 passHostHeader: true
               }
             ],
             middlewares: [
               {
-                name: `${name}-${port}-strip-prefix`
+                name: `${name.replaceAll('_', '-')}-${port}-strip-prefix`
               }
             ]
           }))
@@ -392,13 +390,13 @@ export class HelmGenerator implements IStep {
       apiVersion: 'apps/v1',
       kind: 'Deployment',
       metadata: {
-        name: `${name}-depl`
+        name: `${name.replaceAll('_', '-')}-depl`
       },
       spec: {
         replicas: scopedContext.scaling?.minPods ?? 1,
         selector: {
           matchLabels: {
-            app: `${name}-depl`
+            app: `${name.replaceAll('_', '-')}-depl`
           }
         },
         strategy:
@@ -414,7 +412,7 @@ export class HelmGenerator implements IStep {
         template: {
           metadata: {
             labels: {
-              app: `${name}-depl`
+              app: `${name.replaceAll('_', '-')}-depl`
             }
           },
           spec: {
@@ -449,14 +447,14 @@ export class HelmGenerator implements IStep {
                   if (resolved!.secret) {
                     resulting.valueFrom = {
                       secretKeyRef: {
-                        name: resolved.is_global ? 'global' : name,
+                        name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
                         key
                       }
                     };
                   } else if (!resolved!.static) {
                     resulting.valueFrom = {
                       configMapKeyRef: {
-                        name: resolved.is_global ? 'global' : name,
+                        name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
                         key
                       }
                     };
@@ -492,14 +490,14 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'Secret',
       metadata: {
-        name
+        name: name.replaceAll('_', '-')
       },
       type: 'Opaque',
       stringData: Object.fromEntries(
         allBindings
           .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values${value.is_global ? ' "global"' : ''} ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
           })
       )
     };
@@ -512,13 +510,13 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name
+        name: name.replaceAll('_', '-')
       },
       data: Object.fromEntries(
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`"{{index .Values ${value.is_global ? '"global"' : ''} ${HelmGenerator.buildVariablePath(value.referenced)} }}"`)];
+            return [key, new RawToken(`{{ .Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
           })
       )
     };
@@ -531,7 +529,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
-        name: `${name}-${key}`,
+        name: `${name.replaceAll('_', '-')}-${key}`,
         annotations: {
           'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
           'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
@@ -558,7 +556,7 @@ export class HelmGenerator implements IStep {
                       name: key,
                       valueFrom: {
                         secretKeyRef: {
-                          name: resolved.is_global ? 'global' : name,
+                          name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
                           key
                         }
                       }
@@ -569,7 +567,7 @@ export class HelmGenerator implements IStep {
                     name: key,
                     valueFrom: {
                       configMapKeyRef: {
-                        name: resolved.is_global ? 'global' : name,
+                        name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
                         key
                       }
                     }
@@ -598,13 +596,13 @@ export class HelmGenerator implements IStep {
       apiVersion: 'autoscaling/v2',
       kind: 'HorizontalPodAutoscaler',
       metadata: {
-        name: `${name}-scaler`
+        name: `${name.replaceAll('_', '-')}-scaler`
       },
       spec: {
         scaleTargetRef: {
           apiVersion: 'apps/v1',
           kind: 'Deployment',
-          name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`
+          name: `${name.replaceAll('_', '-')}-${getHash(this.dockerFileGenerator(workspace))}-depl`
         },
         minReplicas: scopedContext.scaling?.minPods ?? 1,
         maxReplicas: scopedContext.scaling?.maxPods,

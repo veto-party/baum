@@ -1,16 +1,11 @@
-"global": 
-  "registry": 
+"global":
+  "registry":
     "type": "local"
-    
-  "host": 
+  "host":
     "domain": "localhost"
-    
-  
-"some-secret": "replace-me"
-"scoped-variable": "example"
-"kdr17cin6-scoped-database": 
-  "auth": 
+"some_secret": "replace_me"
+"scoped_variable": "example"
+"kdr17cin6_scoped_database":
+  "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
-    
-  

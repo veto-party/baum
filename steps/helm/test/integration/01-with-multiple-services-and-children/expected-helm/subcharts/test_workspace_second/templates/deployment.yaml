@@ -1,42 +1,27 @@
 "apiVersion": "apps/v1"
 "kind": "Deployment"
-"metadata": 
-  "name": "test_workspace_second-depl"
-  
-"spec": 
+"metadata":
+  "name": "test-workspace-second-depl"
+"spec":
   "replicas": 1
-  "selector": 
-    "matchLabels": 
-      "app": "test_workspace_second-depl"
-      
-    
-  "template": 
-    "metadata": 
-      "labels": 
-        "app": "test_workspace_second-depl"
-        
-      
-    "spec": 
-      "containers": 
-        
+  "selector":
+    "matchLabels":
+      "app": "test-workspace-second-depl"
+  "template":
+    "metadata":
+      "labels":
+        "app": "test-workspace-second-depl"
+    "spec":
+      "containers":
         - "name": "test_workspace_second-duap0fh7-depl"
           "image": "test_workspace_second"
-          "ports": 
-          
-          "env": 
-            
+          "ports":
+          "env":
             - "name": "test_service_relation"
               "value": "${test}"
-              
-            
             - "name": "test"
               "value": "some_service"
-              
-          
       {{ if eq .Values.global.registry.type "secret" }}
-      "imagePullSecrets":   
+      "imagePullSecrets":
         - "name": "veto-pull-secret"
-          
       {{ end }}
-    
-  

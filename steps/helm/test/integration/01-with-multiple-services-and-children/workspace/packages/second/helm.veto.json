@@ -1,7 +1,7 @@
 {
   "is_service": true,
   "variable": {
-    "my-service-relation": {
+    "my_service_relation": {
       "type": "scoped",
       "binding": {
         "test": "some_service.origin_name_var"
@@ -11,6 +11,6 @@
     }
   },
   "binding": {
-    "test_service_relation": "my-service-relation"
+    "test_service_relation": "my_service_relation"
   }
 }
