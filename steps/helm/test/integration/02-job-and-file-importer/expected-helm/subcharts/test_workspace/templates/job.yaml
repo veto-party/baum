@@ -1,7 +1,7 @@
 "apiVersion": "batch/v1"
 "kind": "Job"
 "metadata":
-  "name": "test_workspace-sql-default-migration"
+  "name": "test-workspace-sql-default-migration"
   "annotations":
     "helm.sh/hook": post-install, post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded, hook-failed

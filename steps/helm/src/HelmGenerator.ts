@@ -436,7 +436,7 @@ export class HelmGenerator implements IStep {
       apiVersion: "v1",
       kind: "Service",
       metadata: {
-        name,
+        name: name.replaceAll('_', '-'),
       },
       spec: {
         selector: {
@@ -468,7 +468,7 @@ export class HelmGenerator implements IStep {
         ports: Object.entries(scopedContext?.expose ?? {})
           .filter(([, exposed]) => exposed.type === "load-balancer")
           .map(([port]) => ({
-            name: `${name}-${port}`,
+            name: `${name.replaceAll('_', '-')}-${port}`,
             protocol: "TCP",
             port: Number(port),
             targetPort: Number(port),
@@ -760,7 +760,7 @@ export class HelmGenerator implements IStep {
         apiVersion: "batch/v1",
         kind: "Job",
         metadata: {
-          name: `${name}-${key}`,
+          name: `${name.replaceAll('_', '-')}-${key}`,
           annotations: {
             "helm.sh/hook": entry.definition?.on
               ? new RawToken(entry.definition?.on)
@@ -804,7 +804,7 @@ export class HelmGenerator implements IStep {
                         name: key,
                         valueFrom: {
                           secretKeyRef: {
-                            name: resolved.is_global ? "global" : name,
+                            name: resolved.is_global ? "global" : name.replaceAll('_', '-'),
                             key,
                           },
                         },
@@ -815,7 +815,7 @@ export class HelmGenerator implements IStep {
                       name: key,
                       valueFrom: {
                         configMapKeyRef: {
-                          name: resolved.is_global ? "global" : name,
+                          name: resolved.is_global ? "global" : name.replaceAll('_', '-'),
                           key,
                         },
                       },
@@ -857,13 +857,13 @@ export class HelmGenerator implements IStep {
       apiVersion: "autoscaling/v2",
       kind: "HorizontalPodAutoscaler",
       metadata: {
-        name: `${name}-scaler`,
+        name: `${name.replaceAll('_', '-')}-scaler`,
       },
       spec: {
         scaleTargetRef: {
           apiVersion: "apps/v1",
           kind: "Deployment",
-          name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
+          name: `${name.replaceAll('_', '-')}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
         },
         minReplicas: scopedContext.scaling?.minPods ?? 1,
         maxReplicas: scopedContext.scaling?.maxPods,
