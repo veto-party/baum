@@ -22,9 +22,15 @@
             - "name": "test2"
               "value": "hello-world2"
             - "name": "test4"
-              "value": "global_database"
+              "valueFrom":
+                "configMapKeyRef":
+                  "name": "global"
+                  "key": "test4"
             - "name": "test3"
-              "value": "kdr17cin6-kdr17cin6_scoped_database"
+              "valueFrom":
+                "configMapKeyRef":
+                  "name": "some-service"
+                  "key": "test3"
             - "name": "my_variable"
               "valueFrom":
                 "secretKeyRef":

@@ -340,8 +340,7 @@ export class HelmGeneratorProvider implements IStep {
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
         refTarget.variable[scopedKey] = {
           type: service.type,
-          default: scopedDefinitionName,
-          static: true,
+          default: scopedDefinitionName.replaceAll('_', '-'),
           sourcePath: workspace.getDirectory()
         };
 
