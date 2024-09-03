@@ -8,3 +8,4 @@
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
+  "fullnameOverride": "kfrhlijri-kfrhlijri-scoped-database"

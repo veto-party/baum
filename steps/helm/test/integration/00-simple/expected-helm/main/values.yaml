@@ -11,3 +11,4 @@
   "auth":
     "forcePassword": true
     "rootPassword": "should be generated"
+  "fullnameOverride": "global-database"

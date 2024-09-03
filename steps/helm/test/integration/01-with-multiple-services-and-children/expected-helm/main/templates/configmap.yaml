@@ -7,4 +7,4 @@
   "example_url": {{.Values.global.service_host | quote }}
   "SERVICE_HOST_PORT": {{.Values.global.service_host_port | quote }}
   "SERVICE_HOST_ADDRESS": {{.Values.global.service_host_address | quote }}
-  "test4": {{.Values.global.global_database.fullnameOverride | quote }}
+  "test4": {{.Values.global_database.fullnameOverride | quote }}

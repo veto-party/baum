@@ -3,10 +3,9 @@
     "type": "local"
   "host":
     "domain": "localhost"
-  "global_database":
-    "fullnameOverride": "global-database"
   "example": "{\n  \"foo\": \"bar\"\n}\n"
 "global_database":
+  "fullnameOverride": "global-database"
   "auth":
     "rootPassword": "should be generated"
     "forcePassword": true
