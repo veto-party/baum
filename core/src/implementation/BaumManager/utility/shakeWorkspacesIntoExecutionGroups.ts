@@ -46,13 +46,19 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
         return true;
       }
 
-      return dependencyMapping[dependent.getName()].some(([version]) => {
-        try {
-          return semver.satisfies(realVersion, version) || semver.eq(realVersion, version);
-        } catch (error) {
-          return semver.satisfies(version, realVersion) || realVersion === version;
-        }
-      });
+      try {
+        return dependencyMapping[dependent.getName()].some(([version]) => {
+          try {
+            return semver.satisfies(realVersion, version) || semver.eq(realVersion, version);
+          } catch (error) {
+            return semver.satisfies(version, realVersion) || realVersion === version;
+          }
+        });
+      } catch (error) {
+        throw new Error(`Could not resolve version for: "${dependent.getName()}:${dependent.getVersion()}"`, {
+          cause: error
+        });
+      }
     });
   });
 
