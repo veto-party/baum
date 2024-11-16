@@ -15,6 +15,8 @@ export class BaumManager implements IBaumManager {
 
   private doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
+  private disableWorkspace: boolean = true;
+
   setRootDirectory(root: string): this {
     this.rootDirectory = root;
     return this;
@@ -22,6 +24,11 @@ export class BaumManager implements IBaumManager {
 
   setPackageManager(packageManager: IExecutablePackageManager): this {
     this.packageManager = packageManager;
+    return this;
+  }
+
+  dontDisableWorkspace(): this {
+    this.disableWorkspace = false;
     return this;
   }
 
@@ -86,6 +93,8 @@ export class BaumManager implements IBaumManager {
 
     const internalSteps: IStep[] = [];
 
+    const disableWorkspace = this.disableWorkspace;
+
     if (this.doCopyLockFileStep) {
       internalSteps.push(this.doCopyLockFileStep);
     }
@@ -98,7 +107,10 @@ export class BaumManager implements IBaumManager {
     const groups = shakeWorkspacesIntoExecutionGroups(await this.packageManager!.readWorkspace(this.rootDirectory!), this.packageManager!);
 
     try {
-      await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);
+      if (disableWorkspace) {
+        await this.packageManager?.disableGlobalWorkspace(this.rootDirectory!);
+      }
+
       while (groups.length > 0) {
         const currentGroup = groups.shift()!;
         console.log(`Executing group: "${JSON.stringify(currentGroup.map((group) => group.getName()))}"`);
@@ -115,7 +127,10 @@ export class BaumManager implements IBaumManager {
         }
       }
 
-      await this.packageManager?.enableGlobalWorkspace(this.rootDirectory!);
+
+      if (disableWorkspace) {
+        await this.packageManager?.enableGlobalWorkspace(this.rootDirectory!);
+      }
     }
   }
 }
