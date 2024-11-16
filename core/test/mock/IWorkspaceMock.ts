@@ -8,6 +8,10 @@ class IWorkspaceMock implements IWorkspace {
     private dependents: IDependent[]
   ) {}
 
+  getFreshWorkspace(): IWorkspace {
+    return this;
+  }
+
   getName(): string {
     return this.name;
   }
@@ -29,7 +33,8 @@ class IWorkspaceMock implements IWorkspace {
 
   getDirectory(): string {
     // is required for execution of commands relative to package, since we want to test the tree shaking, we dont need that right now.
-    throw new Error('Method not implemented.');
+    return "ehhh";
+    // is used for logging now.
   }
   getScriptNames(): string[] {
     // is required for execution of commands, to check if the package exists?

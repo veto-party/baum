@@ -11,11 +11,14 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
     // TODO: improve sorting
     const found = previous[workspace.getName()].find(([version]) => workspace.getVersion() === version || semver.eq(workspace.getVersion(), version));
     if (found !== undefined) {
-      // TODO: Improve error logging.
+      console.log("ehhhh");
       throw new Error('Duplicate package, cannot resolve tree.', {
         cause: new Error(`Its package ${workspace.getName()}:${workspace.getVersion()} at path (${workspace.getDirectory()}) and (${found[1].getDirectory()})`)
       });
     }
+
+
+    console.log("????");
 
     const index = previous[workspace.getName()].push([workspace.getVersion(), workspace]);
     nodes.push([
