@@ -15,7 +15,7 @@ export class BaumManager implements IBaumManager {
 
   private doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
-  private disableWorkspace: boolean = true;
+  private disableWorkspace = true;
 
   setRootDirectory(root: string): this {
     this.rootDirectory = root;
@@ -126,7 +126,6 @@ export class BaumManager implements IBaumManager {
           console.warn('Failed to clean up group.', error);
         }
       }
-
 
       if (disableWorkspace) {
         await this.packageManager?.enableGlobalWorkspace(this.rootDirectory!);

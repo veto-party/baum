@@ -13,10 +13,10 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
     if (found !== undefined) {
       // TODO: Improve error logging.
       throw new Error('Duplicate package, cannot resolve tree.', {
-          cause: new Error(`Its package ${workspace.getName()}:${workspace.getVersion()} at path (${workspace.getDirectory()}) and (${found[1].getDirectory()})`)
+        cause: new Error(`Its package ${workspace.getName()}:${workspace.getVersion()} at path (${workspace.getDirectory()}) and (${found[1].getDirectory()})`)
       });
     }
-    
+
     const index = previous[workspace.getName()].push([workspace.getVersion(), workspace]);
     nodes.push([
       workspace.getName(),
