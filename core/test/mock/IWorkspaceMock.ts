@@ -33,7 +33,7 @@ class IWorkspaceMock implements IWorkspace {
 
   getDirectory(): string {
     // is required for execution of commands relative to package, since we want to test the tree shaking, we dont need that right now.
-    return "ehhh";
+    return 'ehhh';
     // is used for logging now.
   }
   getScriptNames(): string[] {
