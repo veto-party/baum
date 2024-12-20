@@ -15,7 +15,14 @@ export class PKGMStep implements IStep {
       (task: string, exitCodes?: number[]): ConstructorParameters<typeof PKGMStep>[0] =>
       (itent, workspace) =>
         // || [0] to replace empty array with [0]
-        workspace.getScriptNames().includes(task) ? [itent.run().setRunStep(task).setSuccessCodes(exitCodes || [0])] : [],
+        workspace.getScriptNames().includes(task)
+          ? [
+              itent
+                .run()
+                .setRunStep(task)
+                .setSuccessCodes(exitCodes || [0])
+            ]
+          : [],
     RunPublishIfRequired:
       (callback: (itent: ReturnType<IExecutionIntentBuilder['publish']>, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => IExecutionIntent): ConstructorParameters<typeof PKGMStep>[0] =>
       (intent, workspace, pk, rootDir) =>
