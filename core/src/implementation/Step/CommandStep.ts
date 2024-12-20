@@ -83,7 +83,6 @@ class CommandStep implements IStep {
         });
       });
 
-
       newProcess.addListener('exit', (code) => {
         console.log('Process is exit');
         if (this.processCodeValidation(code)) {
