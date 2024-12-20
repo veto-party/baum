@@ -12,9 +12,10 @@ export class PKGMStep implements IStep {
 
   static readonly DEFAULT_TYPES = {
     RunPGKMWhenKeyExists:
-      (task: string): ConstructorParameters<typeof PKGMStep>[0] =>
+      (task: string, exitCodes?: number[]): ConstructorParameters<typeof PKGMStep>[0] =>
       (itent, workspace) =>
-        workspace.getScriptNames().includes(task) ? [itent.run().setRunStep(task)] : [],
+        // || [0] to replace empty array with [0]
+        workspace.getScriptNames().includes(task) ? [itent.run().setRunStep(task).setSuccessCodes(exitCodes || [0])] : [],
     RunPublishIfRequired:
       (callback: (itent: ReturnType<IExecutionIntentBuilder['publish']>, workspace: IWorkspace, packageManager: IPackageManager, rootDirectory: string) => IExecutionIntent): ConstructorParameters<typeof PKGMStep>[0] =>
       (intent, workspace, pk, rootDir) =>
