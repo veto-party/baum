@@ -84,14 +84,27 @@ class CommandStep implements IStep {
       });
 
       newProcess.addListener('close', (code) => {
+        console.log('Process is done');
         if (this.processCodeValidation(code)) {
           resolve();
           return;
         }
 
-        console.error('process exited with code: ', code);
+        console.error('process unexpectedly exited with code: ', code);
         reject(code);
       });
+
+      if (newProcess.exitCode !== null) {
+        console.log('Woah that was fast');
+        if (this.processCodeValidation(newProcess.exitCode)) {
+          resolve();
+          return;
+        }
+
+
+        console.error('process unexpectedly exited with code: ', newProcess.exitCode);
+        reject(newProcess.exitCode);
+      }
     });
   }
 
