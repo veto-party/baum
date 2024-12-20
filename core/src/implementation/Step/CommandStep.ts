@@ -101,7 +101,6 @@ class CommandStep implements IStep {
           return;
         }
 
-
         console.error('process unexpectedly exited with code: ', newProcess.exitCode);
         reject(newProcess.exitCode);
       }
