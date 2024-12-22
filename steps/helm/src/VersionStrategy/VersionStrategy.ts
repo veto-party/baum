@@ -42,11 +42,9 @@ export class VersionStrategy {
             return newVersion;
         }
 
-        return async (name, workpace, packageManager, rootDirectory) => {
+        return async (name, workpace, _packageManager, rootDirectory) => {
             if (!workpace) {
-
                 // Handle global (root) module version. (If one other module incremented, this version should also be incremented.)
-
                 const update = Object.values(versionIncrements).sort((a, b) => b - a).at(0);
                 let version = currentVersions[name]
                 if (update !== undefined && version) {
@@ -54,7 +52,7 @@ export class VersionStrategy {
                 }
 
                 if (!version) {
-                    console.log("No version found for name: ", name, '; Will default to "0.0.0"');
+                    console.log("No version found for name: ", name, '"; Will default to "0.0.0"');
                     version = '0.0.0';
                 }
 
@@ -62,7 +60,6 @@ export class VersionStrategy {
             }
 
             // Handle module-specific versions using git
-
             const gitInstance = git.default(rootDirectory, {
                 baseDir: workpace.getDirectory()
             });
@@ -91,7 +88,7 @@ export class VersionStrategy {
             }
 
             if (versionIncrements[name] && currentVersions[name]) {
-                return incrementVersion(currentVersions[name], versionIncrements[name]);
+                return incrementVersion(currentVersions[name]!, versionIncrements[name]);
             }
 
             return "0.0.0";

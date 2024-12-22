@@ -9,11 +9,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    services:
+      verdaccio:
+        image: verdaccio/verdaccio
+        options: -d --name -p 4873:4873
+        ports:
+          - 4873:4873
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
         with:
           version: 'latest'
+      # - uses: addnab/docker-run-action@v3
+      #   with:
+      #     image: verdaccio/verdaccio
+      #     options: -d --name -p 4873:4873
       - uses: actions/setup-node@v4
         with:
           node-version: 20

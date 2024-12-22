@@ -1,52 +1,76 @@
-import { CachedFN } from "@veto-party/baum__core";
+import { CachedFN, clearCacheForFN } from "@veto-party/baum__core";
 import { ICurrentVersionManager } from "../ICurrentVersionManager.js";
-import Axios, { AxiosInstance } from 'axios';
 import npa from 'npm-package-arg';
 import registryFetch from 'npm-registry-fetch';
-import unzipper from 'unzipper';
 import semver from "semver";
 import ssri from "ssri";
-import { Header, Pack, ReadEntry } from 'tar';
+import tarstream from 'tar-stream';
+import { PassThrough, Readable } from 'node:stream';
+import { buffer } from 'node:stream/consumers'
+
+import normalizer from 'normalize-package-data';
 
 export class NPMPackageProvider implements ICurrentVersionManager {
       private newVersions: Record<string, string> = {};
 
-      private axios: AxiosInstance;
-
       constructor(
           private registry: string,
         private packageName: string
-      ) {
-        this.axios = Axios.create({
-            baseURL: registry,
-            timeout: 5000
-        });
-      }
+      ) {}
 
       @CachedFN(true)
       private async loadPackage() {
-        const { data: givenPackage } = await this.axios.get(`${this.packageName}/latest`);
+        const givenPackage = await registryFetch.json(`${this.packageName}/latest`, {
+          registry: this.registry,
+        }).catch((error) => ({}) as Record<string, unknown>);
 
-        if (!givenPackage.dist) {
+        if (
+          typeof givenPackage.dist !== 'object' || 
+          !givenPackage.dist || 
+          !('tarball' in givenPackage.dist) || 
+          typeof givenPackage?.dist?.tarball !== "string"
+        ) {
             return {
                 self_version: undefined,
                 versions: {}
             };
         }
 
-        const unzippers = await unzipper.Open.url(givenPackage.dist.tarball, {});
+        const tarBuffer = 
+          await registryFetch(givenPackage.dist.tarball, {
+            registry: this.registry,
+          })
+            .then((response) => response.buffer());
 
-        const file = unzippers.files.find((file) => file.path.endsWith('versions.json'));
+
+        const file = await new Promise<Buffer>((resolve, reject) => {
+          const read = tarstream.extract();
+          read.on('entry', (header, stream, next) => {
+            if (header.name === 'versions.json') {
+              resolve(buffer(stream));
+            }
+
+            next();
+          })
+          
+          read.on('finish', () => reject(new Error('File not found')));
+
+          const readable = Readable.from(tarBuffer);
+          readable.pipe(read);
+        });
+
+
+          
+
+        // const file = unzippers.files.find((file) => file.path.endsWith('versions.json'));
 
         if (!file) {
             throw new Error('Could not find versions.json in the package');
         }
 
-        const versionsBuffer = await file.buffer();
-
         return {
-            self_version: givenPackage.version,
-            versions: JSON.parse(versionsBuffer.toString())
+            self_version: typeof givenPackage.version === "string" ? givenPackage.version : undefined,
+            versions: JSON.parse(file.toString())
         };
       }
 
@@ -65,8 +89,6 @@ export class NPMPackageProvider implements ICurrentVersionManager {
         const loaded = await this.loadPackage();
         const newVersions = { ...loaded.versions };
 
-        const tarballStream = new Pack();
-
         for (const name in this.newVersions) {
             newVersions[name] = this.newVersions[name];
         }
@@ -82,14 +104,24 @@ export class NPMPackageProvider implements ICurrentVersionManager {
             version: newVersion
         };
 
-        const manifestHeader = new Header(Buffer.from(JSON.stringify(manifest)));
-        manifestHeader.path = '/package.json';
-        tarballStream.add(new ReadEntry(manifestHeader));
+        normalizer(manifest, console.warn, true);
 
-        const versionHeader = new Header(Buffer.from(JSON.stringify(newVersions)));
-        versionHeader.path = '/versions.json';
-        tarballStream.add(new ReadEntry(versionHeader));
+        const packageJSONPassThrough = new PassThrough();
+        packageJSONPassThrough.end(JSON.stringify(manifest));
 
+        const newVersionsPassThrough = new PassThrough();
+        newVersionsPassThrough.end(JSON.stringify(newVersions));
+
+        const archive = tarstream.pack();
+        const tarPromise = buffer(archive);
+
+        archive.entry({ name: 'package.json' }, JSON.stringify(manifest));
+        archive.entry({ name: 'versions.json' }, JSON.stringify(newVersions));
+
+        archive.finalize();
+
+        const tarball = await tarPromise;
+        
         const metadata = {
             _id: manifest.name,
             name: manifest.name,
@@ -100,9 +132,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
         metadata.versions[manifest.version] = manifest;
         metadata["dist-tags"]['latest'] = manifest.version;
-        metadata["dist-tags"][manifest.version] = manifest.version;
-
-        const tarball = tarballStream.read();
+        metadata["dist-tags"][manifest.version] = manifest.version;;
 
         if (!tarball) {
           throw new Error('Something went wrong, please contact us! REASON (tarball was empty)');
@@ -110,15 +140,15 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
         const tarballName = `${manifest.name}-${manifest.version}.tgz`
         const tarballURI = `${manifest.name}/-/${tarballName}`
-        const integrity = ssri.fromData(tarball, {
+        const integrity = ssri.fromData(Buffer.from(tarball.toString()), {
             algorithms: ['sha512', 'sha1'],
-        })
+        });
 
         manifest._id = `${manifest.name}@${manifest.version}`;
         manifest.dist ??= {};
         manifest.dist.tarball = new URL(tarballURI, this.registry).href.replace(/^https:\/\//, 'http://');
         manifest.dist.integrity = integrity['sha512'][0].toString();
-        manifest.dist.shasum = Buffer.from(integrity['sha1'][0].digest).toString('hex');
+        manifest.dist.shasum = (integrity['sha1'][0] as any).hexDigest();//Buffer.from().toString('hex');
 
         metadata._attachments = {};
         metadata._attachments[tarballName] = {
@@ -137,7 +167,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
           await registryFetch(spec.escapedName, {
             method: 'PUT',
             body: metadata,
-            ignoreBody: true
+            ignoreBody: true,
+            registry: this.registry,
           })
         } catch (error) {
           if ((error as any)?.code !== 'E409') {
@@ -147,7 +178,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
           }
 
           const current = await registryFetch.json(spec.escapedName, {
-            query: { write: true }
+            query: { write: true },
+            registry: this.registry,
           });
 
           const currentVersions = Object.keys(current.versions || {})
@@ -190,8 +222,12 @@ export class NPMPackageProvider implements ICurrentVersionManager {
           await registryFetch(spec.escapedName, {
             method: 'PUT',
             body: current,
-            ignoreBody: true
+            ignoreBody: true,
+            registry: this.registry,
           });
       }
+
+      this.newVersions = {};
+      clearCacheForFN(this, 'loadPackage' as any);
     }
 }

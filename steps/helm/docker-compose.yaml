@@ -1,0 +1,6 @@
+services:
+  verdaccio:
+    build: ./docker/verdaccio
+    ports:
+      - 4873:4873
+  
