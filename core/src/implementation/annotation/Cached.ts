@@ -10,13 +10,13 @@ export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) =>
   }
 };
 
-export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false) => {
+export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsIgnore?: boolean[]) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 
     if (async) {
       type MapValue = [(value: ReturnType<T>) => any, (error?: any) => any];
-      let storedPromises: [[T, ...Parameters<T>], MapValue[]][] = [];
+      let storedPromises: [[T, ...any[]], MapValue[]][] = [];
 
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
@@ -24,20 +24,26 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           values.forEach((promiseTuple) => promiseTuple[index](value));
         };
 
-      context.value = async function (this: any, ...args: Parameters<T>): Promise<ReturnType<T>> {
-        this[generateKey(__propertyKey)] ??= [];
-        const storage: [[T, ...Parameters<T>], any][] = this[generateKey(__propertyKey)];
+      context.value = async function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
 
-        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), args)).find((current) => current[0][0] === this);
+        let lookupArgs = [...givenArgs];
+        if (paramsIgnore !== undefined) {
+          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsIgnore?.[index]));
+        }
+
+        this[generateKey(__propertyKey)] ??= [];
+        const storage: [typeof storedPromises[number][0], ReturnType<T>][] = this[generateKey(__propertyKey)];
+
+        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
 
         if (currentResult?.length === 2) {
           return Promise.resolve(currentResult[1]);
         }
 
-        let promisesTuple = storedPromises.filter((storedPromise) => isEqual(storedPromise[0].slice(1), args)).find((current) => current[0][0] === this);
+        let promisesTuple = storedPromises.filter((storedPromise) => isEqual(storedPromise[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
 
         if (promisesTuple?.length !== 2) {
-          promisesTuple = [[this, ...args], []];
+          promisesTuple = [[this, ...lookupArgs], []];
           storedPromises.push(promisesTuple);
         }
 
@@ -53,29 +59,34 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           promises.push([resolve, reject]);
 
           (async (): Promise<ReturnType<T>> => {
-            const result = await previous?.bind(this)(...args);
-            storage.push([[this, ...args], result]);
+            const result = await previous?.bind(this)(...givenArgs);
+            storage.push([[this, ...lookupArgs], result]);
             return result;
           })()
             .then(resolveOrReject(promises, 0), resolveOrReject(promises, 1))
             .finally(() => {
-              storedPromises = storedPromises.filter(([lookup]) => !(isEqual(lookup.slice(1), args) && lookup[0] === this));
+              storedPromises = storedPromises.filter(([lookup]) => !(isEqual(lookup.slice(1), lookupArgs) && lookup[0] === this));
             });
         });
       } as any;
     } else {
-      context.value = function (this: any, ...args: Parameters<T>): ReturnType<T> {
+      context.value = function (this: any, ...givenArgs: Parameters<T>): ReturnType<T> {
         this[`storage__cache__${__propertyKey}`] ??= [];
-        const storage: [[T, ...Parameters<T>], any][] = this[`storage__cache__${__propertyKey}`];
+        const storage: [[T, ...any[]], any][] = this[`storage__cache__${__propertyKey}`];
 
-        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), args)).find((current) => current[0][0] === this);
+        let lookupArgs = [...givenArgs];
+        if (paramsIgnore !== undefined) {
+          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsIgnore?.[index]));
+        }
+
+        const currentResult = storage.filter((current) => isEqual(current[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
 
         if (currentResult) {
           return currentResult[1];
         }
 
-        const result = previous?.bind(this)(...args);
-        storage.push([[this, ...args], result]);
+        const result = previous?.bind(this)(...givenArgs);
+        storage.push([[this, ...lookupArgs], result]);
         return result;
       } as any;
     }

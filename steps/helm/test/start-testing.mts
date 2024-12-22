@@ -3,6 +3,19 @@ import Path from 'node:path';
 import type JasmineType from 'jasmine';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
+import { inspect } from 'node:util';
+
+process.on('uncaughtException', (error) => {
+  if (inspect.custom in error) {
+    const inspector = error[inspect.custom];
+    if (typeof inspector === "function") {
+      console.log(inspector());
+      return;
+    }
+
+    console.log(inspector);
+  }
+})
 
 const argv = await yargs(hideBin(process.argv)).argv;
 

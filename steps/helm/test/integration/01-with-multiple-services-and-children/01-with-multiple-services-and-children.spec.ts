@@ -50,7 +50,7 @@ describe('A 01-with-multiple-services-and-children', () => {
     stage1.setPackageManager(new NPMPackageManager());
     stage1.dontCopyLockFile();
 
-    stage1.addExecutionStep('pack helm files', new HelmPacker());
+    stage1.addExecutionStep('pack helm files', new HelmPacker(helmfileGenerator));
     stage1.addExecutionStep('validate helm files', new CommandStep('helm lint .', Path.join(Path.resolve(testDirectory), 'helm', 'main')));
 
     await stage1.run();

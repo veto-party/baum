@@ -18,45 +18,69 @@ export class HelmGenerator implements IStep {
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
-    private version: string,
+    private version: string|((name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string),
     private name = 'root'
   ) {}
+
+  private filesToWrite: [string, string[], any[]][] = [];
 
   private async writeObjectToFile(root: string, path: string[], obj: any[]) {
     if (obj.length === 0) {
       return;
     }
 
-    const resulting = Path.join(root, ...path);
+    this.filesToWrite.push([root, path, obj]);
+  }
 
-    try {
-      await FileSystem.mkdir(Path.dirname(resulting), {
-        recursive: true
-      });
-    } catch (error) {
-      console.warn(error);
+  /**
+   * @private
+   */
+  async flush() {
+    for (const [root, path, obj] of this.filesToWrite) {
+
+      const resulting = Path.join(root, ...path);
+
+      try {
+        await FileSystem.mkdir(Path.dirname(resulting), {
+          recursive: true
+        });
+      } catch (error) {
+        console.warn(error);
+      }
+  
+      await FileSystem.writeFile(
+        resulting,
+        obj
+          .map(to_structured_data)
+          .map((resolved) => resolved.write())
+          .join(`${EOL}---${EOL}`)
+      );
     }
-
-    await FileSystem.writeFile(
-      resulting,
-      obj
-        .map(to_structured_data)
-        .map((resolved) => resolved.write())
-        .join(`${EOL}---${EOL}`)
-    );
   }
 
   private static buildVariablePath(variable: string, sep = '.'): string {
     return variable.split('.').join(sep);
   }
 
-  @CachedFN(true)
-  async generateGlobalScope(contexts: Map<IWorkspace, ExtendedSchemaType>, context: ExtendedSchemaType, rootDirectory: string) {
+  @CachedFN(false, [false, true, true, true])
+  private resolveVersion(name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
+    return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory); 
+  }
+
+  /**
+   * @private 
+   */
+  @CachedFN(true, [false, false, true, true])
+  async generateGlobalScope(packageManager: IExecutablePackageManager, rootDirectory: string) {
+
+    const context = this.helmFileGeneratorProvider.globalContext;
+    const contexts = this.helmFileGeneratorProvider.contexts;
+
     const ChartYAML = {
       apiVersion: 'v2',
       type: 'application',
       name: this.name,
-      version: this.version,
+      version: this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
       dependencies: [] as any[]
     };
 
@@ -66,7 +90,7 @@ export class HelmGenerator implements IStep {
         if (service.is_local) {
           ChartYAML.dependencies.push({
             name: name,
-            version: this.version,
+            version: this.resolveVersion(name, undefined, packageManager, rootDirectory),
             repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
             alias: name
           });
@@ -237,15 +261,13 @@ export class HelmGenerator implements IStep {
       return;
     }
 
-    await this.generateGlobalScope(this.helmFileGeneratorProvider.contexts, this.helmFileGeneratorProvider.globalContext, rootDirectory);
-
     const name = scopedContext.alias;
 
     const ChartYAML = {
       apiVersion: 'v2',
       type: 'application',
       name,
-      version: this.version,
+      version: this.resolveVersion(name, workspace, packageManager, rootDirectory),
       dependencies: [] as any[]
     };
 
@@ -624,6 +646,7 @@ export class HelmGenerator implements IStep {
     }
   }
 
+  // @CachedFN(true, [true, true, false])
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     // NO-OP
   }

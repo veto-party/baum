@@ -42,7 +42,7 @@ describe('02 job and file importer', () => {
     baum.addExecutionStep('provide helm metadata', helmfileProvider);
     baum.addExecutionStep('generate helm files', helmfileGenerator);
 
-    baum.addExecutionStep('pack helm files', new HelmPacker());
+    baum.addExecutionStep('pack helm files', new HelmPacker(helmfileGenerator));
     baum.addExecutionStep('validate helm files', new CommandStep('helm lint .', Path.join(Path.resolve(testDirectory), 'helm', 'main')));
 
     await baum.run();
