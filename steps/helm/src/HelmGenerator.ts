@@ -13,12 +13,14 @@ import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
 
+export type VersionProviderCallback = (name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string|Promise<string>;
+
 export class HelmGenerator implements IStep {
   constructor(
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
-    private version: string|((name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string),
+    private version: string|VersionProviderCallback,
     private name = 'root'
   ) {}
 
@@ -62,8 +64,8 @@ export class HelmGenerator implements IStep {
     return variable.split('.').join(sep);
   }
 
-  @CachedFN(false, [false, true, true, true])
-  private resolveVersion(name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
+  @CachedFN(true, [false, true, true, true])
+  private async resolveVersion(name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
     return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory); 
   }
 
@@ -80,17 +82,17 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v2',
       type: 'application',
       name: this.name,
-      version: this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
+      version: await this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
       dependencies: [] as any[]
     };
 
-    Object.entries(context.service ?? {})
+    await Promise.all(Object.entries(context.service ?? {})
       .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-      .forEach(([name, service]) => {
+      .map(async ([name, service]) => {
         if (service.is_local) {
           ChartYAML.dependencies.push({
             name: name,
-            version: this.resolveVersion(name, undefined, packageManager, rootDirectory),
+            version: await this.resolveVersion(name, undefined, packageManager, rootDirectory),
             repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
             alias: name
           });
@@ -107,7 +109,7 @@ export class HelmGenerator implements IStep {
           repository: service.definition.origin.repository,
           alias: name
         });
-      });
+      }));
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
@@ -267,7 +269,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'v2',
       type: 'application',
       name,
-      version: this.resolveVersion(name, workspace, packageManager, rootDirectory),
+      version: await this.resolveVersion(name, workspace, packageManager, rootDirectory),
       dependencies: [] as any[]
     };
 

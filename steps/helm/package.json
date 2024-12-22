@@ -18,7 +18,18 @@
     "semver": "^7.6.0",
     "ajv": "^8.12.0",
     "yaml": "^2.4.1",
-    "change-case": "^5.4.4"
+    "change-case": "^5.4.4",
+    "simple-git": "^3.27.0",
+    "unzipper": "^0.12.3",
+    "@types/unzipper": "^0.10.10",
+    "axios": "^1.7.9",
+    "ssri": "^12.0.0",
+    "@types/ssri": "^7.1.5",
+    "tar": "^7.4.3",
+    "npm-package-arg": "^12.0.1",
+    "@types/npm-package-arg": "^6.1.4",
+    "npm-registry-fetch": "^18.0.2",
+    "@types/npm-registry-fetch": "^8.0.7"
   },
   "devDependencies": {
     "@veto-party/config": "*",
