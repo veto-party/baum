@@ -9,6 +9,13 @@ describe('unit', () => {
             await provider.updateCurrentVersionFor('test', '0.0.0');
             await provider.flush();
             expect(await provider.getCurrentVersionFor('test')).toEqual('0.0.0');
+
+            expect(await provider.getCurrentVersionFor('test2')).toEqual(undefined);
+            await provider.updateCurrentVersionFor('test2', '1.0.1');
+            await provider.flush();
+            
+            expect(await provider.getCurrentVersionFor('test')).toEqual('0.0.0');
+            expect(await provider.getCurrentVersionFor('test2')).toEqual('1.0.1');
         });
     });
 });
