@@ -18,7 +18,8 @@ jobs:
     #      - 4873:4873
     steps:
       - uses: actions/checkout@v4
-      - name: "Start testing containers"
+      - uses: docker://docker
+        name: "Start testing containers"
         run: docker-compose up -d  
       - uses: azure/setup-helm@v4
         with:
