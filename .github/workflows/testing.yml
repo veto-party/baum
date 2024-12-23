@@ -13,7 +13,7 @@ jobs:
       verdaccio:
         image: verdaccio/verdaccio
         volumes: 
-          - $(pwd)/steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
+          - /steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
         ports:
           - 4873:4873
     steps:
