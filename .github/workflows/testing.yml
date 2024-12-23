@@ -12,7 +12,6 @@ jobs:
     services:
       verdaccio:
         image: verdaccio/verdaccio
-        options: -d -v ./
         volumes: 
           - $(pwd)/steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
         ports:
