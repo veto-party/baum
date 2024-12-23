@@ -9,15 +9,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    services:
-      verdaccio:
-        image: verdaccio/verdaccio
-        volumes: 
-          - /steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
-        ports:
-          - 4873:4873
+    #services:
+    #  verdaccio:
+    #    image: verdaccio/verdaccio
+    #    volumes: 
+    #      # - /steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
+    #    ports:
+    #      - 4873:4873
     steps:
       - uses: actions/checkout@v4
+      - name: "Start testing containers"
+        run: docker-compose up -d  
       - uses: azure/setup-helm@v4
         with:
           version: 'latest'
