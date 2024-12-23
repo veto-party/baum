@@ -54,5 +54,4 @@ describe('00-simple', () => {
       expect(compareResult).toBe(true);
     }, 40000);
   });
-
-})
+});

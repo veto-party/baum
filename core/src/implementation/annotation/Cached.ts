@@ -25,14 +25,13 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         };
 
       context.value = async function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
-
         let lookupArgs = [...givenArgs];
         if (paramsIgnore !== undefined) {
           lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsIgnore?.[index]));
         }
 
         this[generateKey(__propertyKey)] ??= [];
-        const storage: [typeof storedPromises[number][0], ReturnType<T>][] = this[generateKey(__propertyKey)];
+        const storage: [(typeof storedPromises)[number][0], ReturnType<T>][] = this[generateKey(__propertyKey)];
 
         const currentResult = storage.filter((current) => isEqual(current[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
 

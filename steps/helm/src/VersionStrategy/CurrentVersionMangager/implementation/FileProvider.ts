@@ -1,22 +1,17 @@
-import { ICurrentVersionManager } from "../ICurrentVersionManager.js";
 import FileSystem from 'node:fs/promises';
 import { join } from 'node:path';
+import type { ICurrentVersionManager } from '../ICurrentVersionManager.js';
 
 export class CurrentVersionFileProvider implements ICurrentVersionManager {
+  constructor(private root: string) {}
 
-  constructor(
-    private root: string
-  ) {
-    
-  }
-
-  public async getCurrentVersionFor(name: string): Promise<string|undefined> {
+  public async getCurrentVersionFor(name: string): Promise<string | undefined> {
     const filePath = join(this.root, 'versions', `${name}.json`);
     try {
-    const content = await FileSystem.readFile(filePath);
-    return JSON.parse(content.toString())?.version;
+      const content = await FileSystem.readFile(filePath);
+      return JSON.parse(content.toString())?.version;
     } catch (error) {
-        return undefined;
+      return undefined;
     }
   }
 
@@ -30,20 +25,25 @@ export class CurrentVersionFileProvider implements ICurrentVersionManager {
     const filePath = join(this.root, 'versions', `${name}.json`);
 
     try {
-      await FileSystem.writeFile(filePath, JSON.stringify({
-        version
-      }));
+      await FileSystem.writeFile(
+        filePath,
+        JSON.stringify({
+          version
+        })
+      );
     } catch (error) {
       throw new Error(`Error updating version file for ${name}:`, {
         cause: error
       });
     }
   }
-  
+
   public async flush() {
-    await Promise.all(Object.entries(this.newVersions).map(async ([name, version]) => {
-      await this.flushVersion(name, version);
-    }));
+    await Promise.all(
+      Object.entries(this.newVersions).map(async ([name, version]) => {
+        await this.flushVersion(name, version);
+      })
+    );
 
     this.newVersions = {};
   }

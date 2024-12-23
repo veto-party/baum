@@ -13,14 +13,14 @@ import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
 
-export type VersionProviderCallback = (name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string|Promise<string>;
+export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
 
 export class HelmGenerator implements IStep {
   constructor(
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
-    private version: string|VersionProviderCallback,
+    private version: string | VersionProviderCallback,
     private name = 'root'
   ) {}
 
@@ -39,7 +39,6 @@ export class HelmGenerator implements IStep {
    */
   async flush() {
     for (const [root, path, obj] of this.filesToWrite) {
-
       const resulting = Path.join(root, ...path);
 
       try {
@@ -49,7 +48,7 @@ export class HelmGenerator implements IStep {
       } catch (error) {
         console.warn(error);
       }
-  
+
       await FileSystem.writeFile(
         resulting,
         obj
@@ -65,16 +64,15 @@ export class HelmGenerator implements IStep {
   }
 
   @CachedFN(true, [false, true, true, true])
-  private async resolveVersion(name: string, workspace: IWorkspace|undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
-    return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory); 
+  private async resolveVersion(name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
+    return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory);
   }
 
   /**
-   * @private 
+   * @private
    */
   @CachedFN(true, [false, false, true, true])
   async generateGlobalScope(packageManager: IExecutablePackageManager, rootDirectory: string) {
-
     const context = this.helmFileGeneratorProvider.globalContext;
     const contexts = this.helmFileGeneratorProvider.contexts;
 
@@ -86,30 +84,32 @@ export class HelmGenerator implements IStep {
       dependencies: [] as any[]
     };
 
-    await Promise.all(Object.entries(context.service ?? {})
-      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-      .map(async ([name, service]) => {
-        if (service.is_local) {
+    await Promise.all(
+      Object.entries(context.service ?? {})
+        .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+        .map(async ([name, service]) => {
+          if (service.is_local) {
+            ChartYAML.dependencies.push({
+              name: name,
+              version: await this.resolveVersion(name, undefined, packageManager, rootDirectory),
+              repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
+              alias: name
+            });
+            return;
+          }
+
+          if (service.type !== 'global') {
+            return;
+          }
+
           ChartYAML.dependencies.push({
-            name: name,
-            version: await this.resolveVersion(name, undefined, packageManager, rootDirectory),
-            repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
+            name: service.definition.origin.name,
+            version: service.definition.origin.version,
+            repository: service.definition.origin.repository,
             alias: name
           });
-          return;
-        }
-
-        if (service.type !== 'global') {
-          return;
-        }
-
-        ChartYAML.dependencies.push({
-          name: service.definition.origin.name,
-          version: service.definition.origin.version,
-          repository: service.definition.origin.repository,
-          alias: name
-        });
-      }));
+        })
+    );
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
