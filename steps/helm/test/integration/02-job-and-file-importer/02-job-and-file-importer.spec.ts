@@ -3,9 +3,6 @@ import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BaumManager, CommandStep } from '@veto-party/baum__core';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
-import { HelmGenerator } from '../../../src/HelmGenerator.js';
-import { HelmGeneratorProvider } from '../../../src/HelmGeneratorProvider.js';
-import { HelmPacker } from '../../../src/HelmPacker.js';
 import { compareDirectories } from '../utility/compareDirectories.js';
 import { Helm } from '../../../src/Helm.js';
 import { StaticVersionProvider } from '../../../src/VersionStrategy/CurrentVersionMangager/implementation/StaticProvider.js';
@@ -30,6 +27,7 @@ describe('02 job and file importer', () => {
       baum.dontCopyLockFile();
 
       const helmfileProvider = new Helm(baum);
+      helmfileProvider.setFilter((workspace) => workspace.getPackageFile().name.startsWith('@veto/'));
       helmfileProvider.setAliasGenerator((workspace) => workspace.getName().replaceAll('/', '__').replaceAll('@', ''));
       helmfileProvider.setVersionProvider(new StaticVersionProvider());
       helmfileProvider.setDockerFileForJobGenerator((schema) => schema.definition?.image ?? '');

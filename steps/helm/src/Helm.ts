@@ -101,6 +101,11 @@ export class Helm extends BaumManager implements IStep {
             step: provider
         });
 
+        this.steps.push({
+            name: 'generate helm files',
+            step: generator
+        });
+
         await this.run();
 
         await generator.generateGlobalScope(packageManager, rootDirectory);
