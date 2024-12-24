@@ -9,13 +9,31 @@ import { structure } from './validation.js';
 export class BaumManager implements IBaumManager {
   private rootDirectory?: string;
 
+  private failed?: boolean;
+
   private packageManager?: IExecutablePackageManager;
 
-  private steps: { name: string; step: IStep }[] = [];
+  protected steps: { name: string; step: IStep }[] = [];
 
-  private doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
+  protected doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
-  private disableWorkspace = true;
+  protected disableWorkspace = true;
+
+  constructor(
+    protected parentBaum?: BaumManager|undefined
+  ) {
+  }
+
+  protected synchronize() {
+    this.rootDirectory = this.parentBaum?.rootDirectory;
+    this.disableWorkspace = this.parentBaum?.disableWorkspace ?? this.disableWorkspace;
+    this.packageManager = this.parentBaum?.packageManager;
+  }
+
+
+  isFailed(): boolean {
+    return this.failed ?? false;
+  }
 
   setRootDirectory(root: string): this {
     this.rootDirectory = root;
@@ -91,6 +109,8 @@ export class BaumManager implements IBaumManager {
   async run(steps?: string[]): Promise<void> {
     await this.validate();
 
+    this.failed = false;
+
     const internalSteps: IStep[] = [];
 
     const disableWorkspace = this.disableWorkspace;
@@ -117,6 +137,9 @@ export class BaumManager implements IBaumManager {
         await this.executeGroup(currentGroup, steps);
         executedGroups.push(currentGroup);
       }
+    } catch (error) {
+      this.failed = true;
+      throw error;
     } finally {
       while (executedGroups.length > 0) {
         const currentGroup = executedGroups.shift()!;

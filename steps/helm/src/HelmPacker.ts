@@ -5,11 +5,9 @@ import type { HelmGenerator } from './HelmGenerator.js';
 
 @RunOnce()
 export class HelmPacker implements IStep {
-  constructor(private generator: HelmGenerator) {}
+  constructor() {}
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await this.generator.generateGlobalScope(packageManager, rootDirectory);
-    await this.generator.flush();
 
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
 
