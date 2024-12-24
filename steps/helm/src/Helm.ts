@@ -3,6 +3,7 @@ import { HelmGeneratorProvider } from "./HelmGeneratorProvider.js";
 import { HelmGenerator } from "./HelmGenerator.js";
 import { ICurrentVersionManager } from "./VersionStrategy/CurrentVersionMangager/ICurrentVersionManager.js";
 import { HelmPacker } from "./HelmPacker.js";
+import { pack } from "tar-stream";
 
 @RunOnce()
 export class Helm extends BaumManager implements IStep {
@@ -77,6 +78,8 @@ export class Helm extends BaumManager implements IStep {
             throw new Error(`${missing.join(', ')} need to be defined using the given setters.`);
         }
 
+        const packer = new HelmPacker();
+
         const provider = new HelmGeneratorProvider(
             this.fileProvider,
             this.filter,
@@ -93,16 +96,6 @@ export class Helm extends BaumManager implements IStep {
             this.name
         );
 
-        this.steps.push({
-            name: 'Generate definition',
-            step: generator
-        });
-
-        this.steps.push({
-            name: 'Pack helm files',
-            step: new HelmPacker()
-        });
-
         this.steps.unshift({ 
             name: 'Provide definition metadata', 
             step: provider
@@ -111,6 +104,19 @@ export class Helm extends BaumManager implements IStep {
         await this.run();
 
         await generator.generateGlobalScope(packageManager, rootDirectory);
+
+        try {
+            await generator.execute(workspace, packageManager, rootDirectory);
+            await generator.flush();
+            try {
+                await packer.execute(workspace, packageManager, rootDirectory);
+            } finally {
+                await packer.clean(workspace, packageManager, rootDirectory);
+            }
+        } finally {
+            await generator.clean(workspace, packageManager, rootDirectory);
+        }
+
         await generator.flush();
         await this.versionProvider?.flush();
     }
