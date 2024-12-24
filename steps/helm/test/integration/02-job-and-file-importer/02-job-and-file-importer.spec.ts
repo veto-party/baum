@@ -36,6 +36,11 @@ describe('02 job and file importer', () => {
       helmfileProvider.setDockerFileGenerator((workpace) => workpace.getName());
 
 
+      baum.addExecutionStep('helm', helmfileProvider);
+      baum.addExecutionStep('validate helm files', new CommandStep('helm lint .', Path.join(Path.resolve(testDirectory), 'helm', 'main')));
+
+      await baum.run();
+
     await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for file handles to flush.
     const compareResult = await compareDirectories(Path.join(testDirectory, 'helm'), Path.join(__dirname, 'expected-helm'));
 
