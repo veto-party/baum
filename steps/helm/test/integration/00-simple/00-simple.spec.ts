@@ -3,9 +3,9 @@ import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BaumManager, CommandStep } from '@veto-party/baum__core';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
-import { compareDirectories } from '../utility/compareDirectories.js';
 import { Helm } from '../../../src/Helm.js';
 import { StaticVersionProvider } from '../../../src/VersionStrategy/CurrentVersionMangager/implementation/StaticProvider.js';
+import { compareDirectories } from '../utility/compareDirectories.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);

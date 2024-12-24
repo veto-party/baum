@@ -1,11 +1,7 @@
-import FileSystem from 'node:fs/promises';
-import { join } from 'node:path';
 import type { ICurrentVersionManager } from '../ICurrentVersionManager.js';
 
 export class StaticVersionProvider implements ICurrentVersionManager {
-  constructor(
-    private versions: Record<string, string> = {}
-  ) {}
+  constructor(private versions: Record<string, string> = {}) {}
 
   public async getCurrentVersionFor(name: string): Promise<string | undefined> {
     return this.versions[name];
@@ -19,8 +15,8 @@ export class StaticVersionProvider implements ICurrentVersionManager {
 
   public async flush() {
     this.versions = {
-        ...this.versions,
-        ...this.newVersions
+      ...this.versions,
+      ...this.newVersions
     };
 
     this.newVersions = {};

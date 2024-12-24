@@ -19,17 +19,13 @@ export class BaumManager implements IBaumManager {
 
   protected disableWorkspace = true;
 
-  constructor(
-    protected parentBaum?: BaumManager|undefined
-  ) {
-  }
+  constructor(protected parentBaum?: BaumManager | undefined) {}
 
   protected synchronize() {
     this.rootDirectory = this.parentBaum?.rootDirectory;
     this.disableWorkspace = this.parentBaum?.disableWorkspace ?? this.disableWorkspace;
     this.packageManager = this.parentBaum?.packageManager;
   }
-
 
   isFailed(): boolean {
     return this.failed ?? false;

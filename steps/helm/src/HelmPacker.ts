@@ -1,14 +1,10 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import { CommandStep, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ParallelStep, RetryStep, RunOnce } from '@veto-party/baum__core';
-import type { HelmGenerator } from './HelmGenerator.js';
 
 @RunOnce()
 export class HelmPacker implements IStep {
-  constructor() {}
-
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
 
     const possibleSteps = await FileSystem.readdir(subChartsDir);
