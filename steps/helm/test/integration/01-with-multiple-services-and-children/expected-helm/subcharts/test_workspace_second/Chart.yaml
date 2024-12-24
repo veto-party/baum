@@ -1,6 +1,6 @@
 "apiVersion": "v2"
 "type": "application"
 "name": "test_workspace_second"
-"version": "1.0.0"
+"version": "0.0.0"
 "dependencies": 
 
