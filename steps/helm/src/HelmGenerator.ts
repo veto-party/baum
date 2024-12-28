@@ -12,6 +12,7 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
+import { HelmPacker } from './HelmPacker.js';
 
 export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
 
@@ -21,6 +22,7 @@ export type VersionProviderCallback = (name: string, workspace: IWorkspace | und
  */
 export class HelmGenerator implements IStep {
   constructor(
+    private helmPacker: HelmPacker|undefined,
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
@@ -298,6 +300,8 @@ export class HelmGenerator implements IStep {
 
     if (ChartYAML.dependencies!.length === 0) {
       delete ChartYAML.dependencies;
+    } else {
+      this.helmPacker?.addPackage(workspace.getName().replaceAll('/', '__'));
     }
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'Chart.yaml'], [ChartYAML]);

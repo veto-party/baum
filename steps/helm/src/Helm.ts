@@ -35,16 +35,16 @@ export class Helm extends BaumManager implements IStep {
     return this;
   }
 
-  protected dockerFileGenerator?: ConstructorParameters<typeof HelmGenerator>[1];
+  protected dockerFileGenerator?: ConstructorParameters<typeof HelmGenerator>[2];
 
-  setDockerFileGenerator(dockerFileGenerator: ConstructorParameters<typeof HelmGenerator>[1]): this {
+  setDockerFileGenerator(dockerFileGenerator: ConstructorParameters<typeof HelmGenerator>[2]): this {
     this.dockerFileGenerator = dockerFileGenerator;
     return this;
   }
 
-  protected dockerFileForJobGenerator?: ConstructorParameters<typeof HelmGenerator>[2];
+  protected dockerFileForJobGenerator?: ConstructorParameters<typeof HelmGenerator>[3];
 
-  setDockerFileForJobGenerator(dockerFileForJobGenerator: ConstructorParameters<typeof HelmGenerator>[2]): this {
+  setDockerFileForJobGenerator(dockerFileForJobGenerator: ConstructorParameters<typeof HelmGenerator>[3]): this {
     this.dockerFileForJobGenerator = dockerFileForJobGenerator;
     return this;
   }
@@ -89,6 +89,7 @@ export class Helm extends BaumManager implements IStep {
     const clonedSteps = [...this.steps];
 
     const generator = new HelmGenerator(
+      packer,
       provider,
       this.dockerFileGenerator!,
       this.dockerFileForJobGenerator!,
