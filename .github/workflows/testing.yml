@@ -9,20 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    #services:
-    #  verdaccio:
-    #    image: verdaccio/verdaccio
-    #    volumes: 
-    #      # - /steps/docker/verdaccio/config.yaml:/verdaccio/conf/config.yaml
-    #    ports:
-    #      - 4873:4873
     steps:
       - uses: actions/checkout@v4
-      # - name: Install Docker using Docker's official script
-      #   run: |
-      #     curl -fsSL https://get.docker.com -o get-docker.sh
-      #     sudo sh get-docker.sh
-      #   continue-on-error: false
       - name: Install Docker Compose
         run: |
             sudo curl -L "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
@@ -34,10 +22,6 @@ jobs:
       - uses: azure/setup-helm@v4
         with:
           version: 'latest'
-      # - uses: addnab/docker-run-action@v3
-      #   with:
-      #     image: verdaccio/verdaccio
-      #     options: -d --name -p 4873:4873
       - uses: actions/setup-node@v4
         with:
           node-version: 20
