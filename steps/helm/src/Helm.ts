@@ -1,8 +1,9 @@
-import { BaumManager, type IBaumManagerConfiguration, type IExecutablePackageManager, type IStep, type IWorkspace, RunOnce } from '@veto-party/baum__core';
+import { BaumManager, type IBaumManagerConfiguration, ICloneable, type IExecutablePackageManager, ISettableStep, type IStep, type IWorkspace, RunOnce } from '@veto-party/baum__core';
 import { HelmGenerator } from './HelmGenerator.js';
 import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import { HelmPacker } from './HelmPacker.js';
 import type { ICurrentVersionManager } from './VersionStrategy/CurrentVersionMangager/ICurrentVersionManager.js';
+import { ConditionalGitDiffStep } from '@veto-party/baum__steps__git_diff';
 
 @RunOnce()
 export class Helm extends BaumManager implements IStep {
@@ -49,6 +50,13 @@ export class Helm extends BaumManager implements IStep {
     return this;
   }
 
+  protected stepWrapper?: ICloneable & ISettableStep;
+
+  setStepWrapper(stepWrapper: ICloneable & ISettableStep): this {
+    this.stepWrapper = stepWrapper;
+    return this;
+  }
+
   protected versionProvider?: ICurrentVersionManager;
 
   setVersionProvider(versionProvider: ICurrentVersionManager): this {
@@ -79,6 +87,9 @@ export class Helm extends BaumManager implements IStep {
 
     const provider = new HelmGeneratorProvider(this.fileProvider, this.filter, this.aliasGenerator);
 
+
+    const clonedSteps = [...this.steps];
+
     const generator = new HelmGenerator(
       provider,
       this.dockerFileGenerator!,
@@ -99,7 +110,18 @@ export class Helm extends BaumManager implements IStep {
       step: generator
     });
 
-    await this.run();
+    if (this.stepWrapper) {
+      this.steps = clonedSteps.map((step) => ({
+        ...step,
+        step: this.stepWrapper!.clone().setStep(step.step)
+      }));
+    }
+
+    try {
+      await this.run();
+    } finally {
+      this.steps = clonedSteps;
+    }
 
     await generator.generateGlobalScope(packageManager, rootDirectory);
 

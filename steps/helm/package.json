@@ -30,7 +30,8 @@
     "npm-registry-fetch": "^18.0.2",
     "@types/npm-registry-fetch": "^8.0.7",
     "normalize-package-data": "^7.0.0",
-    "@types/normalize-package-data": "^2.4.4"
+    "@types/normalize-package-data": "^2.4.4",
+    "@veto-party/baum__steps__git_diff": "*"
   },
   "devDependencies": {
     "@veto-party/config": "*",

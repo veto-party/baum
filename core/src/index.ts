@@ -3,7 +3,8 @@ export type { IBaumManagerConfiguration, IBaumRegistrable } from './interface/Ba
 export type { IPackageManager, IDependent, IWorkspace } from './interface/PackageManager/IPackageManager.js';
 export type { IExecutablePackageManager } from './interface/PackageManager/IExecutablePackageManager.js';
 
-export type { IStep } from './interface/IStep.js';
+export type { IStep, ISettableStep } from './interface/IStep.js';
+export type { ICloneable } from './interface/ICloneable.js';
 
 export type { IExecutablePackageManagerParser } from './interface/PackageManager/executor/IPackageManagerParser.js';
 export type { IPackageManagerExecutor, ICommandIntent, IExecutionIntent, IExecutionIntentBuilder, IInstallIntent, IPublishIntent, IRunIntent } from './interface/PackageManager/executor/IPackageManagerExecutor.js';
