@@ -15,6 +15,10 @@ import { to_structured_data } from './yaml/to_structure_data.js';
 
 export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
 
+
+/**
+ * @internal
+ */
 export class HelmGenerator implements IStep {
   constructor(
     private helmFileGeneratorProvider: HelmGeneratorProvider,
@@ -81,7 +85,7 @@ export class HelmGenerator implements IStep {
       type: 'application',
       name: this.name,
       version: await this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
-      dependencies: [] as any[]
+      dependencies: [] as any[]|undefined
     };
 
     await Promise.all(
@@ -89,7 +93,7 @@ export class HelmGenerator implements IStep {
         .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
         .map(async ([name, service]) => {
           if (service.is_local) {
-            ChartYAML.dependencies.push({
+            ChartYAML.dependencies!.push({
               name: name,
               version: await this.resolveVersion(name, undefined, packageManager, rootDirectory),
               repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
@@ -102,7 +106,7 @@ export class HelmGenerator implements IStep {
             return;
           }
 
-          ChartYAML.dependencies.push({
+          ChartYAML.dependencies!.push({
             name: service.definition.origin.name,
             version: service.definition.origin.version,
             repository: service.definition.origin.repository,
@@ -110,6 +114,10 @@ export class HelmGenerator implements IStep {
           });
         })
     );
+
+    if (ChartYAML.dependencies!.length === 0) {
+      delete ChartYAML.dependencies;
+    }
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
@@ -270,7 +278,7 @@ export class HelmGenerator implements IStep {
       type: 'application',
       name,
       version: await this.resolveVersion(name, workspace, packageManager, rootDirectory),
-      dependencies: [] as any[]
+      dependencies: [] as any[]|undefined
     };
 
     Object.entries(scopedContext?.service ?? {})
@@ -280,13 +288,17 @@ export class HelmGenerator implements IStep {
           return;
         }
 
-        ChartYAML.dependencies.push({
+        ChartYAML.dependencies!.push({
           name: v.definition.origin.name,
           version: v.definition.origin.version,
           repository: v.definition.origin.repository,
           alias: k
         });
       });
+
+    if (ChartYAML.dependencies!.length === 0) {
+      delete ChartYAML.dependencies;
+    }
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'Chart.yaml'], [ChartYAML]);
 
