@@ -50,9 +50,9 @@ export class Helm extends BaumManager implements IStep {
     return this;
   }
 
-  protected stepWrapper?: ICloneable & ISettableStep;
+  protected stepWrapper?: ICloneable<IStep & ISettableStep> & ISettableStep;
 
-  setStepWrapper(stepWrapper: ICloneable & ISettableStep): this {
+  setStepWrapper(stepWrapper: ICloneable<IStep & ISettableStep> & ISettableStep): this {
     this.stepWrapper = stepWrapper;
     return this;
   }
