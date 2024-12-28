@@ -1,9 +1,8 @@
-import { BaumManager, type IBaumManagerConfiguration, ICloneable, type IExecutablePackageManager, ISettableStep, type IStep, type IWorkspace, RunOnce } from '@veto-party/baum__core';
+import { BaumManager, type IBaumManagerConfiguration, type ICloneable, type IExecutablePackageManager, type ISettableStep, type IStep, type IWorkspace, RunOnce } from '@veto-party/baum__core';
 import { HelmGenerator } from './HelmGenerator.js';
 import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import { HelmPacker } from './HelmPacker.js';
 import type { ICurrentVersionManager } from './VersionStrategy/CurrentVersionMangager/ICurrentVersionManager.js';
-import { ConditionalGitDiffStep } from '@veto-party/baum__steps__git_diff';
 
 @RunOnce()
 export class Helm extends BaumManager implements IStep {
@@ -86,7 +85,6 @@ export class Helm extends BaumManager implements IStep {
     const packer = new HelmPacker();
 
     const provider = new HelmGeneratorProvider(this.fileProvider, this.filter, this.aliasGenerator);
-
 
     const clonedSteps = [...this.steps];
 

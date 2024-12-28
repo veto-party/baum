@@ -53,7 +53,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   }
 
   constructor(
-    step: IStep|undefined,
+    step: IStep | undefined,
     private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
     private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {

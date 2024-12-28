@@ -1,13 +1,13 @@
-import { ICloneable } from '../../interface/ICloneable.js';
+import type { ICloneable } from '../../interface/ICloneable.js';
 import type { ISettableStep, IStep } from '../../interface/IStep.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import type { IWorkspace } from '../../interface/PackageManager/IPackageManager.js';
 
-export class ConditionalStep<T extends ConditionalStep<any>|undefined = undefined> implements IStep, ICloneable<T extends undefined ? ConditionalStep : T>, ISettableStep {
+export class ConditionalStep<T extends ConditionalStep<any> | undefined = undefined> implements IStep, ICloneable<T extends undefined ? ConditionalStep : T>, ISettableStep {
   private executedWorkspaces: IWorkspace[] = [];
 
   constructor(
-    protected step: IStep|undefined,
+    protected step: IStep | undefined,
     protected condition: (workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string) => boolean | Promise<boolean>
   ) {}
 
@@ -31,7 +31,6 @@ export class ConditionalStep<T extends ConditionalStep<any>|undefined = undefine
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-
     if (!this.step) {
       throw new Error('No step defined.');
     }
@@ -43,7 +42,6 @@ export class ConditionalStep<T extends ConditionalStep<any>|undefined = undefine
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-
     if (!this.step) {
       throw new Error('No step defined.');
     }
