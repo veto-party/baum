@@ -82,9 +82,12 @@ export class VersionStrategy {
         minorChangedPackages[name] = versionIncrements[name];
       }
 
-      const mostChangedDependent = workpace.getDynamicDependents().sort((dependentA, dependentB) => {
-        return (minorChangedPackages[dependentB.getName()] ?? -1) - (minorChangedPackages[dependentA.getName()] ?? -1);
-      }).find((mostChangedPackage) => minorChangedPackages[mostChangedPackage.getName()] ?? false);
+      const mostChangedDependent = workpace
+        .getDynamicDependents()
+        .sort((dependentA, dependentB) => {
+          return (minorChangedPackages[dependentB.getName()] ?? -1) - (minorChangedPackages[dependentA.getName()] ?? -1);
+        })
+        .find((mostChangedPackage) => minorChangedPackages[mostChangedPackage.getName()] ?? false);
 
       if (mostChangedDependent) {
         switch (minorChangedPackages[mostChangedDependent.getName()]) {
