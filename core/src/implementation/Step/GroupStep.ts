@@ -11,7 +11,7 @@ export class GroupStep implements IStep, IBaumRegistrable {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    for (const step of this.steps.toReversed()) {
+    for (const step of [...this.steps].reverse()) {
       try {
         await step.clean(workspace, packageManager, rootDirectory);
       } catch (error) {
