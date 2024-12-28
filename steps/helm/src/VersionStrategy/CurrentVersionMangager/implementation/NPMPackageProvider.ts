@@ -53,8 +53,6 @@ export class NPMPackageProvider implements ICurrentVersionManager {
       readable.pipe(read);
     });
 
-    // const file = unzippers.files.find((file) => file.path.endsWith('versions.json'));
-
     if (!file) {
       throw new Error('Could not find versions.json in the package');
     }
