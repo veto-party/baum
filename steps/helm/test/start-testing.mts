@@ -48,5 +48,4 @@ process.on('uncaughtException', (error) => {
 
   console.log('RUNNING JASMINE NOW!');
   await jasmine.execute(undefined, f);
-
 })().catch(console.error);

@@ -4,7 +4,6 @@ import type JasmineType from 'jasmine';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-
 (async () => {
   const argv = await yargs(hideBin(process.argv)).argv;
 
@@ -37,5 +36,4 @@ import yargs from 'yargs/yargs';
 
   console.log('RUNNING JASMINE NOW!');
   await jasmine.execute(undefined, f);
-
 })().catch(console.error);
