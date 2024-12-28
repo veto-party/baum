@@ -18,7 +18,7 @@ export class VersionStrategy {
     }
 
     const versionIncrements: Record<string, VersionStatusUpdateType> = {};
-    const minorChangedPackages: Record<string, true | undefined> = {};
+    const minorChangedPackages: Record<string, VersionStatusUpdateType> = {};
 
     const __incrementVersion = (version: string, update: VersionStatusUpdateType) => {
       switch (update) {
@@ -79,16 +79,24 @@ export class VersionStrategy {
       if (diff.length > 0) {
         console.log('Git diff found for name: ', name);
         versionIncrements[name] ??= currentVersions[name] ? VersionStatusUpdateType.PATCH : VersionStatusUpdateType.MAJOR;
-        minorChangedPackages[name] = true; // TODO: Add version logic.
+        minorChangedPackages[name] = versionIncrements[name];
       }
 
-      const hasMinorChangeThroughDependent = workpace.getDynamicDependents().some((dependent) => {
-        return minorChangedPackages[dependent.getName()] ?? false;
-      });
+      const mostChangedDependent = workpace.getDynamicDependents().sort((dependentA, dependentB) => {
+        return (minorChangedPackages[dependentB.getName()] ?? -1) - (minorChangedPackages[dependentA.getName()] ?? -1);
+      }).find((mostChangedPackage) => minorChangedPackages[mostChangedPackage.getName()] ?? false);
 
-      if (hasMinorChangeThroughDependent) {
-        versionIncrements[name] ??= currentVersions[name] ? VersionStatusUpdateType.MINOR : VersionStatusUpdateType.MAJOR;
-        minorChangedPackages[name] = true; // TODO: Add version logic.
+      if (mostChangedDependent) {
+        switch (minorChangedPackages[mostChangedDependent.getName()]) {
+          case VersionStatusUpdateType.MAJOR:
+            versionIncrements[name] ??= VersionStatusUpdateType.MINOR;
+            break;
+          case VersionStatusUpdateType.MINOR:
+          case VersionStatusUpdateType.PATCH:
+            versionIncrements[name] ??= VersionStatusUpdateType.PATCH;
+            break;
+        }
+        minorChangedPackages[name] = minorChangedPackages[mostChangedDependent.getName()];
       }
 
       if (versionIncrements[name] && currentVersions[name]) {
