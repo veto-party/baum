@@ -14,9 +14,7 @@ export class HelmPacker implements IStep {
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
-
-    // const possibleSteps = await FileSystem.readdir(subChartsDir);
-
+    
     const installSteps = new ParallelStep([]);
     this.packages.forEach((chart) => {
       installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new RetryStep(new CommandStep('helm dep update .', Path.join(subChartsDir, chart))));
