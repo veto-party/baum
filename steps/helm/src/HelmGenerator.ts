@@ -2,8 +2,10 @@ import FileSystem from 'node:fs/promises';
 import { EOL } from 'node:os';
 import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { toPath } from 'lodash';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import type { HelmPacker } from './HelmPacker.js';
 import type { SchemaType } from './types/types.js';
 import { buildVariable, getHash } from './utility/buildVariable.js';
 import { resolveBindings } from './utility/resolveReference.js';
@@ -12,18 +14,15 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
-import { HelmPacker } from './HelmPacker.js';
-import { toPath } from 'lodash';
 
 export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
-
 
 /**
  * @internal
  */
 export class HelmGenerator implements IStep {
   constructor(
-    private helmPacker: HelmPacker|undefined,
+    private helmPacker: HelmPacker | undefined,
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
@@ -94,7 +93,7 @@ export class HelmGenerator implements IStep {
       type: 'application',
       name: this.name,
       version: await this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
-      dependencies: [] as any[]|undefined
+      dependencies: [] as any[] | undefined
     };
 
     await Promise.all(
@@ -288,7 +287,7 @@ export class HelmGenerator implements IStep {
       type: 'application',
       name,
       version: await this.resolveVersion(name, workspace, packageManager, rootDirectory),
-      dependencies: [] as any[]|undefined
+      dependencies: [] as any[] | undefined
     };
 
     Object.entries(scopedContext?.service ?? {})
