@@ -53,17 +53,13 @@ class VariablePrepareLogic {
 }
 
 export const buildVariable = (variableDefinition: Exclude<ExtendedSchemaType['variable'], undefined>[string], scopeName: string) => {
-
   const clone = {
     ...variableDefinition,
     binding: {},
     ref: undefined as any
   };
 
-  VariablePrepareLogic.prepareVariable(
-    clone,
-    scopeName
-  );
+  VariablePrepareLogic.prepareVariable(clone, scopeName);
 
   variableDefinition.default = clone.default;
 
