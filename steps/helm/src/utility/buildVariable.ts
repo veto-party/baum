@@ -53,7 +53,11 @@ class VariablePrepareLogic {
 }
 
 export const buildVariable = (variableDefinition: Exclude<ExtendedSchemaType['variable'], undefined>[string], scopeName: string) => {
-  VariablePrepareLogic.prepareVariable(variableDefinition, scopeName);
+  VariablePrepareLogic.prepareVariable({
+    ...variableDefinition,
+    binding: {},
+    ref: '',
+  }, scopeName);
   return variableDefinition.default;
 };
 
