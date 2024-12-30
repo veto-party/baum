@@ -13,6 +13,7 @@ import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
 import { HelmPacker } from './HelmPacker.js';
+import { toPath } from 'lodash';
 
 export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
 
@@ -65,8 +66,14 @@ export class HelmGenerator implements IStep {
     }
   }
 
-  private static buildVariablePath(variable: string, sep = '.'): string {
-    return variable.split('.').join(sep);
+  private static buildVariablePath(variable: string): string {
+    return toPath(variable).reduce((prev, part) => {
+      if (prev !== '' && Number.isInteger(Number(part))) {
+        return `(index ${prev} ${part})`;
+      }
+
+      return [prev, part].filter(Boolean).join('.');
+    }, '');
   }
 
   @CachedFN(true, [false, true, true, true])
@@ -170,7 +177,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -189,7 +196,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -537,7 +544,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -556,7 +563,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{ .Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
