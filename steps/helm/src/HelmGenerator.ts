@@ -2,7 +2,7 @@ import FileSystem from 'node:fs/promises';
 import { EOL } from 'node:os';
 import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
-import { toPath } from 'lodash';
+import lodash from 'lodash';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import type { HelmPacker } from './HelmPacker.js';
@@ -14,6 +14,8 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
+
+const { toPath } = lodash;
 
 export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
 
