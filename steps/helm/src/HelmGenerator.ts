@@ -671,7 +671,6 @@ export class HelmGenerator implements IStep {
     }
   }
 
-  // @CachedFN(true, [true, true, false])
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     // NO-OP
   }
