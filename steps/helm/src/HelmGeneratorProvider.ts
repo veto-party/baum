@@ -328,6 +328,21 @@ export class HelmGeneratorProvider implements IStep {
 
           const refString = `${definitionName}.${k}`;
           refTarget.__scope ??= {};
+
+          // Put unbound copy into global scope to make sure that we pull the correct variables.
+          if (environment.scoped.is_service && service.type !== "global") {
+            environment.global.variable[`${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}`] = {
+              ...v,
+              sourcePath: workspace.getDirectory(),
+              type: "global",
+              binding: {},
+              external: true
+            };
+          } 
+          // environment.global.binding ??= {};
+          // environment.global.binding[refString] = refString;
+
+
           refTarget.__scope[`${definitionName}.environment.${k}`] = {
             ref: refString
           };

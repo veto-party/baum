@@ -11,3 +11,10 @@
     "forcePassword": true
   "example":
     "config": "{\n  \"foo\": \"bar\"\n}\n"
+"test_workspace":
+  "kfrhlijri_scoped_database":
+    "auth":
+      "forcePassword": true
+      "rootPassword": "should be generated"
+    "example":
+      "config": "{\n  \"foo\": \"bar\"\n}\n"

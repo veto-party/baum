@@ -12,3 +12,8 @@
     "forcePassword": true
     "rootPassword": "should be generated"
   "fullnameOverride": "global-database"
+"test_workspace":
+  "kfrhlijri_scoped_database":
+    "auth":
+      "forcePassword": true
+      "rootPassword": "should be generated"
