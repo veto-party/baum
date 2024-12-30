@@ -57,7 +57,7 @@ export const buildVariable = (variableDefinition: Exclude<ExtendedSchemaType['va
     {
       ...variableDefinition,
       binding: {},
-      ref: ''
+      ref: undefined as any
     },
     scopeName
   );
