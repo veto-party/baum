@@ -3,6 +3,6 @@
 "metadata":
   "name": "global"
 "data":
-  "DATABASE_ADDRESS": {{.Values.global_database.fullnameOverride | quote }}
-  "ROOT_PASSWORD": {{.Values.global_database.auth.rootPassword | quote }}
-  "example_data": {{.Values.global.example | quote }}
+  "DATABASE_ADDRESS": {{ .Values.global_database.fullnameOverride | quote }}
+  "ROOT_PASSWORD": {{ .Values.global_database.auth.rootPassword | quote }}
+  "example_data": {{ .Values.global.example | quote }}
