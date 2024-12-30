@@ -7,16 +7,27 @@ on:
 
 jobs:
   test:
+    strategy:
+      matrix:
+        version: [18, 20, 22]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Install Docker Compose
+        run: |
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+            docker-compose --version
+        continue-on-error: false
+      - name: "Start testing containers"
+        run: docker-compose up -d
       - uses: azure/setup-helm@v4
         with:
           version: 'latest'
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.version }}
       - run: npm ci
       - name: testing
         run: npm run baum

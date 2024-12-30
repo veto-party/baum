@@ -1,37 +1,51 @@
 import FileSystem from 'node:fs';
 import Path from 'node:path';
+import { inspect } from 'node:util';
 import type JasmineType from 'jasmine';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-const argv = await yargs(hideBin(process.argv)).argv;
+process.on('uncaughtException', (error) => {
+  if (inspect.custom in error) {
+    const inspector = error[inspect.custom];
+    if (typeof inspector === 'function') {
+      console.log(inspector());
+      return;
+    }
 
-const currentPath = process.cwd();
+    console.log(inspector);
+  }
+});
 
-let configuration: any = {};
+(async () => {
+  const argv = await yargs(hideBin(process.argv)).argv;
+  const currentPath = process.cwd();
 
-if (FileSystem.existsSync(Path.join(currentPath, 'jasmine.json'))) {
-  configuration = JSON.parse(FileSystem.readFileSync(Path.join(currentPath, 'jasmine.json')).toString());
-} else {
-  throw new Error('jasmine.json not found');
-}
+  let configuration: any = {};
 
-configuration.jsLoader = 'import';
+  if (FileSystem.existsSync(Path.join(currentPath, 'jasmine.json'))) {
+    configuration = JSON.parse(FileSystem.readFileSync(Path.join(currentPath, 'jasmine.json')).toString());
+  } else {
+    throw new Error('jasmine.json not found');
+  }
 
-const { default: Jasmine }: { default: typeof JasmineType } = await import('jasmine');
-const jasmine = new Jasmine({
-  numWorkers: 3
-} as any);
+  configuration.jsLoader = 'import';
 
-jasmine.loadConfig(configuration);
+  const { default: Jasmine }: { default: typeof JasmineType } = await import('jasmine');
+  const jasmine = new Jasmine({
+    numWorkers: 3
+  } as any);
 
-jasmine.exitOnCompletion = true;
+  jasmine.loadConfig(configuration);
 
-let f: string | undefined = undefined;
+  jasmine.exitOnCompletion = true;
 
-if (argv.f) {
-  f = argv.f.toString();
-}
+  let f: string | undefined = undefined;
 
-console.log('RUNNING JASMINE NOW!');
-await jasmine.execute(undefined, f);
+  if (argv.f) {
+    f = argv.f.toString();
+  }
+
+  console.log('RUNNING JASMINE NOW!');
+  await jasmine.execute(undefined, f);
+})().catch(console.error);

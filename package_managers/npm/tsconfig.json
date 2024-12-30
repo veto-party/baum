@@ -3,6 +3,7 @@
   "extends": "@veto-party/config/tsconfig.json",
   "include": ["./src/"],
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "target": "ES2018"
   }
 }

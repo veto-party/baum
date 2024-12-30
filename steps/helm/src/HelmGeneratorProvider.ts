@@ -43,6 +43,9 @@ export type ExtendedSchemaType = {
 
 type Mappers = { [K in Exclude<keyof ExtendedSchemaType, undefined>]: (prev: ExtendedSchemaType[K], current: ExtendedSchemaType[K], workspace: IWorkspace) => ExtendedSchemaType[K] };
 
+/**
+ * @internal
+ */
 @RunOnce()
 export class HelmGeneratorProvider implements IStep {
   public globalContext: ExtendedSchemaType = {

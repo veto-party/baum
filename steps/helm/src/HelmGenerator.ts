@@ -2,8 +2,10 @@ import FileSystem from 'node:fs/promises';
 import { EOL } from 'node:os';
 import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { toPath } from 'lodash';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
+import type { HelmPacker } from './HelmPacker.js';
 import type { SchemaType } from './types/types.js';
 import { buildVariable, getHash } from './utility/buildVariable.js';
 import { resolveBindings } from './utility/resolveReference.js';
@@ -13,77 +15,117 @@ import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
 
+export type VersionProviderCallback = (name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) => string | Promise<string>;
+
+/**
+ * @internal
+ */
 export class HelmGenerator implements IStep {
   constructor(
+    private helmPacker: HelmPacker | undefined,
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => string,
     private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
-    private version: string,
+    private version: string | VersionProviderCallback,
     private name = 'root'
   ) {}
+
+  private filesToWrite: [string, string[], any[]][] = [];
 
   private async writeObjectToFile(root: string, path: string[], obj: any[]) {
     if (obj.length === 0) {
       return;
     }
 
-    const resulting = Path.join(root, ...path);
+    this.filesToWrite.push([root, path, obj]);
+  }
 
-    try {
-      await FileSystem.mkdir(Path.dirname(resulting), {
-        recursive: true
-      });
-    } catch (error) {
-      console.warn(error);
+  /**
+   * @private
+   */
+  async flush() {
+    for (const [root, path, obj] of this.filesToWrite) {
+      const resulting = Path.join(root, ...path);
+
+      try {
+        await FileSystem.mkdir(Path.dirname(resulting), {
+          recursive: true
+        });
+      } catch (error) {
+        console.warn(error);
+      }
+
+      await FileSystem.writeFile(
+        resulting,
+        obj
+          .map(to_structured_data)
+          .map((resolved) => resolved.write())
+          .join(`${EOL}---${EOL}`)
+      );
     }
-
-    await FileSystem.writeFile(
-      resulting,
-      obj
-        .map(to_structured_data)
-        .map((resolved) => resolved.write())
-        .join(`${EOL}---${EOL}`)
-    );
   }
 
-  private static buildVariablePath(variable: string, sep = '.'): string {
-    return variable.split('.').join(sep);
+  private static buildVariablePath(variable: string): string {
+    return toPath(variable).reduce((prev, part) => {
+      if (prev !== '' && Number.isInteger(Number(part))) {
+        return `(index ${prev} ${part})`;
+      }
+
+      return [prev, part].filter(Boolean).join('.');
+    }, '');
   }
 
-  @CachedFN(true)
-  async generateGlobalScope(contexts: Map<IWorkspace, ExtendedSchemaType>, context: ExtendedSchemaType, rootDirectory: string) {
+  @CachedFN(true, [false, true, true, true])
+  private async resolveVersion(name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
+    return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory);
+  }
+
+  /**
+   * @private
+   */
+  @CachedFN(true, [false, false, true, true])
+  async generateGlobalScope(packageManager: IExecutablePackageManager, rootDirectory: string) {
+    const context = this.helmFileGeneratorProvider.globalContext;
+    const contexts = this.helmFileGeneratorProvider.contexts;
+
     const ChartYAML = {
       apiVersion: 'v2',
       type: 'application',
       name: this.name,
-      version: this.version,
-      dependencies: [] as any[]
+      version: await this.resolveVersion(this.name, undefined, packageManager, rootDirectory),
+      dependencies: [] as any[] | undefined
     };
 
-    Object.entries(context.service ?? {})
-      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
-      .forEach(([name, service]) => {
-        if (service.is_local) {
-          ChartYAML.dependencies.push({
-            name: name,
-            version: this.version,
-            repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
+    await Promise.all(
+      Object.entries(context.service ?? {})
+        .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+        .map(async ([name, service]) => {
+          if (service.is_local) {
+            ChartYAML.dependencies!.push({
+              name: name,
+              version: await this.resolveVersion(name, undefined, packageManager, rootDirectory),
+              repository: `file://${Path.join('..', 'subcharts', service.workspace.getName().replaceAll('/', '__'))}`,
+              alias: name
+            });
+            return;
+          }
+
+          if (service.type !== 'global') {
+            return;
+          }
+
+          ChartYAML.dependencies!.push({
+            name: service.definition.origin.name,
+            version: service.definition.origin.version,
+            repository: service.definition.origin.repository,
             alias: name
           });
-          return;
-        }
+        })
+    );
 
-        if (service.type !== 'global') {
-          return;
-        }
-
-        ChartYAML.dependencies.push({
-          name: service.definition.origin.name,
-          version: service.definition.origin.version,
-          repository: service.definition.origin.repository,
-          alias: name
-        });
-      });
+    if (ChartYAML.dependencies!.length === 0) {
+      delete ChartYAML.dependencies;
+    }
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'Chart.yaml'], [ChartYAML]);
 
@@ -109,6 +151,7 @@ export class HelmGenerator implements IStep {
 
     allBindings.forEach(([key, resolved]) => {
       if ((resolved.is_global || resolved.external) && !resolved.static) {
+        set(valuesYAML, `${resolved.is_global && !resolved.external ? 'global.' : ''}${key}.${resolved.referenced}`, buildVariable(resolved, 'global'));
         set(valuesYAML, (resolved.is_global && !resolved.external ? 'global.' : '') + resolved.referenced, buildVariable(resolved, 'global'));
       }
     });
@@ -134,7 +177,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -153,7 +196,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -237,16 +280,14 @@ export class HelmGenerator implements IStep {
       return;
     }
 
-    await this.generateGlobalScope(this.helmFileGeneratorProvider.contexts, this.helmFileGeneratorProvider.globalContext, rootDirectory);
-
     const name = scopedContext.alias;
 
     const ChartYAML = {
       apiVersion: 'v2',
       type: 'application',
       name,
-      version: this.version,
-      dependencies: [] as any[]
+      version: await this.resolveVersion(name, workspace, packageManager, rootDirectory),
+      dependencies: [] as any[] | undefined
     };
 
     Object.entries(scopedContext?.service ?? {})
@@ -256,13 +297,19 @@ export class HelmGenerator implements IStep {
           return;
         }
 
-        ChartYAML.dependencies.push({
+        ChartYAML.dependencies!.push({
           name: v.definition.origin.name,
           version: v.definition.origin.version,
           repository: v.definition.origin.repository,
           alias: k
         });
       });
+
+    if (ChartYAML.dependencies!.length === 0) {
+      delete ChartYAML.dependencies;
+    } else {
+      this.helmPacker?.addPackage(workspace.getName().replaceAll('/', '__'));
+    }
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'Chart.yaml'], [ChartYAML]);
 
@@ -497,7 +544,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{.Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };
@@ -516,7 +563,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{ .Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced, '.')} | quote }}`)];
+            return [key, new RawToken(`{{ .Values.${value.is_global ? 'global.' : ''}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
           })
       )
     };

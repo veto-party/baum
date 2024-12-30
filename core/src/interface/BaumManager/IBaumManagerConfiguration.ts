@@ -9,4 +9,6 @@ export interface IBaumManagerConfiguration extends IBaumRegistrable {
   setRootDirectory(root: string): this;
   dontCopyLockFile(): this;
   setPackageManager(packageManager: IExecutablePackageManager): this;
+
+  isFailed(): boolean;
 }

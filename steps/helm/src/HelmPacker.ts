@@ -1,21 +1,27 @@
-import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import { CommandStep, GroupStep, type IExecutablePackageManager, type IStep, type IWorkspace, ParallelStep, RetryStep, RunOnce } from '@veto-party/baum__core';
 
+/**
+ * @internal
+ */
 @RunOnce()
 export class HelmPacker implements IStep {
+  private packages: string[] = [];
+
+  addPackage(name: string) {
+    this.packages.push(name);
+  }
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const subChartsDir = Path.join(rootDirectory, 'helm', 'subcharts');
 
-    const possibleSteps = await FileSystem.readdir(subChartsDir);
-
     const installSteps = new ParallelStep([]);
-    possibleSteps.forEach((chart) => {
+    this.packages.forEach((chart) => {
       installSteps.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new RetryStep(new CommandStep('helm dep update .', Path.join(subChartsDir, chart))));
     });
 
     const validationStep = new ParallelStep([]);
-    possibleSteps.forEach((chart) => {
+    this.packages.forEach((chart) => {
       validationStep.addExecutionStep(`Install helm -- ${JSON.stringify(chart)}`, new CommandStep('helm lint .', Path.join(subChartsDir, chart)));
     });
 

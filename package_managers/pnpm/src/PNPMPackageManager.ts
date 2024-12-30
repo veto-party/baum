@@ -27,7 +27,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
     let paths = [Path.join(rootDirectory, 'pnpm-workspace.yaml'), Path.join(OS.tmpdir(), `${hash}-pnpm-workspace.yaml-bak`)] as const;
 
     if (reversed) {
-      paths = paths.toReversed() as [string, string];
+      paths = [...paths].reverse() as [string, string];
     }
 
     await FileSystem.copyFile(...paths);

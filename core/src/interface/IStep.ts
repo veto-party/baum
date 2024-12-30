@@ -6,3 +6,7 @@ export interface IStep {
 
   clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void>;
 }
+
+export interface ISettableStep extends IStep {
+  setStep(stepWrapper: IStep): this;
+}

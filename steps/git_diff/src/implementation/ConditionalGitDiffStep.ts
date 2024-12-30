@@ -4,7 +4,7 @@ import { type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
 
-export class ConditionalGitDiffStep extends ConditionalStep {
+export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
   private diffMap = new Map<string, string[] | typeof skipped>();
 
   private async ensureGitDiff(root: string): Promise<string[] | typeof skipped> {
@@ -53,7 +53,7 @@ export class ConditionalGitDiffStep extends ConditionalStep {
   }
 
   constructor(
-    step: IStep,
+    step: IStep | undefined,
     private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
     private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {
@@ -67,5 +67,9 @@ export class ConditionalGitDiffStep extends ConditionalStep {
 
       return diff.some((file) => file.startsWith(path));
     });
+  }
+
+  clone(): ConditionalGitDiffStep {
+    return new ConditionalGitDiffStep(this.step, this.targetBranchGetter, this.dontSkipChangeChecks);
   }
 }

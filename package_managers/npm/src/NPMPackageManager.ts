@@ -38,7 +38,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
     let paths = [Path.join(rootDirectory, 'package.json'), Path.join(OS.tmpdir(), `${hash}-package.json-bak`)] as const;
 
     if (reversed) {
-      paths = paths.toReversed() as [string, string];
+      paths = [...paths].reverse() as [string, string];
     }
 
     await FileSystem.copyFile(...paths);
