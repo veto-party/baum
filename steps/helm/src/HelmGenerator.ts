@@ -72,7 +72,7 @@ export class HelmGenerator implements IStep {
     let firstOccurence = '.';
 
     const newPath = toPath(variable.substring(1)).reduce((prev, part) => {
-      if (prev !== '' && Number.isInteger(Number(part)) && Number.isFinite(Number(part))) {
+      if (prev !== '' && Number.isInteger(Number(part)) && Number.isFinite(Number(part)) && part !== '') {
         const result = `(index ${firstOccurence}${prev} ${part})`;
         firstOccurence = '';
         return result;
