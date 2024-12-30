@@ -2,7 +2,7 @@ import FileSystem from 'node:fs/promises';
 import { EOL } from 'node:os';
 import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
-import lodash from 'lodash';
+import lodash, { first } from 'lodash';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import type { HelmPacker } from './HelmPacker.js';
@@ -68,6 +68,7 @@ export class HelmGenerator implements IStep {
   }
 
   private static buildVariablePath(variable: string): string {
+
     let firstOccurence = '.';
 
     const newPath = toPath(variable.substring(1)).reduce((prev, part) => {
@@ -208,7 +209,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{.Values.${value.external ? '' : 'global.'}${HelmGenerator.buildVariablePath(value.referenced)} | quote }}`)];
+            return [key, new RawToken(`{{ ${HelmGenerator.buildVariablePath(`.Values.${value.external ? '' : 'global.'}${value.referenced}`)} | quote }}`)];
           })
       )
     };
@@ -575,7 +576,7 @@ export class HelmGenerator implements IStep {
         allBindings
           .filter(([, value]) => !value.static && !value.secret && !value.is_global)
           .map(([key, value]) => {
-            return [key, new RawToken(`{{  ${HelmGenerator.buildVariablePath(`.Values.${value.is_global ? 'global.' : ''}.${value.referenced}`)} | quote }}`)];
+            return [key, new RawToken(`{{ ${HelmGenerator.buildVariablePath(`.Values.${value.is_global ? 'global.' : ''}.${value.referenced}`)} | quote }}`)];
           })
       )
     };
