@@ -2,7 +2,7 @@ import FileSystem from 'node:fs/promises';
 import { EOL } from 'node:os';
 import Path from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
-import lodash, { first } from 'lodash';
+import lodash from 'lodash';
 import set from 'lodash.set';
 import type { ExtendedSchemaType, HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import type { HelmPacker } from './HelmPacker.js';
@@ -68,7 +68,6 @@ export class HelmGenerator implements IStep {
   }
 
   private static buildVariablePath(variable: string): string {
-
     let firstOccurence = '.';
 
     const newPath = toPath(variable.substring(1)).reduce((prev, part) => {
