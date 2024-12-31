@@ -17,8 +17,8 @@ export type ExtendedSchemaType = {
     string,
     Omit<Exclude<SchemaType['job'], undefined>[string], 'variable'> & {
       workspace: IWorkspace;
-      variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
-      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string } | { ref?: undefined; sourcePath: string })>;
+      variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined; } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
+      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined; } | { ref?: undefined; sourcePath: string })>;
     }
   >;
   service?: Record<
@@ -319,8 +319,41 @@ export class HelmGeneratorProvider implements IStep {
             external: true
           });
 
+           // Put unbound copy into global scope to make sure that we pull the correct variables.
+           if (helmFile?.is_service && service.type !== 'global') {
+            environment.global.variable[`${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}`] = {
+              ...v,
+              sourcePath: workspace.getDirectory(),
+              type: 'global',
+              binding: {},
+              static: false,
+              external: true
+            };
+
+            environment.scoped.variable[`${realDefinitionName ?? definitionName}.${k}`] = {
+              ...v,
+              // is_global: false,
+              sourcePath: workspace.getDirectory(),
+              type: 'scoped',
+              binding: (v as any).binding,
+              static: false,
+              external: true
+            };
+
+            // cloned.type = 'scoped';
+            cloned = {
+              // type: 'scoped',
+              // binding: (v as any).binding,
+              // external: true,
+              // sourcePath: workspace.getDirectory(),
+              // case: v.case,
+              
+              ref: `${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}` 
+            };
+          }
+
           if (realDefinitionName) {
-            refTarget.variable[`${realDefinitionName}.${k}`] = cloneDeep(cloned);
+            refTarget.variable[`${realDefinitionName}.${k}`] ??= cloneDeep(cloned);
             cloned = {
               ref: `${realDefinitionName}.${k}`
             };
@@ -329,20 +362,10 @@ export class HelmGeneratorProvider implements IStep {
           const refString = `${definitionName}.${k}`;
           refTarget.__scope ??= {};
 
-          // Put unbound copy into global scope to make sure that we pull the correct variables.
-          if (environment.scoped.is_service && service.type !== 'global') {
-            environment.global.variable[`${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}`] = {
-              ...v,
-              sourcePath: workspace.getDirectory(),
-              type: 'global',
-              binding: {},
-              external: true
-            };
-          }
           // environment.global.binding ??= {};
           // environment.global.binding[refString] = refString;
 
-          refTarget.__scope[`${definitionName}.environment.${k}`] = {
+          refTarget.__scope[`${definitionName}.environment.${k}`] ??= {
             ref: refString
           };
           refTarget.variable[refString] = cloned;
@@ -355,7 +378,7 @@ export class HelmGeneratorProvider implements IStep {
         }
 
         const scopedKey = `${realDefinitionName ?? definitionName}.${service.origin_name_var}`;
-        refTarget.variable[scopedKey] = {
+        refTarget.variable[scopedKey] ??= {
           type: 'scoped',
           default: scopedDefinitionName.replaceAll('_', '-'),
           sourcePath: workspace.getDirectory(),
@@ -364,7 +387,7 @@ export class HelmGeneratorProvider implements IStep {
 
         if (realDefinitionName) {
           refTarget.__scope ??= {};
-          refTarget.__scope[`${definitionName}.${service.origin_name_var}`] = {
+          refTarget.__scope[`${definitionName}.${service.origin_name_var}`] ??= {
             ref: scopedKey
           };
         }
