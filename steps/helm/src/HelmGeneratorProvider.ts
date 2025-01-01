@@ -17,8 +17,8 @@ export type ExtendedSchemaType = {
     string,
     Omit<Exclude<SchemaType['job'], undefined>[string], 'variable'> & {
       workspace: IWorkspace;
-      variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined; } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
-      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined; } | { ref?: undefined; sourcePath: string })>;
+      variable: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined } | { ref?: undefined; sourcePath: string }) & { external?: boolean }>;
+      __scope?: Record<string, Partial<Exclude<SchemaType['variable'], undefined>[string]> & ({ ref: string; sourcePath?: undefined } | { ref?: undefined; sourcePath: string })>;
     }
   >;
   service?: Record<
@@ -319,8 +319,8 @@ export class HelmGeneratorProvider implements IStep {
             external: true
           });
 
-           // Put unbound copy into global scope to make sure that we pull the correct variables.
-           if (helmFile?.is_service && service.type !== 'global') {
+          // Put unbound copy into global scope to make sure that we pull the correct variables.
+          if (helmFile?.is_service && service.type !== 'global') {
             environment.global.variable[`${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}`] = {
               ...v,
               sourcePath: workspace.getDirectory(),
@@ -347,8 +347,8 @@ export class HelmGeneratorProvider implements IStep {
               // external: true,
               // sourcePath: workspace.getDirectory(),
               // case: v.case,
-              
-              ref: `${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}` 
+
+              ref: `${this.getAlias(workspace, root)}.${realDefinitionName ?? definitionName}.${k}`
             };
           }
 
