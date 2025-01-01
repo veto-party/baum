@@ -669,9 +669,12 @@ export class HelmGenerator implements IStep {
           type: 'Resource',
           resource: {
             name: key,
-            target: {
+            target: value.type === "AverageValue" ? {
               type: value.type,
               averageValue: value.average
+            } : {
+              type: value.type,
+              averageUtilization: value.average
             }
           }
         }))
