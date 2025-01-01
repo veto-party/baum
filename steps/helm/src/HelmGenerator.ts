@@ -435,10 +435,10 @@ export class HelmGenerator implements IStep {
               }
             ],
             middlewares: [
-              {
+              exposed.doNotStripPrefix ? false as const : {
                 name: `${name.replaceAll('_', '-')}-${port}-strip-prefix`
               }
-            ]
+            ].filter((middleware) => middleware !== false)
           }))
       }
     };
