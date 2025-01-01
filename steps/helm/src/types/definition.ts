@@ -277,7 +277,7 @@ export const definitions = asConst({
               additionalProperties: false
             },
             binding: bindingDefinition,
-            variable: variableDefinition,
+            variable: variableDefinition
           },
           required: ['type'],
           additionalProperties: false
