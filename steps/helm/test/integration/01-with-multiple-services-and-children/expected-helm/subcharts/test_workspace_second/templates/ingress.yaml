@@ -1,0 +1,68 @@
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata": 
+  "name": "test-workspace-second-187-strip-prefix"
+  
+"spec": 
+  "stripPrefix": 
+    "prefixes": 
+      
+      - undefined
+    
+  
+
+---
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata": 
+  "name": "test-workspace-second-187-cors"
+  
+"spec": 
+  "headers": 
+    "accessControlAllowMethods": 
+      
+      - "*"
+    "accessControlAllowHeaders": 
+      
+      - "*"
+    "accessControlAllowOriginList": 
+      
+      - ""{{.Values.global.host.domain}}
+      
+      - "examlple.com"
+      
+      - "someprefix"{{.Values.global.host.domain}}
+    "accessControlMaxAge": 100
+    "addVaryHeader": true
+    
+  
+
+---
+"apiVersion": "traefik.containo.us/v1alpha1"
+"kind": "IngressRoute"
+"metadata": 
+  "name": "test-workspace-second--veto-ingress"
+  
+"spec": 
+  "entryPoints": 
+    
+    - "websecure"
+  "routes": 
+    
+    - "kind": "Rule"
+      "match": Host(`undefined{{.Values.global.host.domain}}`) && PathPrefix(`undefined`)
+      "services": 
+        
+        - "name": "test-workspace-second-ext"
+          "port": 187
+          "passHostHeader": true
+          
+      "middlewares": 
+        
+        - "name": "test-workspace-second-187-strip-prefix"
+          
+        
+        - "name": "test-workspace-second-187-cors"
+          
+      
+  

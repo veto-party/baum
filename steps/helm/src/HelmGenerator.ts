@@ -442,7 +442,7 @@ export class HelmGenerator implements IStep {
 
         const options: any[] = [];
 
-        const relativeDomain = (domain: string) => new RawToken(`"${domain}"{{.Values.global.host.domain}}`)
+        const relativeDomain = (domain: string) => new RawToken(`"${domain}{{ .Values.global.host.domain }}"`)
 
         if (cors?.self) {
           options.push(relativeDomain(domainPrefix ?? ''));

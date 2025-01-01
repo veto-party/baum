@@ -16,6 +16,7 @@
         - "name": "test-workspace-second-duap0fh7-depl"
           "image": "test_workspace_second"
           "ports":
+            - "containerPort": 187
           "env":
             - "name": "test_service_relation"
               "value": "${test}"
