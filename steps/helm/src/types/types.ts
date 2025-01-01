@@ -8,7 +8,10 @@ const ajv = new Ajv.default({
 
 export const schema = ajv.compile<SchemaType>(definitions);
 
-export type SchemaType = FromSchema<typeof definitions>;
+export type SchemaType = FromSchema<
+  typeof definitions, 
+  { parseIfThenElseKeywords: true }
+>;
 
 // TODO: Move flags into expose (some of them). e.G. sticky session should be for every expose.
 // TODO: Add option to enable and disable children / other elements from specific modules? (Currently not required but nice to have)

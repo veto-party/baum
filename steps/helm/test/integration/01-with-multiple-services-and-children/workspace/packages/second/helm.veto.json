@@ -12,5 +12,19 @@
   },
   "binding": {
     "test_service_relation": "my_service_relation"
+  },
+  "expose": {
+    "187": {
+      "type": "load-balancer",
+      "cors": {
+        "self": true,
+        "origins": [{
+          "source": "examlple.com"
+        }, {
+          "relative": true,
+          "source": "someprefix"
+        }]
+      }
+    }
   }
 }

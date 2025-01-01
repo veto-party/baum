@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@veto-party/baum__core": "*",
-    "json-schema-to-ts": "^3.0.1",
+    "json-schema-to-ts": "^3.1.1",
     "lodash.set": "^4.3.2",
     "lodash.isequal": "^4.5.0",
     "lodash.has": "4.5.2",
