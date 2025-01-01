@@ -661,7 +661,7 @@ export class HelmGenerator implements IStep {
         scaleTargetRef: {
           apiVersion: 'apps/v1',
           kind: 'Deployment',
-          name: `${name.replaceAll('_', '-')}-${getHash(this.dockerFileGenerator(workspace))}-depl`
+          name: `${name.replaceAll('_', '-')}-depl`
         },
         minReplicas: scopedContext.scaling?.minPods ?? 1,
         maxReplicas: scopedContext.scaling?.maxPods,
