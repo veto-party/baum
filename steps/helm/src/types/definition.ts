@@ -17,20 +17,22 @@ const defaultObjectTypes = {
   ]
 } as const;
 
-const variableDefinitionPattern = '^[a-z0-9_]*$';
+const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]]*$';
+const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
+const definitionDefinionPattern = '^[a-z0-9_]*$'
 
 const bindingDefinition = {
   type: 'object',
   patternProperties: {
     '.*': {
       type: 'string',
-      pattern: variableDefinitionPattern
+      pattern: variableAccessorPattern
     }
   },
   additionalProperties: false
 } as const;
 
-const variableTypes = {
+const generateVariableTypes = (type_required = true) => ({
   type: 'object',
   properties: {
     type: {
@@ -56,7 +58,7 @@ const variableTypes = {
     },
     binding: bindingDefinition
   },
-  required: ['type'],
+  required: type_required ? ['type'] as const : [],
   additionalProperties: false,
   if: {
     properties: {
@@ -70,15 +72,7 @@ const variableTypes = {
       required: ['static', 'secret', 'default', 'case', 'binding']
     }
   }
-} as const;
-
-const variableDefinition = {
-  type: 'object',
-  patternProperties: {
-    [variableDefinitionPattern]: variableTypes
-  },
-  additionalProperties: false
-} as const;
+} as const);
 
 export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
@@ -185,12 +179,18 @@ export const definitions = asConst({
     alias: {
       type: 'string'
     },
-    variable: variableDefinition,
+    variable: {
+      type: 'object',
+      patternProperties: {
+        [variableDefinitionPattern]: generateVariableTypes(true)
+      },
+      additionalProperties: false
+    },
     binding: bindingDefinition,
     service: {
       type: 'object',
       patternProperties: {
-        [variableDefinitionPattern]: {
+        [definitionDefinionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -240,7 +240,7 @@ export const definitions = asConst({
             environment: {
               type: 'object',
               patternProperties: {
-                '.*': variableTypes
+                '.*': generateVariableTypes(false)
               },
               additionalProperties: false
             },
@@ -257,7 +257,7 @@ export const definitions = asConst({
     job: {
       type: 'object',
       patternProperties: {
-        [variableDefinitionPattern]: {
+        [definitionDefinionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -277,7 +277,13 @@ export const definitions = asConst({
               additionalProperties: false
             },
             binding: bindingDefinition,
-            variable: variableDefinition
+            variable: {
+              type: 'object',
+              patternProperties: {
+                [variableDefinitionPattern]: generateVariableTypes(false),
+              },
+              additionalProperties: false
+            }
           },
           required: ['type'],
           additionalProperties: false
