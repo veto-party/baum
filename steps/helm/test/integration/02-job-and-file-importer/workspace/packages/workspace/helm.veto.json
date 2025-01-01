@@ -31,7 +31,7 @@
     }
   },
   "job": {
-    "sql-default-migration": {
+    "sql_default_migration": {
       "type": "scoped",
       "definition": {
         "on": "post-install, post-upgrade",
