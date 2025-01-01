@@ -19,9 +19,21 @@
       "cors": {
         "self": true,
         "origins": [{
-          "source": "examlple.com"
+          "source": "example.com"
         }, {
           "relative": true,
+          "source": "someprefix"
+        }]
+      }
+    },
+    "2000": {
+      "type": "load-balancer",
+      "cors": {
+        "self": false,
+        "origins": [{
+          "source": "example.com"
+        }, {
+          "relaitve": true,
           "source": "someprefix"
         }]
       }
