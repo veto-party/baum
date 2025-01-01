@@ -17,7 +17,7 @@ const defaultObjectTypes = {
   ]
 } as const;
 
-const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]]*$';
+const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]\\-]*$';
 const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
 const definitionDefinionPattern = '^[a-z0-9_]*$';
 
