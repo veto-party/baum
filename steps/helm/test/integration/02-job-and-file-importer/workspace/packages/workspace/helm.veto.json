@@ -42,7 +42,7 @@
         "DATABASE_ADDRESS": "global_database.origin_name_var"
       }
     },
-    "backup-sql": {
+    "backup_sql": {
       "type": "global",
       "definition": {
         "on": "pre-upgrade",
