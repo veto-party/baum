@@ -298,6 +298,9 @@ export const definitions = asConst({
             path: {
               type: 'string'
             },
+            doNotStripPrefix: {
+              type: 'boolean'
+            },
             domainPrefix: {
               type: 'string'
             }

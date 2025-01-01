@@ -400,7 +400,7 @@ export class HelmGenerator implements IStep {
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'service.yaml'], [serviceYAMLInternal.spec.ports.length > 0 ? serviceYAMLInternal : undefined, serviceYAMLExternal.spec.ports.length > 0 ? serviceYAMLExternal : undefined].filter(Boolean));
 
     const ingressYAMLStripPrefixes = Object.entries(scopedContext?.expose ?? {})
-      .filter(([, exposed]) => exposed.type === 'load-balancer')
+      .filter(([, exposed]) => exposed.type === 'load-balancer' && !exposed.doNotStripPrefix)
       .map(([port, lbType]) => ({
         apiVersion: 'traefik.io/v1alpha1',
         kind: 'Middleware',
