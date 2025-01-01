@@ -588,7 +588,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
-        name: `${name.replaceAll('_', '-')}-${key}`,
+        name: `${name.replaceAll('_', '-')}-${key.replaceAll('_', '-')}`,
         annotations: {
           'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
           'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
@@ -600,7 +600,7 @@ export class HelmGenerator implements IStep {
             restartPolicy: 'OnFailure',
             containers: [
               {
-                name: `${key}-container`,
+                name: `${key.replaceAll('_', '-')}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
                   if (resolved.static) {
