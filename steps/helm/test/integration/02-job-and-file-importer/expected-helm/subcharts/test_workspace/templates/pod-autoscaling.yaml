@@ -6,7 +6,7 @@
   "scaleTargetRef":
     "apiVersion": "apps/v1"
     "kind": "Deployment"
-    "name": "test-workspace-frhlijri-depl"
+    "name": "test-workspace-depl"
   "minReplicas": 1
   "maxReplicas": 1000
   "metrics":
