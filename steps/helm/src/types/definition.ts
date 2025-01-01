@@ -30,50 +30,52 @@ const bindingDefinition = {
   additionalProperties: false
 } as const;
 
+const variableTypes = {
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+      enum: ['global', 'scoped', 'scoped-name']
+    },
+    case: {
+      type: 'string',
+      enum: ['snake']
+    },
+    static: {
+      type: 'boolean'
+    },
+    secret: {
+      type: 'boolean'
+    },
+    default: defaultObjectTypes,
+    generated: {
+      type: 'number'
+    },
+    file: {
+      type: 'string'
+    },
+    binding: bindingDefinition
+  },
+  required: ['type'],
+  additionalProperties: false,
+  if: {
+    properties: {
+      type: {
+        const: 'scoped-name'
+      }
+    }
+  },
+  then: {
+    not: {
+      required: ['static', 'secret', 'default', 'case', 'binding']
+    }
+  }
+} as const;
+
 const variableDefinition = {
   type: 'object',
   patternProperties: {
-    [variableDefinitionPattern]: {
-      type: 'object',
-      properties: {
-        type: {
-          type: 'string',
-          enum: ['global', 'scoped', 'scoped-name']
-        },
-        case: {
-          type: 'string',
-          enum: ['snake']
-        },
-        static: {
-          type: 'boolean'
-        },
-        secret: {
-          type: 'boolean'
-        },
-        default: defaultObjectTypes,
-        generated: {
-          type: 'number'
-        },
-        file: {
-          type: 'string'
-        },
-        binding: bindingDefinition
-      },
-      required: ['type'],
-      additionalProperties: false,
-      if: {
-        properties: {
-          type: {
-            const: 'scoped-name'
-          }
-        }
-      },
-      then: {
-        not: {
-          required: ['static', 'secret', 'default', 'case', 'binding']
-        }
-      }
-    }
+    [variableDefinitionPattern]: variableTypes
   },
   additionalProperties: false
 } as const;
@@ -188,7 +190,7 @@ export const definitions = asConst({
     service: {
       type: 'object',
       patternProperties: {
-        '^[a-z0-9_]*$': {
+        [variableDefinitionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -238,23 +240,7 @@ export const definitions = asConst({
             environment: {
               type: 'object',
               patternProperties: {
-                '.*': {
-                  type: 'object',
-                  properties: {
-                    default: defaultObjectTypes,
-                    type: {
-                      type: 'string',
-                      enum: ['global', 'scoped', 'scoped-name']
-                    },
-                    generated: {
-                      type: 'number'
-                    },
-                    file: {
-                      type: 'string'
-                    }
-                  },
-                  additionalProperties: false
-                }
+                '.*': variableTypes
               },
               additionalProperties: false
             },
@@ -271,7 +257,7 @@ export const definitions = asConst({
     job: {
       type: 'object',
       patternProperties: {
-        '.*': {
+        [variableDefinitionPattern]: {
           type: 'object',
           properties: {
             type: {
