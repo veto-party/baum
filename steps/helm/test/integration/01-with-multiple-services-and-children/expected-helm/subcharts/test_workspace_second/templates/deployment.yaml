@@ -13,7 +13,7 @@
         "app": "test-workspace-second-depl"
     "spec":
       "containers":
-        - "name": "test_workspace_second-duap0fh7-depl"
+        - "name": "test-workspace-second-duap0fh7-depl"
           "image": "test_workspace_second"
           "ports":
           "env":

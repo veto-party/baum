@@ -221,7 +221,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
-        name: `global-${key}`,
+        name: `global-${key.replaceAll('_', '-')}`,
         annotations: {
           'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
           'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
@@ -233,7 +233,7 @@ export class HelmGenerator implements IStep {
             restartPolicy: 'OnFailure',
             containers: [
               {
-                name: `${key}-container`,
+                name: `${key.replaceAll('_', '-')}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
                   if (resolved.static) {
@@ -400,7 +400,7 @@ export class HelmGenerator implements IStep {
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'service.yaml'], [serviceYAMLInternal.spec.ports.length > 0 ? serviceYAMLInternal : undefined, serviceYAMLExternal.spec.ports.length > 0 ? serviceYAMLExternal : undefined].filter(Boolean));
 
     const ingressYAMLStripPrefixes = Object.entries(scopedContext?.expose ?? {})
-      .filter(([, exposed]) => exposed.type === 'load-balancer')
+      .filter(([, exposed]) => exposed.type === 'load-balancer' && !exposed.doNotStripPrefix)
       .map(([port, lbType]) => ({
         apiVersion: 'traefik.io/v1alpha1',
         kind: 'Middleware',
@@ -477,7 +477,7 @@ export class HelmGenerator implements IStep {
           spec: {
             containers: [
               {
-                name: `${name}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
+                name: `${name.replaceAll('_', '-')}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
                 image: this.dockerFileGenerator(workspace),
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                   containerPort: Number(port)
@@ -588,7 +588,7 @@ export class HelmGenerator implements IStep {
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
-        name: `${name.replaceAll('_', '-')}-${key}`,
+        name: `${name.replaceAll('_', '-')}-${key.replaceAll('_', '-')}`,
         annotations: {
           'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
           'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
@@ -600,7 +600,7 @@ export class HelmGenerator implements IStep {
             restartPolicy: 'OnFailure',
             containers: [
               {
-                name: `${key}-container`,
+                name: `${key.replaceAll('_', '-')}-container`,
                 image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
                   if (resolved.static) {
@@ -669,10 +669,16 @@ export class HelmGenerator implements IStep {
           type: 'Resource',
           resource: {
             name: key,
-            target: {
-              type: value.type,
-              averageValue: value.average
-            }
+            target:
+              value.type === 'AverageValue'
+                ? {
+                    type: value.type,
+                    averageValue: value.average
+                  }
+                : {
+                    type: value.type,
+                    averageUtilization: value.average
+                  }
           }
         }))
       }

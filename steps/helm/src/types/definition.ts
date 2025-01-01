@@ -1,5 +1,80 @@
 import { asConst } from 'json-schema-to-ts';
 
+const defaultObjectTypes = {
+  anyOf: [
+    {
+      type: 'boolean'
+    },
+    {
+      type: 'string'
+    },
+    {
+      type: 'number'
+    },
+    {
+      type: 'object'
+    }
+  ]
+} as const;
+
+const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]]*$';
+const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
+const definitionDefinionPattern = '^[a-z0-9_]*$';
+
+const bindingDefinition = {
+  type: 'object',
+  patternProperties: {
+    '.*': {
+      type: 'string',
+      pattern: variableAccessorPattern
+    }
+  },
+  additionalProperties: false
+} as const;
+
+const generateVariableTypes = (type_required = true) =>
+  ({
+    type: 'object',
+    properties: {
+      type: {
+        type: 'string',
+        enum: ['global', 'scoped', 'scoped-name']
+      },
+      case: {
+        type: 'string',
+        enum: ['snake']
+      },
+      static: {
+        type: 'boolean'
+      },
+      secret: {
+        type: 'boolean'
+      },
+      default: defaultObjectTypes,
+      generated: {
+        type: 'number'
+      },
+      file: {
+        type: 'string'
+      },
+      binding: bindingDefinition
+    },
+    required: type_required ? (['type'] as const) : [],
+    additionalProperties: false,
+    if: {
+      properties: {
+        type: {
+          const: 'scoped-name'
+        }
+      }
+    },
+    then: {
+      not: {
+        required: ['static', 'secret', 'default', 'case', 'binding']
+      }
+    }
+  }) as const;
+
 export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
   type: 'object',
@@ -108,74 +183,15 @@ export const definitions = asConst({
     variable: {
       type: 'object',
       patternProperties: {
-        '^[a-z0-9_]*$': {
-          type: 'object',
-          properties: {
-            type: {
-              type: 'string',
-              enum: ['global', 'scoped', 'scoped-name']
-            },
-            case: {
-              type: 'string',
-              enum: ['snake']
-            },
-            static: {
-              type: 'boolean'
-            },
-            secret: {
-              type: 'boolean'
-            },
-            default: {
-              anyOf: [
-                {
-                  type: 'boolean'
-                },
-                {
-                  type: 'string'
-                },
-                {
-                  type: 'number'
-                }
-              ]
-            },
-            generated: {
-              type: 'number'
-            },
-            file: {
-              type: 'string'
-            },
-            binding: {
-              type: 'object',
-              patternProperties: {
-                '.*': {
-                  type: 'string'
-                }
-              },
-              additionalProperties: false
-            }
-          },
-          required: ['type'],
-          additionalProperties: false,
-          if: {
-            properties: {
-              type: {
-                const: 'scoped-name'
-              }
-            }
-          },
-          then: {
-            not: {
-              required: ['static', 'secret', 'default', 'case']
-            }
-          }
-        }
+        [variableDefinitionPattern]: generateVariableTypes(true)
       },
       additionalProperties: false
     },
+    binding: bindingDefinition,
     service: {
       type: 'object',
       patternProperties: {
-        '^[a-z0-9_]*$': {
+        [definitionDefinionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -225,35 +241,7 @@ export const definitions = asConst({
             environment: {
               type: 'object',
               patternProperties: {
-                '.*': {
-                  type: 'object',
-                  properties: {
-                    default: {
-                      anyOf: [
-                        {
-                          type: 'boolean'
-                        },
-                        {
-                          type: 'string'
-                        },
-                        {
-                          type: 'number'
-                        }
-                      ]
-                    },
-                    type: {
-                      type: 'string',
-                      enum: ['global', 'scoped', 'scoped-name']
-                    },
-                    generated: {
-                      type: 'number'
-                    },
-                    file: {
-                      type: 'string'
-                    }
-                  },
-                  additionalProperties: false
-                }
+                '.*': generateVariableTypes(false)
               },
               additionalProperties: false
             },
@@ -270,7 +258,7 @@ export const definitions = asConst({
     job: {
       type: 'object',
       patternProperties: {
-        '.*': {
+        [definitionDefinionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -289,95 +277,17 @@ export const definitions = asConst({
               },
               additionalProperties: false
             },
+            binding: bindingDefinition,
             variable: {
               type: 'object',
               patternProperties: {
-                '^[a-z0-9_]*$': {
-                  type: 'object',
-                  properties: {
-                    type: {
-                      type: 'string',
-                      enum: ['global', 'scoped', 'scoped-name']
-                    },
-                    case: {
-                      type: 'string',
-                      enum: ['snake']
-                    },
-                    static: {
-                      type: 'boolean'
-                    },
-                    secret: {
-                      type: 'boolean'
-                    },
-                    default: {
-                      anyOf: [
-                        {
-                          type: 'boolean'
-                        },
-                        {
-                          type: 'string'
-                        },
-                        {
-                          type: 'number'
-                        }
-                      ]
-                    },
-                    generated: {
-                      type: 'number'
-                    },
-                    file: {
-                      type: 'string'
-                    },
-                    binding: {
-                      type: 'object',
-                      patternProperties: {
-                        '.*': {
-                          type: 'string'
-                        }
-                      },
-                      additionalProperties: false
-                    }
-                  },
-                  required: ['type'],
-                  additionalProperties: false,
-                  if: {
-                    properties: {
-                      type: {
-                        const: 'scoped-name'
-                      }
-                    }
-                  },
-                  then: {
-                    not: {
-                      required: ['static', 'secret', 'default', 'case']
-                    }
-                  }
-                }
-              },
-              additionalProperties: false
-            },
-            binding: {
-              type: 'object',
-              patternProperties: {
-                '.*': {
-                  type: 'string'
-                }
+                [variableDefinitionPattern]: generateVariableTypes(false)
               },
               additionalProperties: false
             }
           },
           required: ['type'],
           additionalProperties: false
-        }
-      },
-      additionalProperties: false
-    },
-    binding: {
-      type: 'object',
-      patternProperties: {
-        '.*': {
-          type: 'string',
-          pattern: '^[a-z0-9_]*$'
         }
       },
       additionalProperties: false
@@ -394,6 +304,9 @@ export const definitions = asConst({
             },
             path: {
               type: 'string'
+            },
+            doNotStripPrefix: {
+              type: 'boolean'
             },
             domainPrefix: {
               type: 'string'

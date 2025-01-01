@@ -13,7 +13,7 @@
         "app": "test-workspace-depl"
     "spec":
       "containers":
-        - "name": "test_workspace-frhlijri-depl"
+        - "name": "test-workspace-frhlijri-depl"
           "image": "test_workspace"
           "ports":
             - "containerPort": 80

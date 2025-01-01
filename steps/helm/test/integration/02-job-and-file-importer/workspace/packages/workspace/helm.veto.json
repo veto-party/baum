@@ -31,7 +31,7 @@
     }
   },
   "job": {
-    "sql-default-migration": {
+    "sql_default_migration": {
       "type": "scoped",
       "definition": {
         "on": "post-install, post-upgrade",
@@ -42,7 +42,7 @@
         "DATABASE_ADDRESS": "global_database.origin_name_var"
       }
     },
-    "backup-sql": {
+    "backup_sql": {
       "type": "global",
       "definition": {
         "on": "pre-upgrade",

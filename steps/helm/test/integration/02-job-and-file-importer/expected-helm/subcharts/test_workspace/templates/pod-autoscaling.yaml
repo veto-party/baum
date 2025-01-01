@@ -21,4 +21,4 @@
         "name": "02"
         "target":
           "type": "Utilization"
-          "averageValue": "0.25"
+          "averageUtilization": "0.25"
