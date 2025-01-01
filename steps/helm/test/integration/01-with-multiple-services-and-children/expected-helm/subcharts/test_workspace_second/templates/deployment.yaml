@@ -17,6 +17,7 @@
           "image": "test_workspace_second"
           "ports":
             - "containerPort": 187
+            - "containerPort": 2000
           "env":
             - "name": "test_service_relation"
               "value": "${test}"

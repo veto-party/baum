@@ -1,68 +1,77 @@
 "apiVersion": "traefik.io/v1alpha1"
 "kind": "Middleware"
-"metadata": 
+"metadata":
   "name": "test-workspace-second-187-strip-prefix"
-  
-"spec": 
-  "stripPrefix": 
-    "prefixes": 
-      
+"spec":
+  "stripPrefix":
+    "prefixes":
       - undefined
-    
-  
-
 ---
 "apiVersion": "traefik.io/v1alpha1"
 "kind": "Middleware"
-"metadata": 
+"metadata":
+  "name": "test-workspace-second-2000-strip-prefix"
+"spec":
+  "stripPrefix":
+    "prefixes":
+      - undefined
+---
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata":
   "name": "test-workspace-second-187-cors"
-  
-"spec": 
-  "headers": 
-    "accessControlAllowMethods": 
-      
+"spec":
+  "headers":
+    "accessControlAllowMethods":
       - "*"
-    "accessControlAllowHeaders": 
-      
+    "accessControlAllowHeaders":
       - "*"
-    "accessControlAllowOriginList": 
-      
-      - ""{{.Values.global.host.domain}}
-      
-      - "examlple.com"
-      
-      - "someprefix"{{.Values.global.host.domain}}
+    "accessControlAllowOriginList":
+      - "{{ .Values.global.host.domain }}"
+      - "example.com"
+      - "someprefix{{ .Values.global.host.domain }}"
     "accessControlMaxAge": 100
     "addVaryHeader": true
-    
-  
-
+---
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata":
+  "name": "test-workspace-second-2000-cors"
+"spec":
+  "headers":
+    "accessControlAllowMethods":
+      - "*"
+    "accessControlAllowHeaders":
+      - "*"
+    "accessControlAllowOriginList":
+      - "example.com"
+      - "someprefix"
+    "accessControlMaxAge": 100
+    "addVaryHeader": true
 ---
 "apiVersion": "traefik.containo.us/v1alpha1"
 "kind": "IngressRoute"
-"metadata": 
+"metadata":
   "name": "test-workspace-second--veto-ingress"
-  
-"spec": 
-  "entryPoints": 
-    
+"spec":
+  "entryPoints":
     - "websecure"
-  "routes": 
-    
+  "routes":
     - "kind": "Rule"
       "match": Host(`undefined{{.Values.global.host.domain}}`) && PathPrefix(`undefined`)
-      "services": 
-        
+      "services":
         - "name": "test-workspace-second-ext"
           "port": 187
           "passHostHeader": true
-          
-      "middlewares": 
-        
+      "middlewares":
         - "name": "test-workspace-second-187-strip-prefix"
-          
-        
         - "name": "test-workspace-second-187-cors"
-          
-      
-  
+    - "kind": "Rule"
+      "match": Host(`undefined{{.Values.global.host.domain}}`) && PathPrefix(`undefined`)
+      "services":
+        - "name": "test-workspace-second-ext"
+          "port": 2000
+          "passHostHeader": true
+      "middlewares":
+        - "name": "test-workspace-second-2000-strip-prefix"
+        - "name": "test-workspace-second-2000-cors"

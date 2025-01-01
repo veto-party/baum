@@ -1,18 +1,17 @@
 "apiVersion": "v1"
 "kind": "Service"
-"metadata": 
+"metadata":
   "name": "test-workspace-second-ext"
-  
-"spec": 
-  "selector": 
+"spec":
+  "selector":
     "app": "test-workspace-second-depl"
-    
   "type": "ClusterIP"
-  "ports": 
-    
+  "ports":
     - "name": "test-workspace-second-187"
       "protocol": "TCP"
       "port": 187
       "targetPort": 187
-      
-  
+    - "name": "test-workspace-second-2000"
+      "protocol": "TCP"
+      "port": 2000
+      "targetPort": 2000
