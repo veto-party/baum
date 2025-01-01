@@ -19,7 +19,7 @@ const defaultObjectTypes = {
 
 const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]]*$';
 const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
-const definitionDefinionPattern = '^[a-z0-9_]*$'
+const definitionDefinionPattern = '^[a-z0-9_]*$';
 
 const bindingDefinition = {
   type: 'object',
@@ -32,47 +32,48 @@ const bindingDefinition = {
   additionalProperties: false
 } as const;
 
-const generateVariableTypes = (type_required = true) => ({
-  type: 'object',
-  properties: {
-    type: {
-      type: 'string',
-      enum: ['global', 'scoped', 'scoped-name']
-    },
-    case: {
-      type: 'string',
-      enum: ['snake']
-    },
-    static: {
-      type: 'boolean'
-    },
-    secret: {
-      type: 'boolean'
-    },
-    default: defaultObjectTypes,
-    generated: {
-      type: 'number'
-    },
-    file: {
-      type: 'string'
-    },
-    binding: bindingDefinition
-  },
-  required: type_required ? ['type'] as const : [],
-  additionalProperties: false,
-  if: {
+const generateVariableTypes = (type_required = true) =>
+  ({
+    type: 'object',
     properties: {
       type: {
-        const: 'scoped-name'
+        type: 'string',
+        enum: ['global', 'scoped', 'scoped-name']
+      },
+      case: {
+        type: 'string',
+        enum: ['snake']
+      },
+      static: {
+        type: 'boolean'
+      },
+      secret: {
+        type: 'boolean'
+      },
+      default: defaultObjectTypes,
+      generated: {
+        type: 'number'
+      },
+      file: {
+        type: 'string'
+      },
+      binding: bindingDefinition
+    },
+    required: type_required ? (['type'] as const) : [],
+    additionalProperties: false,
+    if: {
+      properties: {
+        type: {
+          const: 'scoped-name'
+        }
+      }
+    },
+    then: {
+      not: {
+        required: ['static', 'secret', 'default', 'case', 'binding']
       }
     }
-  },
-  then: {
-    not: {
-      required: ['static', 'secret', 'default', 'case', 'binding']
-    }
-  }
-} as const);
+  }) as const;
 
 export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
@@ -280,7 +281,7 @@ export const definitions = asConst({
             variable: {
               type: 'object',
               patternProperties: {
-                [variableDefinitionPattern]: generateVariableTypes(false),
+                [variableDefinitionPattern]: generateVariableTypes(false)
               },
               additionalProperties: false
             }
