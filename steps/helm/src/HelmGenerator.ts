@@ -429,36 +429,37 @@ export class HelmGenerator implements IStep {
           addVaryHeader: true
         }
       }
-    })
+    });
 
-    const corsHeadersYAMLFiles = Object.fromEntries(Object.entries(scopedContext?.expose ?? {})
-      .map(([port, exposed]) => {
+    const corsHeadersYAMLFiles = Object.fromEntries(
+      Object.entries(scopedContext?.expose ?? {})
+        .map(([port, exposed]) => {
+          if (exposed.type === 'internal') {
+            return;
+          }
 
-        if (exposed.type === "internal") {
-          return;
-        }
+          const { cors, domainPrefix } = exposed;
 
-        const { cors, domainPrefix } = exposed;
+          const options: any[] = [];
 
-        const options: any[] = [];
+          const relativeDomain = (domain: string) => new RawToken(`"${domain}{{ .Values.global.host.domain }}"`);
 
-        const relativeDomain = (domain: string) => new RawToken(`"${domain}{{ .Values.global.host.domain }}"`)
+          if (cors?.self) {
+            options.push(relativeDomain(domainPrefix ?? ''));
+          }
 
-        if (cors?.self) {
-          options.push(relativeDomain(domainPrefix ?? ''));
-        }
+          cors?.origins?.forEach((origin) => {
+            options.push(origin.relative ? relativeDomain(origin.source) : origin.source);
+          });
 
-        cors?.origins?.forEach((origin) => {
-          options.push(origin.relative ? relativeDomain(origin.source) : origin.source);
-        });
+          if (options.length === 0) {
+            return undefined;
+          }
 
-        if (options.length === 0) {
-          return undefined;
-        }
-
-
-        return [port, buildCORSOption(`${name.replaceAll('_', '-')}-${port}-cors`, cors?.methods ?? ['*'], ['*'], options)] as const;
-      }).filter(<T>(value: T|undefined): value is T => value !== undefined));
+          return [port, buildCORSOption(`${name.replaceAll('_', '-')}-${port}-cors`, cors?.methods ?? ['*'], ['*'], options)] as const;
+        })
+        .filter(<T>(value: T | undefined): value is T => value !== undefined)
+    );
 
     const ingressYAMLRoutes = {
       apiVersion: 'traefik.containo.us/v1alpha1',
@@ -486,15 +487,17 @@ export class HelmGenerator implements IStep {
                 : {
                     name: `${name.replaceAll('_', '-')}-${port}-strip-prefix`
                   },
-                corsHeadersYAMLFiles[port] === undefined ? (false as const) : {
-                  name: corsHeadersYAMLFiles[port].metadata.name
-                }
+              corsHeadersYAMLFiles[port] === undefined
+                ? (false as const)
+                : {
+                    name: corsHeadersYAMLFiles[port].metadata.name
+                  }
             ].filter((middleware) => middleware !== false)
           }))
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes,  Object.values(corsHeadersYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.values(corsHeadersYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
