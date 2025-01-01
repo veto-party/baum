@@ -312,12 +312,12 @@ export class HelmGeneratorProvider implements IStep {
         const refTarget = service.type === 'scoped' ? environment.scoped : environment.global;
 
         Object.entries(service.environment ?? {}).forEach(([k, v]) => {
-          let cloned: Exclude<ExtendedSchemaType['variable'], undefined>[string] = cloneDeep({
+          let cloned = cloneDeep({
             ...v,
             sourcePath: workspace.getDirectory(),
             type: v.type ?? service.type,
             external: true
-          });
+          }) as Exclude<ExtendedSchemaType['variable'], undefined>[string]; // Ugly type cast, since type is complex.
 
           // Put unbound copy into global scope to make sure that we pull the correct variables.
           if (helmFile?.is_service && service.type !== 'global') {

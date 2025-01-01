@@ -12,5 +12,37 @@
   },
   "binding": {
     "test_service_relation": "my_service_relation"
+  },
+  "expose": {
+    "187": {
+      "type": "load-balancer",
+      "cors": {
+        "self": true,
+        "origins": [
+          {
+            "source": "example.com"
+          },
+          {
+            "relative": true,
+            "source": "someprefix"
+          }
+        ]
+      }
+    },
+    "2000": {
+      "type": "load-balancer",
+      "cors": {
+        "self": false,
+        "origins": [
+          {
+            "source": "example.com"
+          },
+          {
+            "relaitve": true,
+            "source": "someprefix"
+          }
+        ]
+      }
+    }
   }
 }

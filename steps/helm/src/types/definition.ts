@@ -297,38 +297,75 @@ export const definitions = asConst({
       patternProperties: {
         '(0-9)+': {
           type: 'object',
-          properties: {
-            type: {
-              type: 'string',
-              enum: ['internal', 'load-balancer']
-            },
-            path: {
-              type: 'string'
-            },
-            doNotStripPrefix: {
-              type: 'boolean'
-            },
-            domainPrefix: {
-              type: 'string'
-            }
-          },
           required: ['type'],
-          additionalProperties: false,
-          if: {
-            properties: {
-              type: {
-                const: 'load-balancer'
+          oneOf: [
+            {
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['load-balancer']
+                },
+                cors: {
+                  type: 'object',
+                  required: [],
+                  properties: {
+                    self: {
+                      type: 'boolean'
+                    },
+                    methods: {
+                      type: 'array',
+                      items: {
+                        type: 'string'
+                      }
+                    },
+                    origins: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          relative: {
+                            type: 'boolean'
+                          },
+                          source: {
+                            type: 'string'
+                          }
+                        },
+                        required: ['source'],
+                        additionalProperties: false
+                      }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                path: {
+                  type: 'string'
+                },
+                doNotStripPrefix: {
+                  type: 'boolean'
+                },
+                domainPrefix: {
+                  type: 'string'
+                }
+              }
+            },
+            {
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['internal']
+                },
+                path: {
+                  type: 'string'
+                },
+                doNotStripPrefix: {
+                  type: 'boolean'
+                },
+                domainPrefix: {
+                  type: 'string'
+                }
               }
             }
-          },
-          then: {
-            required: ['path', 'domainPrefix']
-          },
-          else: {
-            not: {
-              required: ['path', 'domainPrefix']
-            }
-          }
+          ]
         }
       }
     },
