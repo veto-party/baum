@@ -14,7 +14,6 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
-import { prototype } from 'node:events';
 
 const { toPath } = lodash;
 
