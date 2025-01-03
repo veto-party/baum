@@ -14,6 +14,7 @@ import { ConditionalToken } from './yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from './yaml/implementation/ObjectToken.js';
 import { RawToken } from './yaml/implementation/RawToken.js';
 import { to_structured_data } from './yaml/to_structure_data.js';
+import { prototype } from 'node:events';
 
 const { toPath } = lodash;
 
@@ -461,6 +462,35 @@ export class HelmGenerator implements IStep {
         .filter(<T>(value: T | undefined): value is T => value !== undefined)
     );
 
+    const buildPathPrefixOption = (name: string, prefix: string) => ({
+      apiVersion: 'traefik.io/v1alpha1',
+      kind: 'Middleware',
+      metadata: {
+        name
+      },
+      spec: {
+        addPrefix: {
+          prefix
+        }
+      }
+    })
+
+    const prefixYAMLFiles = Object.fromEntries(
+      Object.entries(scopedContext.expose ?? {})
+      .map(([port, exposed]) => {
+        if (exposed.type === 'internal') {
+          return;
+        }
+
+        if (!exposed.prefix) {
+          return;
+        }
+
+        return [port, buildPathPrefixOption(`${name.replaceAll('_', '-')}-${port}-prefix`, exposed.prefix)] as const;
+       })
+       .filter(<T>(value: T | undefined): value is T => value !== undefined)
+    )
+
     const ingressYAMLRoutes = {
       apiVersion: 'traefik.containo.us/v1alpha1',
       kind: 'IngressRoute',
@@ -491,13 +521,18 @@ export class HelmGenerator implements IStep {
                 ? (false as const)
                 : {
                     name: corsHeadersYAMLFiles[port].metadata.name
-                  }
+                  },
+              prefixYAMLFiles[port] === undefined
+                ? (false as const)
+                : {
+                  name: prefixYAMLFiles[port].metadata.name
+                }
             ].filter((middleware) => middleware !== false)
           }))
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.values(corsHeadersYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
+    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.values(corsHeadersYAMLFiles),  Object.values(prefixYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
