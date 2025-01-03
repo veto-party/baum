@@ -343,6 +343,9 @@ export const definitions = asConst({
                 doNotStripPrefix: {
                   type: 'boolean'
                 },
+                prefix: {
+                  type: 'string'
+                },
                 domainPrefix: {
                   type: 'string'
                 }
