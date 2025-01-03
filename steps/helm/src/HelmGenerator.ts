@@ -472,23 +472,23 @@ export class HelmGenerator implements IStep {
           prefix
         }
       }
-    })
+    });
 
     const prefixYAMLFiles = Object.fromEntries(
       Object.entries(scopedContext.expose ?? {})
-      .map(([port, exposed]) => {
-        if (exposed.type === 'internal') {
-          return;
-        }
+        .map(([port, exposed]) => {
+          if (exposed.type === 'internal') {
+            return;
+          }
 
-        if (!exposed.prefix) {
-          return;
-        }
+          if (!exposed.prefix) {
+            return;
+          }
 
-        return [port, buildPathPrefixOption(`${name.replaceAll('_', '-')}-${port}-prefix`, exposed.prefix)] as const;
-       })
-       .filter(<T>(value: T | undefined): value is T => value !== undefined)
-    )
+          return [port, buildPathPrefixOption(`${name.replaceAll('_', '-')}-${port}-prefix`, exposed.prefix)] as const;
+        })
+        .filter(<T>(value: T | undefined): value is T => value !== undefined)
+    );
 
     const ingressYAMLRoutes = {
       apiVersion: 'traefik.containo.us/v1alpha1',
@@ -524,14 +524,18 @@ export class HelmGenerator implements IStep {
               prefixYAMLFiles[port] === undefined
                 ? (false as const)
                 : {
-                  name: prefixYAMLFiles[port].metadata.name
-                }
+                    name: prefixYAMLFiles[port].metadata.name
+                  }
             ].filter((middleware) => middleware !== false)
           }))
       }
     };
 
-    await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'], [ingressYAMLStripPrefixes, Object.values(corsHeadersYAMLFiles),  Object.values(prefixYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat());
+    await this.writeObjectToFile(
+      rootDirectory,
+      ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'ingress.yaml'],
+      [ingressYAMLStripPrefixes, Object.values(corsHeadersYAMLFiles), Object.values(prefixYAMLFiles), Object.keys(ingressYAMLRoutes.spec.routes).length > 0 ? ingressYAMLRoutes : undefined].filter(Boolean).flat()
+    );
 
     const deploymentYAML = {
       apiVersion: 'apps/v1',
