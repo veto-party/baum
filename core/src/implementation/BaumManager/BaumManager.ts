@@ -23,7 +23,7 @@ export class BaumManager implements IBaumManager {
 
   protected synchronize() {
     this.rootDirectory = this.parentBaum?.rootDirectory;
-    this.disableWorkspace = this.parentBaum?.disableWorkspace ?? this.disableWorkspace;
+    this.disableWorkspace = this.parentBaum?.disableWorkspace || this.disableWorkspace;
     this.packageManager = this.parentBaum?.packageManager;
   }
 
