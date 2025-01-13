@@ -66,15 +66,10 @@ export class VersionStrategy {
         baseDir: workpace.getDirectory()
       });
 
-      const diff = await gitInstance
-        .diffSummary({
-          from: lastGitHash,
-          to: 'HEAD'
-        })
-        .catch(() => {
-          // We definely have a change since it cannot be computed, probably outside of branches.
-          return null;
-        });
+      const diff = await gitInstance.diffSummary(`HEAD..${lastGitHash}`).catch(() => {
+        // We definely have a change since it cannot be computed, probably outside of branches.
+        return null;
+      });
 
       if ((diff?.changed ?? 0) > 0) {
         console.log('Git diff found for name: ', name);

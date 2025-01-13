@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@veto-party/baum__core": "*",
-    "simple-git": "^3.25.0"
+    "simple-git": "^3.27.0"
   },
   "devDependencies": {
     "typescript": "^5.4.2",

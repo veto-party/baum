@@ -28,10 +28,12 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
       return skipped;
     }
-    const raw_changes = await git.diffSummary({
-      from: await this.targetBranchGetter(root, git),
-      to: 'HEAD'
-    });
+
+    const branch = await this.targetBranchGetter(root, git);
+
+    await git.pull('origin', branch).catch(() => undefined);
+
+    const raw_changes = await git.diffSummary(`HEAD..${branch}`);
 
     return raw_changes;
   }
@@ -49,7 +51,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
         return true;
       }
 
-      return diff.changed === 0;
+      return diff.changed !== 0;
     });
   }
 }
