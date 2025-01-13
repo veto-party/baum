@@ -67,16 +67,16 @@ export class VersionStrategy {
       });
 
       const diff = await gitInstance
-        .diff({
+        .diffSummary({
           from: lastGitHash,
           to: 'HEAD'
         })
         .catch(() => {
           // We definely have a change since it cannot be computed, probably outside of branches.
-          return [null];
+          return null;
         });
 
-      if (diff.length > 0) {
+      if ((diff?.changed ?? 0) > 0) {
         console.log('Git diff found for name: ', name);
         versionIncrements[name] ??= currentVersions[name] ? VersionStatusUpdateType.PATCH : VersionStatusUpdateType.MAJOR;
         minorChangedPackages[name] = versionIncrements[name];
