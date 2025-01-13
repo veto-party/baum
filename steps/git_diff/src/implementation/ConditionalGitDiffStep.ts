@@ -1,11 +1,10 @@
 import Path from 'node:path';
 import { ConditionalStep, type IStep } from '@veto-party/baum__core';
-import { DiffResult, type SimpleGit, simpleGit } from 'simple-git';
+import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
 
 export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
-
   private diffMap = new Map<string, DiffResult | typeof skipped>();
 
   private async ensureGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
@@ -47,7 +46,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
       const diff = await this.ensureGitDiff(rootDirectory, path);
 
       if (diff === skipped) {
-        return true;        
+        return true;
       }
 
       return diff.changed === 0;
