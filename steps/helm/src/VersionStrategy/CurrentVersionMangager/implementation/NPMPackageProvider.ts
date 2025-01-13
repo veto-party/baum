@@ -23,7 +23,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     const url = new URL(this.registry);
     const regKey = `//${url.host}${url.pathname}`;
     // regKey = regKey.replace(/([^/]+|\/)$/, '')
-    return `${regKey}:_authToken`
+    return `${regKey}:_authToken`;
   }
 
   protected getFetchParams(params?: Parameters<typeof registryFetch.json>[1]) {
@@ -36,9 +36,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
   @CachedFN(true)
   private async loadPackage() {
-    const givenPackage = await registryFetch
-      .json(`${this.packageName}/latest`, this.getFetchParams())
-      .catch((error) => ({}) as Record<string, unknown>);
+    const givenPackage = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}) as Record<string, unknown>);
 
     if (typeof givenPackage.dist !== 'object' || !givenPackage.dist || !('tarball' in givenPackage.dist) || typeof givenPackage?.dist?.tarball !== 'string') {
       return {
@@ -167,11 +165,14 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     }
 
     try {
-      await registryFetch(spec.escapedName, this.getFetchParams({
-        method: 'PUT',
-        body: metadata,
-        ignoreBody: true
-      }));
+      await registryFetch(
+        spec.escapedName,
+        this.getFetchParams({
+          method: 'PUT',
+          body: metadata,
+          ignoreBody: true
+        })
+      );
     } catch (error) {
       if ((error as any)?.code !== 'E409') {
         throw new Error('Could not put', {
@@ -179,9 +180,12 @@ export class NPMPackageProvider implements ICurrentVersionManager {
         });
       }
 
-      const current = await registryFetch.json(spec.escapedName, this.getFetchParams({
-        query: { write: true }
-      }));
+      const current = await registryFetch.json(
+        spec.escapedName,
+        this.getFetchParams({
+          query: { write: true }
+        })
+      );
 
       const currentVersions = Object.keys(current.versions || {})
         .map((v) => semver.clean(v, true))
@@ -218,11 +222,14 @@ export class NPMPackageProvider implements ICurrentVersionManager {
         }
       }
 
-      await registryFetch(spec.escapedName, this.getFetchParams({
-        method: 'PUT',
-        body: current,
-        ignoreBody: true
-      }));
+      await registryFetch(
+        spec.escapedName,
+        this.getFetchParams({
+          method: 'PUT',
+          body: current,
+          ignoreBody: true
+        })
+      );
     }
 
     this.newVersions = {};
