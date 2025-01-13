@@ -1,75 +1,56 @@
 import Path from 'node:path';
 import { ConditionalStep, type IStep } from '@veto-party/baum__core';
-import { type SimpleGit, simpleGit } from 'simple-git';
+import { DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
 
 export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
-  private diffMap = new Map<string, string[] | typeof skipped>();
 
-  private async ensureGitDiff(root: string): Promise<string[] | typeof skipped> {
-    root = Path.resolve(root);
-    if (!this.diffMap.has(root)) {
-      this.diffMap.set(root, await this.getGitDiff(root));
+  private diffMap = new Map<string, DiffResult | typeof skipped>();
+
+  private async ensureGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
+    base = Path.resolve(base);
+    if (!this.diffMap.has(base)) {
+      this.diffMap.set(base, await this.getGitDiff(root, base));
     }
 
-    return this.diffMap.get(root)!;
+    return this.diffMap.get(base)!;
   }
 
-  private async getGitDiff(root: string): Promise<string[] | typeof skipped> {
+  private async getGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
     if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
       return skipped;
     }
 
-    const git = simpleGit({
-      baseDir: root
+    const git = simpleGit(root, {
+      baseDir: base
     });
 
     if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
       return skipped;
     }
-
-    const defaultBranch = await this.targetBranchGetter(root, git);
-
-    await git.fetch('origin', `${defaultBranch}:${defaultBranch}`, []).catch(console.warn);
-
-    const raw_changes = await new Promise<string>(async (resolve, reject) => {
-      git.raw(['diff', `${defaultBranch}`, '--name-only'], (err, data) => (err ? reject(err) : resolve(data!)));
+    const raw_changes = await git.diffSummary({
+      from: await this.targetBranchGetter(root, git),
+      to: 'HEAD'
     });
 
-    const line_changes = raw_changes.split('\n').map((str) => str.trim());
-
-    line_changes.pop();
-
-    return line_changes
-      .map((line) => {
-        try {
-          return Path.resolve(Path.join(root, line));
-        } catch (error) {
-          return '';
-        }
-      })
-      .filter(Boolean);
+    return raw_changes;
   }
 
   constructor(
-    step: IStep | undefined,
+    step: IStep,
     private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
     private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {
       const path = Path.resolve(workspace.getDirectory());
-      const diff = await this.ensureGitDiff(rootDirectory);
+      const diff = await this.ensureGitDiff(rootDirectory, path);
 
       if (diff === skipped) {
-        return true;
+        return true;        
       }
 
-      return diff.some((file) => file.startsWith(path));
+      return diff.changed === 0;
     });
-  }
-
-  clone(): ConditionalGitDiffStep {
-    return new ConditionalGitDiffStep(this.step, this.targetBranchGetter, this.dontSkipChangeChecks);
   }
 }
