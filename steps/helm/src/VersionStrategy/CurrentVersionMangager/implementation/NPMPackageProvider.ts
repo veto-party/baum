@@ -6,6 +6,8 @@ import registryFetch from 'npm-registry-fetch';
 import semver from 'semver';
 import ssri from 'ssri';
 import tarstream from 'tar-stream';
+import { URL } from 'node:url';
+
 import type { ICurrentVersionManager } from '../ICurrentVersionManager.js';
 
 import normalizer from 'normalize-package-data';
