@@ -114,6 +114,8 @@ export class Helm extends BaumManager implements IStep {
         ...step,
         step: this.stepWrapper!.clone().setStep(step.step)
       }));
+    } else {
+      this.steps = clonedSteps;
     }
 
     try {
