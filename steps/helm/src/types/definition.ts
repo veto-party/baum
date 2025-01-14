@@ -272,19 +272,22 @@ export const definitions = asConst({
                   type: 'string'
                 }
               },
-              oneOf: [{
-                properties: {
-                  image: {
-                    type: 'string'
+              oneOf: [
+                {
+                  properties: {
+                    image: {
+                      type: 'string'
+                    }
                   }
                 },
-              }, {
-                properties: {
-                  project: {
-                    type: 'string'
+                {
+                  properties: {
+                    project: {
+                      type: 'string'
+                    }
                   }
-                },
-              }],
+                }
+              ],
               additionalProperties: false
             },
             binding: bindingDefinition,
