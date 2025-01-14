@@ -19,7 +19,7 @@ const defaultObjectTypes = {
 
 const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]\\-]*$';
 const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
-const definitionDefinionPattern = '^[a-z0-9_]*$';
+const definitionDefinitionPattern = '^[a-z0-9_]*$';
 
 const bindingDefinition = {
   type: 'object',
@@ -191,7 +191,7 @@ export const definitions = asConst({
     service: {
       type: 'object',
       patternProperties: {
-        [definitionDefinionPattern]: {
+        [definitionDefinitionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -258,7 +258,7 @@ export const definitions = asConst({
     job: {
       type: 'object',
       patternProperties: {
-        [definitionDefinionPattern]: {
+        [definitionDefinitionPattern]: {
           type: 'object',
           properties: {
             type: {
@@ -270,11 +270,21 @@ export const definitions = asConst({
               properties: {
                 on: {
                   type: 'string'
-                },
-                image: {
-                  type: 'string'
                 }
               },
+              oneOf: [{
+                properties: {
+                  image: {
+                    type: 'string'
+                  }
+                },
+              }, {
+                properties: {
+                  project: {
+                    type: 'string'
+                  }
+                },
+              }],
               additionalProperties: false
             },
             binding: bindingDefinition,
@@ -286,7 +296,7 @@ export const definitions = asConst({
               additionalProperties: false
             }
           },
-          required: ['type'],
+          required: ['type', 'definition'],
           additionalProperties: false
         }
       },
