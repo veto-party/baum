@@ -99,12 +99,12 @@ export class Helm extends BaumManager implements IStep {
       this.name
     );
 
-    this.steps.unshift({
+    clonedSteps.unshift({
       name: 'Provide definition metadata',
       step: provider
     });
 
-    this.steps.push({
+    clonedSteps.push({
       name: 'generate helm files',
       step: generator
     });
