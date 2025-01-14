@@ -27,7 +27,7 @@ export class HelmGenerator implements IStep {
     private helmPacker: HelmPacker | undefined,
     private helmFileGeneratorProvider: HelmGeneratorProvider,
     private dockerFileGenerator: (workspace: IWorkspace) => Promise<string>|string,
-    private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string|Promise<string>,
+    private dockerFileForJobGenerator: (key: string, schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string|Promise<string>,
     private version: string | VersionProviderCallback,
     private name = 'root'
   ) {}
@@ -234,7 +234,7 @@ export class HelmGenerator implements IStep {
             containers: [
               {
                 name: `${key.replaceAll('_', '-')}-container`,
-                image: await this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                image: await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
                   if (resolved.static) {
                     return {
@@ -693,7 +693,7 @@ export class HelmGenerator implements IStep {
             containers: [
               {
                 name: `${key.replaceAll('_', '-')}-container`,
-                image: await this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                image: await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
                   if (resolved.static) {
                     return {
