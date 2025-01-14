@@ -230,71 +230,73 @@ export class HelmGenerator implements IStep {
 
     const getWorkspaceByName = HelmGenerator.buildInverseContextGetter(contexts);
 
-    const jobYAML = await Promise.all(Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
-      apiVersion: 'batch/v1',
-      kind: 'Job',
-      metadata: {
-        name: `global-${key.replaceAll('_', '-')}`,
-        annotations: {
-          'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
-          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
-        }
-      },
-      spec: {
-        template: {
-          spec: {
-            restartPolicy: 'OnFailure',
-            containers: [
-              {
-                name: `${key.replaceAll('_', '-')}-container`,
-                image:
-                  'project' in entry.definition && entry.definition.project !== undefined
-                    ? await this.dockerFileGenerator(getWorkspaceByName(entry.definition.project))
-                    : await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
-                env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
-                  if (resolved.static) {
-                    return {
-                      name: key,
-                      value: buildVariable(resolved!, 'global')
-                    };
-                  }
+    const jobYAML = await Promise.all(
+      Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
+        apiVersion: 'batch/v1',
+        kind: 'Job',
+        metadata: {
+          name: `global-${key.replaceAll('_', '-')}`,
+          annotations: {
+            'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
+            'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
+          }
+        },
+        spec: {
+          template: {
+            spec: {
+              restartPolicy: 'OnFailure',
+              containers: [
+                {
+                  name: `${key.replaceAll('_', '-')}-container`,
+                  image:
+                    'project' in entry.definition && entry.definition.project !== undefined
+                      ? await this.dockerFileGenerator(getWorkspaceByName(entry.definition.project))
+                      : await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                  env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
+                    if (resolved.static) {
+                      return {
+                        name: key,
+                        value: buildVariable(resolved!, 'global')
+                      };
+                    }
 
-                  if (resolved!.secret) {
+                    if (resolved!.secret) {
+                      return {
+                        name: key,
+                        valueFrom: {
+                          secretKeyRef: {
+                            name: 'global',
+                            key
+                          }
+                        }
+                      };
+                    }
+
                     return {
                       name: key,
                       valueFrom: {
-                        secretKeyRef: {
+                        configMapKeyRef: {
                           name: 'global',
                           key
                         }
                       }
                     };
-                  }
-
-                  return {
-                    name: key,
-                    valueFrom: {
-                      configMapKeyRef: {
-                        name: 'global',
-                        key
-                      }
-                    }
-                  };
-                })
-              }
-            ],
-            imagePullSecrets: new ConditionalToken(
-              `if eq .Values.global.registry.type "secret"`,
-              new ArrayToken([
-                new ObjectToken({
-                  name: 'veto-pull-secret'
-                })
-              ])
-            )
+                  })
+                }
+              ],
+              imagePullSecrets: new ConditionalToken(
+                `if eq .Values.global.registry.type "secret"`,
+                new ArrayToken([
+                  new ObjectToken({
+                    name: 'veto-pull-secret'
+                  })
+                ])
+              )
+            }
           }
         }
-      }
-    })));
+      }))
+    );
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'job.yaml'], [...jobYAML]);
   }
@@ -694,71 +696,73 @@ export class HelmGenerator implements IStep {
       await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
-    const jobYAML = await Promise.all(Object.entries(scopedContext?.job ?? {}).map(async ([key, entry]) => ({
-      apiVersion: 'batch/v1',
-      kind: 'Job',
-      metadata: {
-        name: `${name.replaceAll('_', '-')}-${key.replaceAll('_', '-')}`,
-        annotations: {
-          'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
-          'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
-        }
-      },
-      spec: {
-        template: {
-          spec: {
-            restartPolicy: 'OnFailure',
-            containers: [
-              {
-                name: `${key.replaceAll('_', '-')}-container`,
-                image:
-                  'project' in entry.definition && entry.definition.project !== undefined
-                    ? await this.dockerFileGenerator(getWorkspaceByName(entry.definition.project))
-                    : await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
-                env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
-                  if (resolved.static) {
-                    return {
-                      name: key,
-                      value: buildVariable(resolved!, name)
-                    };
-                  }
+    const jobYAML = await Promise.all(
+      Object.entries(scopedContext?.job ?? {}).map(async ([key, entry]) => ({
+        apiVersion: 'batch/v1',
+        kind: 'Job',
+        metadata: {
+          name: `${name.replaceAll('_', '-')}-${key.replaceAll('_', '-')}`,
+          annotations: {
+            'helm.sh/hook': entry.definition?.on ? new RawToken(entry.definition?.on) : new RawToken('post-install, post-upgrade'),
+            'helm.sh/hook-delete-policy': new RawToken('hook-succeeded, hook-failed')
+          }
+        },
+        spec: {
+          template: {
+            spec: {
+              restartPolicy: 'OnFailure',
+              containers: [
+                {
+                  name: `${key.replaceAll('_', '-')}-container`,
+                  image:
+                    'project' in entry.definition && entry.definition.project !== undefined
+                      ? await this.dockerFileGenerator(getWorkspaceByName(entry.definition.project))
+                      : await this.dockerFileForJobGenerator(key.replaceAll('_', '-'), { ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                  env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
+                    if (resolved.static) {
+                      return {
+                        name: key,
+                        value: buildVariable(resolved!, name)
+                      };
+                    }
 
-                  if (resolved!.secret) {
+                    if (resolved!.secret) {
+                      return {
+                        name: key,
+                        valueFrom: {
+                          secretKeyRef: {
+                            name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
+                            key
+                          }
+                        }
+                      };
+                    }
+
                     return {
                       name: key,
                       valueFrom: {
-                        secretKeyRef: {
+                        configMapKeyRef: {
                           name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
                           key
                         }
                       }
                     };
-                  }
-
-                  return {
-                    name: key,
-                    valueFrom: {
-                      configMapKeyRef: {
-                        name: resolved.is_global ? 'global' : name.replaceAll('_', '-'),
-                        key
-                      }
-                    }
-                  };
-                })
-              }
-            ],
-            imagePullSecrets: new ConditionalToken(
-              `if eq .Values.global.registry.type "secret"`,
-              new ArrayToken([
-                new ObjectToken({
-                  name: 'veto-pull-secret'
-                })
-              ])
-            )
+                  })
+                }
+              ],
+              imagePullSecrets: new ConditionalToken(
+                `if eq .Values.global.registry.type "secret"`,
+                new ArrayToken([
+                  new ObjectToken({
+                    name: 'veto-pull-secret'
+                  })
+                ])
+              )
+            }
           }
         }
-      }
-    })));
+      }))
+    );
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
 

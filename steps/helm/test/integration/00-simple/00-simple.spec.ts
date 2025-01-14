@@ -30,7 +30,7 @@ describe('00-simple', () => {
       const helmfileProvider = new Helm(baum);
       helmfileProvider.setAliasGenerator((workspace) => workspace.getName().replaceAll('/', '__').replaceAll('@', ''));
       helmfileProvider.setVersionProvider(new StaticVersionProvider());
-      helmfileProvider.setDockerFileForJobGenerator((_, schema) => "image" in schema.definition ? schema.definition?.image ?? '' : '');
+      helmfileProvider.setDockerFileForJobGenerator((_, schema) => ('image' in schema.definition ? (schema.definition?.image ?? '') : ''));
       helmfileProvider.setDockerFileGenerator((workpace) => workpace.getName());
 
       baum.addExecutionStep('provide helm metadata', helmfileProvider);

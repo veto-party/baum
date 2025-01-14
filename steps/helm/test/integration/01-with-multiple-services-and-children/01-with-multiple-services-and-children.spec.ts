@@ -29,7 +29,7 @@ describe('A 01 with-multiple-services-and-children', () => {
     const helmfileProvider = new Helm(baum);
     helmfileProvider.setAliasGenerator((workspace) => workspace.getName().replaceAll('/', '__').replaceAll('@', ''));
     helmfileProvider.setVersionProvider(new StaticVersionProvider());
-    helmfileProvider.setDockerFileForJobGenerator((_, schema) => "image" in schema.definition ? schema.definition?.image ?? '' : '');
+    helmfileProvider.setDockerFileForJobGenerator((_, schema) => ('image' in schema.definition ? (schema.definition?.image ?? '') : ''));
     helmfileProvider.setDockerFileGenerator((workpace) => workpace.getName());
 
     baum.addExecutionStep('helm', helmfileProvider);

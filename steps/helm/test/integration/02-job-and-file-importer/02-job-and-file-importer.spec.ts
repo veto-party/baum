@@ -30,7 +30,7 @@ describe('02 job and file importer', () => {
     helmfileProvider.setFilter((workspace) => workspace.getPackageFile().name.startsWith('@veto/'));
     helmfileProvider.setAliasGenerator((workspace) => workspace.getName().replaceAll('/', '__').replaceAll('@', ''));
     helmfileProvider.setVersionProvider(new StaticVersionProvider());
-    helmfileProvider.setDockerFileForJobGenerator((_, schema) => "image" in schema.definition ? schema.definition?.image ?? '' : '');
+    helmfileProvider.setDockerFileForJobGenerator((_, schema) => ('image' in schema.definition ? (schema.definition?.image ?? '') : ''));
     helmfileProvider.setDockerFileGenerator((workpace) => workpace.getName());
 
     baum.addExecutionStep('helm', helmfileProvider);
