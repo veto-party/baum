@@ -26,8 +26,8 @@ export class HelmGenerator implements IStep {
   constructor(
     private helmPacker: HelmPacker | undefined,
     private helmFileGeneratorProvider: HelmGeneratorProvider,
-    private dockerFileGenerator: (workspace: IWorkspace) => string,
-    private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string,
+    private dockerFileGenerator: (workspace: IWorkspace) => Promise<string>|string,
+    private dockerFileForJobGenerator: (schema: Exclude<SchemaType['job'], undefined>[string], workspace: IWorkspace, job: string) => string|Promise<string>,
     private version: string | VersionProviderCallback,
     private name = 'root'
   ) {}
@@ -217,7 +217,7 @@ export class HelmGenerator implements IStep {
       await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
-    const jobYAML = Object.entries(context?.job ?? {}).map(([key, entry]) => ({
+    const jobYAML = Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
@@ -234,7 +234,7 @@ export class HelmGenerator implements IStep {
             containers: [
               {
                 name: `${key.replaceAll('_', '-')}-container`,
-                image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                image: await this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, [], entry.variable !== undefined ? [entry, context] : context, true)).map(([key, resolved]) => {
                   if (resolved.static) {
                     return {
@@ -569,8 +569,8 @@ export class HelmGenerator implements IStep {
           spec: {
             containers: [
               {
-                name: `${name.replaceAll('_', '-')}-${getHash(this.dockerFileGenerator(workspace))}-depl`,
-                image: this.dockerFileGenerator(workspace),
+                name: `${name.replaceAll('_', '-')}-${getHash(await this.dockerFileGenerator(workspace))}-depl`,
+                image: await this.dockerFileGenerator(workspace),
                 ports: Object.keys(scopedContext?.expose ?? {}).map((port) => ({
                   containerPort: Number(port)
                 })),
@@ -676,7 +676,7 @@ export class HelmGenerator implements IStep {
       await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
-    const jobYAML = Object.entries(scopedContext?.job ?? {}).map(([key, entry]) => ({
+    const jobYAML = Object.entries(scopedContext?.job ?? {}).map(async ([key, entry]) => ({
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
@@ -693,7 +693,7 @@ export class HelmGenerator implements IStep {
             containers: [
               {
                 name: `${key.replaceAll('_', '-')}-container`,
-                image: this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
+                image: await this.dockerFileForJobGenerator({ ...entry, workspace: undefined } as Exclude<SchemaType['job'], undefined>[string], entry.workspace, key),
                 env: Object.entries(resolveBindings(entry?.binding ?? {}, entry.variable ? [scopedContext, entry] : scopedContext, globalContext)).map(([key, resolved]) => {
                   if (resolved.static) {
                     return {
