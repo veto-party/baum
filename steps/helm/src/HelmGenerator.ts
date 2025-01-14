@@ -230,7 +230,7 @@ export class HelmGenerator implements IStep {
 
     const getWorkspaceByName = HelmGenerator.buildInverseContextGetter(contexts);
 
-    const jobYAML = Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
+    const jobYAML = await Promise.all(Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
@@ -294,7 +294,7 @@ export class HelmGenerator implements IStep {
           }
         }
       }
-    }));
+    })));
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'job.yaml'], [...jobYAML]);
   }
@@ -694,7 +694,7 @@ export class HelmGenerator implements IStep {
       await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
-    const jobYAML = Object.entries(scopedContext?.job ?? {}).map(async ([key, entry]) => ({
+    const jobYAML = await Promise.all(Object.entries(scopedContext?.job ?? {}).map(async ([key, entry]) => ({
       apiVersion: 'batch/v1',
       kind: 'Job',
       metadata: {
@@ -758,7 +758,7 @@ export class HelmGenerator implements IStep {
           }
         }
       }
-    }));
+    })));
 
     await this.writeObjectToFile(rootDirectory, ['helm', 'subcharts', workspace.getName().replaceAll('/', '__'), 'templates', 'job.yaml'], [...jobYAML]);
 

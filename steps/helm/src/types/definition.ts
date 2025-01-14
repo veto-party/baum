@@ -267,28 +267,30 @@ export const definitions = asConst({
             },
             definition: {
               type: 'object',
-              properties: {
-                on: {
-                  type: 'string'
-                }
-              },
               oneOf: [
                 {
                   properties: {
+                    on: {
+                      type: 'string'
+                    },
                     image: {
                       type: 'string'
                     }
-                  }
+                  },
+                  additionalProperties: false
                 },
                 {
                   properties: {
+                    on: {
+                      type: 'string'
+                    },
                     project: {
                       type: 'string'
                     }
-                  }
+                  },
+                  additionalProperties: false
                 }
-              ],
-              additionalProperties: false
+              ]
             },
             binding: bindingDefinition,
             variable: {
