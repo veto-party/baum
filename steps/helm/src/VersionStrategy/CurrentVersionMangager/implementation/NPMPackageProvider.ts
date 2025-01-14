@@ -21,7 +21,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     private token?: string
   ) {}
 
-  private get partialRegistry() {
+  private partialRegistry(): string {
     const url = new URL(this.registry);
     const regKey = `//${url.host}${url.pathname}`;
     // regKey = regKey.replace(/([^/]+|\/)$/, '')
@@ -32,7 +32,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     return {
       ...params,
       registry: this.registry,
-      [this.partialRegistry]: this.token
+      [this.partialRegistry()]: this.token
     };
   }
 
@@ -177,6 +177,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
       );
     } catch (error) {
       if ((error as any)?.code !== 'E409') {
+        console.error('Publish failed: ', error);
         throw new Error('Could not put', {
           cause: error
         });
