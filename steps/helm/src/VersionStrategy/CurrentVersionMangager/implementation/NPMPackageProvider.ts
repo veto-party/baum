@@ -176,7 +176,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
         })
       );
     } catch (error) {
-      if ((error as any)?.code !== 'E409') {
+      if ((error as any)?.code !== 'E409' && (error as any)?.code !== 'E403') {
         console.error('Publish failed: ', error);
         throw new Error('Could not put', {
           cause: error
