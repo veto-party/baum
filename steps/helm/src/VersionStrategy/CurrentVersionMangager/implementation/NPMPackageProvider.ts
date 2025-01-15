@@ -45,9 +45,9 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     let tarball: any = undefined;
 
     if (givenPackage === 404) {
-      tarball = await registryFetch(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}));
+      tarball = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}));
     } else {
-      tarball = givenPackage['versions'][givenPackage['dist-tags']['latest']];
+      tarball = givenPackage.versions[givenPackage['dist-tags'].latest];
     }
 
     if (tarball === undefined) {
