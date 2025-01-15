@@ -7,6 +7,8 @@ import registryFetch from 'npm-registry-fetch';
 import semver from 'semver';
 import ssri from 'ssri';
 import tarstream from 'tar-stream';
+import FS from 'node:fs/promises';
+import zlib from 'node:zlib';
 
 import type { ICurrentVersionManager } from '../ICurrentVersionManager.js';
 
@@ -38,23 +40,29 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
   @CachedFN(true)
   private async loadPackage() {
-    const givenPackage = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}) as Record<string, unknown>);
+    const givenPackage: any = await registryFetch.json(`${this.packageName}`, this.getFetchParams()).catch((error) => 404);
 
-    if (typeof givenPackage.dist !== 'object' || !givenPackage.dist || !('tarball' in givenPackage.dist) || typeof givenPackage?.dist?.tarball !== 'string') {
-      return {
-        self_version: undefined,
-        versions: {}
-      };
+    let tarball: any = undefined;
+
+    if (givenPackage === 404) {
+      tarball = await registryFetch(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}));
+    } else {
+      tarball = givenPackage['versions'][givenPackage['dist-tags']['latest']];
     }
 
-    const tarBuffer = await registryFetch(givenPackage.dist.tarball, {
-      registry: this.registry
-    }).then((response) => response.buffer());
+    if (tarball === undefined) {
+      return {
+        versions: {},
+        self_version: undefined,
+      }
+    }
+
+    const tarBuffer = await registryFetch(tarball.dist.tarball, this.getFetchParams()).then((response) => response.buffer());
 
     const file = await new Promise<Buffer>((resolve, reject) => {
       const read = tarstream.extract();
       read.on('entry', (header, stream, next) => {
-        if (header.name === 'versions.json') {
+        if (header.name.endsWith('versions.json')) {
           resolve(buffer(stream));
         }
 
@@ -63,7 +71,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
       read.on('finish', () => reject(new Error('File not found')));
 
-      const readable = Readable.from(tarBuffer);
+      const readable = Readable.from(tarBuffer).pipe(zlib.createGunzip());
       readable.pipe(read);
     });
 
@@ -72,7 +80,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     }
 
     return {
-      self_version: typeof givenPackage.version === 'string' ? givenPackage.version : undefined,
+      self_version: typeof tarball.version === 'string' ? tarball.version : undefined,
       versions: JSON.parse(file.toString())
     };
   }
@@ -92,11 +100,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     const loaded = await this.loadPackage();
     const newVersions = { ...loaded.versions };
 
-    for (const name in this.newVersions) {
-      newVersions[name] = this.newVersions[name];
-    }
-
     const newVersion = loaded.self_version ? semver.inc(loaded.self_version, 'patch') : '0.0.0';
+    // newVersions.self_version = newVersion;
 
     if (!newVersion) {
       throw new Error('Something went wrong, please contact us!');
@@ -115,11 +120,17 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     const newVersionsPassThrough = new PassThrough();
     newVersionsPassThrough.end(JSON.stringify(newVersions));
 
-    const archive = tarstream.pack();
-    const tarPromise = buffer(archive);
+    const archive = tarstream.pack({
+      emitClose: true
+    });
 
-    archive.entry({ name: 'package.json' }, JSON.stringify(manifest));
-    archive.entry({ name: 'versions.json' }, JSON.stringify(newVersions));
+    const tarPromise = buffer(archive.pipe(zlib.createGzip()));
+
+    archive.entry({ name: `package/package.json` }, Buffer.from(JSON.stringify(manifest)));
+    archive.entry({ name: `package/versions.json` }, Buffer.from(JSON.stringify(newVersions)));
+
+
+    FS.writeFile('./test.tgz', archive);
 
     archive.finalize();
 
@@ -149,7 +160,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     manifest._id = `${manifest.name}@${manifest.version}`;
     manifest.dist ??= {};
-    manifest.dist.tarball = new URL(tarballURI, this.registry).href.replace(/^https:\/\//, 'http://');
+    manifest.dist.tarball = new URL(tarballURI, this.registry);
     manifest.dist.integrity = integrity.sha512[0].toString();
     manifest.dist.shasum = (integrity.sha1[0] as any).hexDigest();
 
@@ -200,7 +211,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
       if (currentVersions.indexOf(newVersion) !== -1) {
         const { name: pkgid, version } = current;
-        throw new Error(`Cannot publish ${pkgid}@${version} over existing version.`);
+        throw new Error(`Cannot publish ${pkgid}@${newVersion} over existing version.`);
       }
 
       current.versions ??= {};
