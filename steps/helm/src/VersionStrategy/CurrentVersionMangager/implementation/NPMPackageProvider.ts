@@ -155,8 +155,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     const tarballName = `${manifest.name}-${manifest.version}.tgz`;
     const tarballURI = `${manifest.name}/-/${tarballName}`;
-    const integrity = ssri.fromData(Buffer.from(rawTarball.toString()), {
-      algorithms: ['sha512', 'sha1']
+    const integrity = ssri.fromData(rawTarball, {
+      algorithms: ['sha1', 'sha512']
     });
 
     manifest._id = `${manifest.name}@${manifest.version}`;
