@@ -92,8 +92,8 @@ export class HelmGenerator implements IStep {
     return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory);
   }
 
-  private static buildInverseContextGetter(workspaces: Map<IWorkspace, any>): (workspaceName: string) => IWorkspace {
-    const inverse = new Map(Array.from(workspaces.keys()).map((workspace) => [workspace.getName(), workspace] as const));
+  private static async buildInverseContextGetter(packageManager: IExecutablePackageManager, root: string): Promise<(workspaceName: string) => IWorkspace> {
+    const inverse = new Map((await packageManager.readWorkspace(root)).map((workspace) => [workspace.getName(), workspace] as const));
 
     return (workspace) => {
       if (!inverse.has(workspace)) {
@@ -228,7 +228,7 @@ export class HelmGenerator implements IStep {
       await this.writeObjectToFile(rootDirectory, ['helm', 'main', 'templates', 'configmap.yaml'], [configMapYAML]);
     }
 
-    const getWorkspaceByName = HelmGenerator.buildInverseContextGetter(contexts);
+    const getWorkspaceByName = await HelmGenerator.buildInverseContextGetter(packageManager, rootDirectory);
 
     const jobYAML = await Promise.all(
       Object.entries(context?.job ?? {}).map(async ([key, entry]) => ({
@@ -305,7 +305,7 @@ export class HelmGenerator implements IStep {
     const scopedContext = this.helmFileGeneratorProvider.contexts.get(workspace);
     const globalContext = this.helmFileGeneratorProvider.globalContext;
 
-    const getWorkspaceByName = HelmGenerator.buildInverseContextGetter(this.helmFileGeneratorProvider.contexts);
+    const getWorkspaceByName = await HelmGenerator.buildInverseContextGetter(packageManager, rootDirectory);
 
     if (!scopedContext?.is_service) {
       console.info(`Workspace: ${JSON.stringify(workspace.getName())} is not a service. No helm files will be generated for it.`);
