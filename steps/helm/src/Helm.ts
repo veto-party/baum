@@ -99,16 +99,6 @@ export class Helm extends BaumManager implements IStep {
       this.name
     );
 
-    clonedSteps.unshift({
-      name: 'Provide definition metadata',
-      step: provider
-    });
-
-    clonedSteps.push({
-      name: 'generate helm files',
-      step: generator
-    });
-
     if (this.stepWrapper) {
       this.steps = clonedSteps.map((step) => ({
         ...step,
@@ -117,6 +107,17 @@ export class Helm extends BaumManager implements IStep {
     } else {
       this.steps = clonedSteps;
     }
+
+
+    this.steps.unshift({
+      name: 'Provide definition metadata',
+      step: provider
+    });
+
+    this.steps.push({
+      name: 'generate helm files',
+      step: generator
+    });
 
     try {
       await this.run();
