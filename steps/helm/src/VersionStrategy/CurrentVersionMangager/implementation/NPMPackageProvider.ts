@@ -1,14 +1,14 @@
+import FS from 'node:fs/promises';
 import { PassThrough, Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
 import { URL } from 'node:url';
+import zlib from 'node:zlib';
 import { CachedFN, clearCacheForFN } from '@veto-party/baum__core';
 import npa from 'npm-package-arg';
 import registryFetch from 'npm-registry-fetch';
 import semver from 'semver';
 import ssri from 'ssri';
 import tarstream from 'tar-stream';
-import FS from 'node:fs/promises';
-import zlib from 'node:zlib';
 
 import type { ICurrentVersionManager } from '../ICurrentVersionManager.js';
 
@@ -53,9 +53,11 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     if (tarball === undefined) {
       return {
         versions: {},
-        self_version: undefined,
-      }
+        self_version: undefined
+      };
     }
+
+    console.log(tarball);
 
     const tarBuffer = await registryFetch(tarball.dist.tarball, this.getFetchParams()).then((response) => response.buffer());
 
@@ -128,7 +130,6 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     archive.entry({ name: `package/package.json` }, Buffer.from(JSON.stringify(manifest)));
     archive.entry({ name: `package/versions.json` }, Buffer.from(JSON.stringify(newVersions)));
-
 
     FS.writeFile('./test.tgz', archive);
 

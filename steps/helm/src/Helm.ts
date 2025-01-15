@@ -108,7 +108,6 @@ export class Helm extends BaumManager implements IStep {
       this.steps = clonedSteps;
     }
 
-
     this.steps.unshift({
       name: 'Provide definition metadata',
       step: provider
