@@ -40,12 +40,12 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
   @CachedFN(true)
   private async loadPackage() {
-    const givenPackage: any = await registryFetch.json(`${this.packageName}`, this.getFetchParams()).catch((error) => 404);
+    const givenPackage: any = await registryFetch.json(`${this.packageName}`, this.getFetchParams()).catch(() => 404);
 
     let tarball: any = undefined;
 
     if (givenPackage === 404) {
-      tarball = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch((error) => ({}));
+      tarball = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch(() => undefined);
     } else {
       tarball = givenPackage.versions[givenPackage['dist-tags'].latest];
     }
@@ -56,8 +56,6 @@ export class NPMPackageProvider implements ICurrentVersionManager {
         self_version: undefined
       };
     }
-
-    console.log(tarball);
 
     const tarBuffer = await registryFetch(tarball.dist.tarball, this.getFetchParams()).then((response) => response.buffer());
 
@@ -128,8 +126,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     const tarPromise = buffer(archive.pipe(zlib.createGzip()));
 
-    archive.entry({ name: `package/package.json` }, Buffer.from(JSON.stringify(manifest)));
-    archive.entry({ name: `package/versions.json` }, Buffer.from(JSON.stringify(newVersions)));
+    archive.entry({ name: 'package/package.json' }, Buffer.from(JSON.stringify(manifest)));
+    archive.entry({ name: 'package/versions.json' }, Buffer.from(JSON.stringify(newVersions)));
 
     FS.writeFile('./test.tgz', archive);
 
