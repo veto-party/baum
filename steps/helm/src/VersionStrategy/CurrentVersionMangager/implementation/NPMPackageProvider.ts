@@ -124,7 +124,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
       emitClose: true
     });
 
-    const tarPromise = buffer(archive.pipe(zlib.createGzip()));
+    const gzippedTarPromise = buffer(archive.pipe(zlib.createGzip()));
+    const tarPromise = buffer(archive);
 
     archive.entry({ name: 'package/package.json' }, Buffer.from(JSON.stringify(manifest)));
     archive.entry({ name: 'package/versions.json' }, Buffer.from(JSON.stringify(newVersions)));
@@ -133,7 +134,8 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     archive.finalize();
 
-    const tarball = await tarPromise;
+    const rawTarball = await tarPromise;
+    const tarball = await gzippedTarPromise;
 
     const metadata = {
       _id: manifest.name,
@@ -153,7 +155,7 @@ export class NPMPackageProvider implements ICurrentVersionManager {
 
     const tarballName = `${manifest.name}-${manifest.version}.tgz`;
     const tarballURI = `${manifest.name}/-/${tarballName}`;
-    const integrity = ssri.fromData(Buffer.from(tarball.toString()), {
+    const integrity = ssri.fromData(Buffer.from(rawTarball.toString()), {
       algorithms: ['sha512', 'sha1']
     });
 
