@@ -100,8 +100,11 @@ export class NPMPackageProvider implements ICurrentVersionManager {
     const loaded = await this.loadPackage();
     const newVersions = { ...loaded.versions };
 
+    for (const name in this.newVersions) {
+      newVersions[name] = this.newVersions[name];
+    }
+
     const newVersion = loaded.self_version ? semver.inc(loaded.self_version, 'patch') : '0.0.0';
-    // newVersions.self_version = newVersion;
 
     if (!newVersion) {
       throw new Error('Something went wrong, please contact us!');
