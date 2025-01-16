@@ -1,5 +1,3 @@
-import { shakeWorkspacesIntoExecutionGroups } from './implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js';
-
 export type { IBaumManager } from './interface/BaumManager/IBaumManager.js';
 export type { IBaumManagerConfiguration, IBaumRegistrable } from './interface/BaumManager/IBaumManagerConfiguration.js';
 export type { IPackageManager, IDependent, IWorkspace } from './interface/PackageManager/IPackageManager.js';
