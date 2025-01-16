@@ -100,12 +100,10 @@ export class Helm extends BaumManager implements IStep {
     );
 
     if (this.stepWrapper) {
-      this.steps = clonedSteps.map((step) => ({
+      this.steps = this.steps.map((step) => ({
         ...step,
         step: this.stepWrapper!.clone().setStep(step.step)
       }));
-    } else {
-      this.steps = clonedSteps;
     }
 
     this.steps.unshift({

@@ -1,3 +1,5 @@
+import { shakeWorkspacesIntoExecutionGroups } from './implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js';
+
 export type { IBaumManager } from './interface/BaumManager/IBaumManager.js';
 export type { IBaumManagerConfiguration, IBaumRegistrable } from './interface/BaumManager/IBaumManagerConfiguration.js';
 export type { IPackageManager, IDependent, IWorkspace } from './interface/PackageManager/IPackageManager.js';
@@ -31,3 +33,5 @@ export { GenericWorkspace } from './implementation/PackageManager/GenericWorkspa
 export { allSettledButFailure, allSettledButNoFailures } from './implementation/BaumManager/utility/allSettledButNoFailure.js';
 
 export { getDependentWorkspaces } from './implementation/BaumManager/utility/getDependentWorkspaces.js';
+
+export { shakeWorkspacesIntoExecutionGroups } from './implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js';
