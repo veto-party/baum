@@ -87,7 +87,7 @@ export class HelmGenerator implements IStep {
     return `.${newPath}`;
   }
 
-  @CachedFN(true, [false, true, true, true])
+  @CachedFN(true, [true, false, false])
   private async resolveVersion(name: string, workspace: IWorkspace | undefined, packageManager: IExecutablePackageManager, rootDirectory: string) {
     return typeof this.version === 'string' ? this.version : this.version(name, workspace, packageManager, rootDirectory);
   }
@@ -106,7 +106,7 @@ export class HelmGenerator implements IStep {
   /**
    * @private
    */
-  @CachedFN(true, [false, false, true, true])
+  @CachedFN(true, [true, true, false, false])
   async generateGlobalScope(packageManager: IExecutablePackageManager, rootDirectory: string) {
     const context = this.helmFileGeneratorProvider.globalContext;
     const contexts = this.helmFileGeneratorProvider.contexts;
