@@ -2,8 +2,7 @@ import { BaumManager, type IBaumManagerConfiguration, type ICloneable, type IExe
 import { HelmGenerator } from './HelmGenerator.js';
 import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import { HelmPacker } from './HelmPacker.js';
-import type { ICurrentVersionManager } from './VersionStrategy/CurrentVersionMangager/ICurrentVersionManager.js';
-import { IHelmVersionManager } from './HelmVersionManager/IHelmVersionManager.js';
+import type { IHelmVersionManager } from './HelmVersionManager/IHelmVersionManager.js';
 
 @RunOnce()
 export class Helm extends BaumManager implements IStep {
