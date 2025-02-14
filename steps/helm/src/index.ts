@@ -9,3 +9,6 @@ export { CurrentVersionFileProvider } from './VersionStrategy/CurrentVersionMang
 export { NPMPackageProvider } from './VersionStrategy/CurrentVersionMangager/implementation/NPMPackageProvider.js';
 export { VersionStrategy } from './VersionStrategy/VersionStrategy.js';
 export { RawToken } from './yaml/implementation/RawToken.js';
+
+export { buildVariable } from './utility/buildVariable.js';
+export { resolveReference } from './utility/resolveReference.js';
