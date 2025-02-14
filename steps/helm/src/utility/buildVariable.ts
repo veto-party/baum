@@ -17,6 +17,11 @@ class required for caching decorator
 */
 // biome-ignore lint/complexity/noStaticOnlyClass: we need the annation.
 class VariablePrepareLogic {
+
+  private constructor() {
+    
+  }
+  
   @CachedFN(false)
   static prepareVariable(variableDefinition: Exclude<ExtendedSchemaType['variable'], undefined>[string], scopeName: string) {
     if (variableDefinition.file) {

@@ -2,7 +2,7 @@ import { BaumManager, type IBaumManagerConfiguration, type ICloneable, type IExe
 import { HelmGenerator } from './HelmGenerator.js';
 import { HelmGeneratorProvider } from './HelmGeneratorProvider.js';
 import { HelmPacker } from './HelmPacker.js';
-import type { ICurrentVersionManager } from './VersionStrategy/CurrentVersionMangager/ICurrentVersionManager.js';
+import type { IHelmVersionManager } from './HelmVersionManager/IHelmVersionManager.js';
 
 @RunOnce()
 export class Helm extends BaumManager implements IStep {
@@ -56,9 +56,9 @@ export class Helm extends BaumManager implements IStep {
     return this;
   }
 
-  protected versionProvider?: ICurrentVersionManager;
+  protected versionProvider?: IHelmVersionManager;
 
-  setVersionProvider(versionProvider: ICurrentVersionManager): this {
+  setVersionProvider(versionProvider: IHelmVersionManager): this {
     this.versionProvider = versionProvider;
     return this;
   }
@@ -93,8 +93,8 @@ export class Helm extends BaumManager implements IStep {
       provider,
       this.dockerFileGenerator!,
       this.dockerFileForJobGenerator!,
-      async (name) => {
-        return (await this.versionProvider!.getCurrentVersionFor(name)) ?? '0.0.0';
+      async (name, workspace, packageManager, root) => {
+        return (await this.versionProvider!.getCurrentVersionFor(name, workspace, packageManager, root)) ?? '0.0.0';
       },
       this.name
     );
@@ -137,7 +137,6 @@ export class Helm extends BaumManager implements IStep {
     }
 
     await generator.flush();
-    await this.versionProvider?.flush();
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
