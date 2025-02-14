@@ -12,3 +12,5 @@ export { RawToken } from './yaml/implementation/RawToken.js';
 
 export { buildVariable } from './utility/buildVariable.js';
 export { resolveReference } from './utility/resolveReference.js';
+
+export { resolveBindings } from './utility/resolveReference.js';
