@@ -8,7 +8,7 @@
     "baum": "baum --config baum_config",
     "biome": "biome"
   },
-  "workspaces": ["config", "core", "cli", "package_managers/*", "registry/*", "steps/*"],
+  "workspaces": ["config", "core", "cli", "package_managers/*", "registry/*", "steps/*", "steps/installer/features/*", "steps/installer/renderer/*"],
   "devDependencies": {
     "@biomejs/biome": "*",
     "baum": "*",

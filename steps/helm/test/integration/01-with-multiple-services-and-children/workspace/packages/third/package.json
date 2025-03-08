@@ -1,6 +1,0 @@
-{
-  "name": "third",
-  "dependencies": {
-    "test_workspace_child": "*"
-  }
-}

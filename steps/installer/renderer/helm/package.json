@@ -1,0 +1,53 @@
+{
+  "name": "@veto-party/baum__steps__installer__renderer__helm",
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": ["./dist/**"],
+  "scripts": {
+    "build": "tsc --project ./build.tsconfig.json",
+    "test": "node --loader ts-node/esm --enable-source-maps ./test/start-testing.mjs",
+    "generate": "node --loader ts-node/esm ./scripts/export-json.mjs"
+  },
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "lodash.set": "^4.3.2",
+    "lodash.isequal": "^4.5.0",
+    "lodash.has": "4.5.2",
+    "lodash.clonedeep": "^4.5.0",
+    "semver": "^7.6.0",
+    "yaml": "^2.4.1",
+    "change-case": "^5.4.4",
+    "simple-git": "^3.27.0",
+    "axios": "^1.7.9",
+    "ssri": "^12.0.0",
+    "@types/ssri": "^7.1.5",
+    "tar-stream": "^3.1.7",
+    "@types/tar-stream": "^3.1.3",
+    "npm-package-arg": "^12.0.1",
+    "@types/npm-package-arg": "^6.1.4",
+    "npm-registry-fetch": "^18.0.2",
+    "@types/npm-registry-fetch": "^8.0.7",
+    "normalize-package-data": "^7.0.0",
+    "@types/normalize-package-data": "^2.4.4",
+    "@veto-party/baum__steps__git_diff": "*"
+  },
+  "devDependencies": {
+    "@veto-party/config": "*",
+    "typescript": "^5.4.2",
+    "@types/lodash.set": "^4.3.9",
+    "@types/lodash.isequal": "^4.5.8",
+    "@types/lodash.has": "^4.5.9",
+    "@types/semver": "^7.5.8",
+    "@types/lodash.clonedeep": "^4.5.9",
+    "jasmine": "^5.1.0",
+    "@types/jasmine": "^5.1.4",
+    "diff": "^5.2.0",
+    "@types/diff": "^5.0.9",
+    "colors": "^1.4.0",
+    "@types/colors": "^1.2.1",
+    "ts-node": "^10.9.2",
+    "@veto-party/baum__package_manager__npm": "*",
+    "lodash.uniq": "^4.5.0",
+    "@types/lodash.uniq": "^4.5.9"
+  }
+}
