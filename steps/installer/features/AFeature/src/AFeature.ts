@@ -1,14 +1,14 @@
 import AJV from 'ajv';
 import { CachedFN } from '@veto-party/baum__core';
 import { FromSchema } from 'json-schema-to-ts';
-import { FeatureContainer, IFeature } from './IFeature';
+import { FeatureContainer, IFeature } from './IFeature.js';
 
 
 export abstract class AFeature<T extends {}|Record<string, any> = {}, From = T extends {} ? any[]|any : FromSchema<T>> implements IFeature<T, From> {
 
     protected constructor(
         private schema: T = {} as any,
-        private ajv = new AJV()
+        private ajv = new AJV.default()
     ) {}
 
     @CachedFN(true)
