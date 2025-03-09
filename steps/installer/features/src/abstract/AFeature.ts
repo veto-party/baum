@@ -1,8 +1,8 @@
 import AJV from 'ajv';
 import { CachedFN } from '@veto-party/baum__core';
 import type { FromSchema } from 'json-schema-to-ts';
-import type { IFeature, IngestResult, ToObjectWithPath } from '../../interface/IFeature.js';
-import type { FeatureContainer } from '../../interface/IFeatureContainer.js';
+import type { IFeature, IngestResult, ToObjectWithPath } from '../interface/IFeature.js';
+import type { FeatureContainer } from '../interface/IFeatureContainer.js';
 import { get } from 'lodash-es';
 
 
@@ -22,6 +22,14 @@ export abstract class AFeature<T extends {}|Record<string, any> = {}, Path exten
 
     private getElementByLookupIfPresent(baseEl: any) {
         return this.lookup ? get(baseEl, this.lookup) : baseEl;
+    }
+
+    public getSchema(): T {
+        return this.schema;
+    }
+
+    public getPath(): Path {
+        return this.lookup;
     }
 
     public verifyObject(element: any): element is ToObjectWithPath<Path, From> {

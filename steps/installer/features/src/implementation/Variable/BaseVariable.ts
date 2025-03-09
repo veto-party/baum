@@ -1,20 +1,21 @@
 import type { FromSchema } from "json-schema-to-ts";
 import { definitions } from "../../utils/definition.js";
-import { AMergeFeature } from "../abstract/AMergeFeature.js";
 import { CachedFN } from "@veto-party/baum__core";
 import type { IngestResult } from "../../interface/IFeature.js";
 import { generatePassword } from "./utils/generatePassword.js";
-import { isAbsolute, join,  } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { readFile, stat } from "node:fs/promises";
-import { isEqual } from "lodash-es";
+import { AKeyOverrideFeature } from "../../abstract/AMergeFeature/AKeyOverride/AKeyOverride.js";
+import { cloneDeep } from "lodash-es";
+import { definition } from "./definition.js";
 
-export class VariableFeature extends AMergeFeature<typeof definitions.properties.variable, 'variable'> {
+export class BaseVariableFeature extends AKeyOverrideFeature<typeof definition, 'variable'> {
     constructor() {
-        super(definitions.properties.variable, 'variable' as const);
+        super(definition, 'variable' as const);
     }
 
     @CachedFN(true, [true, true, false])
-    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definitions.properties.variable>[string]) {
+    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definition>[string]) {
 
         const resolvedDefinition = { ...item };
 
@@ -41,7 +42,9 @@ export class VariableFeature extends AMergeFeature<typeof definitions.properties
         return resolvedDefinition;
     }
 
-    protected async mergeLayers(base: FromSchema<typeof definitions.properties.variable>|undefined, layers: IngestResult<FromSchema<typeof definitions.properties.variable>>[]) {
+    protected async mergeLayers(base: FromSchema<typeof definitions.properties.variable>|undefined, originalLayers: IngestResult<FromSchema<typeof definitions.properties.variable>>[]) {
+
+        const layers = cloneDeep(originalLayers);
         
         // Prepare layers.
         for (const key in layers) {
@@ -54,20 +57,7 @@ export class VariableFeature extends AMergeFeature<typeof definitions.properties
             }
         }
 
-        let newLayer = { ...base ?? {}};
-
-        // Start merging layers.
-        for (const layer of layers) {
-            for (const key in layer.item) {
-                if (!isEqual(layer.item[key], newLayer[key])) {
-                    console.warn(`Key "${key}" in layer already present overriding it!`);
-                }
-
-                newLayer[key] = layer.item[key];
-            }
-        }
-
-        return newLayer;
+        return super.mergeLayers(base, layers);
     }
 
 }

@@ -1,9 +1,13 @@
 import type { FromSchema } from 'json-schema-to-ts';
-import type { IFeature, IngestResult } from '../../interface/IFeature.js';
+import type { IngestResult } from '../../interface/IFeature.js';
 import type { FeatureContainer } from '../../interface/IFeatureContainer.js';
-import { AFeature } from './AFeature.js';
+import { AFeature } from '../AFeature.js';
 
-export abstract class AMergeFeature<T extends {}|Record<string, any> = {}, Path extends string|undefined = undefined, From = T extends {} ? any[]|any : FromSchema<T>> extends AFeature<T, Path, From> implements IFeature<T, Path, From> {
+export abstract class AMergeFeature<
+    T extends {}|Record<string, any> = {}, 
+    Path extends string|undefined = undefined, 
+    From = T extends {} ? any[]|any : FromSchema<T>
+> extends AFeature<T, Path, From> {
 
     protected constructor(
         schema: T = {} as any,

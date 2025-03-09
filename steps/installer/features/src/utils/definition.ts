@@ -17,9 +17,9 @@ const defaultObjectTypes = {
   ]
 } as const;
 
-const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]\\-]*$';
-const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
-const definitionDefinitionPattern = '^[a-z0-9_]*$';
+export const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]\\-]*$';
+export const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
+export const definitionDefinitionPattern = '^[a-z0-9_]*$';
 
 const bindingDefinition = {
   type: 'object',

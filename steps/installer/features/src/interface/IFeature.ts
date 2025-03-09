@@ -9,18 +9,13 @@ export type IngestResult<T> = {
 
 export type ToObjectWithPath<Path extends string|undefined, Target> =   
     // No path is given, return target
-    Path extends undefined ? Target : 
+    Path extends undefined ? Transformer<Target>: 
     // Path is given and contains . : return Key value pair recurisive 
     Path extends `${infer U}.${infer Rest}` ? Record<U, ToObjectWithPath<Rest, Target>> :
     // Path is given contain contains array access : return never, since we do not want to allow array access (for now).
     Path extends `${infer U}[${infer index}]${infer Rest}` ? never :
     Path extends string ? Record<Path, Target> :
     never;
-
-
-type TypeContainer<Path extends string|undefined, From> = {
-    ObjectWithPath: ToObjectWithPath<Path, From>;
-}
 
 export interface IFeature<T extends Record<string, any>|{} = {}, Path extends string|undefined = undefined, From = T extends {} ? any[]|any : FromSchema<T>> {
     /**
@@ -30,6 +25,10 @@ export interface IFeature<T extends Record<string, any>|{} = {}, Path extends st
      * @param element 
      */
     verifyObject(element: any): element is ToObjectWithPath<Path, From>;
+
+    getSchema(): T;
+
+    getPath(): Path;
 
     /**
      * This method is to be overridden, if a feature needs to merge data.
