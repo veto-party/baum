@@ -4,13 +4,19 @@ type ComputedKeys<T> = keyof T;
 
 const generateKey = (key: string) => `storage__cache__${key}`;
 
+type TypeTuple<T extends any[], Type, R extends Type[] = []> =
+  T['length'] extends 0 ? R : 
+  T extends [infer U] ? TypeTuple<[], Type, [...R, Type]> : 
+  T extends [infer U, ...infer Rest] ? TypeTuple<Rest, Type, [...R, Type]> | R :
+  never;
+
 export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) => {
   if (forCallbackKey !== undefined) {
     (scope as any)[generateKey(forCallbackKey.toString())] = [];
   }
 };
 
-export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsIgnore?: boolean[]) => {
+export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: TypeTuple<Parameters<T>, boolean|undefined>) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 
@@ -26,8 +32,8 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
 
       context.value = async function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
         let lookupArgs = [...givenArgs];
-        if (paramsIgnore !== undefined) {
-          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsIgnore?.[index]));
+        if (paramsInclude !== undefined) {
+          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsInclude?.[index]));
         }
 
         this[generateKey(__propertyKey)] ??= [];
@@ -74,8 +80,8 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
         const storage: [[T, ...any[]], any][] = this[`storage__cache__${__propertyKey}`];
 
         let lookupArgs = [...givenArgs];
-        if (paramsIgnore !== undefined) {
-          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsIgnore?.[index]));
+        if (paramsInclude !== undefined) {
+          lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsInclude?.[index]));
         }
 
         const currentResult = storage.filter((current) => isEqual(current[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
