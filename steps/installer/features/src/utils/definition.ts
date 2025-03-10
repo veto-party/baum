@@ -1,22 +1,5 @@
 import { asConst } from 'json-schema-to-ts';
 
-const defaultObjectTypes = {
-  anyOf: [
-    {
-      type: 'boolean'
-    },
-    {
-      type: 'string'
-    },
-    {
-      type: 'number'
-    },
-    {
-      type: 'object'
-    }
-  ]
-} as const;
-
 export const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
 export const definitionDefinitionPattern = '^[a-z0-9_]*$';
 

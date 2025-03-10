@@ -1,6 +1,6 @@
 import type { FromSchema } from "json-schema-to-ts";
 import { BindingFeature } from "../Binding/Binding.js";
-import { GroupFeature } from "../GroupFeature/GroupFeature.js";
+import { GroupFeature } from "../../abstract/GroupFeature/GroupFeature.js";
 import { baseDefinition, definition } from "./definition.js";
 import { BaseVariableFeature } from "./BaseVariable.js";
 import { AMergeFeature } from "../../abstract/AMergeFeature/AMergeFeature.js";

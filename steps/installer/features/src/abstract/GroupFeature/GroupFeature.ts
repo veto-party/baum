@@ -1,5 +1,5 @@
 import { IFeature } from "../../interface/IFeature.js";
-import { AFeature } from "../../abstract/AFeature.js";
+import { AFeature } from "../AFeature.js";
 import { FromSchema } from "json-schema-to-ts";
 import { cloneDeep, get, set, merge, toPath } from "lodash-es";
 

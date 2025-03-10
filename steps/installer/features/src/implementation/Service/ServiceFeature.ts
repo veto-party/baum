@@ -1,6 +1,6 @@
 import type { FromSchema } from "json-schema-to-ts";
 import { BindingFeature } from "../Binding/Binding.js";
-import { GroupFeature } from "../GroupFeature/GroupFeature.js";
+import { GroupFeature } from "../../abstract/GroupFeature/GroupFeature.js";
 import { definition } from "./definition.js";
 
 export class ServiceFeature<T extends {}|Record<string, any> = typeof definition> extends GroupFeature<T, 'service', FromSchema<T>> {
