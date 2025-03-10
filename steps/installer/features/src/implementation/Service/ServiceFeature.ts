@@ -3,22 +3,17 @@ import { BindingFeature } from "../Binding/Binding.js";
 import { GroupFeature } from "../GroupFeature/GroupFeature.js";
 import { definition } from "./definition.js";
 
-export class ServiceFeature<
-    T extends {}|Record<string, any> = {}, 
-    Path extends string|undefined = undefined, 
-    From = T extends {} ? any[]|any : FromSchema<T>
-> extends GroupFeature<T, Path, From> {
+export class ServiceFeature<T extends {}|Record<string, any> = typeof definition> extends GroupFeature<T, 'service', 'properties', FromSchema<T>> {
 
     protected do_construct(value: any, path: string|undefined) {
-        return new ServiceFeature(value, path);
+        return new ServiceFeature(value, 'service', 'properties') as any;
     }
 
     public static makeInstance() {
-        const result = (new ServiceFeature(definition, 'definition')).appendFeature(new BindingFeature());
+        const result = (new ServiceFeature(definition, 'service', undefined)).appendFeature(new BindingFeature());
 
-        type T = typeof result extends GroupFeature<infer T, infer Path, infer From> ? T : never;
-        type Path = typeof result extends GroupFeature<infer T, infer Path, infer From> ? Path : never;
+        type T = typeof result extends infer A ? A extends GroupFeature<infer T, infer Path, infer WritePath, infer Last> ? T : never : never;
 
-        return result as ServiceFeature<T, Path>;
+        return result as unknown as ServiceFeature<T>;
     }
 }

@@ -7,15 +7,15 @@ import { isAbsolute, join } from 'node:path';
 import { readFile, stat } from "node:fs/promises";
 import { AKeyOverrideFeature } from "../../abstract/AMergeFeature/AKeyOverride/AKeyOverride.js";
 import { cloneDeep } from "lodash-es";
-import { definition } from "./definition.js";
+import { baseDefinition } from "./definition.js";
 
-export class BaseVariableFeature extends AKeyOverrideFeature<typeof definition, 'variable'> {
+export class BaseVariableFeature extends AKeyOverrideFeature<typeof baseDefinition, 'variable'> {
     constructor() {
-        super(definition, 'variable' as const);
+        super(baseDefinition, 'variable' as const);
     }
 
     @CachedFN(true, [true, true, false])
-    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definition>[string]) {
+    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof baseDefinition>) {
 
         const resolvedDefinition = { ...item };
 
