@@ -17,63 +17,9 @@ const defaultObjectTypes = {
   ]
 } as const;
 
-export const variableAccessorPattern = '^[a-zA-Z0-9_\\.\\[\\]\\-]*$';
 export const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
 export const definitionDefinitionPattern = '^[a-z0-9_]*$';
 
-const bindingDefinition = {
-  type: 'object',
-  patternProperties: {
-    '.*': {
-      type: 'string',
-      pattern: variableAccessorPattern
-    }
-  },
-  additionalProperties: false
-} as const;
-
-const generateVariableTypes = (type_required = true) =>
-  ({
-    type: 'object',
-    properties: {
-      type: {
-        type: 'string',
-        enum: ['global', 'scoped', 'scoped-name']
-      },
-      case: {
-        type: 'string',
-        enum: ['snake']
-      },
-      static: {
-        type: 'boolean'
-      },
-      secret: {
-        type: 'boolean'
-      },
-      default: defaultObjectTypes,
-      generated: {
-        type: 'number'
-      },
-      file: {
-        type: 'string'
-      },
-      binding: bindingDefinition
-    },
-    required: type_required ? (['type'] as const) : [],
-    additionalProperties: false,
-    if: {
-      properties: {
-        type: {
-          const: 'scoped-name'
-        }
-      }
-    },
-    then: {
-      not: {
-        required: ['static', 'secret', 'default', 'case', 'binding']
-      }
-    }
-  }) as const;
 
 export const definitions = asConst({
   $schema: 'http://json-schema.org/draft-07/schema',
@@ -180,14 +126,6 @@ export const definitions = asConst({
     alias: {
       type: 'string'
     },
-    variable: {
-      type: 'object',
-      patternProperties: {
-        [variableDefinitionPattern]: generateVariableTypes(true)
-      },
-      additionalProperties: false
-    },
-    binding: bindingDefinition,
     service: {
       type: 'object',
       patternProperties: {
@@ -233,14 +171,14 @@ export const definitions = asConst({
                 }
               ]
             },
-            binding: bindingDefinition,
-            variable: {
-              type: 'object',
-              patternProperties: {
-                [variableDefinitionPattern]: generateVariableTypes(false)
-              },
-              additionalProperties: false
-            }
+            // binding: bindingDefinition,
+            // variable: {
+            //   type: 'object',
+            //   patternProperties: {
+            //     [variableDefinitionPattern]: generateVariableTypes(false)
+            //   },
+            //   additionalProperties: false
+            // }
           },
           required: ['type', 'definition'],
           additionalProperties: false

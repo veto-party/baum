@@ -9,7 +9,10 @@ export abstract class AKeyOverrideFeature<
     Path extends string|undefined = undefined, 
     From = T extends {} ? any[]|any : FromSchema<T>> extends AMergeFeature<T, Path, From
 > {
-    protected mergeLayers(base: any, layers: IngestResult<any>[]) {
+    /**
+     * @internal
+     */
+    public mergeLayers(base: any, layers: IngestResult<any>[]) {
         const newLayer = { ...base ?? {} };
         
         // Start merging layers.

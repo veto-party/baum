@@ -1,6 +1,8 @@
 
 import { asConst } from "json-schema-to-ts"
 
+export const variableAccessorPattern = '^[a-zA-Z0-9_]*$' as const;
+
 export const baseDefinition = asConst({
     type: 'object',
     properties: {
@@ -60,8 +62,8 @@ export const baseDefinition = asConst({
 export const definition = asConst({
     type: 'object',
     patternProperties: {
-        ['^[a-zA-Z0-9_]*$']: {
-           
+        [variableAccessorPattern]: {
+           type: 'object',
         }
     },
     additionalProperties: false

@@ -26,7 +26,6 @@ type ToDefinitionStructure<Path extends string|undefined, Target> =
 export class GroupFeature<
     T extends {}|Record<string, any> = {}, 
     Path extends string|undefined = undefined,
-    WritePath extends string|undefined = undefined,
     From = T extends {} ? any[]|any : FromSchema<T>
 > extends AFeature<T, Path, From> {
 
@@ -36,24 +35,20 @@ export class GroupFeature<
         additionalProperties: false
     } as const;
 
-    constructor(value: T, path: Path, private writePath: WritePath = undefined as WritePath) {
+    constructor(value: T, path: Path) {
         super(value, path)
     }
 
-    protected do_construct(newSchema: any, path: string|undefined): GroupFeature<any, Path, WritePath> {
-        return new GroupFeature<any, Path, WritePath>(newSchema, path as any, this.writePath as any);
+    protected do_construct(newSchema: any, path: string|undefined): GroupFeature<any, Path> {
+        return new GroupFeature<any, Path>(newSchema, path as any);
     }
 
-    protected get_write_path(): WritePath {
-        return this.writePath;
-    }
-
-    appendFeature<Feature extends IFeature<any, any, any>>(feature: Feature): Feature extends IFeature<infer A, infer B, infer U> ? GroupFeature<T & ToDefinitionStructure<B, A>, Path> : never {
+    appendFeature<WritePath extends string|undefined, Feature extends IFeature<any, any, any>>(writePath: WritePath, feature: Feature): Feature extends IFeature<infer A, infer B, infer _U> ? GroupFeature<T & ToDefinitionStructure<WritePath extends string ? B extends string ? `${WritePath}.${B}` : WritePath : B extends string ? B : never, A>, Path> : never {
 
         const oldSchemaCloned = cloneDeep(this.getSchema());
 
-        const newSchemaStructure = this.get_write_path() ? cloneDeep(
-            get(this.getSchema(), this.get_write_path()!)!,
+        const newSchemaStructure = writePath ? cloneDeep(
+            get(this.getSchema(), writePath)!,
         ) : cloneDeep(GroupFeature.basicSchemaStructure);
 
         toPath(feature.getPath() ?? '').reduce((prev, current) => {
@@ -61,8 +56,8 @@ export class GroupFeature<
             return prev[current].properties;
         }, (newSchemaStructure as any).properties as Record<string, any>);
 
-        const newResultingStructure = this.get_write_path() ? {} : newSchemaStructure;
-        this.get_write_path() && set(newResultingStructure, this.get_write_path()!, newSchemaStructure);
+        const newResultingStructure = writePath ? {} : newSchemaStructure;
+        writePath && set(newResultingStructure, writePath, newSchemaStructure);
 
         const newSchema = merge({}, newResultingStructure, oldSchemaCloned);
 

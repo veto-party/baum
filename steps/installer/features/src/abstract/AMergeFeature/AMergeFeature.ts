@@ -16,7 +16,10 @@ export abstract class AMergeFeature<
         super(schema, key);
     }
 
-    protected abstract mergeLayers(base: From|undefined, layers: IngestResult<From>[]): From;
+    /**
+     * @internal 
+     */
+    public abstract mergeLayers(base: From|undefined, layers: IngestResult<From>[]): From;
     
     public async ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<From>[]> {
         await this.verfiyBaseSchema();
