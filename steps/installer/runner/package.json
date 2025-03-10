@@ -4,7 +4,7 @@
     "main": "./src/index.ts",
     "dependencies": {
         "@veto-party/baum__core": "*",
-        "@veto-party/baum__steps__installer__features__afeature": "*"
+        "@veto-party/baum__steps__installer__features": "*"
     },
     "devDependencies": {
         "@veto-party/config": "*"

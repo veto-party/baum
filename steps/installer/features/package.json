@@ -1,5 +1,5 @@
 {
-    "name": "@veto-party/baum__steps__installer__features__afeature",
+    "name": "@veto-party/baum__steps__installer__features",
     "type": "module",
     "main": "./src/index.ts",
     "dependencies": {

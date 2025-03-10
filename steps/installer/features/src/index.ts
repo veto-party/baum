@@ -8,3 +8,8 @@ export { GroupFeature } from './abstract/GroupFeature/GroupFeature.js';
 export { ServiceFeature } from './implementation/Service/ServiceFeature.js';
 
 export { VariableFeature } from './implementation/Variable/Variable.js';
+export { BindingFeature } from './implementation/Binding/Binding.js';
+
+
+export { BaseInstaller } from './BaseInstaller.js';
+
