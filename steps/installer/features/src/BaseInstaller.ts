@@ -1,3 +1,4 @@
+
 import { FromSchema } from "json-schema-to-ts";
 import { GroupFeature } from "./abstract/GroupFeature/GroupFeature.js";
 import { definition } from "./definition.js";
@@ -26,7 +27,16 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
             .appendFeature('items.oneOf[1].properties' as const, new UpdateStrategy())
             .appendFeature('items.oneOf[1].properties' as const, ServiceFeature.makeInstance());
 
-        const data = installer.getSchema();
+        const obj: any[] = [];
+
+        if (installer.verifyObject(obj)) {
+            const child = obj[0];
+            
+            if (child.type === 'SERVICE') {
+                // child.binding['hello']
+            }
+        }
+
         return installer;
     }
 }
