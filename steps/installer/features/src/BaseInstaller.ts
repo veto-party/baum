@@ -19,13 +19,13 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
     public static makeInstance() {
         const installer = (new BaseInstaller(definition))
             .appendFeature<'items.properties', ReturnType<typeof VariableFeature.makeInstance>>('items.properties', VariableFeature.makeInstance())
-            .appendFeature('items.properties' as const, new BindingFeature())
-            .appendFeature('items.oneOf[1].properties' as const, new ExposeFeature())
-            .appendFeature('items.oneOf[1].properties' as const, new ScalingFeature())
-            .appendFeature('items.oneOf[1].properties' as const, new SystemUsageFeature())
-            .appendFeature('items.oneOf[1].properties' as const, new NetworkFeature())
-            .appendFeature('items.oneOf[1].properties' as const, new UpdateStrategy())
-            .appendFeature('items.oneOf[1].properties' as const, ServiceFeature.makeInstance());
+            // .appendFeature('items.properties' as const, new BindingFeature())
+            // .appendFeature('items.oneOf[1].properties' as const, new ExposeFeature())
+            // .appendFeature('items.oneOf[1].properties' as const, new ScalingFeature())
+            // .appendFeature('items.oneOf[1].properties' as const, new SystemUsageFeature())
+            // .appendFeature('items.oneOf[1].properties' as const, new NetworkFeature())
+            // .appendFeature('items.oneOf[1].properties' as const, new UpdateStrategy())
+            // .appendFeature('items.oneOf[1].properties' as const, ServiceFeature.makeInstance());
 
         const obj: any[] = [];
 
