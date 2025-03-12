@@ -2,7 +2,6 @@ import { asConst } from 'json-schema-to-ts';
 
 export const variableDefinitionPattern = '^[a-zA-Z0-9_]*$';
 
-
 export const definition = asConst({
   type: 'array',
   items: {
