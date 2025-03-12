@@ -4,14 +4,14 @@ import type { FeatureContainer } from '../../interface/IFeatureContainer.js';
 import { AFeature } from '../AFeature.js';
 
 export abstract class AMergeFeature<
-    T extends {}|Record<string, any> = {}, 
-    Path extends string|never = never, 
+    T extends {}|Record<string, any>, 
+    Path , 
     From = T extends {} ? any[]|any : FromSchema<T>
 > extends AFeature<T, Path, From> {
 
     protected constructor(
-        schema: T = {} as any,
-        key: Path extends never ? undefined : Path = undefined as any
+        schema: T,
+        key: Path extends string ? Path : undefined
     ) {
         super(schema, key);
     }

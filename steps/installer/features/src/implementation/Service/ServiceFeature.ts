@@ -15,9 +15,9 @@ export class ServiceFeature<T extends {}|Record<string, any> = typeof definition
     }
 
     public static makeInstance() {
-        const result = (new ServiceFeature(definition)).appendFeature<never, typeof BindingFeature>(undefined, new BindingFeature());
+        const result = (new ServiceFeature(definition)).appendFeature<undefined, BindingFeature>(undefined, new BindingFeature());
 
-        type T = typeof result extends infer A ? A extends GroupFeature<infer T, infer Path, infer Last> ? T : never : never;
+        type T = typeof result extends infer A ? A extends GroupFeature<infer T, infer Path, infer Last> ? T : unknown : unknown;
 
         return result as unknown as ServiceFeature<T>;
     }

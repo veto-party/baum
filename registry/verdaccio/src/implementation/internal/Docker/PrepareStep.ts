@@ -47,7 +47,7 @@ export class PrepareStep extends DockerBuildStep {
 
     //config.VERDACCIO_PUBLIC_URL = this.public_address;
 
-    config.packages = {};
+    config.packages;
 
     prefixes.forEach((prefix) => {
       config.packages[prefix] = {

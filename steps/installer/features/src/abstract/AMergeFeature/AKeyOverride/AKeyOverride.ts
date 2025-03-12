@@ -5,8 +5,8 @@ import type { FromSchema } from "json-schema-to-ts";
 
 
 export abstract class AKeyOverrideFeature<
-    T extends {}|Record<string, any> = {}, 
-    Path extends string|never = never, 
+    T extends {}|Record<string, any>, 
+    Path, 
     From = T extends {} ? any[]|any : FromSchema<T>
 > extends AMergeFeature<T, Path, From> {
     /**

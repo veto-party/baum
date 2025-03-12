@@ -8,7 +8,7 @@ import { GroupCollection } from './GroupCollection.js';
 export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   private collection: ICollection = new GroupCollection([]);
 
-  private oldFiles: Record<string, string> = {};
+  private oldFiles: Record<string, string>;
 
   constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
 

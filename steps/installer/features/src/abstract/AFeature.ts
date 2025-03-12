@@ -1,18 +1,18 @@
 import AJV from 'ajv';
 import { CachedFN } from '@veto-party/baum__core';
 import type { FromSchema } from 'json-schema-to-ts';
-import type { IFeature, IngestResult, ToObjectWithPath } from '../interface/IFeature.js';
+import type { IFeature, IngestResult, ToDefinitionStructure } from '../interface/IFeature.js';
 import type { FeatureContainer } from '../interface/IFeatureContainer.js';
 import { get } from 'lodash-es';
 
 
-export abstract class AFeature<T extends {}|Record<string, any> = {}, Path extends string|never = never, From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {
+export abstract class AFeature<T extends {}|Record<string, any>, Path , From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {
 
     private ajv = new AJV.default();
 
     protected constructor(
-        private schema: T = {} as any,
-        private lookup: Path extends never ? undefined : Path = undefined as any
+        private schema: T,
+        private lookup: Path extends string ? Path : undefined
      ) {}
 
     @CachedFN(true)
@@ -21,18 +21,18 @@ export abstract class AFeature<T extends {}|Record<string, any> = {}, Path exten
     }
 
     private getElementByLookupIfPresent(baseEl: any) {
-        return this.lookup ? get(baseEl, this.lookup) : baseEl;
+        return this.lookup ? get(baseEl, this.lookup as string) : baseEl;
     }
 
     public getSchema(): T {
         return this.schema;
     }
 
-    public getPath(): Path extends never ? undefined : Path {
+    public getPath(): Path extends string ? Path : undefined {
         return this.lookup as any;
     }
 
-    public verifyObject(element: any): element is ToObjectWithPath<Path, From> {
+    public verifyObject(element: any): element is ToDefinitionStructure<Path, From> {
         return this.ajv.validate(this.schema, this.getElementByLookupIfPresent(element));
     }
 

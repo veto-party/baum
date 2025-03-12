@@ -4,6 +4,6 @@ import { definition } from "./definition.js";
 
 export class BindingFeature extends AKeyOverrideFeature<typeof definition, 'binding', FromSchema<typeof definition>> {
     constructor() {
-        super(definition, 'binding' as const);
+        super(definition, 'binding');
     }
 }
