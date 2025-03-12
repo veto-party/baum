@@ -1,12 +1,16 @@
+import { asConst } from "json-schema-to-ts";
 import { variableAccessorPattern } from "../Variable/definition.js";
 
-export const definition = {
-    type: 'object',
-    patternProperties: {
-      '.*': {
-        type: 'string',
-        pattern: variableAccessorPattern
-      }
-    },
-    additionalProperties: false
-  } as const;
+
+export const definitionDefinitionPattern = '^[a-z0-9_]*$';
+
+export const definition = asConst({
+  type: 'object',
+  patternProperties: {
+    [definitionDefinitionPattern]: {
+      type: 'string',
+      pattern: variableAccessorPattern
+    }
+  },
+  additionalProperties: false
+});

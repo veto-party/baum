@@ -1,38 +1,59 @@
 import { IFeature } from "../../interface/IFeature.js";
 import { AFeature } from "../AFeature.js";
-import { FromSchema } from "json-schema-to-ts";
-import { cloneDeep, get, set, merge, toPath } from "lodash-es";
+import { asConst, FromSchema } from "json-schema-to-ts";
+import { cloneDeep, set, merge, toPath } from "lodash-es";
 
-type MakeTuple<T, N extends number = 1, Items extends any[] = []> = N extends Items['length'] ? [...Items, T] : MakeTuple<T, N, [{}, ...Items]>;
+type StringToNumber<S extends string> = 
+  S extends "0" ? 0 :
+  S extends "1" ? 1 :
+  S extends "2" ? 2 :
+  S extends "3" ? 3 :
+  S extends "4" ? 4 :
+  S extends "5" ? 5 :
+  S extends "6" ? 6 :
+  S extends "7" ? 7 :
+  S extends "8" ? 8 :
+  S extends "9" ? 9 :
+  never;
+
  
-type ToDefinitionStructure<Path extends string|undefined, Target> =
+type MakeTuple<T, N extends number = 1, Items extends any[] = []> = N extends Items['length'] ? Items extends [infer _, ...infer All] ? [...All, T] : never : MakeTuple<T, N, [never, ...Items]>;
+
+type KeyValuePair<A extends string|never, Target> = { [key in A]: Target }; 
+
+type ToDefinitionStructure<Path extends string|never, Target> =
     // No path is given, return target
-    Path extends undefined ? never: 
-    Path extends '' ? Target :
-    // Path is given and contains . : return Key value pair recurisive 
-    Path extends `${infer U}.${infer Rest}` ? Record<U, ToDefinitionStructure<Rest, Target>> :
+    Path extends never ? never: 
+
+    Path extends '' ? Target : 
+    // Aray witn prefix
+
+
+    Path extends `${infer U}.${infer Rest}` ? ToDefinitionStructure<U, ToDefinitionStructure<Rest, Target>> :
+    Path extends `${infer U}["${infer Path}"].${infer Rest}` ?  ToDefinitionStructure<U, KeyValuePair<Path, ToDefinitionStructure<Rest, Target>>> :
+    Path extends `${infer U}[${infer index}].${infer Rest}` ? ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> : 
     // Path is given contain contains array access : return never, since we do not want to allow array access (for now).
-    Path extends `[${infer index}]${infer Rest}` ? index extends number ? MakeTuple<ToDefinitionStructure<Rest, Target>, index> : never :
-    Path extends string ? {
-        type: 'object';
-        properties: Record<Path, Target>;
-        additionalProperties: false;
-    } :
-    never;
+    Path extends `["${infer Path}"].${infer Rest}` ?  ToDefinitionStructure<Path, ToDefinitionStructure<Rest, Target>> :
+    Path extends `[${infer index}].${infer Rest}` ? MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>> : 
+    // Path is given and contains . : return Key value pair recurisive 
+
+    Path extends `["${infer Path}"]` ? KeyValuePair<Path, Target> :
+    Path extends `[${infer index}]` ? MakeTuple<Target, StringToNumber<index>> :
+    KeyValuePair<Path, Target>;
+
+
+export type A = 'A["hello"].properties';
+export type B = 'data';
+
+type Resolved = ToDefinitionStructure<`${A}.${B}`, true>;
 
 export class GroupFeature<
     T extends {}|Record<string, any> = {}, 
-    Path extends string|undefined = undefined,
+    Path extends string|never = never,
     From = T extends {} ? any[]|any : FromSchema<T>
 > extends AFeature<T, Path, From> {
 
-    private static basicSchemaStructure = {
-        type: 'object',
-        properties: {},
-        additionalProperties: false
-    } as const;
-
-    constructor(value: T, path: Path) {
+    protected constructor(value: T, path: Path extends never ? undefined : Path) {
         super(value, path)
     }
 
@@ -40,25 +61,22 @@ export class GroupFeature<
         return new GroupFeature<any, Path>(newSchema, path as any);
     }
 
-    appendFeature<WritePath extends string|undefined, Feature extends IFeature<any, any, any>>(writePath: WritePath, feature: Feature): Feature extends IFeature<infer A, infer B, infer _U> ? GroupFeature<T & ToDefinitionStructure<WritePath extends string ? B extends string ? `${WritePath}.${B}` : WritePath : B extends string ? B : never, A>, Path> : never {
+    appendFeature<
+        WritePath extends string|never, 
+        Feature extends IFeature<any, any, any>>(
+            writePath: WritePath extends never ? undefined : WritePath, 
+            feature: Feature
+        ): Feature extends IFeature<infer D, infer B, infer A> ? GroupFeature<
+            ReturnType<typeof asConst<T & ToDefinitionStructure<WritePath extends never ? B : B extends never ? WritePath : `${WritePath}.${B}`, D>>>, 
+            Path, 
+            FromSchema<T & ToDefinitionStructure<WritePath extends never ? B : B extends never ? WritePath : `${WritePath}.${B}`, D>>
+        > : never {
 
         const oldSchemaCloned = cloneDeep(this.getSchema());
 
-        const newSchemaStructure = writePath ? cloneDeep(
-            get(this.getSchema(), writePath)!,
-        ) : cloneDeep(GroupFeature.basicSchemaStructure);
+        set(oldSchemaCloned, toPath(`${writePath ? `${writePath}.` : ''}${this.getPath()}`), feature.getSchema());
 
-        toPath(feature.getPath() ?? '').reduce((prev, current) => {
-            prev[current] = cloneDeep(GroupFeature.basicSchemaStructure);
-            return prev[current].properties;
-        }, (newSchemaStructure as any).properties as Record<string, any>);
-
-        const newResultingStructure = writePath ? {} : newSchemaStructure;
-        writePath && set(newResultingStructure, writePath, newSchemaStructure);
-
-        const newSchema = merge({}, newResultingStructure, oldSchemaCloned);
-
-        return this.do_construct(newSchema, this.getPath()) as any;
+        return this.do_construct(oldSchemaCloned, this.getPath()) as any;
     }
 
 

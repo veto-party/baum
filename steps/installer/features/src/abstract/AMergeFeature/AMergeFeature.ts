@@ -5,13 +5,13 @@ import { AFeature } from '../AFeature.js';
 
 export abstract class AMergeFeature<
     T extends {}|Record<string, any> = {}, 
-    Path extends string|undefined = undefined, 
+    Path extends string|never = never, 
     From = T extends {} ? any[]|any : FromSchema<T>
 > extends AFeature<T, Path, From> {
 
     protected constructor(
         schema: T = {} as any,
-        key: Path = undefined as Path
+        key: Path extends never ? undefined : Path = undefined as any
     ) {
         super(schema, key);
     }

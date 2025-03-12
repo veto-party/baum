@@ -10,7 +10,7 @@ import { NetworkFeature } from "./implementation/Network/NetworkFeature.js";
 import { UpdateStrategy } from "./implementation/UpdateStrategyFeature/UpdateStrategyFeature.js";
 import { ServiceFeature } from "./implementation/Service/ServiceFeature.js";
 
-export class BaseInstaller<T extends typeof definition = typeof definition> extends GroupFeature<T, undefined, FromSchema<T>> {
+export class BaseInstaller<T extends typeof definition = typeof definition> extends GroupFeature<T, never, FromSchema<T>> {
     protected constructor(value: any)  {
         super(value, undefined);
     }
@@ -19,15 +19,14 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
         const installer = (new BaseInstaller(definition))
             .appendFeature('items.properties', VariableFeature.makeInstance())
             .appendFeature('items.properties', new BindingFeature())
-            .appendFeature('items.services[1].properties', new ExposeFeature())
-            .appendFeature('items.services[1].properties', new ScalingFeature())
-            .appendFeature('items.services[1].properties', new SystemUsageFeature())
-            .appendFeature('items.services[1].properties', new NetworkFeature())
-            .appendFeature('items.services[1].properties', new UpdateStrategy())
-            .appendFeature('items.services[1].properties', ServiceFeature.makeInstance());
+            .appendFeature('items.oneOf[1].properties', new ExposeFeature())
+            .appendFeature('items.oneOf[1].properties', new ScalingFeature())
+            .appendFeature('items.oneOf[1].properties', new SystemUsageFeature())
+            .appendFeature('items.oneOf[1].properties', new NetworkFeature())
+            .appendFeature('items.oneOf[1].properties', new UpdateStrategy())
+            .appendFeature('items.oneOf[1].properties', ServiceFeature.makeInstance());
 
-        type T = typeof installer extends GroupFeature<infer T, infer _Path, infer _From> ? T : never;
-
-        return installer as unknown as BaseInstaller<T>;
+        const data = installer.getSchema();
+        return installer;
     }
 }

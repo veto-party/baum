@@ -1,8 +1,7 @@
 import type { FromSchema } from "json-schema-to-ts";
 import { BindingFeature } from "../Binding/Binding.js";
 import { GroupFeature } from "../../abstract/GroupFeature/GroupFeature.js";
-import { baseDefinition, definition } from "./definition.js";
-import { BaseVariableFeature } from "./BaseVariable.js";
+import { definition, variableAccessorPattern } from "./definition.js";
 import { AMergeFeature } from "../../abstract/AMergeFeature/AMergeFeature.js";
 import { FeatureContainer } from "../../interface/IFeatureContainer.js";
 import { IngestResult } from "../../interface/IFeature.js";
@@ -14,15 +13,15 @@ import { readFile, stat } from "node:fs/promises";
 import { AKeyOverrideFeature } from "../../abstract/AMergeFeature/AKeyOverride/AKeyOverride.js";
 
 export class VariableFeature<
-    T extends Record<string, any> = typeof definition
+    T extends typeof definition = typeof definition
 > extends GroupFeature<T, 'variable', FromSchema<T>> {
 
-    protected constructor(value: T) {
+    protected constructor(value: any) {
         super(value, 'variable');
     }
 
     @CachedFN(true, [true, true, false])
-    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof baseDefinition>) {
+    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definition>[string]) {
 
         const resolvedDefinition = { ...item };
 
@@ -54,17 +53,22 @@ export class VariableFeature<
     }
 
     public static makeInstance() {
-        const result = (new VariableFeature(definition)).appendFeature('patternProperties.^[a-zA-Z0-9_]*$', new BaseVariableFeature()).appendFeature('patternProperties.^[a-zA-Z0-9_]*$.properties', new BindingFeature());
+        const result = (new VariableFeature(definition))//.appendFeature('patternProperties.["^[a-zA-Z0-9_]*$"]', new BaseVariableFeature());
+            .appendFeature(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
 
-        type T = typeof result extends GroupFeature<infer T, infer _Path, infer _From> ? T : never;
 
-        return result as unknown as VariableFeature<T>;
+        const obj = {};
+        if (result.verifyObject(obj)) {
+            obj.variable.test.binding?.['test'];
+        }
+
+        return result;
     }
 
     protected async mergeLayers(base: any|undefined, originalLayers: any[]): Promise<any[]> {
 
         const layers = cloneDeep(originalLayers);
-        
+
         // Prepare layers.
         for (const key in layers) {
             for (const variableKey in layers[key].item) {
@@ -78,7 +82,7 @@ export class VariableFeature<
 
         return (AKeyOverrideFeature<T, 'variable', FromSchema<T>>).prototype.mergeLayers(base, layers);
     }
-    
+
 
     public async ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<FromSchema<T>>[]> {
         return await (AMergeFeature<T, 'variable', FromSchema<T>>).prototype.ingestObject.call(this, objects) as unknown as any;

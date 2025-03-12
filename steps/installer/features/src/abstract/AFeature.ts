@@ -6,13 +6,13 @@ import type { FeatureContainer } from '../interface/IFeatureContainer.js';
 import { get } from 'lodash-es';
 
 
-export abstract class AFeature<T extends {}|Record<string, any> = {}, Path extends string|undefined = undefined, From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {
+export abstract class AFeature<T extends {}|Record<string, any> = {}, Path extends string|never = never, From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {
 
     private ajv = new AJV.default();
 
     protected constructor(
         private schema: T = {} as any,
-        private lookup: Path = undefined as any
+        private lookup: Path extends never ? undefined : Path = undefined as any
      ) {}
 
     @CachedFN(true)
@@ -28,8 +28,8 @@ export abstract class AFeature<T extends {}|Record<string, any> = {}, Path exten
         return this.schema;
     }
 
-    public getPath(): Path {
-        return this.lookup;
+    public getPath(): Path extends never ? undefined : Path {
+        return this.lookup as any;
     }
 
     public verifyObject(element: any): element is ToObjectWithPath<Path, From> {

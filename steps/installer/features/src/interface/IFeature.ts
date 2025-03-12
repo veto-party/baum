@@ -17,7 +17,7 @@ export type ToObjectWithPath<Path extends string|undefined, Target> =
     Path extends string ? Record<Path, Target> :
     never;
 
-export interface IFeature<T extends Record<string, any>|{} = {}, Path extends string|undefined = undefined, From = T extends {} ? any[]|any : FromSchema<T>> {
+export interface IFeature<T extends Record<string, any>|{} = {}, Path extends string|never = never, From = T extends {} ? any[]|any : FromSchema<T>> {
     /**
      * Verifies an object.
      * Might throw an error on invalid, or return false. 
@@ -28,7 +28,7 @@ export interface IFeature<T extends Record<string, any>|{} = {}, Path extends st
 
     getSchema(): T;
 
-    getPath(): Path;
+    getPath(): Path extends never ? undefined : Path;
 
     /**
      * This method is to be overridden, if a feature needs to merge data.

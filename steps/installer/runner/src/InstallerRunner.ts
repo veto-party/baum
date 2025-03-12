@@ -40,19 +40,16 @@ export class InstallerRunner implements IStep {
         const metadata = metadatas.unshift();
 
 
-        this.installer.ingestObject({
+        const result = this.installer.ingestObject({
             root: {
                 children: metadatas.map(([metadata]) => metadata),
-                fe3ature: metadata
+                feature: metadata
             },
             ...Object.fromEntries(metadatas.map(([key, metadata]) => [key, {
                 children: [],
                 feature: metadata
             }] as const))
         });
-
-
-        this.installer.
 
     }
 
