@@ -54,7 +54,7 @@ export class VariableFeature<
 
     public static makeInstance() {
         const result = (new VariableFeature(definition))//.appendFeature('patternProperties.["^[a-zA-Z0-9_]*$"]', new BaseVariableFeature());
-            .appendFeature<`patternProperties.["${typeof variableAccessorPattern}"].properties`, BindingFeature>(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
+            .appendFeature(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
 
         return result;
     }

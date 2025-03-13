@@ -4,6 +4,7 @@ export const definition = asConst({
   type: 'array',
   items: {
     type: 'object',
+    properties: {},
     oneOf: [{
       type: 'object',
       properties: {
