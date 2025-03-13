@@ -7,7 +7,18 @@ import { cloneDeep, set, toPath } from "lodash-es";
 
 const NOT_FOUND = Symbol('ehhh');
 
-export type MergeTuple<T, Original extends any[], N extends number = 1, Items extends any[] = []> = N extends Items['length'] ? [...Items, T & Original[Items['length']]] : MergeTuple<T, Original, N, [...Items, Original[Items['length']], ]>;
+export type MergeTuple<T, Original extends any[], N extends number = 1, Items extends any[] = []> = 
+    N extends Items['length'] ? 
+        Original extends [infer Current, ...infer Rest] ? 
+            [...Items, Current & T, ...Rest] : 
+        Original extends [infer Current] ?
+            [...Items, T & Current] :
+        [...Items, T] : 
+    Original extends [infer Current, ...infer Rest] ? 
+        MergeTuple<T, Rest, N, [...Items, Current]> :
+    Original extends [infer Current] ? 
+        MergeTuple<T, [], N, [...Items, Current]> : 
+    MergeTuple<T, [], N, [...Items, void]>; 
 
 type GetDefinitionStructure<Target, Path> =
         // No path is given, return target
@@ -15,36 +26,36 @@ type GetDefinitionStructure<Target, Path> =
 
     Target extends typeof NOT_FOUND ? Target : 
 
-    Path extends string ? // 1
+    Path extends string ?
 
-        Path extends '' ? // 2 
-            Target :  // 1
-        Path extends keyof Target ? // 2
-            Target[Path] : // 1
+        Path extends '' ? 
+            Target :  
+        Path extends keyof Target ?
+            Target[Path] : 
         // Path is given and contains . : return Key value pair recurisive 
-        Path extends `["${infer Path}"]` ?  // 2
-            Path extends keyof Target ?  // 3
-                Target[Path] : // 2
-            typeof NOT_FOUND & { reason: 'PATH_NOT_FOUND'} : // 1
-        Path extends `[${infer index}]` ? // 2
-            Target extends any[] ? // 3
-            StringToNumber<index, number, number> extends infer INDEX ?  // 4
-                INDEX extends number ? // 5
-                    Target[INDEX] : // 4
-                    never :  // 3
-                never : // 2
-            typeof NOT_FOUND & { reason: 'INDEX_NOT_FOUND' } : // 1
+        Path extends `["${infer Path}"]` ?  
+            Path extends keyof Target ?  
+                Target[Path] : 
+            typeof NOT_FOUND & { reason: 'PATH_NOT_FOUND'} : 
+        Path extends `[${infer index}]` ? 
+            Target extends any[] ? 
+            StringToNumber<index, number, number> extends infer INDEX ? 
+                INDEX extends number ? 
+                    Target[INDEX] : 
+                    never : 
+                never : 
+            typeof NOT_FOUND & { reason: 'INDEX_NOT_FOUND' } : 
 
-        Path extends `${infer U}["${infer Path}"]"` ? // 2
-            GetDefinitionStructure<Target, U> extends infer AResult ?  // 3
-                Path extends infer APath ?  // 4
-                    APath extends keyof AResult ? // 5 
-                        AResult[APath] : // 4
-                    typeof NOT_FOUND & { reason: '1' } :  // 3
-                typeof NOT_FOUND & { reason: '2' } : // 2
-            typeof NOT_FOUND & { reason: '2_1' } : // 1
-        Path extends `${infer U}[${infer index}]` ?  // 2
-            GetDefinitionStructure<Target, U> extends infer AResult ? // 3
+        Path extends `${infer U}["${infer Path}"]"` ?
+            GetDefinitionStructure<Target, U> extends infer AResult ?
+                Path extends infer APath ?
+                    APath extends keyof AResult ? 
+                        AResult[APath] : 
+                    typeof NOT_FOUND & { reason: '1' } : 
+                typeof NOT_FOUND & { reason: '2' } : 
+            typeof NOT_FOUND & { reason: '2_1' } : 
+        Path extends `${infer U}[${infer index}]` ?  
+            GetDefinitionStructure<Target, U> extends infer AResult ? 
                 AResult extends any[] ? 
                     StringToNumber<index, number, number> extends infer INDEX ?
                         INDEX extends number ?
@@ -52,34 +63,34 @@ type GetDefinitionStructure<Target, Path> =
                         typeof NOT_FOUND & { reason: '5_1' } :
                     typeof NOT_FOUND & { reason: '5_2' } :
                 typeof NOT_FOUND & { reason: '5_3' } :
-            typeof NOT_FOUND & { reason: '5' } : // 1
+            typeof NOT_FOUND & { reason: '5' } : 
 
         // Aray witn prefix
-        Path extends `${infer U}["${infer Path}"].${infer Rest}` ?  // 2
-            GetDefinitionStructure<Target, U> extends infer R0 ?  // 3
-                Path extends keyof R0 ?  // 4
-                    GetDefinitionStructure<R0[Path], Rest> :  // 3
-                typeof NOT_FOUND & { reason: '6' } : // 2
-            typeof NOT_FOUND & { reason: '7' } : // 1
-        Path extends `${infer U}[${infer index}].${infer Rest}` ?  // 2
-            GetDefinitionStructure<Target, U> extends infer R0 ? // 3 
-                R0 extends any[] ?  // 4
-                    GetDefinitionStructure<R0[StringToNumber<index, number, number>], Rest> : // 5
-                typeof NOT_FOUND & { reason: '7' } :  // 4
-            typeof NOT_FOUND & { reason: '7' } :  // 3
+        Path extends `${infer U}["${infer Path}"].${infer Rest}` ? 
+            GetDefinitionStructure<Target, U> extends infer R0 ?  
+                Path extends keyof R0 ?  
+                    GetDefinitionStructure<R0[Path], Rest> : 
+                typeof NOT_FOUND & { reason: '6' } :
+            typeof NOT_FOUND & { reason: '7' } :
+        Path extends `${infer U}[${infer index}].${infer Rest}` ? 
+            GetDefinitionStructure<Target, U> extends infer R0 ?
+                R0 extends any[] ? 
+                    GetDefinitionStructure<R0[StringToNumber<index, number, number>], Rest> :
+                typeof NOT_FOUND & { reason: '7' } : 
+            typeof NOT_FOUND & { reason: '7' } :
 
         // Path is given contain contains array access : return unknown, since we do not want to allow array access (for now).
-        Path extends `["${infer Path}"].${infer Rest}` ? // 2 
-            Path extends keyof Target ?  // 3
-                GetDefinitionStructure<Target[Path], Rest> : // 2
-            typeof NOT_FOUND & { reason: '9' } : // 1
-        Path extends `[${infer index}].${infer Rest}` ?  // 2
-            Target extends any[] ?  // 3
-                GetDefinitionStructure<Target[StringToNumber<index, number, number>], Rest> :  // 2
-            typeof NOT_FOUND & { reason: '10' } : // 1
-        Path extends `${infer U}.${infer Rest}` ? // 2
-            GetDefinitionStructure<GetDefinitionStructure<Target, U>, Rest> : // 3
-        typeof NOT_FOUND & { reason: '12' } : // 2
+        Path extends `["${infer Path}"].${infer Rest}` ?
+            Path extends keyof Target ?
+                GetDefinitionStructure<Target[Path], Rest> :
+            typeof NOT_FOUND & { reason: '9' } :
+        Path extends `[${infer index}].${infer Rest}` ?
+            Target extends any[] ?
+                GetDefinitionStructure<Target[StringToNumber<index, number, number>], Rest> :
+            typeof NOT_FOUND & { reason: '10' } :
+        Path extends `${infer U}.${infer Rest}` ?
+            GetDefinitionStructure<GetDefinitionStructure<Target, U>, Rest> :
+        typeof NOT_FOUND & { reason: '12' } :
     Target;
 
 type SomeTest = GetDefinitionStructure<{
@@ -138,12 +149,8 @@ export type ToDefinitionStructureWithTupleMerge<Path, Target, Obj> =
                 P0 extends typeof NOT_FOUND ? 
                     ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> : 
                 P0 extends any[] ? 
-                    GetDefinitionStructure<Target, U> extends infer P1 ?
-                        P1 extends typeof NOT_FOUND ?
-                            ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> :
-                        ToDefinitionStructureWithTupleMerge<U, MergeTuple<ToDefinitionStructureWithTupleMerge<Rest, P1, P0[StringToNumber<index>]>, P0, StringToNumber<index>>, Obj> :
-                    ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> :
-                ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>>  : 
+                    ToDefinitionStructureWithTupleMerge<U, MergeTuple<ToDefinitionStructureWithTupleMerge<Rest, Target, Obj>, P0, StringToNumber<index>>, Obj> :
+                ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> :
             ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>>
         ) & Obj :
         // Path is given contain contains array access : return unknown, since we do not want to allow array access (for now).
@@ -154,7 +161,7 @@ export type ToDefinitionStructureWithTupleMerge<Path, Target, Obj> =
         ) & Obj :
         Path extends `[${infer index}].${infer Rest}` ? 
             Obj extends any[] ? 
-                MergeTuple<ToDefinitionStructureWithTupleMerge<Rest, Target, Obj[StringToNumber<index>]>, Obj, StringToNumber<index>> :
+                MergeTuple<ToDefinitionStructureWithTupleMerge<Rest, Target, Obj>, Obj, StringToNumber<index>> :
             MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>> : 
 
         Path extends `${infer U}.${infer Rest}` ? ( 
