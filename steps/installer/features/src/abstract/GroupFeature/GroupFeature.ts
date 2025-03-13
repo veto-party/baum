@@ -183,7 +183,9 @@ type Test2Path = GetDefinitionStructure<{
         patternProperties: [{ test: 1}, { properties: {}, ehllo: 'world' }]
     }
 }, 'items.patternProperties'>;
-type Test2 = ToDefinitionStructureWithTupleMerge<'items.patternProperties[1]', { type: 'object'; }, {
+
+// TODO: array type --------------------------------
+type Test2 = ToDefinitionStructureWithTupleMerge<'items.patternProperties[1].test123', { type: 'object'; }, {
     items: {
         patternProperties: [{ test: 1}, { properties: {}, ehllo: 'world' }]
     }
