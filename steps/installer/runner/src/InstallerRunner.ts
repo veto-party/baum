@@ -1,6 +1,6 @@
 
 import type { IExecutablePackageManager, IStep, IWorkspace } from "@veto-party/baum__core";
-import { BaseInstaller } from "@veto-party/baum__steps__installer__features__afeature";
+import { BaseInstaller } from "@veto-party/baum__steps__installer__features";
 import { ISearchStrategy } from "./search/ISearchStrategy.js";
 import { readFile } from 'fs/promises';
 

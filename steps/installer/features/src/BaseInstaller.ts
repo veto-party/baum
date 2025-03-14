@@ -18,14 +18,14 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
 
     public static makeInstance() {
         const installer = (new BaseInstaller(definition))
-            .appendFeature('items.properties' as const, VariableFeature.makeInstance())
-            .appendFeature('items.oneOf[1].properties' as const, new BindingFeature())
+            //.appendFeature('items.properties' as const, VariableFeature.makeInstance())
+            .appendFeature('items.properties' as const, new BindingFeature())
             // .appendFeature('items.oneOf[1].properties' as const, new ExposeFeature())
-            // .appendFeature('items.oneOf[1].properties' as const, new ScalingFeature())
-            // .appendFeature('items.oneOf[1].properties' as const, new SystemUsageFeature())
-            // .appendFeature('items.oneOf[1].properties' as const, new NetworkFeature())
-            // .appendFeature('items.oneOf[1].properties' as const, new UpdateStrategy())
-            // .appendFeature('items.oneOf[1].properties' as const, ServiceFeature.makeInstance());
+            //.appendFeature('items.oneOf[1].properties' as const, new ScalingFeature())
+            //.appendFeature('items.oneOf[1].properties' as const, new SystemUsageFeature())
+            //.appendFeature('items.oneOf[1].properties' as const, new NetworkFeature())
+            //.appendFeature('items.oneOf[1].properties' as const, new UpdateStrategy())
+            //.appendFeature('items.oneOf[1].properties' as const, ServiceFeature.makeInstance());
 
         const obj: any[] = [];
 
@@ -35,7 +35,7 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
 
             
             if (child.type === 'SERVICE') {
-                // child.binding['hello']
+                child.binding['hello']
             }
         }
 

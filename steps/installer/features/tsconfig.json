@@ -3,7 +3,8 @@
     "extends": "@veto-party/config/tsconfig.json",
     "include": ["./src/"],
     "compilerOptions": {
-      "outDir": "dist"
+      "outDir": "dist",
+      "lib": ["ESNext"]
     }
   }
   

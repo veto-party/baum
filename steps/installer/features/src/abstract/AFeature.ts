@@ -1,9 +1,10 @@
 import AJV from 'ajv';
 import { CachedFN } from '@veto-party/baum__core';
 import type { FromSchema } from 'json-schema-to-ts';
-import type { IFeature, IngestResult, ToDefinitionStructure } from '../interface/IFeature.js';
+import type { IFeature, IngestResult } from '../interface/IFeature.js';
 import type { FeatureContainer } from '../interface/IFeatureContainer.js';
 import { get } from 'lodash-es';
+import { ToDefinitionStructure } from '../interface/types/ToDefinitionStructure.js';
 
 
 export abstract class AFeature<T extends {}|Record<string, any>, Path , From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {

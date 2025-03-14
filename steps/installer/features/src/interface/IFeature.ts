@@ -1,5 +1,6 @@
 import { FromSchema } from "json-schema-to-ts";
 import { FeatureContainer } from "./IFeatureContainer.js";
+import { ToDefinitionStructure } from "./types/ToDefinitionStructure.js";
 
 export type IngestResult<T> = {
     item: T;
@@ -7,51 +8,6 @@ export type IngestResult<T> = {
     sourcePath?: string;
 }
 
-export type StringToNumber<S extends string|number, AlternativeBase = never, Alternative extends AlternativeBase = never> = S extends number ? S : 
-  S extends "0" ? 0 :
-  S extends "1" ? 1 :
-  S extends "2" ? 2 :
-  S extends "3" ? 3 :
-  S extends "4" ? 4 :
-  S extends "5" ? 5 :
-  S extends "6" ? 6 :
-  S extends "7" ? 7 :
-  S extends "8" ? 8 :
-  S extends "9" ? 9 :
-  Alternative;
-
- 
-
-export type MakeTuple<T, N extends number = 1, Items extends any[] = []> = N extends Items['length'] ?[...Items, T] : MakeTuple<T, N, [void, ...Items]>;
-
-export type KeyValuePair<A extends string|unknown, Target> = A extends string ? { [key in A]: Target } : Target; 
-
-export type ToDefinitionStructure<Path, Target> =
-
-    Path extends string ?
-
-        // No path is given, return target
-        Path extends undefined ? Target: 
-
-        Path extends '' ? Target :
-
-        // Path is given and contains . : return Key value pair recurisive 
-        Path extends `["${infer Path}"]` ? KeyValuePair<Path, Target> :
-        Path extends `[${infer index}]` ? MakeTuple<Target, StringToNumber<index>> :
-
-        Path extends `${infer U}["${infer Path}"]"` ? ToDefinitionStructure<U, KeyValuePair<Path, Target>> :
-        Path extends `${infer U}[${infer index}]` ? ToDefinitionStructure<U, MakeTuple<Target, StringToNumber<index>>> :
-
-        // Aray witn prefix
-        Path extends `${infer U}["${infer Path}"].${infer Rest}` ?  ToDefinitionStructure<U, KeyValuePair<Path, ToDefinitionStructure<Rest, Target>>> :
-        Path extends `${infer U}[${infer index}].${infer Rest}` ? ToDefinitionStructure<U, MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>>> : 
-        // Path is given contain contains array access : return unknown, since we do not want to allow array access (for now).
-        Path extends `["${infer Path}"].${infer Rest}` ?  KeyValuePair<Path, ToDefinitionStructure<Rest, Target>> :
-        Path extends `[${infer index}].${infer Rest}` ? MakeTuple<ToDefinitionStructure<Rest, Target>, StringToNumber<index>> : 
-
-        Path extends `${infer U}.${infer Rest}` ? ToDefinitionStructure<U, ToDefinitionStructure<Rest, Target>> :
-        KeyValuePair<Path, Target>
-    : Target;
 export interface IFeature<T extends Record<string, any>|{}, Path , From = T extends {} ? any[]|any : FromSchema<T>> {
     /**
      * Verifies an object.
