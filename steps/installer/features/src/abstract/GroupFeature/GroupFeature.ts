@@ -33,9 +33,8 @@ export class GroupFeature<
             FromSchema<Some extends JSONSchema ? Some : never>
         > : unknown : unknown {
 
-        const oldSchemaCloned = cloneDeep(this.getSchema());
-
-        set(oldSchemaCloned, toPath(`${writePath ? `${writePath}.` : ''}${this.getPath()}`), feature.getSchema());
+        const oldSchemaCloned = cloneDeep(this.getSchema());;
+        set(oldSchemaCloned, toPath([writePath, feature.getPath()].filter(Boolean).join('.')), feature.getSchema());
 
         return this.do_construct(oldSchemaCloned, this.getPath()) as any;
     }
