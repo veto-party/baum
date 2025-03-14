@@ -5,6 +5,7 @@ import { AFeature } from "../AFeature.js";
 import { BindingFeature } from "../../implementation/Binding/Binding.js";
 import { variableAccessorPattern } from "../../implementation/Variable/definition.js";
 import { definitionDefinitionPattern } from "../../implementation/Binding/definition.js";
+import { IFeature } from "../../interface/IFeature.js";
 
 describe('GroupFeature', () => {
     describe('should be able to merge structure to equal type', () => {
@@ -84,6 +85,10 @@ describe('GroupFeature', () => {
         const groupInstance = new Group(definition);
 
         const clonedGroup = groupInstance.appendFeature('properties.test' as const, new SomeFeature());
+
+        type GivenTForCloned = typeof clonedGroup extends IFeature<infer T, any, any> ? T : never;
+
+
         expect(clonedGroup.getSchema()).toStrictEqual({
             type: 'object',
             additionalProperties: false,
@@ -101,9 +106,11 @@ describe('GroupFeature', () => {
                     }
                 }
             }
-        });
+        } satisfies GivenTForCloned);
 
         const cloned02 = clonedGroup.appendFeature(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
+
+        type GivenTForCloned02 = typeof cloned02 extends IFeature<infer T, any, any> ? T : never;
 
         expect(cloned02.getSchema()).toStrictEqual({
             type: 'object',
@@ -138,6 +145,6 @@ describe('GroupFeature', () => {
                     }
                 }
             }
-        });
+        } satisfies GivenTForCloned02);
     })
 });
