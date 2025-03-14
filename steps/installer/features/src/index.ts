@@ -21,5 +21,5 @@ export { SystemUsageFeature } from './implementation/SystemUsageFeature/SystemUs
 export { UpdateStrategy } from './implementation/UpdateStrategyFeature/UpdateStrategyFeature.js';
 export { VariableFeature } from './implementation/Variable/Variable.js';
 
-export { BaseInstaller } from './utils/BaseInstaller.js';
+export { BaseInstaller } from './BaseInstaller.js';
 
