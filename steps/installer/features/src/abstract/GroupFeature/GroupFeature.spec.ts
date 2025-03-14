@@ -22,8 +22,12 @@ describe('GroupFeature', () => {
             });
 
             const Group = class extends GroupFeature<typeof definition, undefined, FromSchema<typeof definition>> {
-                constructor(defintion: any) {
-                    super(definition, undefined);
+                constructor(value: any) {
+                    super(value, undefined);
+                }
+
+                protected do_construct(value: any): any {
+                    return new Group(value);
                 }
             };
 
