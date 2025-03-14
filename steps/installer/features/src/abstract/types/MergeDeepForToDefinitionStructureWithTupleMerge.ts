@@ -52,13 +52,5 @@ export type MergeDeepForToDefinitionStructureWithTupleMerge<A, B> =
     B extends any[] ?
         A extends any[] ? 
             MergeTuple<A, B> :
-        never :
-    A extends Record<string|symbol, any> ? 
-        B extends Record<string|symbol, any> ? 
-            Extract<keyof A, keyof B> extends infer Keys ? 
-                Keys extends string|number|symbol ? 
-                    { [Key in Keys]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> } & (Omit<A, Keys> & Omit<B, Keys>) :
-                Omit<A, keyof B> & Omit<B, keyof A> :
-            Omit<A, keyof B> & Omit<B, keyof A> :
-        Omit<A, keyof B> & Omit<B, keyof A> :
-    (A & B);  
+        never : 
+    { [Key in keyof (A & B)]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> };

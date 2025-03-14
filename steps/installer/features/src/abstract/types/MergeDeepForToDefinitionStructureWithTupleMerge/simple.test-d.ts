@@ -1,5 +1,5 @@
 import { expectType } from "tsd";
-import { MergeDeepForToDefinitionStructureWithTupleMerge } from "../types/MergeDeepForToDefinitionStructureWithTupleMerge.js";
+import { MergeDeepForToDefinitionStructureWithTupleMerge } from "../MergeDeepForToDefinitionStructureWithTupleMerge.js";
 
 
 type InA = [void, {
