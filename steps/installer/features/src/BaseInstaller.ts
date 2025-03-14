@@ -17,6 +17,10 @@ export class BaseInstaller<T extends typeof definition = typeof definition> exte
         super(value, undefined);
     }
 
+    protected do_construct(value: any) {
+        return new BaseInstaller(value);
+    }
+
     public static makeInstance() {
         const installer = (new BaseInstaller(definition))
             .appendFeature('items.properties' as const, VariableFeature.makeInstance())
