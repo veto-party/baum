@@ -20,6 +20,7 @@ export { ServiceFeature } from './implementation/Service/ServiceFeature.js';
 export { SystemUsageFeature } from './implementation/SystemUsageFeature/SystemUsageFeature.js';
 export { UpdateStrategy } from './implementation/UpdateStrategyFeature/UpdateStrategyFeature.js';
 export { VariableFeature } from './implementation/Variable/Variable.js';
+export { VolumeFeature } from './implementation/Volume/Volume.js';
 
 export { BaseInstaller } from './BaseInstaller.js';
 
