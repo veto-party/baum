@@ -13,6 +13,9 @@ export { GroupFeature } from './abstract/GroupFeature/GroupFeature.js';
 export  type {
     ToDefinitionStructureWithTupleMerge
 } from './abstract/types/ToDefinitionStructureWithTupleMerge.js'
+export type {
+    MergeFeatures
+} from './abstract/types/MergeFeatures.js';
 
 
 export { BindingFeature } from './implementation/Binding/Binding.js';

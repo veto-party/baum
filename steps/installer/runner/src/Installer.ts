@@ -1,18 +1,15 @@
-
 import type { IExecutablePackageManager, IStep, IWorkspace } from "@veto-party/baum__core";
-import { type IRenderer } from '@veto-party/baum__steps__installer__renderer';
+import { IRendererManager, type IRenderer } from '@veto-party/baum__steps__installer__renderer';
 import { BaseInstaller, type IFeature } from "@veto-party/baum__steps__installer__features";
 import type { ISearchStrategy } from "./search/ISearchStrategy.js";
 import { readFile } from 'node:fs/promises';
 import { FromSchema } from "json-schema-to-ts";
 
-type EmtpyBaseInstallerType = BaseInstaller extends IFeature<infer Type, undefined, any> ? Type : never;
 
-export class InstallerRunner<T extends EmtpyBaseInstallerType = ReturnType<typeof BaseInstaller.makeInstance> extends infer FullInstaller ? FullInstaller extends IFeature<infer U, undefined, any> ? U extends EmtpyBaseInstallerType ? U : never : never : never> implements IStep{
+export class InstallerRunner<T extends IFeature<any, any, any>> implements IStep{
 
     constructor(
-        private installer: IFeature<T, undefined, FromSchema<T>> = BaseInstaller.makeInstance() as any,
-        private renderer: IRenderer<T>
+        private renderer: IRendererManager<T>
     ) {}
 
     private searchStrategy: ISearchStrategy|undefined;

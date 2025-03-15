@@ -1,24 +1,38 @@
-import type { GroupFeature, IFeature, ToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features";
+import type { GroupFeature, IFeature, MergeFeatures, ToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features";
 import type { InferStructure, IRenderer } from "./IRenderer.js";
 import { asConst, FromSchema, JSONSchema } from "json-schema-to-ts";
 
 export type IFilter<T extends IFeature<any, any, any>> = {
-    <U extends InferStructure<T>>(obj: U): boolean
+    <U extends InferStructure<T>>(obj: U[]): boolean
 } | {
     key: string;
-    filter: <U extends InferStructure<T>>(obj: U) => boolean;
+    filter: <U extends InferStructure<T>>(obj: U[]) => boolean;
 }
 
-export interface IRendererFeatureManager<T extends IFeature<any, any, any>> extends IRenderer<T> {
-    addRenderer(renderer: IRenderer<T>): void;
+export interface IFeatureManager<T extends IFeature<any, any, any>> {
+    addRenderer(renderer: IRenderer<T>['render']): void;
     // removeRenderer(renderer: IRenderer<T>): void;
 }
 
-export type InferNewRenderer<WritePath extends string|undefined, T extends IRendererManager<any>, Feature extends IFeature<any, any, any>> = T extends IFeature<any, infer Path, any> ? IRendererManager<Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<WritePath extends string ? B extends undefined ? WritePath : B extends string ? `${WritePath}.${B}` : never : B extends string ? B : never, D, T>>> extends infer Some ? GroupFeature<
-Some extends Record<string, any> ? Some : never,
-Path, 
-FromSchema<Some extends JSONSchema ? Some : never>
-> : IFeature<never, never, never> : IFeature<never, never, never>> : unknown;
+export interface IRendererFEatureManager<T extends IFeature<any, any, any>> extends IRenderer<T>, IFeatureManager<T> {
+
+};
+
+export type InferNewRenderer<
+    WritePath extends string | undefined, 
+    R extends IRendererManager<any>, 
+    Feature extends IFeature<any, any, any>
+> = 
+    R extends IRendererManager<infer T> ?
+        T extends IFeature<any, any, any> ? 
+            IRenderer<MergeFeatures<Feature, WritePath, T>>
+        : never
+    : never;
+
+export type InferToFeatureManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IFeatureManager<Feature> : never
+export type InferToRendererManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IRendererManager<Feature> : never;
+
+
 
 export interface IRendererManager<T extends IFeature<any, any, any>> extends IRenderer<T> {
     ensureFeature<
@@ -27,9 +41,9 @@ export interface IRendererManager<T extends IFeature<any, any, any>> extends IRe
         >(
                 writePath: WritePath extends undefined ? undefined : WritePath, 
                 feature: Feature,
-                creator: (rendererGenerator: InferNewRenderer<WritePath, IRendererManager<T>, Feature>) => InferNewRenderer<WritePath, IRendererManager<T>, Feature>,
+                creator: (rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>,
                 filter?: IFilter<InferNewRenderer<WritePath, IRendererManager<T>, Feature> extends IRendererManager<infer NewFeature> ? NewFeature : never>,
-        ): InferNewRenderer<WritePath, IRendererManager<T>, Feature>;
+        ): InferToRendererManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>;
     getGroup(): T;
     // removeFeature<T extends IFeature<any, any, any>>(feature: { new(...args: any[]): T }): void;
 }
