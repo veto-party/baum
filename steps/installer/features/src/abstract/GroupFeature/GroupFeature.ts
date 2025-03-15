@@ -4,9 +4,6 @@ import { asConst, FromSchema, JSONSchema } from "json-schema-to-ts";
 import { cloneDeep, set, toPath } from "lodash-es";
 import type { ToDefinitionStructureWithTupleMerge } from "../types/ToDefinitionStructureWithTupleMerge.js";
 
-
-type SomeFeature<T = any> = T extends any & IFeature<infer _, infer __, infer __> ? T : unknown;
-
 export class GroupFeature<
     T extends {}|Record<string, any>, 
     Path,
@@ -26,12 +23,12 @@ export class GroupFeature<
         Feature extends IFeature<any, any, any>
     >(
             writePath: WritePath extends undefined ? undefined : WritePath, 
-            feature: SomeFeature<Feature>
-        ): Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<WritePath extends string ? B extends undefined ? WritePath : B extends string ? `${WritePath}.${B}` : never : B extends string ? B : never, D, T>>> extends infer Some ? GroupFeature<
-            Some extends Record<string, any> ? Some : never,
-            Path, 
-            FromSchema<Some extends JSONSchema ? Some : never>
-        > : unknown : unknown {
+            feature: Feature
+    ): Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<WritePath extends string ? B extends undefined ? WritePath : B extends string ? `${WritePath}.${B}` : never : B extends string ? B : never, D, T>>> extends infer Some ? GroupFeature<
+        Some extends Record<string, any> ? Some : never,
+        Path, 
+        FromSchema<Some extends JSONSchema ? Some : never>
+    > : never : never {
 
         const oldSchemaCloned = cloneDeep(this.getSchema());;
         set(oldSchemaCloned, toPath([writePath, feature.getPath()].filter(Boolean).join('.')), feature.getSchema());

@@ -10,6 +10,9 @@ export { AMergeFeature } from './abstract/AMergeFeature/AMergeFeature.js';
 export { AKeyOverrideFeature } from './abstract/AMergeFeature/AKeyOverride/AKeyOverride.js'
 
 export { GroupFeature } from './abstract/GroupFeature/GroupFeature.js';
+export  type {
+    ToDefinitionStructureWithTupleMerge
+} from './abstract/types/ToDefinitionStructureWithTupleMerge.js'
 
 
 export { BindingFeature } from './implementation/Binding/Binding.js';
@@ -23,4 +26,5 @@ export { VariableFeature } from './implementation/Variable/Variable.js';
 export { VolumeFeature } from './implementation/Volume/Volume.js';
 
 export { BaseInstaller } from './BaseInstaller.js';
+
 
