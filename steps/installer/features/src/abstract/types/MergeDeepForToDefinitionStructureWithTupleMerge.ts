@@ -44,13 +44,24 @@ type DoMergeTuple<A extends any[], AOriginal extends any[], B extends any[], BOr
  * This is a custom merge function
  */
 export type MergeDeepForToDefinitionStructureWithTupleMerge<A, B> = 
-    A extends typeof MERGE_ELEM_NOT_FOUND ? B : B extends typeof MERGE_ELEM_NOT_FOUND ? A : 
+    A extends typeof MERGE_ELEM_NOT_FOUND ? 
+        B : 
+    B extends typeof MERGE_ELEM_NOT_FOUND ? 
+        A : 
     A extends any[] ? 
         B extends any[] ? 
             MergeTuple<A, B> :
-        never :
+        A :
     B extends any[] ?
         A extends any[] ? 
             MergeTuple<A, B> :
-        never : 
-    { [Key in keyof (A & B)]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> };
+        B :
+    A extends object ?
+        B extends object ? 
+            { [Key in (keyof (A & B))]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> } :
+        A :
+    B extends object ?
+        A extends object ?
+            { [Key in (keyof (A & B))]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> } :
+        B :
+    never;

@@ -73,7 +73,7 @@ describe('Type merge test', () => {
                 }]
             }
         }
-        expectTypeOf({} as MergeDeepForToDefinitionStructureWithTupleMerge<ToTestA, ToTestB>).toMatchTypeOf<Expected>();
-        expectTypeOf({} as MergeDeepForToDefinitionStructureWithTupleMerge<ToTestB, ToTestA>).toMatchTypeOf<Expected>();
+        expectTypeOf({} as MergeDeepForToDefinitionStructureWithTupleMerge<ToTestA, ToTestB>).toMatchObjectType<Expected>();
+        expectTypeOf({} as MergeDeepForToDefinitionStructureWithTupleMerge<ToTestB, ToTestA>).toMatchObjectType<Expected>();
     });
 });

@@ -1,4 +1,4 @@
-import type { GroupFeature, IFeature, MergeFeatures, ToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features";
+import type { GroupFeature, IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
 import type { InferStructure, IRenderer } from "./IRenderer.js";
 import { asConst, FromSchema, JSONSchema } from "json-schema-to-ts";
 
@@ -10,7 +10,7 @@ export type IFilter<T extends IFeature<any, any, any>> = {
 }
 
 export interface IFeatureManager<T extends IFeature<any, any, any>> {
-    addRenderer(renderer: IRenderer<T>['render']): void;
+    addRenderer(renderer: IRenderer<T>['render']): IFeatureManager<T>;
     // removeRenderer(renderer: IRenderer<T>): void;
 }
 
@@ -19,15 +19,15 @@ export interface IRendererFEatureManager<T extends IFeature<any, any, any>> exte
 };
 
 export type InferNewRenderer<
-    WritePath extends string | undefined, 
-    R extends IRendererManager<any>, 
+    WritePath, 
+    R extends IRendererManager<any>|IFeatureManager<any>, 
     Feature extends IFeature<any, any, any>
 > = 
-    R extends IRendererManager<infer T> ?
-        T extends IFeature<any, any, any> ? 
-            IRenderer<MergeFeatures<Feature, WritePath, T>>
-        : never
-    : never;
+    R extends IRendererManager<infer T> ? 
+        IRenderer<MergeFeatures<T, WritePath, Feature>> :
+    R extends IFeatureManager<infer T> ? 
+        IRenderer<MergeFeatures<T, WritePath, Feature>> :
+    never;
 
 export type InferToFeatureManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IFeatureManager<Feature> : never
 export type InferToRendererManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IRendererManager<Feature> : never;
@@ -36,10 +36,10 @@ export type InferToRendererManager<T extends IRenderer<any>> = T extends IRender
 
 export interface IRendererManager<T extends IFeature<any, any, any>> extends IRenderer<T> {
     ensureFeature<
-            WritePath extends string|undefined, 
+            WritePath, 
             Feature extends IFeature<any, any, any>
         >(
-                writePath: WritePath extends undefined ? undefined : WritePath, 
+                writePath: WritePath, 
                 feature: Feature,
                 creator: (rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>,
                 filter?: IFilter<InferNewRenderer<WritePath, IRendererManager<T>, Feature> extends IRendererManager<infer NewFeature> ? NewFeature : never>,

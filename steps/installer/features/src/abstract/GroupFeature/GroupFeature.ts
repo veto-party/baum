@@ -22,7 +22,7 @@ export class GroupFeature<
         WritePath, 
         Feature extends IFeature<any, any, any>
     >(
-            writePath: WritePath extends undefined ? undefined : WritePath, 
+            writePath: WritePath, 
             feature: Feature
     ): Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<WritePath extends string ? B extends undefined ? WritePath : B extends string ? `${WritePath}.${B}` : never : B extends string ? B : never, D, T>>> extends infer Some ? GroupFeature<
         Some extends Record<string, any> ? Some : never,

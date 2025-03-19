@@ -6,11 +6,12 @@ export class RenderFeatureManager<T extends IFeature<any, any, any>> implements 
     
     private rendererInstances = new Set<IRenderer<T>['render']>();
 
-    addRenderer(renderer: IRenderer<T>['render']): void {
+    addRenderer(renderer: (metadata: RendererMetadata, features: InferStructure<T>[]) => void|Promise<void>): IFeatureManager<T> {
         this.rendererInstances.add(renderer);
+        return this;
     }
     
-    render<U extends InferStructure<T>>(metadata: RendererMetadata, structure: U) {
+    render(metadata: RendererMetadata, structure: InferStructure<T>[]) {
         for (const renderer of this.rendererInstances) {
             renderer(metadata, structure);
         }

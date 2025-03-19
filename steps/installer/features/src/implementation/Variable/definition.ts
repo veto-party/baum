@@ -47,19 +47,7 @@ export const definition = asConst({
             }
         },
         required: ['type'],
-        additionalProperties: false,
-        if: {
-            properties: {
-                type: {
-                    const: 'scoped-name'
-                }
-            }
-        },
-        then: {
-            not: {
-                required: ['static', 'secret', 'default', 'case']
-            }
-        }
+        additionalProperties: false
       }
     },
     additionalProperties: false

@@ -16,7 +16,7 @@ export const definition = asConst({
         enum: ['JOB']
       }
     },
-    additionalProperties: false,
+    // additionalProperties: false,
   }, {
     type: 'object',
     properties: {
@@ -24,11 +24,8 @@ export const definition = asConst({
         type: "string",
         enum: ['SERVICE']
       },
-      alias: {
-        type: 'string'
-      },
     },
-    additionalProperties: false,
+    // additionalProperties: false,
   }],
   required: ['type']
 });
