@@ -1,4 +1,4 @@
-import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, MergeFeatures, NetworkFeature, ScalingFeature, ServiceFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
+import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, MergeFeatures, NetworkFeature, ScalingFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFEatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
@@ -12,14 +12,19 @@ import { IServiceRenderer } from "./interface/IServiceRenderer.js";
 import { INetworkRenderer } from "./interface/INetworkRenderer.js";
 import { INameProvider } from "../../interface/INameProvider.js";
 import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js";
-import { ExposeRenderer } from "./implementation/ExposeRenderer.js";
 import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
+import type { FromSchema, JSONSchema } from "json-schema-to-ts";
+
+const pattern = "^[a-zA-Z0-9]+$" as const;
 
 export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererManager<T> {
 
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
     public propertyStorage = new Map<IWorkspace|undefined, IConfigMapStructure>();
+
+
+    public jobPropertyStorage = new Map<IWorkspace|undefined, Map<string, IConfigMapStructure>>();
 
     public globalBindingStorage = new Map<string, ConfigMappingWithStore>();
 
@@ -78,11 +83,13 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
         const ensureExposeStorage = ensurePropertyValueGenerator(exposeStorage, () => new Map());
 
-        const renderer = (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
-            .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
-                const ensurePropertyStorage = ensurePropertyValueGenerator(this.propertyStorage, () => new Map());
-                return feature.addRenderer((metadata, data) => {
 
+        const buildVariableStorage = (givenMap: Map<IWorkspace|undefined, IConfigMapStructure>) => {
+            type GivenThisType = typeof BaseInstaller.makeInstance extends () => infer R ? MergeFeatures<R extends IFeature<any, any, any> ? R : never, 'properties', ReturnType<typeof VariableFeature.makeInstance>> extends IFeature<infer Structure, any, any> ? Structure : never : never;
+            type GivenFeature = IFeature<GivenThisType, undefined, FromSchema<GivenThisType>>; 
+            return function buildVariables(this: HelmRenderer<GivenFeature>, feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> {
+                const ensurePropertyStorage = ensurePropertyValueGenerator(givenMap, () => new Map());
+                return feature.addRenderer((metadata, data) => {
                     let elem = ensurePropertyStorage(metadata.project.workspace);
                     let globalElem = ensurePropertyStorage(undefined);
 
@@ -100,9 +107,15 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                         globalElem = HelmRenderer.mergeElements(globalElem, new Map(otherVars));
                     }
 
-                    this.propertyStorage.set(metadata.project.workspace, elem);
-                    this.propertyStorage.set(undefined, globalElem);
+                    givenMap.set(metadata.project.workspace, elem);
+                    givenMap.set(undefined, globalElem);
                 });
+            }
+        }
+
+        let renderer = (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
+            .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
+                return buildVariableStorage(this.propertyStorage).call(this, feature);
             })
             .ensureFeature('properties' as const, new BindingFeature(), function (feature) {
                 const ensureBindingStorage = ensurePropertyValueGenerator(this.bindingStorage, () => new Map());
@@ -123,34 +136,41 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             })
             .ensureFeature('properties' as const, new VolumeFeature(), (feature) => {
                 return feature;
+            });
+
+
+            renderer = renderer.ensureFeature('properties.job' as const, BaseInstaller.makeInstance().appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, renderer.getGroup()), function (feature) {
+
+                feature.addRenderer((metadata, structure) => {
+                    const filteredStructure = structure.flatMap((obj) => Object.entries(obj.job ?? {}), 1)
+                });
+
+                //.call(this, )
+                return feature;
             })
-            .ensureFeature('oneOf[1].properties' as const, new ExposeFeature(), (feature) => {
+            .ensureFeature('properties' as const, new ExposeFeature(), (feature) => {
                 return feature.addRenderer((metadata, data) => {
                     let storage = ensureExposeStorage(metadata.project.workspace);
                     for (const element of data) {
-                        if (element.type !== 'SERVICE') {
-                            continue;
-                        }
-                        element.expose
                         storage = HelmRenderer.mergeElements(storage, new Map(Object.entries(element.expose ?? {})));
                     }
 
                     exposeStorage.set(metadata.project.workspace, storage);
                 });
             })
-            .ensureFeature('oneOf[1].properties' as const, new ScalingFeature(), (feature) => {
+            .ensureFeature('properties' as const, new ScalingFeature(), (feature) => {
                 return feature;
             })
-            .ensureFeature('oneOf[1].properties' as const, new SystemUsageFeature(), (feature) => {
+            .ensureFeature('properties' as const, new SystemUsageFeature(), (feature) => {
                 return feature;
             })
-            .ensureFeature('oneOf[1].properties' as const, new NetworkFeature(), (feature) => {
+            .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
                 return feature;
             })
-            .ensureFeature('oneOf[1].properties' as const, new UpdateStrategy(), (feature) => {
+            .ensureFeature('properties' as const, new UpdateStrategy(), (feature) => {
                 return feature;
             })
-            // .ensureFeature('oneOf[1].properties' as const, ServiceFeature.makeInstance(), (feature) => {
+            // .ensureFeature('properties' as const, ServiceFeature.makeInstance(), (feature) => {
             //     return feature;
             // });
 

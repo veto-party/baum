@@ -67,7 +67,7 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
         return self;
     }
 
-    getGroup() {
+    getGroup(): T {
         return this.groupFeature;
     }
 

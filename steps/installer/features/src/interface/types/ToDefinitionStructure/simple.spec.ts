@@ -23,6 +23,6 @@ describe('Type merge test', () => {
             }
         };
 
-        expectTypeOf({} as Actual).toMatchTypeOf<Expected>();
+        expectTypeOf({} as Actual).toMatchObjectType<Expected>();
     });
 });

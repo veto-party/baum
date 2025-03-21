@@ -16,7 +16,7 @@ export type ToDefinitionStructure<Path, Target> =
         Path extends `["${infer Path}"]` ? KeyValuePair<Path, Target> :
         Path extends `[${infer index}]` ? MakeTuple<Target, StringToNumber<index>> :
 
-        Path extends `${infer U}["${infer Path}"]"` ? ToDefinitionStructure<U, KeyValuePair<Path, Target>> :
+        Path extends `${infer U}["${infer Path}"]` ? ToDefinitionStructure<U, KeyValuePair<Path, Target>> :
         Path extends `${infer U}[${infer index}]` ? ToDefinitionStructure<U, MakeTuple<Target, StringToNumber<index>>> :
 
         // Aray witn prefix
