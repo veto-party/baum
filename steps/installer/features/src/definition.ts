@@ -7,7 +7,7 @@ export const definition = asConst({
       type: 'string'
     }
   },
-  additionalProperties: false,
+  // additionalProperties: false,
   oneOf: [{
     type: 'object',
     properties: {

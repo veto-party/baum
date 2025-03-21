@@ -41,9 +41,9 @@ export interface IRendererManager<T extends IFeature<any, any, any>> extends IRe
         >(
                 writePath: WritePath, 
                 feature: Feature,
-                creator: (rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>,
+                creator: (this: IRendererManager<T>, rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>,
                 filter?: IFilter<InferNewRenderer<WritePath, IRendererManager<T>, Feature> extends IRendererManager<infer NewFeature> ? NewFeature : never>,
-        ): InferToRendererManager<InferNewRenderer<WritePath, IRendererManager<T>, Feature>>;
+        ): InferNewRenderer<WritePath, IRendererManager<T>, Feature>;
     getGroup(): T;
     // removeFeature<T extends IFeature<any, any, any>>(feature: { new(...args: any[]): T }): void;
 }

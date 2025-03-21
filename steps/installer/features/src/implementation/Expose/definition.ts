@@ -1,13 +1,23 @@
-import { asConst } from "json-schema-to-ts";
+import { asConst, JSONSchema } from "json-schema-to-ts";
 
 export const definition = asConst({
     type: 'object',
+    // additionalProperties: true,
     patternProperties: {
-        '(0-9)+': {
+        '$(0-9)+^': {
             type: 'object',
-            required: ['type'],
+            properties: {
+                type: {
+                    type: 'string'
+                }
+            },
+            required: ['type'], 
+            // additionalProperties: false,
             oneOf: [
                 {
+                    type: 'object',
+                    additionalProperties: false,
+                    required: ['type'],
                     properties: {
                         type: {
                             type: 'string',
@@ -15,7 +25,6 @@ export const definition = asConst({
                         },
                         cors: {
                             type: 'object',
-                            required: [],
                             properties: {
                                 self: {
                                     type: 'boolean'
@@ -41,8 +50,7 @@ export const definition = asConst({
                                         required: ['source'],
                                         additionalProperties: false
                                     }
-                                },
-                                additionalProperties: false
+                                }
                             }
                         },
                         path: {
@@ -60,6 +68,9 @@ export const definition = asConst({
                     }
                 },
                 {
+                    type: 'object',
+                    required: ['type'],
+                    additionalProperties: false,
                     properties: {
                         type: {
                             type: 'string',
