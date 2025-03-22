@@ -15,7 +15,7 @@ import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js
 import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
 
-type GivenFeature = typeof BaseInstaller.makeInstance extends () => infer R0 ? typeof VariableFeature.makeInstance extends () => infer R1 ? MergeFeatures<R0 extends IFeature<any, any, any> ? R0 : never, 'properties', R1 extends IFeature<any, any, any> ? R1 : never> extends infer Feature ? Feature : never : never : never;
+type GivenFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', IFeature<B0, B1, B2>> extends infer Feature ? Feature : never : never : never;
 export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererManager<T> {
 
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
@@ -83,7 +83,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
 
         const buildVariableStorage = (givenMap: Map<IWorkspace|undefined, IConfigMapStructure>) => {
-            return (feature: IFeatureManager<GivenFeature>) => {
+            return (feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> => {
                 const ensurePropertyStorage = ensurePropertyValueGenerator(givenMap, () => new Map());
                 return feature.addRenderer((metadata, data) => {
                     let elem = ensurePropertyStorage(metadata.project.workspace);
@@ -158,8 +158,6 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                         await mockRenderer.render(metadata, entries);
                     }
                 });
-
-                //.call(this, )
                 return feature;
             })
             .ensureFeature('properties' as const, new ExposeFeature(), (feature) => {
