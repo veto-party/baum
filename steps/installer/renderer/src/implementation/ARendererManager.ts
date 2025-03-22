@@ -1,5 +1,5 @@
 import { GroupFeature, IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
-import type { IFilter, InferNewRenderer, InferToFeatureManager, InferToRendererManager, IFeatureManager, IRendererManager, IRendererFEatureManager } from "../interface/IRendererManager.js";
+import type { IFilter, InferNewRenderer, InferToFeatureManager, InferToRendererManager, IFeatureManager, IRendererManager, IRendererFeatureManager } from "../interface/IRendererManager.js";
 import type { InferStructure, RendererMetadata } from "../interface/IRenderer.js";
 import { createHash } from "node:crypto";
 import { RenderFeatureManager } from "./RenderFeatureManager.js";
@@ -7,7 +7,7 @@ import { RenderFeatureManager } from "./RenderFeatureManager.js";
 
 export abstract class ARendererManager<T extends IFeature<any, any, any>> extends RenderFeatureManager<T> implements IRendererManager<T> {
     protected featureCache = new Map<string, {
-        renderer: IRendererFEatureManager<T>;
+        renderer: IRendererFeatureManager<T>;
         filter?: IFilter<T>;
     }>();
 
@@ -40,7 +40,7 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
 
 
     protected abstract createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U>;
-    protected abstract createFeatureManager(feature: T): IRendererFEatureManager<T>;
+    protected abstract createFeatureManager(feature: T): IRendererFeatureManager<T>;
 
     ensureFeature<
         WritePath, 

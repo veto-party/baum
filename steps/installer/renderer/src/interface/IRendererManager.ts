@@ -10,11 +10,11 @@ export type IFilter<T extends IFeature<any, any, any>> = {
 }
 
 export interface IFeatureManager<T extends IFeature<any, any, any>> {
-    addRenderer(renderer: (metadata: RendererMetadata, structure: T extends IFeature<any, any, infer Structure> ? Structure : never) => void|Promise<void>): IFeatureManager<T>;
+    addRenderer(renderer: (this: IFeatureManager<T>, metadata: RendererMetadata, structure: T extends IFeature<any, any, infer Structure> ? Structure[] : never) => void|Promise<void>): IFeatureManager<T>;
     // removeRenderer(renderer: IRenderer<T>): void;
 }
 
-export interface IRendererFEatureManager<T extends IFeature<any, any, any>> extends IRenderer<T>, IFeatureManager<T> {
+export interface IRendererFeatureManager<T extends IFeature<any, any, any>> extends IRenderer<T>, IFeatureManager<T> {
 
 };
 

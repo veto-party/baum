@@ -1,6 +1,6 @@
 import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, MergeFeatures, NetworkFeature, ScalingFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
 import { ARendererManager } from "../ARendererManager.js";
-import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFEatureManager, IRendererManager } from "../../interface/IRendererManager.js";
+import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
 import { isEqual } from 'lodash-es';
 import { IWorkspace } from "@veto-party/baum__core";
@@ -14,10 +14,8 @@ import { INameProvider } from "../../interface/INameProvider.js";
 import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js";
 import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
-import type { FromSchema, JSONSchema } from "json-schema-to-ts";
 
-const pattern = "^[a-zA-Z0-9]+$" as const;
-
+type GivenFeature = typeof BaseInstaller.makeInstance extends () => infer R0 ? typeof VariableFeature.makeInstance extends () => infer R1 ? MergeFeatures<R0 extends IFeature<any, any, any> ? R0 : never, 'properties', R1 extends IFeature<any, any, any> ? R1 : never> extends infer Feature ? Feature : never : never : never;
 export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererManager<T> {
 
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
@@ -74,9 +72,9 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
         const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
 
-        const ensurePropertyValueGenerator = <SomeMap extends Map<any, any>>(map: SomeMap, generator: () => SomeMap extends Map<any, infer Value> ? Value : never) => (workspace: SomeMap extends Map<infer Key, any> ? Key : never): SomeMap extends Map<any, infer Value> ? Value : never => {
+        const ensurePropertyValueGenerator = <SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Value : never) => (workspace: SomeMap extends Map<infer Key, any> ? Key : never) => {
             if (!map.has(workspace)) {
-                map.set(workspace, generator());
+                map.set(workspace, generator(workspace));
             }
             return map.get(workspace)!;
         }
@@ -85,9 +83,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
 
         const buildVariableStorage = (givenMap: Map<IWorkspace|undefined, IConfigMapStructure>) => {
-            type GivenThisType = typeof BaseInstaller.makeInstance extends () => infer R ? MergeFeatures<R extends IFeature<any, any, any> ? R : never, 'properties', ReturnType<typeof VariableFeature.makeInstance>> extends IFeature<infer Structure, any, any> ? Structure : never : never;
-            type GivenFeature = IFeature<GivenThisType, undefined, FromSchema<GivenThisType>>; 
-            return function buildVariables(this: HelmRenderer<GivenFeature>, feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> {
+            return (feature: IFeatureManager<GivenFeature>) => {
                 const ensurePropertyStorage = ensurePropertyValueGenerator(givenMap, () => new Map());
                 return feature.addRenderer((metadata, data) => {
                     let elem = ensurePropertyStorage(metadata.project.workspace);
@@ -228,7 +224,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         return helm as any;
     }
     
-    protected createFeatureManager(_: T): IRendererFEatureManager<T> {
+    protected createFeatureManager(_: T): IRendererFeatureManager<T> {
         return new RenderFeatureManager<T>();
     }
 }

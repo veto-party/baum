@@ -1,12 +1,12 @@
 import type { IFeature } from "@veto-party/baum__steps__installer__features";
-import type { IFeatureManager, IRendererFEatureManager } from "../interface/IRendererManager.js";
+import type { IFeatureManager, IRendererFeatureManager } from "../interface/IRendererManager.js";
 import { IRenderer, InferStructure, RendererMetadata } from "../interface/IRenderer.js";
 
-export class RenderFeatureManager<T extends IFeature<any, any, any>> implements IRendererFEatureManager<T> {
+export class RenderFeatureManager<T extends IFeature<any, any, any>> implements IRendererFeatureManager<T> {
     
     private rendererInstances = new Set<IRenderer<T>['render']>();
 
-    addRenderer(renderer: (this: this, metadata: RendererMetadata, features: InferStructure<T>[]) => void|Promise<void>): this {
+    addRenderer(renderer: (this: this, metadata: RendererMetadata, features: T extends IFeature<any, any, infer U> ? U[] : never) => void|Promise<void>): this {
         this.rendererInstances.add(renderer);
         return this;
     }
