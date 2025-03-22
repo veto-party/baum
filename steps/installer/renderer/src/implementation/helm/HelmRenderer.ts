@@ -1,4 +1,4 @@
-import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, JobFeature, MergeFeatures, NetworkFeature, ScalingFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
+import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, JobFeature, MergeFeatures, NetworkFeature, ScalingFeature, ServiceFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
@@ -28,7 +28,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public jobBindingStorage = new Map<IWorkspace|undefined, Map<string, Map<string, string>>>();
     public jobPropertyStorage = new Map<IWorkspace|undefined, Map<string, IConfigMapStructure>>();
 
-    public globalBindingStorage = new Map<string, ConfigMappingWithStore>();
+    public globalBindingStorage = new Map<string | number, ConfigMappingWithStore>();
 
     public writers: IWritable[] = [];
     
@@ -41,7 +41,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         super(feature);
     }
 
-    public static mergeElements<A extends Map<any, any>, B extends Map<any, any>>(a: A, b: B): A extends Map<infer AKey, infer AValue> ? B extends Map<infer BKey, infer BValue> ? Map<AKey & BKey, AValue | BValue> : never : never {
+    public static mergeElements<A extends Map<any, any>, B extends Map<any, any>>(a: A, b: B): A extends Map<infer AKey, infer AValue> ? B extends Map<infer BKey, infer BValue> ? Map<AKey | BKey, AValue | BValue> : never : never {
         const aSet = new Set(a.keys());
         const bSet = new Set(b.keys());
 
@@ -201,15 +201,15 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             .ensureFeature('properties' as const, new SystemUsageFeature(), (feature) => {
                 return feature;
             })
-            .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
-                return feature;
-            })
+            // .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
+            //     return feature;
+            // })
             .ensureFeature('properties' as const, new UpdateStrategy(), (feature) => {
                 return feature;
             })
-            // .ensureFeature('properties' as const, ServiceFeature.makeInstance(), (feature) => {
-            //     return feature;
-            // });
+            .ensureFeature('properties' as const, ServiceFeature.makeInstance(), (feature) => {
+                return feature;
+            });
 
         baseRenderer.addRenderer(async function (metadata) {
             const configResult = await configMapRenderer.render(metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));
@@ -259,8 +259,10 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public async render(metadata: RendererMetadata, structure: InferStructure<T>[]): Promise<void> {
         await super.render(metadata, structure);
         const binding = new Map(this.globalBindingStorage.entries().map(([key, value]) => [key, typeof value.store === 'string' ? value.key : undefined] as const).filter((entry): entry is readonly [string, string] => entry[1] !== undefined));
-        
-        const propertyStorage = HelmRenderer.mergeElements(this.jobPropertyStorage.get(undefined) ?? new Map(), new Map(this.propertyStorage.entries()));
+
+        const allValues = this.jobPropertyStorage.get(undefined)?.values?.()?.toArray?.();
+        const values = allValues?.reduce?.((a, b) => HelmRenderer.mergeElements(a, b), allValues?.shift?.()!);
+        const propertyStorage = values ? new Map([[undefined as IWorkspace|undefined, HelmRenderer.mergeElements(this.propertyStorage.get(undefined)!, values)]] as const) : this.propertyStorage;
 
         const secretRenderer = await this.secretRenderer.render(undefined, propertyStorage, binding);
         this.writers.push(secretRenderer);
