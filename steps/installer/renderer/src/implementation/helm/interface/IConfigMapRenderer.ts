@@ -31,5 +31,6 @@ export interface IConfigMapRendererResult extends IWritable {
 }
 
 export interface IConfigMapRenderer {
-    render(workspace: IWorkspace|undefined, map: Map<IWorkspace|undefined, IConfigMapStructure>, binding: Map<string, string> | undefined): IConfigMapRendererResult|Promise<IConfigMapRendererResult>;
+    render<Key>(workspace: Key|undefined, map: Map<Key|undefined, IConfigMapStructure>|Map<string|number, IConfigMapStructure>, binding: Map<string, string> | undefined): IConfigMapRendererResult|Promise<IConfigMapRendererResult>;
+
 }

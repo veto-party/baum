@@ -2,7 +2,7 @@ import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, J
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
-import { isEqual, merge } from 'lodash-es';
+import { isEqual, merge, property } from 'lodash-es';
 import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from "./interface/IConfigMapRenderer.js";
 import { IDeploymentRenderer } from "./interface/IDeploymentRenderer.js";
@@ -230,16 +230,42 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             const deploymentResult = await deploymentRenderer.render(metadata.project.workspace, itemsMap, portsResult.getPorts());            
             this.writers.push(deploymentResult);
         });
+
+        baseRenderer.addRenderer(async function (metadata) {
+            for (const key in this.jobStorage.get(metadata.project.workspace) ?? {}) {
+                const propertyStorage = this.jobPropertyStorage.get(metadata.project.workspace);
+                const bindingStorage = this.jobBindingStorage.get(metadata.project.workspace)?.get(key);
+
+                if (!propertyStorage || !bindingStorage) {
+                    continue;
+                }
+
+                const configResult = await configMapRenderer.render(key, propertyStorage, bindingStorage);
+                this.writers.push(configResult);
+                const secretResult = await secretRenderer.render(key, propertyStorage, bindingStorage);
+                this.writers.push(secretResult);
+
+                const itemsMap = HelmRenderer.mergeElements(await configResult.getResolvedWorkspaceVars(), await secretResult.getResolvedWorkspaceSecrets());
+
+                itemsMap.entries().forEach(([key, entry]) => {
+                    if ('store' in entry && entry.store && entry.global) {
+                        this.globalBindingStorage.set(key, entry);
+                    }
+                });
+            }
+        });
     }
 
     public async render(metadata: RendererMetadata, structure: InferStructure<T>[]): Promise<void> {
         await super.render(metadata, structure);
         const binding = new Map(this.globalBindingStorage.entries().map(([key, value]) => [key, typeof value.store === 'string' ? value.key : undefined] as const).filter((entry): entry is readonly [string, string] => entry[1] !== undefined));
+        
+        const propertyStorage = HelmRenderer.mergeElements(this.jobPropertyStorage.get(undefined) ?? new Map(), new Map(this.propertyStorage.entries()));
 
-        const secretRenderer = await this.secretRenderer.render(undefined, this.propertyStorage, binding);
+        const secretRenderer = await this.secretRenderer.render(undefined, propertyStorage, binding);
         this.writers.push(secretRenderer);
 
-        const valueRenderer = await this.configMapRenderer.render(undefined, this.propertyStorage, binding);
+        const valueRenderer = await this.configMapRenderer.render(undefined, propertyStorage, binding);
         this.writers.push(valueRenderer);
 
         for (const writer of this.writers) {

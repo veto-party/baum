@@ -4,7 +4,7 @@ import { ToDefinitionStructure } from "../../interface/types/ToDefinitionStructu
 import { ToDefinitionStructureWithTupleMerge } from "./ToDefinitionStructureWithTupleMerge.js";
 
 // Resolves the correct feature path
-type ResolveFeaturePath<WritePath, B extends string | undefined> =
+export type ResolveFeaturePath<WritePath, B extends string | undefined> =
     WritePath extends string ? 
         B extends undefined ? 
             WritePath  : 

@@ -11,5 +11,5 @@ export interface ISecretRendererResult extends IWritable {
 }
 
 export interface ISecretRenderer {
-    render(workspace: IWorkspace|undefined, map: Map<IWorkspace|undefined, IConfigMapStructure>, binding: Map<string, string>|undefined): ISecretRendererResult|Promise<ISecretRendererResult>;
+    render<Key>(workspace: Key|undefined, map: Map<Key|undefined, IConfigMapStructure>, binding: Map<string, string>|undefined): ISecretRendererResult|Promise<ISecretRendererResult>;
 }
