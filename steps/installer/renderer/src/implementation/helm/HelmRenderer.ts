@@ -111,7 +111,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
         let renderer = (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
             .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
-                return buildVariableStorage(this.propertyStorage).call(this, feature);
+                return buildVariableStorage(this.propertyStorage)(feature);
             })
             .ensureFeature('properties' as const, new BindingFeature(), function (feature) {
                 const ensureBindingStorage = ensurePropertyValueGenerator(this.bindingStorage, () => new Map());
@@ -137,8 +137,26 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
             renderer = renderer.ensureFeature('properties.job' as const, BaseInstaller.makeInstance().appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, renderer.getGroup()), function (feature) {
 
-                feature.addRenderer((metadata, structure) => {
-                    const filteredStructure = structure.flatMap((obj) => Object.entries(obj.job ?? {}), 1)
+                const ensureWorkspace = ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
+
+                feature.addRenderer(async (metadata, structure) => {
+                    const filteredStructure = new Map<string, Exclude<(typeof structure)[number]['job'], undefined>[string][]>();
+                    const ensureFilteredStruct = ensurePropertyValueGenerator(filteredStructure, () => []);
+                    structure.flatMap((obj) => Object.entries(obj.job ?? {}), 1).forEach(([key, value]) => {
+                        ensureFilteredStruct(key).push(value);
+                    });
+                
+                    const ensureStructureByKey = ensureWorkspace(metadata.project.workspace);
+
+                    
+                    for (const [key, entries] of filteredStructure.entries()) {
+
+                        const mockRenderer = new RenderFeatureManager<GivenFeature>();
+
+                        buildVariableStorage(ensureStructureByKey(key))(mockRenderer);
+
+                        await mockRenderer.render(metadata, entries);
+                    }
                 });
 
                 //.call(this, )
