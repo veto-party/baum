@@ -15,7 +15,10 @@ import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js
 import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
 
-type GivenFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', IFeature<B0, B1, B2>> extends infer Feature ? Feature : never : never : never;
+type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', IFeature<B0, B1, B2>> extends infer Feature ? Feature : never : never : never;
+
+type BindingStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', BindingFeature> extends infer Feature ? Feature : never : never;
+
 export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererManager<T> {
 
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
@@ -69,8 +72,8 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         }
     }
 
-    private static buildVariableStorage<Key>(givenMap: Map<Key|undefined, IConfigMapStructure>, resolver: (...parameters: Parameters<Parameters<IFeatureManager<GivenFeature>['addRenderer']>[0]>) => Key) {
-        return (feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> => {
+    private static buildVariableStorage<Key>(givenMap: Map<Key|undefined, IConfigMapStructure>, resolver: (...parameters: Parameters<Parameters<IFeatureManager<VariableStorageFeature>['addRenderer']>[0]>) => Key) {
+        return (feature: IFeatureManager<VariableStorageFeature>): IFeatureManager<VariableStorageFeature> => {
             const ensurePropertyStorage = HelmRenderer.ensurePropertyValueGenerator(givenMap, () => new Map());
             return feature.addRenderer((metadata, data) => {
                 const key = resolver(metadata, data);
@@ -97,21 +100,27 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         }
     }
 
+    private static buildBindingStorage<Key>(givenMap: Map<Key|undefined, Map<string, string>>, resolver: (...parameters: Parameters<Parameters<IFeatureManager<BindingStorageFeature>['addRenderer']>[0]>) => Key) {
+        return (feature: IFeatureManager<BindingStorageFeature>): IFeatureManager<BindingStorageFeature> => {
+            const ensureBindingStorage = HelmRenderer.ensurePropertyValueGenerator(givenMap, () => new Map());
+            return feature.addRenderer((metadata, data) => {
+                const key = resolver(metadata, data);
+                let binding = ensureBindingStorage(key);
+                for (const dataset of data) {
+                    binding = HelmRenderer.mergeElements(binding, new Map(Object.entries(dataset.binding ?? {})));
+                }
+                givenMap.set(key, binding);
+            });
+        }
+    }
+
     public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider) {
         return (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
             .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
                 return HelmRenderer.buildVariableStorage(this.propertyStorage, (metadata) => metadata.project.workspace)(feature);
             })
             .ensureFeature('properties' as const, new BindingFeature(), function (feature) {
-                const ensureBindingStorage = HelmRenderer.ensurePropertyValueGenerator(this.bindingStorage, () => new Map());
-                feature.addRenderer((metadata, data) => {
-                    let binding = ensureBindingStorage(metadata.project.workspace);
-                    for (const dataset of data) {
-                        binding = HelmRenderer.mergeElements(binding, new Map(Object.entries(dataset.binding ?? {})));
-                    }
-                    this.bindingStorage.set(metadata.project.workspace, binding);
-                })
-                return feature;
+                return HelmRenderer.buildBindingStorage(this.bindingStorage, (metadata) => metadata.project.workspace)(feature);
             })
             .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
                 feature.addRenderer((metadata, structure) => {
@@ -124,7 +133,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             });
     }
 
-    public static makeIntance(
+    public static makeInstance(
         configMapRenderer: IConfigMapRenderer,
         secretRenderer: ISecretRenderer,
         deploymentRenderer: IDeploymentRenderer,
@@ -146,7 +155,8 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
             baseRenderer.ensureFeature('properties.job' as const, jobStructure, function (feature) {
 
-                const ensureWorkspace = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
+                const ensureJobBindings = HelmRenderer.ensurePropertyValueGenerator(this.jobBindingStorage, () => new Map());
+                const ensureJobProperties = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
                 const ensureJob = HelmRenderer.ensurePropertyValueGenerator(this.jobStorage, () => new Map());
 
                 feature.addRenderer(async (metadata, structure) => {
@@ -165,9 +175,10 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
                             ensureJob(key === undefined ? undefined : metadata.project.workspace).set(jobKey, merge({}, ...structure));
 
-                            const mockRenderer = new RenderFeatureManager<GivenFeature>();
-                            HelmRenderer.buildVariableStorage(ensureWorkspace(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(mockRenderer);
-                            await mockRenderer.render(metadata, structure);
+                            const innerRenderer = new RenderFeatureManager<MergeFeatures<VariableStorageFeature, undefined, BindingStorageFeature>>();
+                            HelmRenderer.buildVariableStorage(ensureJobProperties(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(innerRenderer);
+                            HelmRenderer.buildBindingStorage(ensureJobBindings(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(innerRenderer);
+                            await innerRenderer.render(metadata, structure);
                         }
                     }
                 
