@@ -1,8 +1,8 @@
-import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, MergeFeatures, NetworkFeature, ScalingFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
+import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, JobFeature, MergeFeatures, NetworkFeature, ScalingFeature, SystemUsageFeature, UpdateStrategy, VariableFeature, VolumeFeature } from "@veto-party/baum__steps__installer__features";
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
-import { isEqual } from 'lodash-es';
+import { isEqual, merge } from 'lodash-es';
 import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from "./interface/IConfigMapRenderer.js";
 import { IDeploymentRenderer } from "./interface/IDeploymentRenderer.js";
@@ -21,7 +21,8 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
     public propertyStorage = new Map<IWorkspace|undefined, IConfigMapStructure>();
 
-
+    public jobStorage = new Map<IWorkspace|undefined, Map<string, typeof HelmRenderer['buildBaseInstance'] extends (...args: any[]) => HelmRenderer<IFeature<infer A0, infer A1, infer A2>> ? MergeFeatures<IFeature<A0, A1, A2>, undefined, JobFeature> extends IFeature<any, any, infer Structure> ? Structure : never : never>>;
+    public jobBindingStorage = new Map<IWorkspace|undefined, Map<string, Map<string, string>>>();
     public jobPropertyStorage = new Map<IWorkspace|undefined, Map<string, IConfigMapStructure>>();
 
     public globalBindingStorage = new Map<string, ConfigMappingWithStore>();
@@ -59,62 +60,50 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         return newMap as any;
     }
 
-    public static makeIntance(
-        configMapRenderer: IConfigMapRenderer,
-        secretRenderer: ISecretRenderer,
-        deploymentRenderer: IDeploymentRenderer,
-        exposeRenderer: IExposeRenderer,
-        networkRenderer: INetworkRenderer,
-        jobRenderer: IJobRenderer,
-        serviceRenderer: IServiceRenderer,
-        nameProvider: INameProvider
-    ) {
-
-        const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
-
-        const ensurePropertyValueGenerator = <SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Value : never) => (workspace: SomeMap extends Map<infer Key, any> ? Key : never) => {
-            if (!map.has(workspace)) {
-                map.set(workspace, generator(workspace));
+    private static ensurePropertyValueGenerator<SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Value : never) {
+        return (key: SomeMap extends Map<infer U, any> ? U : never) : SomeMap extends Map<any, infer Value> ? Value : never => {
+            if (!map.has(key)) {
+                map.set(key, generator(key));
             }
-            return map.get(workspace)!;
+            return map.get(key)!;
         }
+    }
 
-        const ensureExposeStorage = ensurePropertyValueGenerator(exposeStorage, () => new Map());
+    private static buildVariableStorage<Key>(givenMap: Map<Key|undefined, IConfigMapStructure>, resolver: (...parameters: Parameters<Parameters<IFeatureManager<GivenFeature>['addRenderer']>[0]>) => Key) {
+        return (feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> => {
+            const ensurePropertyStorage = HelmRenderer.ensurePropertyValueGenerator(givenMap, () => new Map());
+            return feature.addRenderer((metadata, data) => {
+                const key = resolver(metadata, data);
+                let elem = ensurePropertyStorage(key);
+                let globalElem = ensurePropertyStorage(undefined);
+
+                for (const dataset of data) {
+                    const allVars = Object.entries(dataset.variable ?? {} as Exclude<typeof dataset.variable, undefined>);
+                    const [globalVars, otherVars] = allVars.reduce(([globalVars, otherVars], entry) => {
+                        const [, value] = entry;
+                        const scope = value.type === 'global' ? globalVars : otherVars;
+                        scope.push(entry);
+                        return [globalVars, otherVars];
+                    }, [[] as typeof allVars, [] as typeof allVars] as const);
 
 
-        const buildVariableStorage = (givenMap: Map<IWorkspace|undefined, IConfigMapStructure>) => {
-            return (feature: IFeatureManager<GivenFeature>): IFeatureManager<GivenFeature> => {
-                const ensurePropertyStorage = ensurePropertyValueGenerator(givenMap, () => new Map());
-                return feature.addRenderer((metadata, data) => {
-                    let elem = ensurePropertyStorage(metadata.project.workspace);
-                    let globalElem = ensurePropertyStorage(undefined);
+                    elem = HelmRenderer.mergeElements(elem, new Map(globalVars));
+                    globalElem = HelmRenderer.mergeElements(globalElem, new Map(otherVars));
+                }
 
-                    for (const dataset of data) {
-                        const allVars = Object.entries(dataset.variable ?? {} as Exclude<typeof dataset.variable, undefined>);
-                        const [globalVars, otherVars] = allVars.reduce(([globalVars, otherVars], entry) => {
-                            const [, value] = entry;
-                            const scope = value.type === 'global' ? globalVars : otherVars;
-                            scope.push(entry);
-                            return [globalVars, otherVars];
-                        }, [[] as typeof allVars, [] as typeof allVars] as const);
-
-
-                        elem = HelmRenderer.mergeElements(elem, new Map(globalVars));
-                        globalElem = HelmRenderer.mergeElements(globalElem, new Map(otherVars));
-                    }
-
-                    givenMap.set(metadata.project.workspace, elem);
-                    givenMap.set(undefined, globalElem);
-                });
-            }
+                givenMap.set(key, elem);
+                givenMap.set(undefined, globalElem);
+            });
         }
+    }
 
-        let renderer = (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
+    public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider) {
+        return (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
             .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
-                return buildVariableStorage(this.propertyStorage)(feature);
+                return HelmRenderer.buildVariableStorage(this.propertyStorage, (metadata) => metadata.project.workspace)(feature);
             })
             .ensureFeature('properties' as const, new BindingFeature(), function (feature) {
-                const ensureBindingStorage = ensurePropertyValueGenerator(this.bindingStorage, () => new Map());
+                const ensureBindingStorage = HelmRenderer.ensurePropertyValueGenerator(this.bindingStorage, () => new Map());
                 feature.addRenderer((metadata, data) => {
                     let binding = ensureBindingStorage(metadata.project.workspace);
                     for (const dataset of data) {
@@ -133,30 +122,55 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             .ensureFeature('properties' as const, new VolumeFeature(), (feature) => {
                 return feature;
             });
+    }
 
+    public static makeIntance(
+        configMapRenderer: IConfigMapRenderer,
+        secretRenderer: ISecretRenderer,
+        deploymentRenderer: IDeploymentRenderer,
+        exposeRenderer: IExposeRenderer,
+        networkRenderer: INetworkRenderer,
+        jobRenderer: IJobRenderer,
+        serviceRenderer: IServiceRenderer,
+        nameProvider: INameProvider
+    ) {
 
-            renderer = renderer.ensureFeature('properties.job' as const, BaseInstaller.makeInstance().appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, renderer.getGroup()), function (feature) {
+        const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
+        const ensureExposeStorage = HelmRenderer.ensurePropertyValueGenerator(exposeStorage, () => new Map());
 
-                const ensureWorkspace = ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
+        const baseRenderer = HelmRenderer.buildBaseInstance(secretRenderer, configMapRenderer,nameProvider);
+
+            const jobStructure = BaseInstaller.makeInstance()
+                .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, baseRenderer.getGroup())
+                .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, new JobFeature());
+
+            baseRenderer.ensureFeature('properties.job' as const, jobStructure, function (feature) {
+
+                const ensureWorkspace = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
+                const ensureJob = HelmRenderer.ensurePropertyValueGenerator(this.jobStorage, () => new Map());
 
                 feature.addRenderer(async (metadata, structure) => {
-                    const filteredStructure = new Map<string, Exclude<(typeof structure)[number]['job'], undefined>[string][]>();
-                    const ensureFilteredStruct = ensurePropertyValueGenerator(filteredStructure, () => []);
-                    structure.flatMap((obj) => Object.entries(obj.job ?? {}), 1).forEach(([key, value]) => {
-                        ensureFilteredStruct(key).push(value);
-                    });
-                
-                    const ensureStructureByKey = ensureWorkspace(metadata.project.workspace);
+                    // undefined marks global.
+                    const filteredStructure = new Map<string | undefined, Record<string | number, Exclude<(typeof structure)[number]['job'], undefined>[string][]>>();
+                    const ensureFilteredStruct = HelmRenderer.ensurePropertyValueGenerator(filteredStructure, () => ({}));
 
+                    structure.flatMap((obj) => Object.entries(obj.job ?? {}), 1).forEach(([key, value]) => {
+                        const key2 = value.type === 'global' ? undefined : key
+                        ensureFilteredStruct(key2)[key] ??= [];
+                        ensureFilteredStruct(key2)[key].push(value);
+                    }); 
                     
                     for (const [key, entries] of filteredStructure.entries()) {
+                        for (const [jobKey, structure] of Object.entries(entries)) {
 
-                        const mockRenderer = new RenderFeatureManager<GivenFeature>();
+                            ensureJob(key === undefined ? undefined : metadata.project.workspace).set(jobKey, merge({}, ...structure));
 
-                        buildVariableStorage(ensureStructureByKey(key))(mockRenderer);
-
-                        await mockRenderer.render(metadata, entries);
+                            const mockRenderer = new RenderFeatureManager<GivenFeature>();
+                            HelmRenderer.buildVariableStorage(ensureWorkspace(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(mockRenderer);
+                            await mockRenderer.render(metadata, structure);
+                        }
                     }
+                
                 });
                 return feature;
             })
@@ -186,7 +200,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             //     return feature;
             // });
 
-        renderer.addRenderer(async function (metadata) {
+        baseRenderer.addRenderer(async function (metadata) {
             const configResult = await configMapRenderer.render(metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));
             this.writers.push(configResult);
             const secretResult = await secretRenderer.render(metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));

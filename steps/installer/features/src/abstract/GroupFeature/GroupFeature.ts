@@ -3,6 +3,7 @@ import { AFeature } from "../AFeature.js";
 import { asConst, FromSchema, JSONSchema } from "json-schema-to-ts";
 import { cloneDeep, set, toPath } from "lodash-es";
 import type { ToDefinitionStructureWithTupleMerge } from "../types/ToDefinitionStructureWithTupleMerge.js";
+import { ResolveFeaturePath } from "../types/MergeFeatures.js";
 
 export class GroupFeature<
     T extends {}|Record<string, any>, 
@@ -24,7 +25,7 @@ export class GroupFeature<
     >(
             writePath: WritePath, 
             feature: Feature
-    ): Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<WritePath extends string ? B extends undefined ? WritePath : B extends string ? `${WritePath}.${B}` : never : B extends string ? B : never, D, T>>> extends infer Some ? GroupFeature<
+    ): Feature extends IFeature<infer D, infer B, infer _> ? ReturnType<typeof asConst<ToDefinitionStructureWithTupleMerge<ResolveFeaturePath<WritePath, B extends string|undefined ? B : undefined>, D, T>>> extends infer Some ? GroupFeature<
         Some extends Record<string, any> ? Some : never,
         Path, 
         FromSchema<Some extends JSONSchema ? Some : never>

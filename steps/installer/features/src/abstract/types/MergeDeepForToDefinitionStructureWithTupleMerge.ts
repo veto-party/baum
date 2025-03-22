@@ -64,4 +64,4 @@ export type MergeDeepForToDefinitionStructureWithTupleMerge<A, B> =
         A extends object ?
             { [Key in (keyof (A & B))]: MergeDeepForToDefinitionStructureWithTupleMerge<Key extends keyof A ? A[Key] : typeof MERGE_ELEM_NOT_FOUND, Key extends keyof B ? B[Key] : typeof MERGE_ELEM_NOT_FOUND> } :
         B :
-    never;
+    A | B;

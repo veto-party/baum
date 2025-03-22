@@ -27,6 +27,7 @@ export { SystemUsageFeature } from './implementation/SystemUsageFeature/SystemUs
 export { UpdateStrategy } from './implementation/UpdateStrategyFeature/UpdateStrategyFeature.js';
 export { VariableFeature } from './implementation/Variable/Variable.js';
 export { VolumeFeature } from './implementation/Volume/Volume.js';
+export { JobFeature } from './implementation/Job/JobFeature.js';
 
 export { BaseInstaller } from './BaseInstaller.js';
 
