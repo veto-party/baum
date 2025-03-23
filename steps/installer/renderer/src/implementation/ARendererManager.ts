@@ -76,17 +76,16 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
         return filter.filter;
     }
 
-    async render(metadata: RendererMetadata, structure: InferStructure<T>[]) {
+    async render(given: Map<RendererMetadata, InferStructure<T>[]>) {
         
-        for (const { renderer, filter } of this.featureCache.values()) {
-            if (filter && !ARendererManager.resolveFilter(filter)(structure)) {
-                return;
-            }
+        for (const [metadata, structure] of given.entries()) {
+            for (const { renderer, filter } of this.featureCache.values()) {
+                if (filter && !ARendererManager.resolveFilter(filter)(structure)) {
+                    return;
+                }
 
-            await renderer.render(metadata, structure);
-        };
-
-        await super.render(metadata, structure);
-
+                await renderer.renderFeature(metadata, structure);
+            };
+        }
     }
 }

@@ -1,8 +1,7 @@
-import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from "../interface/IConfigMapRenderer.js";
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
-    render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
+    render<Key>(workspace: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
         const allItems: IConfigMapStructure = new Map();
 
         const entriesToCheck = [Array.from(binding?.entries() ?? [])];
@@ -14,7 +13,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
 
             for (const entry of entries) {
                 const [key, lookupKey] = entry;
-                const item = map.get(workspace)?.get(lookupKey);
+                const item = map.get(undefined)?.get(workspace)?.get(lookupKey);
 
                 if (!item) {
                     possibleGlobalEntries.push(entry);
@@ -36,7 +35,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
 
             for (const entry of entries) {
                 const [key, lookupKey] = entry;
-                const item = map.get(workspace)?.get(lookupKey);
+                const item = map.get(undefined)?.get(workspace)?.get(lookupKey);
 
                 if (!item) {
                     throw new Error(`Entry(${key}, ${lookupKey} not found, checked scoped and global context.`);
@@ -63,7 +62,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     } : {
                         type: 'variable',
                         global: value.type === 'global',
-                        store: value.type === 'global' ? 'global' : workspace?.getName() 
+                        store: value.type === 'global' ? 'global' : name
                     }) satisfies ConfigMapping] as const;
                 }))
             },

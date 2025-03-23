@@ -1,6 +1,5 @@
-import type { GroupFeature, IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
-import type { InferStructure, IRenderer, RendererMetadata } from "./IRenderer.js";
-import { asConst, FromSchema, JSONSchema } from "json-schema-to-ts";
+import type { IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
+import type { IFeatureRenderer, InferStructure, IRenderer, RendererMetadata } from "./IRenderer.js";
 
 export type IFilter<T extends IFeature<any, any, any>> = {
     <U extends InferStructure<T>>(obj: U[]): boolean
@@ -14,7 +13,7 @@ export interface IFeatureManager<T extends IFeature<any, any, any>> {
     // removeRenderer(renderer: IRenderer<T>): void;
 }
 
-export interface IRendererFeatureManager<T extends IFeature<any, any, any>> extends IRenderer<T>, IFeatureManager<T> {
+export interface IRendererFeatureManager<T extends IFeature<any, any, any>> extends IFeatureRenderer<T>, IFeatureManager<T> {
 
 };
 

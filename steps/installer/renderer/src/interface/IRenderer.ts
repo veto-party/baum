@@ -14,6 +14,10 @@ export type RendererMetadata = {
     project: ProjectMetadata;
 } & Record<string, any>;
 
+export interface IFeatureRenderer<T extends IFeature<any, any, any>> {
+    renderFeature(metadata: RendererMetadata, structure: InferStructure<T>[]): Promise<any>|any;
+}
+
 export interface IRenderer<T extends IFeature<any, any, any>> {
-    render(metadata: RendererMetadata, structure: InferStructure<T>[]): Promise<any>|any;
+    render(structure: Map<RendererMetadata, InferStructure<T>[]>): Promise<any>|any;
 }
