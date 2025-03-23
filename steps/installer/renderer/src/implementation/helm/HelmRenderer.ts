@@ -40,6 +40,20 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public propertyStorage = new Map<IWorkspace|undefined, IConfigMapStructure>();
 
     /**
+     * This is the metadata about scaling the containers.
+     * 
+     * It contains info about how mutch and when to scale the container.(s)
+     */
+    public scalingStorage = new Map<IWorkspace, ScalingFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+
+    /**
+     * This is the metadata about updating the containers.
+     * 
+     * It contains the info on how to update the container.(s)
+     */
+    public updateStorage = new Map<IWorkspace, UpdateStrategy extends IFeature<any, any, infer Structure> ? Structure : never>();
+
+    /**
      * Jobs are a (workspace|undefined) mapping, where undefined represents the global scope.
      * Jobs are the complete jobs, with bindings and properties.
      * Bindings and properties are stored twice to make it more easy to work with them.
@@ -109,7 +123,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         return newMap as any;
     }
 
-    public static warnAboutDifferences<A extends Record<any, any>, B extends Record<any, any>>(a: A, b: B): A extends Record<infer AKey, infer AValue> ? B extends Record<infer BKey, infer BValue> ? Record<AKey | BKey, MergeDeepForToDefinitionStructureWithTupleMerge<AValue, BValue>> : never : never {
+    public static warnAboutDifferences<A extends object, B extends object>(a: A, b: B): MergeDeepForToDefinitionStructureWithTupleMerge<A, B> {
         const keysToCheck = uniq([getDeepKeys(a), getDeepKeys(b)].flat());
         for (const key of keysToCheck) {
             const aValue = get(a, key, NOT_FOUND);
@@ -203,7 +217,6 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         exposeRenderer: IExposeRenderer,
         networkRenderer: INetworkRenderer,
         jobRenderer: IJobRenderer,
-        serviceRenderer: IServiceRenderer,
         nameProvider: INameProvider
     ) {
 
@@ -222,8 +235,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                 const ensureJobProperties = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
                 const ensureJob = HelmRenderer.ensurePropertyValueGenerator(this.jobStorage, () => new Map());
 
-                feature.addRenderer(async (metadata, structure) => {
-                    // undefined marks global.
+                return feature.addRenderer(async (metadata, structure) => {
                     const filteredStructure = new Map<string | undefined, Record<string | number, Exclude<(typeof structure)[number]['job'], undefined>[string][]>>();
                     const ensureFilteredStruct = HelmRenderer.ensurePropertyValueGenerator(filteredStructure, () => ({}));
 
@@ -246,7 +258,6 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                     }
                 
                 });
-                return feature;
             })
             .ensureFeature('properties' as const, new ExposeFeature(), (feature) => {
                 return feature.addRenderer((metadata, data) => {
@@ -258,20 +269,25 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                     exposeStorage.set(metadata.project.workspace, storage);
                 });
             })
-            .ensureFeature('properties' as const, new ScalingFeature(), (feature) => {
-                return feature.addRenderer(function(metadata, data) {
-                    for (const element of data) {
+            .ensureFeature('properties' as const, new ScalingFeature(), function (feature) {
+                return feature.addRenderer((metadata, data) => {
+                    const structure = data.reduce((a, b) => HelmRenderer.warnAboutDifferences(a ?? {}, b.scaling ?? {}), data.pop()?.scaling);
 
+                    if (structure) {
+                        this.scalingStorage.set(metadata.project.workspace, structure);
                     }
-                })
+                });
             })
-            // .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
-            //     return feature;
-            // })
-            .ensureFeature('properties' as const, new UpdateStrategy(), (feature) => {
-                return feature;
+            .ensureFeature('properties' as const, new UpdateStrategy(), function (feature) {
+                return feature.addRenderer((metadata, data) => {
+                    const structure = data.reduce((a, b) => b.update_strategy !== undefined ? a !== undefined ? HelmRenderer.warnAboutDifferences(a, b.update_strategy) : b.update_strategy : a, data.pop()?.update_strategy);
+
+                    if (structure) {
+                        this.updateStorage.set(metadata.project.workspace, structure);
+                    }
+                });
             })
-            .ensureFeature('properties' as const, ServiceFeature.makeInstance(), (feature) => {
+            .ensureFeature('properties.service' as const, ServiceFeature.makeInstance(), function (feature) {
                 return feature;
             });
 
@@ -326,8 +342,9 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         });
     }
 
-    public async renderFeature(metadata: RendererMetadata, structure: InferStructure<T>[]): Promise<void> {
-        await super.renderFeature(metadata, structure);
+    public async render(structure: Map<RendererMetadata, InferStructure<T>[]>): Promise<void> {
+        await super.render(structure);
+
         const binding = new Map(this.globalBindingStorage.entries().map(([key, value]) => [key, typeof value.store === 'string' ? value.key : undefined] as const).filter((entry): entry is readonly [string, string] => entry[1] !== undefined));
 
         const allValues = this.jobPropertyStorage.get(undefined)?.values?.()?.toArray?.();

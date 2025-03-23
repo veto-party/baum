@@ -1,12 +1,12 @@
 import type { FromSchema } from "json-schema-to-ts";
 import { BindingFeature } from "../Binding/Binding.js";
 import { GroupFeature } from "../../abstract/GroupFeature/GroupFeature.js";
-import { definition } from "./definition.js";
+import { definition, mappingStructure, pattern } from "./definition.js";
 
-export class ServiceFeature<T extends {}|Record<string, any> = typeof definition> extends GroupFeature<T, 'service', FromSchema<T>> {
+export class ServiceFeature<T extends {}|Record<string, any>> extends GroupFeature<T, 'service', FromSchema<T>> {
 
 
-    protected constructor(value: any) {
+    protected constructor(value: T) {
         super(value, 'service');
     }
 
@@ -15,10 +15,6 @@ export class ServiceFeature<T extends {}|Record<string, any> = typeof definition
     }
 
     public static makeInstance() {
-        const result = (new ServiceFeature(definition)).appendFeature<undefined, BindingFeature>(undefined, new BindingFeature());
-
-        type T = typeof result extends infer A ? A extends GroupFeature<infer T, infer Path, infer Last> ? T : unknown : unknown;
-
-        return result as unknown as ServiceFeature<T>;
+        return (new ServiceFeature(mappingStructure)).appendFeature(`patternProperties["${pattern}"]` as const, new ServiceFeature(definition).appendFeature(undefined, new BindingFeature()));
     }
 }

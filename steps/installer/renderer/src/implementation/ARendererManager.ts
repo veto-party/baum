@@ -84,7 +84,10 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
                     return;
                 }
 
-                await renderer.renderFeature(metadata, structure);
+                await Promise.all([
+                    this.renderFeature(metadata, [...structure]), 
+                    renderer.renderFeature(metadata, [...structure])
+                ]);
             };
         }
     }
