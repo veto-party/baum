@@ -2,7 +2,7 @@ import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, J
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
-import { isEqual, merge, property } from 'lodash-es';
+import { get, isEqual, merge, property, uniq } from 'lodash-es';
 import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from "./interface/IConfigMapRenderer.js";
 import { IDeploymentRenderer } from "./interface/IDeploymentRenderer.js";
@@ -14,22 +14,68 @@ import { INameProvider } from "../../interface/INameProvider.js";
 import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js";
 import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
+import { MergeDeepForToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features/src/abstract/types/MergeDeepForToDefinitionStructureWithTupleMerge.js";
+import { getDeepKeys } from "../../utility/getDeepKeys.js";
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', IFeature<B0, B1, B2>> extends infer Feature ? Feature : never : never : never;
 
 type BindingStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', BindingFeature> extends infer Feature ? Feature : never : never;
 
+const NOT_FOUND = Symbol('NOT_FOUND');
+
 export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererManager<T> {
 
+    /**
+     * These are the bindings for the given workspace.
+     * 
+     * A binding is a key that maps to a key of a property.
+     * It is done this way so that a variable can be refenced multiple times (from multiple bindings).
+     */
     public bindingStorage = new Map<IWorkspace, Map<string, string>>();
+
+    /**
+     * Properties are a (workspace|undefined) mapping, where undefined represents the global scope.
+     * Properties are the values (environment + secret environment), which in turn are consumed by the bindings. 
+     */
     public propertyStorage = new Map<IWorkspace|undefined, IConfigMapStructure>();
 
+    /**
+     * Jobs are a (workspace|undefined) mapping, where undefined represents the global scope.
+     * Jobs are the complete jobs, with bindings and properties.
+     * Bindings and properties are stored twice to make it more easy to work with them.
+     *
+     * This is called jobs since every (workspace|undefined) can have multiple jobs which are accessed by name.
+     */
     public jobStorage = new Map<IWorkspace|undefined, Map<string, typeof HelmRenderer['buildBaseInstance'] extends (...args: any[]) => HelmRenderer<IFeature<infer A0, infer A1, infer A2>> ? MergeFeatures<IFeature<A0, A1, A2>, undefined, JobFeature> extends IFeature<any, any, infer Structure> ? Structure : never : never>>;
+
+    /**
+     * Job bindings are a (workspace|undefined)(string) which in turn are used to map the scoped or global variables(evironment + secrets) to a specified job.
+     * An entry is not necessarrly presnet when a job storage is present, if this is not present, there are no bindings to a job.
+     */
     public jobBindingStorage = new Map<IWorkspace|undefined, Map<string, Map<string, string>>>();
+
+    /**
+     * Job properties are a (workspace|undefined)(string) which in turn can be used multiple times.
+     * These dependencies can also be accessed by the bindingStorage property.
+     * 
+     * The job somejob is defined and contains a variable called foo.
+     * Then you access it using somejob.variable.a.
+     */
     public jobPropertyStorage = new Map<IWorkspace|undefined, Map<string, IConfigMapStructure>>();
 
+    /**
+     * This is the storage for all the bindings that come from the global storage.
+     * It is later used to build the global config map and the global config secret.
+     */
     public globalBindingStorage = new Map<string | number, ConfigMappingWithStore>();
 
+    /**
+     * Writers are the temporary stored version a yaml file.
+     * It is generated successfully, but not yet written to the file system.
+     * 
+     * A writer is usually returned by a renderer.
+     * It might contain usefull information for additional steps.
+     */
     public writers: IWritable[] = [];
     
     protected constructor(
@@ -61,6 +107,21 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
 
 
         return newMap as any;
+    }
+
+    public static warnAboutDifferences<A extends Record<any, any>, B extends Record<any, any>>(a: A, b: B): A extends Record<infer AKey, infer AValue> ? B extends Record<infer BKey, infer BValue> ? Record<AKey | BKey, MergeDeepForToDefinitionStructureWithTupleMerge<AValue, BValue>> : never : never {
+        const keysToCheck = uniq([getDeepKeys(a), getDeepKeys(b)].flat());
+        for (const key of keysToCheck) {
+            const aValue = get(a, key, NOT_FOUND);
+            const bValue = get(b, key, NOT_FOUND);
+            if (aValue == NOT_FOUND || bValue == NOT_FOUND || isEqual(aValue, bValue)) {
+                continue;
+            }
+        
+            console.warn(`${key} is overridden`);
+        }
+
+        return merge(a, b) as any;
     }
 
     private static ensurePropertyValueGenerator<SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Value : never) {
@@ -123,12 +184,12 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                 return HelmRenderer.buildBindingStorage(this.bindingStorage, (metadata) => metadata.project.workspace)(feature);
             })
             .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
-                feature.addRenderer((metadata, structure) => {
-                    
-                });
                 return feature;
             })
             .ensureFeature('properties' as const, new VolumeFeature(), (feature) => {
+                return feature;
+            })
+            .ensureFeature('properties' as const, new SystemUsageFeature(), (feature) => {
                 return feature;
             });
     }
@@ -196,10 +257,11 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                 });
             })
             .ensureFeature('properties' as const, new ScalingFeature(), (feature) => {
-                return feature;
-            })
-            .ensureFeature('properties' as const, new SystemUsageFeature(), (feature) => {
-                return feature;
+                return feature.addRenderer(function(metadata, data) {
+                    for (const element of data) {
+
+                    }
+                })
             })
             // .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
             //     return feature;
