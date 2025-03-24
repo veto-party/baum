@@ -92,6 +92,16 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public jobPropertyStorage = new Map<IWorkspace|undefined, Map<string, IConfigMapStructure>>();
 
     /**
+     * A structure that is an array of networks, which contains the info on how the jobs are connected to services.
+     */
+    public jobNetworkStrorage = new Map<IWorkspace | undefined, Map<string, NetworkFeature extends IFeature<any, any, infer Structure> ? Structure : never>>();
+
+    /**
+     * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
+     */
+    public jobSystemUsageStorage = new Map<IWorkspace | undefined, Map<string, SystemUsageFeature extends IFeature<any, any, infer Structure> ? Structure : never>>();
+
+    /**
      * This is the storage for all the bindings that come from the global storage.
      * It is later used to build the global config map and the global config secret.
      */
@@ -274,13 +284,24 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                     }); 
                     
                     for (const [key, entries] of filteredStructure.entries()) {
+                        const workspaceKey = key === undefined ? undefined : metadata.project.workspace;
                         for (const [jobKey, structure] of Object.entries(entries)) {
 
                             ensureJob(key === undefined ? undefined : metadata.project.workspace).set(jobKey, merge({}, ...structure));
 
+                            const systemUsage = HelmRenderer.reduceDistances(structure, 'system_usage');
+                            if (systemUsage) {
+                                this.jobSystemUsageStorage.set(workspaceKey, HelmRenderer.mergeElements(this.jobSystemUsageStorage.get(workspaceKey) ?? new Map(), new Map([[jobKey, systemUsage]])))
+                            }
+
+                            const network = HelmRenderer.reduceDistances(structure, 'network');
+                            if (network) {
+                                this.jobNetworkStrorage.set(workspaceKey, HelmRenderer.mergeElements(this.jobNetworkStrorage.get(workspaceKey) ?? new Map(), new Map([[jobKey, network]])));
+                            }
+
                             const innerRenderer = new RenderFeatureManager<MergeFeatures<VariableStorageFeature, undefined, BindingStorageFeature>>();
-                            HelmRenderer.buildVariableStorage(ensureJobProperties(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(innerRenderer);
-                            HelmRenderer.buildBindingStorage(ensureJobBindings(key === undefined ? undefined : metadata.project.workspace), () => jobKey)(innerRenderer);
+                            HelmRenderer.buildVariableStorage(ensureJobProperties(workspaceKey), () => jobKey)(innerRenderer);
+                            HelmRenderer.buildBindingStorage(ensureJobBindings(workspaceKey), () => jobKey)(innerRenderer);
                             await innerRenderer.renderFeature(metadata, structure);
                         }
                     }
