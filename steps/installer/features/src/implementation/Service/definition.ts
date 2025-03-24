@@ -9,7 +9,8 @@ export const mappingStructure = asConst({
         [pattern]: {
             type: 'object'
         }
-    }
+    },
+    additionalProperties: false
 });
 
 export const definition = asConst({

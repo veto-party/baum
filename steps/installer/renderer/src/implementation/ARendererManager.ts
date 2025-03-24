@@ -1,5 +1,5 @@
 import { GroupFeature, IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
-import type { IFilter, InferNewRenderer, InferToFeatureManager, InferToRendererManager, IFeatureManager, IRendererManager, IRendererFeatureManager } from "../interface/IRendererManager.js";
+import type { IFilter, InferNewRenderer, InferToFeatureManager, IFeatureManager, IRendererManager, IRendererFeatureManager } from "../interface/IRendererManager.js";
 import type { InferStructure, RendererMetadata } from "../interface/IRenderer.js";
 import { createHash } from "node:crypto";
 import { RenderFeatureManager } from "./RenderFeatureManager.js";

@@ -8,7 +8,6 @@ import { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from 
 import { IDeploymentRenderer } from "./interface/IDeploymentRenderer.js";
 import { ISecretRenderer } from "./interface/ISecretRenderer.js";
 import { IJobRenderer, JobStructure } from "./interface/IJobRenderer.js";
-import { IServiceRenderer } from "./interface/IServiceRenderer.js";
 import { INetworkRenderer } from "./interface/INetworkRenderer.js";
 import { INameProvider } from "../../interface/INameProvider.js";
 import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js";
@@ -54,13 +53,28 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     public updateStorage = new Map<IWorkspace, UpdateStrategy extends IFeature<any, any, infer Structure> ? Structure : never>();
 
     /**
+     * A structure that is an array of networks, which contains the info on how the services are connected.
+     */
+    public networkStrorage = new Map<IWorkspace, NetworkFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+
+    /**
+     * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
+     */
+    public systemUsageStorage = new Map<IWorkspace, SystemUsageFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+
+    /**
+     * This is the service mapping it contains a mapping for external helm charts.
+     */
+    public serviceStorage = new Map<IWorkspace | undefined, Map<string, typeof ServiceFeature.makeInstance extends () => IFeature<any, any, infer Structure> ? Structure extends Record<string, any> ? Structure[string] : never : never>>();
+
+    /**
      * Jobs are a (workspace|undefined) mapping, where undefined represents the global scope.
      * Jobs are the complete jobs, with bindings and properties.
      * Bindings and properties are stored twice to make it more easy to work with them.
      *
      * This is called jobs since every (workspace|undefined) can have multiple jobs which are accessed by name.
      */
-    public jobStorage = new Map<IWorkspace|undefined, Map<string, JobStructure>>;
+    public jobStorage = new Map<IWorkspace|undefined, Map<string, JobStructure>>();
 
     /**
      * Job bindings are a (workspace|undefined)(string) which in turn are used to map the scoped or global variables(evironment + secrets) to a specified job.
@@ -189,6 +203,10 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         }
     }
 
+    private static reduceDistances<Value extends object, Key extends keyof Value>(value: Value[], key: Key): Value[Key]|undefined {
+        return value.reduce<Value[Key]|undefined>((a, b) => a !== undefined ? HelmRenderer.warnAboutDifferences(a as any, b?.[key] !== undefined ? b[key] as any : a) : b, value.pop()?.[key]);
+    }
+
     public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider) {
         return (new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider))
             .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
@@ -197,14 +215,24 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             .ensureFeature('properties' as const, new BindingFeature(), function (feature) {
                 return HelmRenderer.buildBindingStorage(this.bindingStorage, (metadata) => metadata.project.workspace)(feature);
             })
-            .ensureFeature('properties' as const, new NetworkFeature(), (feature) => {
-                return feature;
+            .ensureFeature('properties' as const, new NetworkFeature(), function (feature) {
+                return feature.addRenderer((metadata, data) => {
+                    const network = HelmRenderer.reduceDistances(data, 'network' as const);
+                    if (network) {
+                        this.networkStrorage.set(metadata.project.workspace, network);
+                    }
+                });
             })
-            .ensureFeature('properties' as const, new VolumeFeature(), (feature) => {
-                return feature;
-            })
-            .ensureFeature('properties' as const, new SystemUsageFeature(), (feature) => {
-                return feature;
+            // .ensureFeature('properties' as const, new VolumeFeature(), function (feature) {
+            //     return feature;
+            // })
+            .ensureFeature('properties' as const, new SystemUsageFeature(), function (feature) {
+                return feature.addRenderer((metadata, data) => {
+                    const systemUsage = HelmRenderer.reduceDistances(data, 'system_usage' as const);
+                    if (systemUsage) {
+                        this.systemUsageStorage.set(metadata.project.workspace, systemUsage);
+                    }
+                });
             });
     }
 
@@ -271,7 +299,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             })
             .ensureFeature('properties' as const, new ScalingFeature(), function (feature) {
                 return feature.addRenderer((metadata, data) => {
-                    const structure = data.reduce((a, b) => HelmRenderer.warnAboutDifferences(a ?? {}, b.scaling ?? {}), data.pop()?.scaling);
+                    const structure = HelmRenderer.reduceDistances(data, 'scaling');
 
                     if (structure) {
                         this.scalingStorage.set(metadata.project.workspace, structure);
@@ -280,18 +308,27 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             })
             .ensureFeature('properties' as const, new UpdateStrategy(), function (feature) {
                 return feature.addRenderer((metadata, data) => {
-                    const structure = data.reduce((a, b) => b.update_strategy !== undefined ? a !== undefined ? HelmRenderer.warnAboutDifferences(a, b.update_strategy) : b.update_strategy : a, data.pop()?.update_strategy);
+                    const structure = HelmRenderer.reduceDistances(data, 'update_strategy');
 
                     if (structure) {
                         this.updateStorage.set(metadata.project.workspace, structure);
                     }
                 });
             })
-            .ensureFeature('properties.service' as const, ServiceFeature.makeInstance(), function (feature) {
-                return feature;
-            });
+            .ensureFeature('properties' as const, ServiceFeature.makeInstance(), function (feature) {
+                const ensureService = HelmRenderer.ensurePropertyValueGenerator(this.serviceStorage, () => new Map());
+                return feature.addRenderer((metadata, data) => {
+                    for (const dataset of data) {
+                        const [globals, workspaced] = Object.entries(dataset.service ?? {}).reduce((prev, [key, value]) => {
+                            prev[value.type === 'global' ? 0 : 1].push([key, value]);
+                            return prev;
+                        }, [[] as [string, Exclude<typeof dataset.service, undefined>[string]][], [] as [string, Exclude<typeof dataset.service, undefined>[string]][]]);
 
-        
+                        this.serviceStorage.set(metadata.project.workspace, HelmRenderer.mergeElements(ensureService(metadata.project.workspace), new Map(workspaced)));
+                        this.serviceStorage.set(undefined, HelmRenderer.mergeElements(ensureService(undefined), new Map(globals)));
+                    }
+                });
+            });
  
 
         baseRenderer.addRenderer(async function (metadata) {
