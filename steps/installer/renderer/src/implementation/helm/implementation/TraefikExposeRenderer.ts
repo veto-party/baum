@@ -197,7 +197,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
                     .map((resolved) => resolved.write())
                     .join(`${EOL}---${EOL}`);
 
-                await FileSystem.writeFile(Path.join(fileContent, 'network.yaml'), fileContent);
+                await FileSystem.writeFile(Path.join(fileContent, 'ingress.yaml'), fileContent);
             }
         }
     }
