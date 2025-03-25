@@ -1,14 +1,17 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
+import { extractVariables } from '../../utility/extractVariables.js';
 import type { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from '../interface/IConfigMapRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
-import { extractVariables } from '../../utility/extractVariables.js';
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
   render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
-
-    const allItems = new Map(extractVariables(workspace, map, binding).entries().filter(([, value]) => value.secret === false));
+    const allItems = new Map(
+      extractVariables(workspace, map, binding)
+        .entries()
+        .filter(([, value]) => value.secret === false)
+    );
 
     const yaml = (name: string) => ({
       apiVersion: 'v1',
