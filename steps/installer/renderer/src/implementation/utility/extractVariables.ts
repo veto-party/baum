@@ -1,79 +1,61 @@
-import { CachedFN, type IWorkspace } from "@veto-party/baum__core";
-import { toPath } from 'lodash-es';
-import type { IConfigMapStructure } from "../helm/interface/IConfigMapRenderer.js";
+import { CachedFN, type IWorkspace } from '@veto-party/baum__core';
+import type { IConfigMapStructure } from '../helm/interface/IConfigMapRenderer.js';
 
 class VariableExtractor {
+  @CachedFN(false)
+  extractVariables<Key>(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name: string) {
+    const allItems: IConfigMapStructure = new Map();
 
-    private static toLookupKey(key: string) {
-        const path = toPath(key);
+    const entriesToCheck = [Array.from(binding?.entries() ?? [])];
+    const globalsToCheck = new Set<(typeof entriesToCheck)[number]>();
 
-        if (path.length < 1) {
-            return key;
+    do {
+      const entries = entriesToCheck.pop()!;
+      const possibleGlobalEntries: (typeof entriesToCheck)[number] = [];
+
+      for (const entry of entries) {
+        const [_key, lookupKey] = entry;
+
+        const item = map.get(workspace)?.get(lookupKey);
+
+        if (!item) {
+          possibleGlobalEntries.push(entry);
+          globalsToCheck.add(possibleGlobalEntries);
+          continue;
         }
 
-        const [resolved, ...lookup] = path;
+        allItems.set(_key, item);
 
-        return 
-    }
+        if (item.binding) {
+          entriesToCheck.push(Object.entries(item.binding));
+        }
+      }
+    } while (entriesToCheck.length > 0);
 
-    @CachedFN(false)
-    extractVariables<Key>(workspace: IWorkspace|undefined, key: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string) {
-        const allItems: IConfigMapStructure = new Map();
+    do {
+      const [entries] = globalsToCheck.values().take(1);
+      globalsToCheck.delete(entries);
 
-        const entriesToCheck = [Array.from(binding?.entries() ?? [])];
-        const globalsToCheck = new Set<typeof entriesToCheck[number]>();
+      for (const entry of entries) {
+        const [_key, lookupKey] = entry;
+        const item = map?.get(undefined)?.get(lookupKey);
 
-        do {
-            const entries = entriesToCheck.pop()!;
-            const possibleGlobalEntries: typeof entriesToCheck[number] = [];
+        if (!item) {
+          throw new Error(`Entry(global, ${lookupKey} not found, checked scoped and global context.`);
+        }
 
-            for (const entry of entries) {
-                const [_key, lookupKey] = entry;
+        allItems.set(_key, {
+          ...item,
+          type: 'global'
+        });
 
-                const [resolvedLookup, realLookupKey] = 
-
-
-                const item = map.get(undefined)?.get(key)?.get(lookupKey);
-
-                if (!item) {
-                    possibleGlobalEntries.push(entry);
-                    globalsToCheck.add(possibleGlobalEntries);
-                    continue;
-                }
-
-                allItems.set(_key, item);
-
-                if (item.binding) {
-                    entriesToCheck.push(Object.entries(item.binding));
-                }
-            }
-        } while (entriesToCheck.length > 0);
-
-        do {
-            const [entries] = globalsToCheck.values().take(1);
-            globalsToCheck.delete(entries);
-
-            for (const entry of entries) {
-                const [_key, lookupKey] = entry;
-                const item = map.get(undefined)?.get(undefined)?.get(lookupKey);
-
-                if (!item) {
-                    throw new Error(`Entry(${key}, ${lookupKey} not found, checked scoped and global context.`);
-                }
-
-                allItems.set(_key, {
-                    ...item,
-                    type: 'global'
-                });
-
-                if (item.binding) {
-                    globalsToCheck.add(Object.entries(item.binding));
-                }
-            } 
-        } while (globalsToCheck.size > 0);
-    }
+        if (item.binding) {
+          globalsToCheck.add(Object.entries(item.binding));
+        }
+      }
+    } while (globalsToCheck.size > 0);
+  }
 }
-
 
 const extractor = new VariableExtractor();
 export const extractVariables = extractor.extractVariables.bind(extractor);
