@@ -12,7 +12,7 @@ import { INetworkRenderer } from "./interface/INetworkRenderer.js";
 import { INameProvider } from "../../interface/INameProvider.js";
 import { ExposeStructure, IExposeRenderer } from "./interface/IExposeRenderer.js";
 import { IWritable } from "./interface/IWritable.js";
-import { RendererMetadata, InferStructure } from "../../interface/IRenderer.js";
+import { RendererMetadata, InferStructure, ProjectMetadata } from "../../interface/IRenderer.js";
 import { MergeDeepForToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features/src/abstract/types/MergeDeepForToDefinitionStructureWithTupleMerge.js";
 import { getDeepKeys } from "../../utility/getDeepKeys.js";
 
@@ -352,7 +352,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
             });
  
 
-        baseRenderer.addRenderer(async function (metadata) {
+        return baseRenderer.addRenderer(async function (metadata) {
             await (async () => {
 
                 const configResult = await configMapRenderer.render(metadata.project.workspace, this.buildPropertyMap(this.propertyStorage, metadata.project.workspace), this.bindingStorage.get(metadata.project.workspace), `${this.nameProvider.getNameByWorkspace(metadata.project.workspace)}-vars`);
@@ -395,13 +395,16 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                             this.globalBindingStorage.set(key, entry);
                         }
                     });
+
+                    const jobResult = await jobRenderer.render(key, this.jobStorage.get(metadata.project.workspace)!.get(key)!);
+                    this.writers.push(jobResult);
                 }
             })();
         });
     }
 
-    public async render(structure: Map<RendererMetadata, InferStructure<T>[]>): Promise<void> {
-        await super.render(structure);
+    public async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>): Promise<void> {
+        await super.render(projectMetadata, structure);
 
         const binding = new Map(this.globalBindingStorage.entries().map(([key, value]) => [key, typeof value.store === 'string' ? value.key : undefined] as const).filter((entry): entry is readonly [string, string] => entry[1] !== undefined));
 
@@ -416,7 +419,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         this.writers.push(valueRenderer);
 
         for (const writer of this.writers) {
-            writer.write(this.nameProvider);
+            writer.write(projectMetadata.rootDirectory, this.nameProvider);
         }
     }
 

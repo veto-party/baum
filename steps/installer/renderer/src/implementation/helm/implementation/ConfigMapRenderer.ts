@@ -1,4 +1,5 @@
 import { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from "../interface/IConfigMapRenderer.js";
+import { isNumber, toPath } from 'lodash-es';
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
     render<Key>(workspace: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
@@ -52,6 +53,15 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
             } 
         } while (globalsToCheck.size > 0);
 
+        const yaml = {
+            "apiVersion": "v1",
+            "kind": "ConfigMap",
+            "metadata": {
+                "name": `${name}-vars`
+            },
+            "data": Object.fromEntries(allItems.entries())
+        }
+
         return {
             getResolvedWorkspaceVars: () => {
                 return new Map(allItems.entries().map(([key, value]) => {
@@ -67,7 +77,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                 }))
             },
             write: () => {
-                throw new Error('NOT IMPLEMENTED!');
+                
             }
         }
     }

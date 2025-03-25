@@ -1,8 +1,9 @@
 import { GroupFeature, IFeature, MergeFeatures } from "@veto-party/baum__steps__installer__features";
 import type { IFilter, InferNewRenderer, InferToFeatureManager, IFeatureManager, IRendererManager, IRendererFeatureManager } from "../interface/IRendererManager.js";
-import type { InferStructure, RendererMetadata } from "../interface/IRenderer.js";
+import type { InferStructure, ProjectMetadata, RendererMetadata } from "../interface/IRenderer.js";
 import { createHash } from "node:crypto";
 import { RenderFeatureManager } from "./RenderFeatureManager.js";
+import { IWorkspace } from "@veto-party/baum__core";
 
 
 export abstract class ARendererManager<T extends IFeature<any, any, any>> extends RenderFeatureManager<T> implements IRendererManager<T> {
@@ -76,17 +77,24 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
         return filter.filter;
     }
 
-    async render(given: Map<RendererMetadata, InferStructure<T>[]>) {
-        
-        for (const [metadata, structure] of given.entries()) {
+    async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>) {
+        for (const [workspace, givenStructure] of structure.entries()) {
             for (const { renderer, filter } of this.featureCache.values()) {
-                if (filter && !ARendererManager.resolveFilter(filter)(structure)) {
+                
+                const metadata = {
+                    project: {
+                        ...projectMetadata,
+                        workspace
+                    }
+                }
+
+                if (filter && !ARendererManager.resolveFilter(filter)(givenStructure)) {
                     return;
                 }
 
                 await Promise.all([
-                    this.renderFeature(metadata, [...structure]), 
-                    renderer.renderFeature(metadata, [...structure])
+                    this.renderFeature(metadata, [...givenStructure]), 
+                    renderer.renderFeature(metadata, [...givenStructure])
                 ]);
             };
         }

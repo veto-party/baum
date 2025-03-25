@@ -19,5 +19,5 @@ export interface IFeatureRenderer<T extends IFeature<any, any, any>> {
 }
 
 export interface IRenderer<T extends IFeature<any, any, any>> {
-    render(structure: Map<RendererMetadata, InferStructure<T>[]>): Promise<any>|any;
+    render(metadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>): Promise<any>|any;
 }
