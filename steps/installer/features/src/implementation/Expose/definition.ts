@@ -2,7 +2,6 @@ import { asConst, JSONSchema } from "json-schema-to-ts";
 
 export const definition = asConst({
     type: 'object',
-    // additionalProperties: true,
     patternProperties: {
         '$(0-9)+^': {
             type: 'object',
@@ -12,7 +11,6 @@ export const definition = asConst({
                 }
             },
             required: ['type'], 
-            // additionalProperties: false,
             oneOf: [
                 {
                     type: 'object',
@@ -40,31 +38,43 @@ export const definition = asConst({
                                     items: {
                                         type: 'object',
                                         properties: {
-                                            relative: {
-                                                type: 'boolean'
-                                            },
-                                            source: {
+                                            domain: {
                                                 type: 'string'
-                                            }
+                                            },
+                                            domainIsAbsolute: {
+                                                type: 'string'
+                                            },
                                         },
-                                        required: ['source'],
+                                        required: ['domain'],
                                         additionalProperties: false
                                     }
                                 }
                             }
                         },
-                        path: {
+                        appendPath: {
                             type: 'string'
                         },
                         doNotStripPrefix: {
                             type: 'boolean'
                         },
-                        prefix: {
-                            type: 'string'
+                        passHostHeader: {
+                            type: 'boolean'
                         },
-                        domainPrefix: {
-                            type: 'string'
-                        }
+                        matcher: {
+                            type: 'object',
+                            properties: {
+                                domain: {
+                                    type: 'string',
+                                },
+                                domainIsAbsolute: {
+                                    type: 'boolean'
+                                },
+                                path: {
+                                    type: 'string'
+                                }
+                            },
+                            additionalProperties: false,
+                        },
                     }
                 },
                 {
@@ -75,15 +85,6 @@ export const definition = asConst({
                         type: {
                             type: 'string',
                             enum: ['internal']
-                        },
-                        path: {
-                            type: 'string'
-                        },
-                        doNotStripPrefix: {
-                            type: 'boolean'
-                        },
-                        domainPrefix: {
-                            type: 'string'
                         }
                     }
                 }
