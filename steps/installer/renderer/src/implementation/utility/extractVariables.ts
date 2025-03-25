@@ -3,7 +3,7 @@ import type { IConfigMapStructure } from '../helm/interface/IConfigMapRenderer.j
 
 class VariableExtractor {
   @CachedFN(false)
-  extractVariables<Key>(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name: string) {
+  extractVariables(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined) {
     const allItems: IConfigMapStructure = new Map();
 
     const entriesToCheck = [Array.from(binding?.entries() ?? [])];
@@ -54,6 +54,8 @@ class VariableExtractor {
         }
       }
     } while (globalsToCheck.size > 0);
+
+    return allItems;
   }
 }
 

@@ -356,7 +356,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       await (async () => {
         const configResult = await configMapRenderer.render(metadata.project.workspace, this.buildPropertyMap(this.propertyStorage, metadata.project.workspace), this.bindingStorage.get(metadata.project.workspace));
         this.writers.push(configResult);
-        const secretResult = await secretRenderer.render(metadata.project.workspace, metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));
+        const secretResult = await secretRenderer.render(metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));
         this.writers.push(secretResult);
         const portsResult = await exposeRenderer.render(metadata.project.workspace, exposeStorage.get(metadata.project.workspace));
         this.writers.push(portsResult);
@@ -382,9 +382,9 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
             continue;
           }
 
-          const configResult = await configMapRenderer.render(metadata.project.workspace, key, this.buildPropertyMap(propertyStorage, metadata.project.workspace), bindingStorage, key);
+          const configResult = await configMapRenderer.render(metadata.project.workspace, this.buildPropertyMap(propertyStorage, metadata.project.workspace), bindingStorage, key);
           this.writers.push(configResult);
-          const secretResult = await secretRenderer.render(metadata.project.workspace, key, propertyStorage, bindingStorage);
+          const secretResult = await secretRenderer.render(metadata.project.workspace, propertyStorage, bindingStorage, key);
           this.writers.push(secretResult);
 
           const itemsMap = HelmRenderer.mergeElements(await configResult.getResolvedWorkspaceVars(), await secretResult.getResolvedWorkspaceSecrets());
@@ -416,7 +416,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     const values = allValues?.reduce?.((a, b) => HelmRenderer.mergeElements(a, b), allValues?.shift?.()!);
     const propertyStorage = values ? new Map([[undefined as IWorkspace | undefined, HelmRenderer.mergeElements(this.propertyStorage.get(undefined)!, values)]] as const) : this.propertyStorage;
 
-    const secretRenderer = await this.secretRenderer.render(undefined, undefined, propertyStorage, binding);
+    const secretRenderer = await this.secretRenderer.render(undefined, propertyStorage, binding);
     this.writers.push(secretRenderer);
 
     const valueRenderer = await this.configMapRenderer.render(undefined, this.buildPropertyMap(propertyStorage, undefined), binding);

@@ -5,7 +5,7 @@ import type { IWritable } from './IWritable.js';
 export type IConfigMapStructure = typeof VariableFeature.makeInstance extends () => IFeature<any, any, infer Structure> ? (Structure extends Record<infer Key, infer Value> ? Map<Key, Value> : never) : never;
 
 export type ConfigMappingWithStore = {
-  store: string;
+  store: string | undefined;
   key: string | number;
   global?: boolean;
   variable?: undefined;

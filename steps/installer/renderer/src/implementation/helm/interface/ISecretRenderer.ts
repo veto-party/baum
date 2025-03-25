@@ -7,9 +7,9 @@ export type SecretMapping = {
 } & ConfigMappingWithStore;
 
 export interface ISecretRendererResult extends IWritable {
-  getResolvedWorkspaceSecrets(): Map<string, SecretMapping>;
+  getResolvedWorkspaceSecrets(): Map<string | number, SecretMapping>;
 }
 
 export interface ISecretRenderer {
-  render<Key>(workspace: IWorkspace | undefined, key: Key | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined): ISecretRendererResult | Promise<ISecretRendererResult>;
+  render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, key?: string): ISecretRendererResult | Promise<ISecretRendererResult>;
 }

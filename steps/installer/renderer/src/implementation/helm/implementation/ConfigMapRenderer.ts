@@ -3,17 +3,21 @@ import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from '../interface/IConfigMapRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
+import { extractVariables } from '../../utility/extractVariables.js';
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
-  render<Key>(workspace: IWorkspace | undefined, key: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
-    const yaml = {
+  render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
+
+    const allItems = new Map(extractVariables(workspace, map, binding).entries().filter(([, value]) => value.secret === false));
+
+    const yaml = (name: string) => ({
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
         name: `${name}-vars`
       },
       data: Object.fromEntries(allItems.entries())
-    };
+    });
 
     return {
       getResolvedWorkspaceVars: () => {
@@ -31,7 +35,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     type: 'variable',
                     key,
                     global: value.type === 'global',
-                    store: value.type === 'global' ? 'global' : name
+                    store: value.type === 'global' ? 'global' : undefined
                   }) satisfies ConfigMapping
             ] as const;
           })
@@ -39,9 +43,9 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
       },
       write: async (root, resolver) => {
         const path = await resolver.getNameByWorkspace(workspace);
-        const filepath = Path.join(...[root, 'helm', path, key !== workspace && typeof ['string', 'number'].includes(typeof key) ? String(key) : undefined, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
+        const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
-        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml).write());
+        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml(path)).write());
       }
     };
   }
