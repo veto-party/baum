@@ -4,28 +4,34 @@ export const definition = asConst({
     type: 'object',
     properties: {
         limit: {
-        type: 'object',
-        properties: {
-            cpu: {
-            type: 'string'
+            type: 'object',
+            properties: {
+                cpu: {
+                    type: 'string'
+                },
+                memory: {
+                    type: 'string'
+                },
+                gpu: {
+                    type: 'string'
+                }
             },
-            memory: {
-            type: 'string'
-            }
-        },
-        additionalProperties: false
+            additionalProperties: false
         },
         requested: {
-        type: 'object',
-        properties: {
-            cpu: {
-            type: 'string'
+            type: 'object',
+            properties: {
+                cpu: {
+                    type: 'string'
+                },
+                memory: {
+                    type: 'string'
+                },
+                gpu: {
+                    type: 'string'
+                }
             },
-            memory: {
-            type: 'string'
-            }
-        },
-        additionalProperties: false
+            additionalProperties: false
         }
     }
 });

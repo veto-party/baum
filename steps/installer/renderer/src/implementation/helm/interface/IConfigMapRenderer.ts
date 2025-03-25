@@ -6,18 +6,15 @@ export type IConfigMapStructure = typeof VariableFeature.makeInstance extends ()
 
 export type ConfigMappingWithStore = {
     store: string;
-    key: string;
+    key: string|number;
     global?: boolean;
     variable?: undefined;
-} | {
-    store?: undefined;
 };
 
 export type StaticConfigMapping = {
     variable: string|number|boolean|Record<any, any>|undefined;
     store?: undefined;
-} | {
-    variable?: undefined;
+    key?: undefined;
 };
 
 export type ConfigMapping = ({

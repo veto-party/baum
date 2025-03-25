@@ -74,6 +74,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                         variable: value.default
                     } : {
                         type: 'variable',
+                        key,
                         global: value.type === 'global',
                         store: value.type === 'global' ? 'global' : name
                     }) satisfies ConfigMapping] as const;
@@ -93,6 +94,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                 
 
                 await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml).write());
+                
             }
         }
     }

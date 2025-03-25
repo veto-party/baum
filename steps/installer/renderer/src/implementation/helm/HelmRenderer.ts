@@ -2,10 +2,10 @@ import { BaseInstaller, BindingFeature, ExposeFeature, GroupFeature, IFeature, J
 import { ARendererManager } from "../ARendererManager.js";
 import { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from "../../interface/IRendererManager.js";
 import { RenderFeatureManager } from "../RenderFeatureManager.js";
-import { get, isEqual, merge, property, uniq } from 'lodash-es';
+import { get, isEqual, merge, uniq } from 'lodash-es';
 import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from "./interface/IConfigMapRenderer.js";
-import { IDeploymentRenderer } from "./interface/IDeploymentRenderer.js";
+import { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from "./interface/IDeploymentRenderer.js";
 import { ISecretRenderer } from "./interface/ISecretRenderer.js";
 import { IJobRenderer, JobStructure } from "./interface/IJobRenderer.js";
 import { INetworkRenderer } from "./interface/INetworkRenderer.js";
@@ -15,6 +15,7 @@ import { IWritable } from "./interface/IWritable.js";
 import { RendererMetadata, InferStructure, ProjectMetadata } from "../../interface/IRenderer.js";
 import { MergeDeepForToDefinitionStructureWithTupleMerge } from "@veto-party/baum__steps__installer__features/src/abstract/types/MergeDeepForToDefinitionStructureWithTupleMerge.js";
 import { getDeepKeys } from "../../utility/getDeepKeys.js";
+import { IImageGenerator } from "./interface/IImageGenerator.js";
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2> ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2> ? MergeFeatures<IFeature<A0, A1, A2>, 'properties', IFeature<B0, B1, B2>> extends infer Feature ? Feature : never : never : never;
 
@@ -43,14 +44,14 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
      * 
      * It contains info about how mutch and when to scale the container.(s)
      */
-    public scalingStorage = new Map<IWorkspace, ScalingFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+    public scalingStorage = new Map<IWorkspace, ScalingStorage>();
 
     /**
      * This is the metadata about updating the containers.
      * 
      * It contains the info on how to update the container.(s)
      */
-    public updateStorage = new Map<IWorkspace, UpdateStrategy extends IFeature<any, any, infer Structure> ? Structure : never>();
+    public updateStorage = new Map<IWorkspace, UpdateStorage>();
 
     /**
      * A structure that is an array of networks, which contains the info on how the services are connected.
@@ -60,7 +61,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
     /**
      * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
      */
-    public systemUsageStorage = new Map<IWorkspace, SystemUsageFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+    public systemUsageStorage = new Map<IWorkspace, SystemUsageStorage>();
 
     /**
      * This is the service mapping it contains a mapping for external helm charts.
@@ -255,7 +256,8 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         exposeRenderer: IExposeRenderer,
         networkRenderer: INetworkRenderer,
         jobRenderer: IJobRenderer,
-        nameProvider: INameProvider
+        nameProvider: INameProvider,
+        imageNameGenerator: IImageGenerator,
     ) {
 
         const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
@@ -370,7 +372,15 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                     }
                 });
 
-                const deploymentResult = await deploymentRenderer.render(metadata.project.workspace, itemsMap, portsResult.getPorts());            
+                const deploymentResult = await deploymentRenderer.render(
+                    metadata.project.workspace, 
+                    itemsMap, 
+                    portsResult.getPorts(), 
+                    this.scalingStorage.get(metadata.project.workspace), 
+                    this.updateStorage.get(metadata.project.workspace), 
+                    this.systemUsageStorage.get(metadata.project.workspace),
+                    imageNameGenerator,
+                );            
                 this.writers.push(deploymentResult);
             })();
 
