@@ -355,7 +355,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         return baseRenderer.addRenderer(async function (metadata) {
             await (async () => {
 
-                const configResult = await configMapRenderer.render(metadata.project.workspace, this.buildPropertyMap(this.propertyStorage, metadata.project.workspace), this.bindingStorage.get(metadata.project.workspace), `${this.nameProvider.getNameByWorkspace(metadata.project.workspace)}-vars`);
+                const configResult = await configMapRenderer.render(metadata.project.workspace, metadata.project.workspace, this.buildPropertyMap(this.propertyStorage, metadata.project.workspace), this.bindingStorage.get(metadata.project.workspace), `${this.nameProvider.getNameByWorkspace(metadata.project.workspace)}-vars`);
                 this.writers.push(configResult);
                 const secretResult = await secretRenderer.render(metadata.project.workspace, this.propertyStorage, this.bindingStorage.get(metadata.project.workspace));
                 this.writers.push(secretResult);
@@ -383,7 +383,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
                         continue;
                     }
     
-                    const configResult = await configMapRenderer.render(key, this.buildPropertyMap(propertyStorage, metadata.project.workspace), bindingStorage, `${this.nameProvider.getNameByWorkspace(metadata.project.workspace)}-${key}-vars`);
+                    const configResult = await configMapRenderer.render(metadata.project.workspace, key, this.buildPropertyMap(propertyStorage, metadata.project.workspace), bindingStorage, `${this.nameProvider.getNameByWorkspace(metadata.project.workspace)}-${key}-vars`);
                     this.writers.push(configResult);
                     const secretResult = await secretRenderer.render(key, propertyStorage, bindingStorage);
                     this.writers.push(secretResult);
@@ -415,7 +415,7 @@ export class HelmRenderer<T extends IFeature<any,any,any>> extends ARendererMana
         const secretRenderer = await this.secretRenderer.render(undefined, propertyStorage, binding);
         this.writers.push(secretRenderer);
 
-        const valueRenderer = await this.configMapRenderer.render(undefined, this.buildPropertyMap(propertyStorage, undefined), binding, 'global-vars');
+        const valueRenderer = await this.configMapRenderer.render(undefined, undefined, this.buildPropertyMap(propertyStorage, undefined), binding, 'global-vars');
         this.writers.push(valueRenderer);
 
         for (const writer of this.writers) {

@@ -1,8 +1,11 @@
+import { IWorkspace } from "@veto-party/baum__core";
 import { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from "../interface/IConfigMapRenderer.js";
-import { isNumber, toPath } from 'lodash-es';
+import Path from 'node:path';
+import FileSystem from 'node:fs/promises';
+import { to_structured_data } from "../yaml/to_structured_data.js";
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
-    render<Key>(workspace: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
+    render<Key>(workspace: IWorkspace|undefined, key: Key | undefined, map: Map<string | undefined, Map<Key | undefined, IConfigMapStructure>>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
         const allItems: IConfigMapStructure = new Map();
 
         const entriesToCheck = [Array.from(binding?.entries() ?? [])];
@@ -13,8 +16,8 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
             const possibleGlobalEntries: typeof entriesToCheck[number] = [];
 
             for (const entry of entries) {
-                const [key, lookupKey] = entry;
-                const item = map.get(undefined)?.get(workspace)?.get(lookupKey);
+                const [_key, lookupKey] = entry;
+                const item = map.get(undefined)?.get(key)?.get(lookupKey);
 
                 if (!item) {
                     possibleGlobalEntries.push(entry);
@@ -22,7 +25,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     continue;
                 }
 
-                allItems.set(key, item);
+                allItems.set(_key, item);
 
                 if (item.binding) {
                     entriesToCheck.push(Object.entries(item.binding));
@@ -35,14 +38,14 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
             globalsToCheck.delete(entries);
 
             for (const entry of entries) {
-                const [key, lookupKey] = entry;
-                const item = map.get(undefined)?.get(workspace)?.get(lookupKey);
+                const [_key, lookupKey] = entry;
+                const item = map.get(undefined)?.get(key)?.get(lookupKey);
 
                 if (!item) {
                     throw new Error(`Entry(${key}, ${lookupKey} not found, checked scoped and global context.`);
                 }
 
-                allItems.set(key, {
+                allItems.set(_key, {
                     ...item,
                     type: 'global'
                 });
@@ -76,8 +79,20 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     }) satisfies ConfigMapping] as const;
                 }))
             },
-            write: () => {
+            write: async (root, resolver) => {
+                const path = await resolver.getNameByWorkspace(workspace);
+                const filepath = Path.join(...[
+                        root, 
+                        'helm', 
+                        path, 
+                        key !== workspace && typeof ['string', 'number'].includes(typeof key) ? 
+                            String(key) : undefined, 
+                        'templates'
+                    ].filter(<T>(value: T|undefined): value is T => Boolean(value))
+                );
                 
+
+                await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml).write());
             }
         }
     }
