@@ -23,7 +23,7 @@ export class VariableFeature<T extends typeof definition = typeof definition> ex
 
     if (resolvedDefinition.generated) {
       if (resolvedDefinition.default) {
-        throw new Error(`Try to remove default from variable when using a resolvedDenifition.generated.`);
+        throw new Error('Try to remove default from variable when using a resolvedDenifition.generated.');
       }
       resolvedDefinition.default = generatePassword(resolvedDefinition.generated);
       delete resolvedDefinition.generated;
@@ -35,7 +35,7 @@ export class VariableFeature<T extends typeof definition = typeof definition> ex
       }
 
       if (resolvedDefinition.default) {
-        throw new Error(`Try to remove default from variable when using a resolvedDenifition.file.`);
+        throw new Error('Try to remove default from variable when using a resolvedDenifition.file.');
       }
       resolvedDefinition.default = (await readFile(resolvedDefinition.file)).toString();
       delete resolvedDefinition.file;

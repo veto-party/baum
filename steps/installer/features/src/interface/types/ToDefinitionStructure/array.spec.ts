@@ -12,7 +12,7 @@ describe('Type merge test', () => {
 
     type Expected = {
       items: {
-        ['^[a-zA-Z0-9]+$']: {
+        '^[a-zA-Z0-9]+$': {
           type: 'string';
         };
       };

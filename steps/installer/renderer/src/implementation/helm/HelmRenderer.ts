@@ -157,7 +157,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     for (const key of keysToCheck) {
       const aValue = get(a, key, NOT_FOUND);
       const bValue = get(b, key, NOT_FOUND);
-      if (aValue == NOT_FOUND || bValue == NOT_FOUND || isEqual(aValue, bValue)) {
+      if (aValue === NOT_FOUND || bValue === NOT_FOUND || isEqual(aValue, bValue)) {
         continue;
       }
 
