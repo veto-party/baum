@@ -1,5 +1,4 @@
-
 export interface FeatureContainer {
-    children: string[];
-    feature: any;
+  children: string[];
+  feature: any;
 }

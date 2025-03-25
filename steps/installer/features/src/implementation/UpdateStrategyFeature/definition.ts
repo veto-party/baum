@@ -1,34 +1,34 @@
-import { asConst } from "json-schema-to-ts";
+import { asConst } from 'json-schema-to-ts';
 
 export const definition = asConst({
-    type: 'object',
-    required: ['type'],
-    oneOf: [
-      {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['RollingUpdate']
-          },
-          maxSurge: {
-            type: 'string'
-          },
-          maxUnavailable: {
-            type: 'string'
-          }
+  type: 'object',
+  required: ['type'],
+  oneOf: [
+    {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['RollingUpdate']
         },
-        additionalProperties: false
+        maxSurge: {
+          type: 'string'
+        },
+        maxUnavailable: {
+          type: 'string'
+        }
       },
-      {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['Rereate']
-          }
-        },
-        additionalProperties: false
-      }
-    ]
+      additionalProperties: false
+    },
+    {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['Rereate']
+        }
+      },
+      additionalProperties: false
+    }
+  ]
 });

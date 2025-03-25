@@ -1,112 +1,112 @@
-import { IWorkspace } from "@veto-party/baum__core";
-import { ConfigMapping } from "../interface/IConfigMapRenderer.js";
-import { IDeploymentRenderer, IDeploymentRenderResult, ScalingStorage, SystemUsageStorage, UpdateStorage } from "../interface/IDeploymentRenderer.js";
-import { SecretMapping } from "../interface/ISecretRenderer.js";
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { IImageGenerator } from "../interface/IImageGenerator.js";
-import { ConditionalToken } from "../yaml/implementation/ConditionalToken.js";
-import { ArrayToken } from "../yaml/implementation/ArrayToken.js";
-import { ObjectToken } from "../yaml/implementation/ObjectToken.js";
-import { to_structured_data } from "../yaml/to_structured_data.js";
+import type { IWorkspace } from '@veto-party/baum__core';
+import type { ConfigMapping } from '../interface/IConfigMapRenderer.js';
+import type { IDeploymentRenderResult, IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from '../interface/IDeploymentRenderer.js';
+import type { IImageGenerator } from '../interface/IImageGenerator.js';
+import type { SecretMapping } from '../interface/ISecretRenderer.js';
+import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
+import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
+import { ObjectToken } from '../yaml/implementation/ObjectToken.js';
+import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class DeploymentRenderer implements IDeploymentRenderer {
+  public constructor(private secretName = 'pull-secret') {}
 
-    public constructor(
-        private secretName: string = 'pull-secret'
-    ) {}
+  render(
+    workspace: IWorkspace,
+    map: Map<string | number, ConfigMapping | SecretMapping>,
+    ports: Set<number>,
+    scaling: ScalingStorage | undefined,
+    update: UpdateStorage | undefined,
+    systemUsage: SystemUsageStorage | undefined,
+    imageGenerator: IImageGenerator
+  ): IDeploymentRenderResult | Promise<IDeploymentRenderResult> {
+    const limits = Object.entries(systemUsage?.limit ?? {}).filter(([, value]) => Boolean(value));
+    const requests = Object.entries(systemUsage?.requested ?? {}).filter(([, value]) => Boolean(value));
 
-    render(
-        workspace: IWorkspace, 
-        map: Map<string | number, ConfigMapping | SecretMapping>, 
-        ports: Set<number>,
-        scaling: ScalingStorage|undefined,
-        update: UpdateStorage|undefined,
-        systemUsage: SystemUsageStorage|undefined,
-        imageGenerator: IImageGenerator
-    ): IDeploymentRenderResult|Promise<IDeploymentRenderResult> {
-
-        const limits = Object.entries(systemUsage?.limit ?? {}).filter(([, value]) => Boolean(value));
-        const requests = Object.entries(systemUsage?.requested ?? {}).filter(([, value]) => Boolean(value));
-
-        const yaml = (name: string) => ({
-            apiVersion: 'apps/v1',
-            kind: 'deployment',
-            metadata: {
-                name: `${name}-depl`,
-            },
-            spec: {
-                replicas: scaling?.minPods ?? 1,
-                selector: {
-                    matchLabels: {
-                        app: `${name}-depl`
-                    }
-                },
-                strategy: update?.type === 'RollingUpdate' ? {
-                    type: 'RollingUpdate',
-                    rollingUpdatge: {
-                        maxSurge: update.maxSurge,
-                        maxUnavailable: update.maxUnavailable
-                    }
-                } : update?.type === 'Rereate' ? {
-                    type: update.type
-                } : undefined,
-                template: {
-                    metadata: {
-                        labels: {
-                            app: `${name}-depl`
-                        },
-                    },
-                    spec: {
-                        imagePullSecrets: new ConditionalToken(
-                            `if eq .Values.global.registry.type "secret"`,
-                            new ArrayToken([
-                              new ObjectToken({
-                                name: this.secretName
-                              })
-                            ])
-                        ),
-                        containers: [{
-                            name: `${name}-depl`,
-                            image: imageGenerator.generateImage(workspace).image,
-                            ports: ports.values().map((port) => ({
-                                containerPort: port
-                            })),
-                            resources: {
-                                limits: limits.length > 0 ? Object.fromEntries(limits) : undefined,
-                                requests: requests.length > 0 ? Object.fromEntries(requests) : undefined,
-                            },
-                            env: map.entries().map(([name, value]) => ({
-                                name,
-                                ...'store' in value && value.store ? {
-                                    valueFrom: {
-                                        [value.type === 'secret' ? 'secretKeyRef' : 'configMapKeyRef']: {
-                                            name: value.store,
-                                            key: value.key
-                                        }
-                                    }
-                                } : {
-                                    value: value.variable
-                                }
-                            }))
-                        }]
-                    }
+    const yaml = (name: string) => ({
+      apiVersion: 'apps/v1',
+      kind: 'deployment',
+      metadata: {
+        name: `${name}-depl`
+      },
+      spec: {
+        replicas: scaling?.minPods ?? 1,
+        selector: {
+          matchLabels: {
+            app: `${name}-depl`
+          }
+        },
+        strategy:
+          update?.type === 'RollingUpdate'
+            ? {
+                type: 'RollingUpdate',
+                rollingUpdatge: {
+                  maxSurge: update.maxSurge,
+                  maxUnavailable: update.maxUnavailable
                 }
+              }
+            : update?.type === 'Rereate'
+              ? {
+                  type: update.type
+                }
+              : undefined,
+        template: {
+          metadata: {
+            labels: {
+              app: `${name}-depl`
             }
-        });
-
-        return {
-            write: async (root, resolver) => {
-                const path = await resolver.getNameByWorkspace(workspace);
-                const filepath = Path.join(
-                    root, 
-                    'helm', 
-                    path, 
-                    'templates'
-                );
-                
-                await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml(path)).write());
-            }
+          },
+          spec: {
+            imagePullSecrets: new ConditionalToken(
+              `if eq .Values.global.registry.type "secret"`,
+              new ArrayToken([
+                new ObjectToken({
+                  name: this.secretName
+                })
+              ])
+            ),
+            containers: [
+              {
+                name: `${name}-depl`,
+                image: imageGenerator.generateImage(workspace).image,
+                ports: ports.values().map((port) => ({
+                  containerPort: port
+                })),
+                resources: {
+                  limits: limits.length > 0 ? Object.fromEntries(limits) : undefined,
+                  requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
+                },
+                env: map.entries().map(([name, value]) => ({
+                  name,
+                  ...('store' in value && value.store
+                    ? {
+                        valueFrom: {
+                          [value.type === 'secret' ? 'secretKeyRef' : 'configMapKeyRef']: {
+                            name: value.store,
+                            key: value.key
+                          }
+                        }
+                      }
+                    : {
+                        value: value.variable
+                      })
+                }))
+              }
+            ]
+          }
         }
-    }
+      }
+    });
+
+    return {
+      write: async (root, resolver) => {
+        const path = await resolver.getNameByWorkspace(workspace);
+        const filepath = Path.join(root, 'helm', path, 'templates');
+
+        await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml(path)).write());
+      }
+    };
+  }
 }

@@ -1,9 +1,9 @@
-import { IWorkspace } from "@veto-party/baum__core";
+import type { IWorkspace } from '@veto-party/baum__core';
 
 type Image = {
-    image: string;
-}
+  image: string;
+};
 
 export interface IImageGenerator {
-    generateImage(workspace: IWorkspace): Image;
+  generateImage(workspace: IWorkspace): Image;
 }

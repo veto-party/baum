@@ -1,22 +1,16 @@
-
 export type { ToDefinitionStructure } from './interface/types/ToDefinitionStructure.js';
 
 export type { IFeature, IngestResult } from './interface/IFeature.js';
-export type { FeatureContainer } from './interface/IFeatureContainer.js'
+export type { FeatureContainer } from './interface/IFeatureContainer.js';
 
 export { AFeature } from './abstract/AFeature.js';
 
 export { AMergeFeature } from './abstract/AMergeFeature/AMergeFeature.js';
-export { AKeyOverrideFeature } from './abstract/AMergeFeature/AKeyOverride/AKeyOverride.js'
+export { AKeyOverrideFeature } from './abstract/AMergeFeature/AKeyOverride/AKeyOverride.js';
 
 export { GroupFeature } from './abstract/GroupFeature/GroupFeature.js';
-export  type {
-    ToDefinitionStructureWithTupleMerge
-} from './abstract/types/ToDefinitionStructureWithTupleMerge.js'
-export type {
-    MergeFeatures
-} from './abstract/types/MergeFeatures.js';
-
+export type { ToDefinitionStructureWithTupleMerge } from './abstract/types/ToDefinitionStructureWithTupleMerge.js';
+export type { MergeFeatures } from './abstract/types/MergeFeatures.js';
 
 export { BindingFeature } from './implementation/Binding/Binding.js';
 export { ExposeFeature } from './implementation/Expose/Expose.js';
@@ -30,5 +24,3 @@ export { VolumeFeature } from './implementation/Volume/Volume.js';
 export { JobFeature } from './implementation/Job/JobFeature.js';
 
 export { BaseInstaller } from './BaseInstaller.js';
-
-

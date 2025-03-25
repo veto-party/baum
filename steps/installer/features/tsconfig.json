@@ -1,10 +1,9 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "extends": "@veto-party/config/tsconfig.json",
-    "include": ["./src/"],
-    "compilerOptions": {
-      "outDir": "dist",
-      "lib": ["ESNext"]
-    }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@veto-party/config/tsconfig.json",
+  "include": ["./src/"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": ["ESNext"]
   }
-  
+}

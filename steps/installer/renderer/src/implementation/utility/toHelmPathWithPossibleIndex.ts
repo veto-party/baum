@@ -1,16 +1,15 @@
-
-import { toPath, isNumber } from 'lodash-es';
+import { isNumber, toPath } from 'lodash-es';
 
 export const toHelmPathWithPossibleIndex = (value: string) => {
-    const parts = toPath(value);
+  const parts = toPath(value);
 
-    const mapPart = (previous: string|undefined, part: string) => {
-        if (isNumber(part)) {
-            return `(index ${previous ?? '.'} ${part})`;
-        }
-
-        return [previous, part].filter(Boolean).join('.');
+  const mapPart = (previous: string | undefined, part: string) => {
+    if (isNumber(part)) {
+      return `(index ${previous ?? '.'} ${part})`;
     }
 
-    return parts.reduce(mapPart, undefined);
-}
+    return [previous, part].filter(Boolean).join('.');
+  };
+
+  return parts.reduce(mapPart, undefined);
+};

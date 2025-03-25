@@ -1,5 +1,5 @@
-import { IWorkspace } from "@veto-party/baum__core";
+import type { IWorkspace } from '@veto-party/baum__core';
 
 export interface INameProvider {
-    getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string>;
+  getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string>;
 }

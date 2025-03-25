@@ -1,6 +1,5 @@
-import { asConst } from "json-schema-to-ts";
-import { variableAccessorPattern } from "../Variable/definition.js";
-
+import { asConst } from 'json-schema-to-ts';
+import { variableAccessorPattern } from '../Variable/definition.js';
 
 export const definitionDefinitionPattern = '^[a-z0-9_]*$';
 

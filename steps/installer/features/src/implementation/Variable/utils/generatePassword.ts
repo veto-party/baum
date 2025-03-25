@@ -1,4 +1,3 @@
-
 import { randomInt } from 'node:crypto';
 
 const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi';

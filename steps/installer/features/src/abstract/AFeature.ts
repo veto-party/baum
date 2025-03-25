@@ -1,52 +1,52 @@
-import AJV from 'ajv';
 import { CachedFN } from '@veto-party/baum__core';
+import AJV from 'ajv';
 import type { FromSchema } from 'json-schema-to-ts';
+import { get } from 'lodash-es';
 import type { IFeature, IngestResult } from '../interface/IFeature.js';
 import type { FeatureContainer } from '../interface/IFeatureContainer.js';
-import { get } from 'lodash-es';
-import { ToDefinitionStructure } from '../interface/types/ToDefinitionStructure.js';
+import type { ToDefinitionStructure } from '../interface/types/ToDefinitionStructure.js';
 
+export abstract class AFeature<T extends {} | Record<string, any>, Path, From = T extends {} ? any[] | any : FromSchema<T>> implements IFeature<T, Path, From> {
+  private ajv = new AJV.default();
 
-export abstract class AFeature<T extends {}|Record<string, any>, Path , From = T extends {} ? any[]|any : FromSchema<T>,> implements IFeature<T, Path, From> {
+  protected constructor(
+    private schema: T,
+    private lookup: Path extends string ? Path : undefined
+  ) {}
 
-    private ajv = new AJV.default();
+  @CachedFN(true)
+  protected async verfiyBaseSchema() {
+    await this.ajv.validateSchema(this.schema, true);
+  }
 
-    protected constructor(
-        private schema: T,
-        private lookup: Path extends string ? Path : undefined
-     ) {}
+  private getElementByLookupIfPresent(baseEl: any) {
+    return this.lookup ? get(baseEl, this.lookup as string) : baseEl;
+  }
 
-    @CachedFN(true)
-    protected async verfiyBaseSchema() {
-        await this.ajv.validateSchema(this.schema, true);
-    }
+  public getSchema(): T {
+    return this.schema;
+  }
 
-    private getElementByLookupIfPresent(baseEl: any) {
-        return this.lookup ? get(baseEl, this.lookup as string) : baseEl;
-    }
+  public getPath(): Path extends string ? Path : undefined {
+    return this.lookup as any;
+  }
 
-    public getSchema(): T {
-        return this.schema;
-    }
+  public verifyObject(element: any): element is ToDefinitionStructure<Path, From> {
+    return this.ajv.validate(this.schema, this.getElementByLookupIfPresent(element));
+  }
 
-    public getPath(): Path extends string ? Path : undefined {
-        return this.lookup as any;
-    }
+  public ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<From>[]> | IngestResult<From>[] {
+    const items = Object.entries(objects).map(
+      ([key, element]) =>
+        ({
+          item: this.getElementByLookupIfPresent(element.feature),
+          key,
+          sourcePath: key
+        }) satisfies IngestResult<From>
+    );
 
-    public verifyObject(element: any): element is ToDefinitionStructure<Path, From> {
-        return this.ajv.validate(this.schema, this.getElementByLookupIfPresent(element));
-    }
+    items.map((item) => item.item).forEach(this.verifyObject.bind(this));
 
-    public ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<From>[]>|IngestResult<From>[] {
-
-        const items = Object.entries(objects).map(([key, element]) => ({
-            item: this.getElementByLookupIfPresent(element.feature),
-            key,
-            sourcePath: key
-        }) satisfies IngestResult<From>);
-
-        items.map((item) => item.item).forEach(this.verifyObject.bind(this));
-
-        return items;
-    }
+    return items;
+  }
 }

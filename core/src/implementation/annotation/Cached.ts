@@ -4,11 +4,7 @@ type ComputedKeys<T> = keyof T;
 
 const generateKey = (key: string) => `storage__cache__${key}`;
 
-type TypeTuple<T extends any[], Type, R extends Type[] = []> =
-  T['length'] extends 0 ? R : 
-  T extends [infer U] ? TypeTuple<[], Type, [...R, Type]> : 
-  T extends [infer U, ...infer Rest] ? TypeTuple<Rest, Type, [...R, Type]> | R :
-  never;
+type TypeTuple<T extends any[], Type, R extends Type[] = []> = T['length'] extends 0 ? R : T extends [infer U] ? TypeTuple<[], Type, [...R, Type]> : T extends [infer U, ...infer Rest] ? TypeTuple<Rest, Type, [...R, Type]> | R : never;
 
 export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) => {
   if (forCallbackKey !== undefined) {
@@ -16,7 +12,7 @@ export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) =>
   }
 };
 
-export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: TypeTuple<Parameters<T>, boolean|undefined>) => {
+export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: TypeTuple<Parameters<T>, boolean | undefined>) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 

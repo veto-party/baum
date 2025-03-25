@@ -1,84 +1,83 @@
-import type { FromSchema } from "json-schema-to-ts";
-import { BindingFeature } from "../Binding/Binding.js";
-import { GroupFeature } from "../../abstract/GroupFeature/GroupFeature.js";
-import { definition, variableAccessorPattern } from "./definition.js";
-import { AMergeFeature } from "../../abstract/AMergeFeature/AMergeFeature.js";
-import { FeatureContainer } from "../../interface/IFeatureContainer.js";
-import { IngestResult } from "../../interface/IFeature.js";
-import { cloneDeep } from 'lodash-es';
-import { CachedFN } from "@veto-party/baum__core";
-import { generatePassword } from "./utils/generatePassword.js";
+import { readFile, stat } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
-import { readFile, stat } from "node:fs/promises";
-import { AKeyOverrideFeature } from "../../abstract/AMergeFeature/AKeyOverride/AKeyOverride.js";
+import { CachedFN } from '@veto-party/baum__core';
+import type { FromSchema } from 'json-schema-to-ts';
+import { cloneDeep } from 'lodash-es';
+import { AKeyOverrideFeature } from '../../abstract/AMergeFeature/AKeyOverride/AKeyOverride.js';
+import { AMergeFeature } from '../../abstract/AMergeFeature/AMergeFeature.js';
+import { GroupFeature } from '../../abstract/GroupFeature/GroupFeature.js';
+import type { IngestResult } from '../../interface/IFeature.js';
+import type { FeatureContainer } from '../../interface/IFeatureContainer.js';
+import { BindingFeature } from '../Binding/Binding.js';
+import { definition, variableAccessorPattern } from './definition.js';
+import { generatePassword } from './utils/generatePassword.js';
 
-export class VariableFeature<
-    T extends typeof definition = typeof definition
-> extends GroupFeature<T, 'variable', FromSchema<T>> {
+export class VariableFeature<T extends typeof definition = typeof definition> extends GroupFeature<T, 'variable', FromSchema<T>> {
+  protected constructor(value: any) {
+    super(value, 'variable');
+  }
 
-    protected constructor(value: any) {
-        super(value, 'variable');
+  @CachedFN(true, [true, true, false])
+  private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definition>[string]) {
+    const resolvedDefinition = { ...item };
+
+    if (resolvedDefinition.generated) {
+      if (resolvedDefinition.default) {
+        throw new Error(`Try to remove default from variable when using a resolvedDenifition.generated.`);
+      }
+      resolvedDefinition.default = generatePassword(resolvedDefinition.generated);
+      delete resolvedDefinition.generated;
     }
 
-    @CachedFN(true, [true, true, false])
-    private async generateOrLoadFile(_key: string, path: string, item: FromSchema<typeof definition>[string]) {
+    if (resolvedDefinition.file) {
+      if (!isAbsolute(resolvedDefinition.file)) {
+        resolvedDefinition.file = join(path, resolvedDefinition.file);
+      }
 
-        const resolvedDefinition = { ...item };
+      if (resolvedDefinition.default) {
+        throw new Error(`Try to remove default from variable when using a resolvedDenifition.file.`);
+      }
+      resolvedDefinition.default = (await readFile(resolvedDefinition.file)).toString();
+      delete resolvedDefinition.file;
+    }
 
-        if (resolvedDefinition.generated) {
-            if (resolvedDefinition.default) {
-                throw new Error(`Try to remove default from variable when using a resolvedDenifition.generated.`);
-            }
-            resolvedDefinition.default = generatePassword(resolvedDefinition.generated);
-            delete resolvedDefinition.generated;
+    return resolvedDefinition;
+  }
+
+  protected do_construct(value: any, path: string | undefined): GroupFeature<any, 'variable'> {
+    return new VariableFeature<any>(value);
+  }
+
+  public static makeInstance() {
+    const result = new VariableFeature(definition) //.appendFeature('patternProperties.["^[a-zA-Z0-9_]*$"]', new BaseVariableFeature());
+      .appendFeature(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
+
+    return result;
+  }
+
+  protected async mergeLayers(base: any | undefined, originalLayers: any[]): Promise<any[]> {
+    const layers = cloneDeep(originalLayers);
+
+    // Prepare layers.
+    for (const key in layers) {
+      for (const variableKey in layers[key].item) {
+        if (
+          !(await stat(layers[key].sourcePath ?? key).then(
+            () => true,
+            () => false
+          ))
+        ) {
+          throw new Error(`Cannot resolve path of template: checked (${layers[key].sourcePath ?? key})`);
         }
 
-        if (resolvedDefinition.file) {
-            if (!isAbsolute(resolvedDefinition.file)) {
-                resolvedDefinition.file = join(path, resolvedDefinition.file);
-            }
-
-            if (resolvedDefinition.default) {
-                throw new Error(`Try to remove default from variable when using a resolvedDenifition.file.`);
-            }
-            resolvedDefinition.default = (await readFile(resolvedDefinition.file)).toString();
-            delete resolvedDefinition.file;
-        }
-
-        return resolvedDefinition;
+        layers[key].item[variableKey] = await this.generateOrLoadFile(`${layers[key].key}-${key}`, layers[key].sourcePath ?? key, layers[key].item[key]);
+      }
     }
 
-    protected do_construct(value: any, path: string | undefined): GroupFeature<any, 'variable'> {
-        return new VariableFeature<any>(value);
-    }
+    return (AKeyOverrideFeature<T, 'variable', FromSchema<T>>).prototype.mergeLayers(base, layers);
+  }
 
-    public static makeInstance() {
-        const result = (new VariableFeature(definition))//.appendFeature('patternProperties.["^[a-zA-Z0-9_]*$"]', new BaseVariableFeature());
-            .appendFeature(`patternProperties.["${variableAccessorPattern}"].properties` as const, new BindingFeature());
-
-        return result;
-    }
-
-    protected async mergeLayers(base: any|undefined, originalLayers: any[]): Promise<any[]> {
-
-        const layers = cloneDeep(originalLayers);
-
-        // Prepare layers.
-        for (const key in layers) {
-            for (const variableKey in layers[key].item) {
-                if (!(await stat(layers[key].sourcePath ?? key).then(() => true, () => false))) {
-                    throw new Error(`Cannot resolve path of template: checked (${layers[key].sourcePath ?? key})`);
-                }
-
-                layers[key].item[variableKey] = await this.generateOrLoadFile(`${layers[key].key}-${key}`, layers[key].sourcePath ?? key, layers[key].item[key]);
-            }
-        }
-
-        return (AKeyOverrideFeature<T, 'variable', FromSchema<T>>).prototype.mergeLayers(base, layers);
-    }
-
-
-    public async ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<FromSchema<T>>[]> {
-        return await (AMergeFeature<T, 'variable', FromSchema<T>>).prototype.ingestObject.call(this, objects) as unknown as any;
-    }
+  public async ingestObject(objects: Record<string, FeatureContainer>): Promise<IngestResult<FromSchema<T>>[]> {
+    return (await (AMergeFeature<T, 'variable', FromSchema<T>>).prototype.ingestObject.call(this, objects)) as unknown as any;
+  }
 }
