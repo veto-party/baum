@@ -104,8 +104,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
                     path, 
                     'templates'
                 );
-
-
+                
                 await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml(path)).write());
             }
         }
