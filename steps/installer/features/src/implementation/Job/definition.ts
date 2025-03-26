@@ -10,31 +10,16 @@ export const definition = asConst({
     },
     definition: {
       type: 'object',
-      oneOf: [
-        {
-          properties: {
-            on: {
-              type: 'string'
-            },
-            image: {
-              type: 'string'
-            }
-          }
-          // additionalProperties: false
+      properties: {
+        on: {
+          type: 'string'
         },
-        {
-          properties: {
-            on: {
-              type: 'string'
-            },
-            project: {
-              type: 'string'
-            }
-          }
-          // additionalProperties: false
+        image: {
+          type: 'string'
         }
-      ]
-    }
+      }
+      // additionalProperties: false
+    },
   }
   // additionalProperties: true
 });

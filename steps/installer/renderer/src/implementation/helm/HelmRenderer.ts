@@ -129,6 +129,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     private configMapRenderer: IConfigMapRenderer,
     private nameProvider: INameProvider,
     private jobRenderer: IJobRenderer,
+    private imageNameGenerator: IImageGenerator,
   ) {
     super(feature);
   }
@@ -226,9 +227,9 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     return value.reduce<Value[Key] | undefined>((a, b) => (a !== undefined ? HelmRenderer.warnAboutDifferences(a as any, b?.[key] !== undefined ? (b[key] as any) : a) : b), value.pop()?.[key]);
   }
 
-  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer) {
+  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer, imageGenerator: IImageGenerator) {
     return (
-      new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider, jobRenderer)
+      new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageGenerator)
         .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
           return HelmRenderer.buildVariableStorage(this.propertyStorage, (metadata) => metadata.project.workspace)(feature);
         })
@@ -261,7 +262,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
     const ensureExposeStorage = HelmRenderer.ensurePropertyValueGenerator(exposeStorage, () => new Map());
 
-    const baseRenderer = HelmRenderer.buildBaseInstance(secretRenderer, configMapRenderer, nameProvider, jobRenderer);
+    const baseRenderer = HelmRenderer.buildBaseInstance(secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageNameGenerator);
 
     const jobStructure = BaseInstaller.makeInstance()
       .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, baseRenderer.getGroup())
@@ -406,7 +407,14 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
             }
           });
 
-          const jobResult = await jobRenderer.render(key, this.jobStorage.get(metadata.project.workspace)!.get(key)!);
+          const jobResult = await jobRenderer.render(
+            metadata.project.workspace, 
+            key, 
+            this.jobStorage.get(metadata.project.workspace)!.get(key)!, 
+            HelmRenderer.mergeElements(secretResult.getResolvedWorkspaceSecrets(), configResult.getResolvedWorkspaceVars()),
+            this.jobSystemUsageStorage.get(metadata.project.workspace)?.get(key),
+            imageNameGenerator
+          );
           this.writers.push(jobResult);
         }
       })();
@@ -468,7 +476,14 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           }
         });
 
-        const jobResult = await this.jobRenderer.render(key, this.jobStorage.get(undefined)!.get(key)!);
+        const jobResult = await this.jobRenderer.render(
+          undefined, 
+          key, 
+          this.jobStorage.get(undefined)!.get(key)!, 
+          HelmRenderer.mergeElements(secretResult.getResolvedWorkspaceSecrets(), configResult.getResolvedWorkspaceVars()),
+          this.jobSystemUsageStorage.get(undefined)?.get(key),
+          this.imageNameGenerator
+        );
         this.writers.push(jobResult);
       }
     })();
@@ -521,7 +536,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   }
 
   protected createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U> {
-    const helm = new HelmRenderer(feature, this.secretRenderer, this.configMapRenderer, this.nameProvider, this.jobRenderer);
+    const helm = new HelmRenderer(feature, this.secretRenderer, this.configMapRenderer, this.nameProvider, this.jobRenderer, this.imageNameGenerator);
     helm.featureCache = new Map(this.featureCache) as any;
     return helm as any;
   }
