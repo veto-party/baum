@@ -8,6 +8,7 @@ export type SecretMapping = {
 
 export interface ISecretRendererResult extends IWritable {
   getResolvedWorkspaceSecrets(): Map<string | number, SecretMapping>;
+  getValues(): Map<string, any>;
 }
 
 export interface ISecretRenderer {

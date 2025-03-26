@@ -7,6 +7,7 @@ export type IConfigMapStructure = typeof VariableFeature.makeInstance extends ()
 export type ConfigMappingWithStore = {
   store: string | undefined;
   key: string | number;
+  recreate: boolean;
   global?: boolean;
   variable?: undefined;
 };
@@ -27,6 +28,7 @@ export type ConfigMapping =
 
 export interface IConfigMapRendererResult extends IWritable {
   getResolvedWorkspaceVars(): Map<string | number, ConfigMapping>;
+  getValues(): Map<string, any>;
 }
 
 export interface IConfigMapRenderer {

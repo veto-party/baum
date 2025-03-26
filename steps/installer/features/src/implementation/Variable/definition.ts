@@ -22,6 +22,9 @@ export const definition = asConst({
         secret: {
           type: 'boolean'
         },
+        maintainValueBetweenVersions: {
+          type: 'boolean'
+        },
         default: {
           anyOf: [
             {
