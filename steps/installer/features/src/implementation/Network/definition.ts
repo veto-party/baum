@@ -1,45 +1,43 @@
 import { asConst } from 'json-schema-to-ts';
 
 export const definition = asConst({
-  type: 'array',
-  items: {
-    type: 'object',
-    properties: {
-      to: {
-        type: 'string'
-      },
-      retries: {
-        type: 'number'
-      },
-      policy: {
-        type: 'object',
-        properties: {
-          type: {
-            type: 'string',
-            enum: ['SIMPLE', 'ROUND_ROBIN']
-          }
+  type: 'object',
+  properties: {
+    defaults: {
+      type: 'object',
+      properties: {
+        allow_outgoing: {
+          type: 'string',
+          enum: ['IN_NAMESPACE', 'NONE', 'ALL', 'STRICT']
         },
-        additionalProperties: false
-      },
-      protocol: {
-        type: 'string',
-        enum: ['http', 'https']
-      },
-      routes: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            path: {
-              type: 'string'
-            }
-          },
-          required: ['path']
-        },
-        additionalProperties: false
+        allow_incoming: {
+          type: 'string',
+          enum: ['IN_NAMESPACE', 'NONE', 'ALL', 'STRICT']
+        }
       }
     },
-    required: ['to', 'routes'],
-    additionalProperties: false
+    allow_connections_to: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          to: {
+            type: 'string'
+          },
+          policy: {
+            type: 'object',
+            properties: {
+              type: {
+                type: 'string',
+                enum: ['SIMPLE', 'ROUND_ROBIN']
+              }
+            },
+            additionalProperties: false
+          }
+        },
+        required: ['to'],
+        additionalProperties: false
+      }
+    }
   }
 });

@@ -10,13 +10,17 @@ import { ObjectToken } from "../yaml/implementation/ObjectToken.js";
 import { to_structured_data } from "../yaml/to_structured_data.js";
 import Path from 'node:path';
 import FileSystem from 'node:fs/promises';
+import { IContainerName } from "../interface/IContainerName.js";
+import { IMatchLabel } from "../interface/IMatchLabel.js";
 
 export class JobRenderer implements IJobRenderer {
 
     public constructor(
         private packageManager: IPackageManager,
         private root: string,
-        private secretName: string
+        private secretName: string,
+        private containerNameProvider: IContainerName,
+        private labelProvider: IMatchLabel,
     ) {}
 
     private async getPackageImageName(name: string) {
@@ -63,14 +67,17 @@ export class JobRenderer implements IJobRenderer {
                         ])
                     ),
                     containers: [{
-                        name: `${name}-${key}-container`,
+                        name: this.containerNameProvider.getForJob(name, key),
                         image: 'image' in job.definition ? 
                             job.definition.image : 
                             imageGenerator.generateImage(await this.getPackageImageName(job.definition.on)),
                         resources: {
                             limits: limits.length > 0 ? Object.fromEntries(limits) : undefined,
                             requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
-                            },
+                        },
+                        nodeSelector: {
+                            label: this.labelProvider.getForJob(name, key)
+                        },
                         env: map.entries().map(([name, value]) => ({
                             name,
                             ...('store' in value && value.store

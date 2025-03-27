@@ -9,9 +9,15 @@ import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from '../yaml/implementation/ObjectToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
+import { IContainerName } from '../interface/IContainerName.js';
+import { IMatchLabel } from '../interface/IMatchLabel.js';
 
 export class DeploymentRenderer implements IDeploymentRenderer {
-  public constructor(private secretName = 'pull-secret') {}
+  public constructor(
+    private secretName = 'pull-secret',
+    private containerNameProvider: IContainerName,
+    private labelProvider: IMatchLabel,
+  ) {}
 
   render(
     workspace: IWorkspace,
@@ -69,7 +75,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
             ),
             containers: [
               {
-                name: `${name}-depl`,
+                name: this.containerNameProvider.getForContainer(name),
                 image: imageGenerator.generateImage(workspace).image,
                 ports: ports.values().map((port) => ({
                   containerPort: port
@@ -77,6 +83,9 @@ export class DeploymentRenderer implements IDeploymentRenderer {
                 resources: {
                   limits: limits.length > 0 ? Object.fromEntries(limits) : undefined,
                   requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
+                },
+                nodeSelector: {
+                  label: this.labelProvider.getForContainer(name),
                 },
                 env: map.entries().map(([name, value]) => ({
                   name,

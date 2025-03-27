@@ -13,7 +13,7 @@ import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateSto
 import type { ExposeStructure, IExposeRenderer } from './interface/IExposeRenderer.js';
 import type { IImageGenerator } from './interface/IImageGenerator.js';
 import type { IJobRenderer, JobStructure } from './interface/IJobRenderer.js';
-import type { INetworkRenderer } from './interface/INetworkRenderer.js';
+import type { INetworkRenderer, NetworkStorage } from './interface/INetworkRenderer.js';
 import type { ISecretRenderer } from './interface/ISecretRenderer.js';
 import type { IWritable } from './interface/IWritable.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
@@ -62,7 +62,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   /**
    * A structure that is an array of networks, which contains the info on how the services are connected.
    */
-  public networkStrorage = new Map<IWorkspace, NetworkFeature extends IFeature<any, any, infer Structure> ? Structure : never>();
+  public networkStorage = new Map<IWorkspace, NetworkStorage>();
 
   /**
    * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
@@ -170,7 +170,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     return merge(a, b) as any;
   }
 
-  private static ensurePropertyValueGenerator<SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Exclude<Value, undefined> : never) {
+  public static ensurePropertyValueGenerator<SomeMap extends Map<any, any>>(map: SomeMap, generator: SomeMap extends Map<infer Key, infer Value> ? (workspace: Key) => Exclude<Value, undefined> : never) {
     return (key: SomeMap extends Map<infer U, any> ? U : never): SomeMap extends Map<any, infer Value> ? Exclude<Value, undefined> : never => {
       if (!map.has(key)) {
         map.set(key, generator(key));
@@ -240,7 +240,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           return feature.addRenderer((metadata, data) => {
             const network = HelmRenderer.reduceDistances(data, 'network' as const);
             if (network) {
-              this.networkStrorage.set(metadata.project.workspace, network);
+              this.networkStorage.set(metadata.project.workspace, network);
             }
           });
         })
