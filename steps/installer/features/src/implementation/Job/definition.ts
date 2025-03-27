@@ -2,7 +2,7 @@ import { asConst } from 'json-schema-to-ts';
 
 export const definition = asConst({
   type: 'object',
-  required: ['type'],
+  required: ['type', 'definition'],
   properties: {
     type: {
       type: 'string',
@@ -10,15 +10,34 @@ export const definition = asConst({
     },
     definition: {
       type: 'object',
-      properties: {
-        on: {
-          type: 'string'
+      oneOf: [
+        {
+          type: 'object',
+          required: ['on', 'image'],
+          properties: {
+            on: {
+              type: 'string'
+            },
+            image: {
+              type: 'string'
+            }
+          },
+          additionalProperties: false
         },
-        image: {
-          type: 'string'
+        {
+          type: 'object',
+          required: ['on', 'project'],
+          properties: {
+            on: {
+              type: 'string'
+            },
+            project: {
+              type: 'string'
+            }
+          },
+          additionalProperties: false
         }
-      }
-      // additionalProperties: false
+      ]
     },
   }
   // additionalProperties: true
