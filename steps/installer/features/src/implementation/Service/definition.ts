@@ -61,6 +61,14 @@ export const definition = asConst({
     },
     origin_name_var: {
       type: 'string'
+    },
+    properties: {
+      type: 'object',
+      patternProperties: {
+        '^[a-zA-Z0-9.]+$': {
+          type: ["number", "string", "boolean", "object", "array", "null"]
+        }
+      }
     }
   },
   required: ['type', 'definition', 'origin_name_var'],

@@ -17,6 +17,7 @@ import type { INetworkRenderer, NetworkStorage } from './interface/INetworkRende
 import type { ISecretRenderer } from './interface/ISecretRenderer.js';
 import type { IWritable } from './interface/IWritable.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
+import { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/I3rdPartyRenderer.js';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
   ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2>
@@ -72,7 +73,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   /**
    * This is the service mapping it contains a mapping for external helm charts.
    */
-  public serviceStorage = new Map<IWorkspace | undefined, Map<string, typeof ServiceFeature.makeInstance extends () => IFeature<any, any, infer Structure> ? (Structure extends Record<string, any> ? Structure[string] : never) : never>>();
+  public serviceStorage = new Map<IWorkspace | undefined, Map<string | number, ThirdPartyRendererStorage>>();
 
   /**
    * Jobs are a (workspace|undefined) mapping, where undefined represents the global scope.
@@ -130,6 +131,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     private nameProvider: INameProvider,
     private jobRenderer: IJobRenderer,
     private imageNameGenerator: IImageGenerator,
+    private thirdPartyRenderer: I3rdPartyRenderer,
   ) {
     super(feature);
   }
@@ -227,9 +229,9 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     return value.reduce<Value[Key] | undefined>((a, b) => (a !== undefined ? HelmRenderer.warnAboutDifferences(a as any, b?.[key] !== undefined ? (b[key] as any) : a) : b), value.pop()?.[key]);
   }
 
-  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer, imageGenerator: IImageGenerator) {
+  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer, imageGenerator: IImageGenerator, thirdPartyRenderer: I3rdPartyRenderer) {
     return (
-      new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageGenerator)
+      new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageGenerator, thirdPartyRenderer)
         .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
           return HelmRenderer.buildVariableStorage(this.propertyStorage, (metadata) => metadata.project.workspace)(feature);
         })
@@ -258,11 +260,16 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     );
   }
 
-  public static makeInstance(configMapRenderer: IConfigMapRenderer, secretRenderer: ISecretRenderer, deploymentRenderer: IDeploymentRenderer, exposeRenderer: IExposeRenderer, networkRenderer: INetworkRenderer, jobRenderer: IJobRenderer, nameProvider: INameProvider, imageNameGenerator: IImageGenerator) {
+  public static makeInstance(
+    configMapRenderer: IConfigMapRenderer, 
+    secretRenderer: ISecretRenderer, 
+    deploymentRenderer: IDeploymentRenderer, 
+    exposeRenderer: IExposeRenderer, 
+    networkRenderer: INetworkRenderer, jobRenderer: IJobRenderer, nameProvider: INameProvider, imageNameGenerator: IImageGenerator, thirdPartyRenderer: I3rdPartyRenderer) {
     const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
     const ensureExposeStorage = HelmRenderer.ensurePropertyValueGenerator(exposeStorage, () => new Map());
 
-    const baseRenderer = HelmRenderer.buildBaseInstance(secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageNameGenerator);
+    const baseRenderer = HelmRenderer.buildBaseInstance(secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageNameGenerator, thirdPartyRenderer);
 
     const jobStructure = BaseInstaller.makeInstance()
       .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, baseRenderer.getGroup())
@@ -357,7 +364,18 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
     return baseRenderer.addRenderer(async function (metadata) {
 
+      /**
+       * Config map is values.yaml
+       */
       let configMap = new Map<string, any>();
+
+      await (async () => {
+        if (this.serviceStorage.has(metadata.project.workspace)) {
+          const thirdPartyResult = await thirdPartyRenderer.render(metadata.project.workspace, this.serviceStorage.get(metadata.project.workspace)!);
+          configMap = HelmRenderer.mergeElements(configMap, thirdPartyResult.getConfigMap());
+          this.writers.push(thirdPartyResult);
+        }
+      })();
 
       await (async () => {
         const configResult = await configMapRenderer.render(metadata.project.workspace, this.buildPropertyMap(this.propertyStorage, metadata.project.workspace), this.bindingStorage.get(metadata.project.workspace));
@@ -418,7 +436,6 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           this.writers.push(jobResult);
         }
       })();
-
 
       this.writers.push(await (new ValuesRenderer()).render(metadata.project.workspace, configMap));
     });
@@ -488,6 +505,14 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       }
     })();
 
+    await (async () => {
+      if (this.serviceStorage.has(undefined)) {
+        const thirdPartyResult = await this.thirdPartyRenderer.render(undefined, this.serviceStorage.get(undefined)!);
+        configMap = HelmRenderer.mergeElements(configMap, thirdPartyResult.getConfigMap());
+        this.writers.push(thirdPartyResult);
+      }
+    })();
+
 
     this.writers.push(await (new ValuesRenderer()).render(undefined, configMap));
 
@@ -499,10 +524,11 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   public buildPropertyMap(properties: Map<IWorkspace | undefined, IConfigMapStructure>, givenWorkspace: IWorkspace | undefined): Map<IWorkspace | undefined, IConfigMapStructure> {
     const ensureJob = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
     const ensureKey = HelmRenderer.ensurePropertyValueGenerator(properties, () => new Map());
+    const ensureService = HelmRenderer.ensurePropertyValueGenerator(this.serviceStorage, () => new Map());
 
     const propertyMap = new Map([[givenWorkspace, ensureKey(givenWorkspace)]]);
 
-    const mergeWithWorkspace = (workspace: IWorkspace | undefined) =>
+    const mergeWithWorkspace = (workspace: IWorkspace | undefined) => {
       propertyMap.set(
         workspace,
         HelmRenderer.mergeElements(
@@ -514,6 +540,21 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           )
         )
       );
+      propertyMap.set(
+        workspace,
+        HelmRenderer.mergeElements(
+          ensureKey(workspace),
+          new Map(
+            ensureService(workspace)
+              .entries()
+              .flatMap(([baseKey, value]) => Object.entries(value.properties ?? {}).map(([key, v]) => [`${baseKey}.${key}`, {
+                type: 'scoped',
+                default: v as any,
+              }] as const))
+          )
+        )
+      );
+    }
 
     if (this.jobPropertyStorage.get(givenWorkspace)) {
       mergeWithWorkspace(givenWorkspace);
@@ -536,7 +577,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   }
 
   protected createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U> {
-    const helm = new HelmRenderer(feature, this.secretRenderer, this.configMapRenderer, this.nameProvider, this.jobRenderer, this.imageNameGenerator);
+    const helm = new HelmRenderer(feature, this.secretRenderer, this.configMapRenderer, this.nameProvider, this.jobRenderer, this.imageNameGenerator, this.thirdPartyRenderer);
     helm.featureCache = new Map(this.featureCache) as any;
     return helm as any;
   }
