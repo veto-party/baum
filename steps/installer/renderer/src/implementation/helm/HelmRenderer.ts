@@ -18,6 +18,7 @@ import type { ISecretRenderer } from './interface/ISecretRenderer.js';
 import type { IWritable } from './interface/IWritable.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
 import { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/I3rdPartyRenderer.js';
+import { ChartRenderer } from './implementation/ChartRenderer.js';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
   ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2>
@@ -364,6 +365,8 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
     return baseRenderer.addRenderer(async function (metadata) {
 
+      this.writers.push(new ChartRenderer().render(metadata.project.workspace, this.serviceStorage.get(metadata.project.workspace) ?? new Map()));
+
       /**
        * Config map is values.yaml
        */
@@ -443,6 +446,8 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
   public async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>): Promise<void> {
     await super.render(projectMetadata, structure);
+
+    this.writers.push(new ChartRenderer().renderGlobal(Array.from(this.serviceStorage.keys()).filter((value): value is IWorkspace => value !== undefined), this.serviceStorage.get(undefined) ?? new Map()));
 
     let configMap = new Map<string, any>();
 
