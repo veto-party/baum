@@ -1,5 +1,4 @@
-
 export interface IContainerName {
-    getForJob(name: string, key: string): string;
-    getForContainer(name: string): string;
+  getForJob(name: string, key: string): string;
+  getForContainer(name: string): string;
 }

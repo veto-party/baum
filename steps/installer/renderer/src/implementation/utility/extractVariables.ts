@@ -4,7 +4,7 @@ import type { IConfigMapStructure } from '../helm/interface/IConfigMapRenderer.j
 class VariableExtractor {
   @CachedFN(false)
   extractVariables(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined) {
-    const allItems: IConfigMapStructure extends Map<infer Key, infer Value> ? Map<Key, Value & { source: string; }> : never = new Map();
+    const allItems: IConfigMapStructure extends Map<infer Key, infer Value> ? Map<Key, Value & { source: string }> : never = new Map();
 
     const entriesToCheck = [Array.from(binding?.entries() ?? [])];
     const globalsToCheck = new Set<(typeof entriesToCheck)[number]>();
@@ -26,7 +26,7 @@ class VariableExtractor {
 
         allItems.set(_key, {
           ...item,
-          source: lookupKey,
+          source: lookupKey
         });
 
         if (item.binding) {

@@ -66,7 +66,7 @@ export const definition = asConst({
       type: 'object',
       patternProperties: {
         '^[a-zA-Z0-9.]+$': {
-          type: ["number", "string", "boolean", "object", "array", "null"]
+          type: ['number', 'string', 'boolean', 'object', 'array', 'null']
         }
       }
     }

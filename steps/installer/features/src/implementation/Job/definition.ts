@@ -38,7 +38,7 @@ export const definition = asConst({
           additionalProperties: false
         }
       ]
-    },
+    }
   }
   // additionalProperties: true
 });

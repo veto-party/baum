@@ -8,6 +8,9 @@ import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManage
 import { getDeepKeys } from '../../utility/getDeepKeys.js';
 import { ARendererManager } from '../ARendererManager.js';
 import { RenderFeatureManager } from '../RenderFeatureManager.js';
+import { ChartRenderer } from './implementation/ChartRenderer.js';
+import { ValuesRenderer } from './implementation/ValuesRenderer.js';
+import type { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/I3rdPartyRenderer.js';
 import type { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from './interface/IConfigMapRenderer.js';
 import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from './interface/IDeploymentRenderer.js';
 import type { ExposeStructure, IExposeRenderer } from './interface/IExposeRenderer.js';
@@ -16,9 +19,6 @@ import type { IJobRenderer, JobStructure } from './interface/IJobRenderer.js';
 import type { INetworkRenderer, NetworkStorage } from './interface/INetworkRenderer.js';
 import type { ISecretRenderer } from './interface/ISecretRenderer.js';
 import type { IWritable } from './interface/IWritable.js';
-import { ValuesRenderer } from './implementation/ValuesRenderer.js';
-import { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/I3rdPartyRenderer.js';
-import { ChartRenderer } from './implementation/ChartRenderer.js';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
   ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2>
@@ -132,7 +132,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     private nameProvider: INameProvider,
     private jobRenderer: IJobRenderer,
     private imageNameGenerator: IImageGenerator,
-    private thirdPartyRenderer: I3rdPartyRenderer,
+    private thirdPartyRenderer: I3rdPartyRenderer
   ) {
     super(feature);
   }
@@ -262,11 +262,16 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
   }
 
   public static makeInstance(
-    configMapRenderer: IConfigMapRenderer, 
-    secretRenderer: ISecretRenderer, 
-    deploymentRenderer: IDeploymentRenderer, 
-    exposeRenderer: IExposeRenderer, 
-    networkRenderer: INetworkRenderer, jobRenderer: IJobRenderer, nameProvider: INameProvider, imageNameGenerator: IImageGenerator, thirdPartyRenderer: I3rdPartyRenderer) {
+    configMapRenderer: IConfigMapRenderer,
+    secretRenderer: ISecretRenderer,
+    deploymentRenderer: IDeploymentRenderer,
+    exposeRenderer: IExposeRenderer,
+    networkRenderer: INetworkRenderer,
+    jobRenderer: IJobRenderer,
+    nameProvider: INameProvider,
+    imageNameGenerator: IImageGenerator,
+    thirdPartyRenderer: I3rdPartyRenderer
+  ) {
     const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
     const ensureExposeStorage = HelmRenderer.ensurePropertyValueGenerator(exposeStorage, () => new Map());
 
@@ -364,7 +369,6 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       });
 
     return baseRenderer.addRenderer(async function (metadata) {
-
       this.writers.push(new ChartRenderer().render(metadata.project.workspace, this.serviceStorage.get(metadata.project.workspace) ?? new Map()));
 
       /**
@@ -429,9 +433,9 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           });
 
           const jobResult = await jobRenderer.render(
-            metadata.project.workspace, 
-            key, 
-            this.jobStorage.get(metadata.project.workspace)!.get(key)!, 
+            metadata.project.workspace,
+            key,
+            this.jobStorage.get(metadata.project.workspace)!.get(key)!,
             HelmRenderer.mergeElements(secretResult.getResolvedWorkspaceSecrets(), configResult.getResolvedWorkspaceVars()),
             this.jobSystemUsageStorage.get(metadata.project.workspace)?.get(key),
             imageNameGenerator
@@ -440,14 +444,19 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
         }
       })();
 
-      this.writers.push(await (new ValuesRenderer()).render(metadata.project.workspace, configMap));
+      this.writers.push(await new ValuesRenderer().render(metadata.project.workspace, configMap));
     });
   }
 
   public async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>): Promise<void> {
     await super.render(projectMetadata, structure);
 
-    this.writers.push(new ChartRenderer().renderGlobal(Array.from(this.serviceStorage.keys()).filter((value): value is IWorkspace => value !== undefined), this.serviceStorage.get(undefined) ?? new Map()));
+    this.writers.push(
+      new ChartRenderer().renderGlobal(
+        Array.from(this.serviceStorage.keys()).filter((value): value is IWorkspace => value !== undefined),
+        this.serviceStorage.get(undefined) ?? new Map()
+      )
+    );
 
     let configMap = new Map<string, any>();
 
@@ -498,14 +507,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           }
         });
 
-        const jobResult = await this.jobRenderer.render(
-          undefined, 
-          key, 
-          this.jobStorage.get(undefined)!.get(key)!, 
-          HelmRenderer.mergeElements(secretResult.getResolvedWorkspaceSecrets(), configResult.getResolvedWorkspaceVars()),
-          this.jobSystemUsageStorage.get(undefined)?.get(key),
-          this.imageNameGenerator
-        );
+        const jobResult = await this.jobRenderer.render(undefined, key, this.jobStorage.get(undefined)!.get(key)!, HelmRenderer.mergeElements(secretResult.getResolvedWorkspaceSecrets(), configResult.getResolvedWorkspaceVars()), this.jobSystemUsageStorage.get(undefined)?.get(key), this.imageNameGenerator);
         this.writers.push(jobResult);
       }
     })();
@@ -518,8 +520,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       }
     })();
 
-
-    this.writers.push(await (new ValuesRenderer()).render(undefined, configMap));
+    this.writers.push(await new ValuesRenderer().render(undefined, configMap));
 
     for (const writer of this.writers) {
       writer.write(projectMetadata.rootDirectory, this.nameProvider);
@@ -552,14 +553,22 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           new Map(
             ensureService(workspace)
               .entries()
-              .flatMap(([baseKey, value]) => Object.entries(value.properties ?? {}).map(([key, v]) => [`${baseKey}.${key}`, {
-                type: 'scoped',
-                default: v as any,
-              }] as const))
+              .flatMap(([baseKey, value]) =>
+                Object.entries(value.properties ?? {}).map(
+                  ([key, v]) =>
+                    [
+                      `${baseKey}.${key}`,
+                      {
+                        type: 'scoped',
+                        default: v as any
+                      }
+                    ] as const
+                )
+              )
           )
         )
       );
-    }
+    };
 
     if (this.jobPropertyStorage.get(givenWorkspace)) {
       mergeWithWorkspace(givenWorkspace);
