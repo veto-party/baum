@@ -5,8 +5,8 @@ import type { IVersionManager } from '../../interface/IVersionManager.js';
 export class GenericVersionManager implements IVersionManager {
   public static readonly MIN_VERSION = 'v0.0.0-temp';
 
-  protected nameToVersionOrder: Record<string, IWorkspace[]>;
-  protected namesToWorkspaces: Record<string, Record<string, IWorkspace>>;
+  protected nameToVersionOrder: Record<string, IWorkspace[]> = {};
+  protected namesToWorkspaces: Record<string, Record<string, IWorkspace>> = {};
 
   private mapToVersions(workspaces: IWorkspace[]) {
     for (const workspace of workspaces) {
