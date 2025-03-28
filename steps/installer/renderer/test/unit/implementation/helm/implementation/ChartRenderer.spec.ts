@@ -1,0 +1,45 @@
+import { GenericWorkspace, IWorkspace } from "@veto-party/baum__core";
+import { ChartRenderer } from "../../../../../src/implementation/helm/implementation/ChartRenderer.js";
+import { IWritable } from "../../../../../src/implementation/helm/interface/IWritable.js";
+
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from "node:url";
+import { INameProvider } from "../../../../../src/interface/INameProvider.js";
+import { compareDirectories } from "../../../../uility/compareDirectories.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const actualDir = join(__dirname, 'actual');
+const expectedDir = join(__dirname, 'expected');
+
+const chartRenderer = new ChartRenderer();
+
+describe('A chart renderer test', () => {
+
+    let writers: IWritable[] = [];
+
+    const workspace = new GenericWorkspace(__dirname, {
+        name: 'some-package'
+    }, () => false);
+
+    it ('Should produce a file (global)', async () => {
+        writers.push(chartRenderer.renderGlobal([workspace], new Map()));
+    });
+
+    it ('Should produce a file (scoped/workspace)', () => {
+        writers.push(chartRenderer.render(workspace, new Map()));
+    });
+
+    it ('Should write them to the file system and they should match the contents.', async () => {
+        await Promise.all(writers.map((writer) => writer.write(actualDir, new class implements INameProvider {
+            getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
+                if (!workspace) {
+                    return 'main';
+                }
+
+                return workspace.getName();
+            }
+        })));
+
+        await compareDirectories(actualDir, expectedDir);
+    })
+});

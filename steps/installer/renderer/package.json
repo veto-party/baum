@@ -13,6 +13,8 @@
     "graph-data-structure": "^4.5.0"
   },
   "devDependencies": {
-    "@veto-party/config": "*"
+    "@veto-party/config": "*",
+    "diff": "^7.0.0",
+    "@types/diff": "^7.0.2"
   }
 }
