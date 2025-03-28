@@ -14,9 +14,9 @@ import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class DeploymentRenderer implements IDeploymentRenderer {
   public constructor(
-    private secretName = 'pull-secret',
     private containerNameProvider: IContainerName,
-    private labelProvider: IMatchLabel
+    private labelProvider: IMatchLabel,
+    private secretName = 'pull-secret',
   ) {}
 
   render(

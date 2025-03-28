@@ -180,6 +180,7 @@ export class NetworkRenderer implements INetworkRenderer {
             continue;
           }
 
+          // biome-ignore lint: return type is inferred.
           let yaml;
 
           if (node.job) {
