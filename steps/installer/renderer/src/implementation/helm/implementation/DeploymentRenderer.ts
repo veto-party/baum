@@ -16,7 +16,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
   public constructor(
     private containerNameProvider: IContainerName,
     private labelProvider: IMatchLabel,
-    private secretName = 'pull-secret',
+    private secretName = 'pull-secret'
   ) {}
 
   render(
