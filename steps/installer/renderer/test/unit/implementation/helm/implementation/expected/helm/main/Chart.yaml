@@ -1,0 +1,10 @@
+"type": "application"
+"apiVersion": "v2"
+"version": "0.0.0"
+"dependencies": 
+  
+  - "name": "some-package"
+    "alias": "some-package"
+    "repository": file://../some-package
+    
+    "version": "0.0.0"

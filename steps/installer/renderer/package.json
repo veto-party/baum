@@ -5,7 +5,7 @@
   "files": ["./dist/**"],
   "scripts": {
     "build": "tsc --project ./build.tsconfig.json",
-    "test": "node --loader ts-node/esm --enable-source-maps ./test/start-testing.mjs",
+    "test": "vitest",
     "generate": "node --loader ts-node/esm ./scripts/export-json.mjs"
   },
   "dependencies": {
@@ -15,6 +15,7 @@
   "devDependencies": {
     "@veto-party/config": "*",
     "diff": "^7.0.0",
-    "@types/diff": "^7.0.2"
+    "@types/diff": "^7.0.2",
+    "vitest": "^3.0.9"
   }
 }

@@ -100,6 +100,9 @@ export class JobRenderer implements IJobRenderer {
       write: async (root, resolver) => {
         const path = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(root, 'helm', path, 'templates');
+
+
+        await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(await yaml(path)).write());
       }
     };

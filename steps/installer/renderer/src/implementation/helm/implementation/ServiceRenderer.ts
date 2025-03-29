@@ -38,6 +38,7 @@ export class ServiceRenderer implements IServiceRenderer {
         const path = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(root, 'helm', path, 'templates');
 
+        await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'service.yaml'), to_structured_data(yaml(path)).write());
       }
     };

@@ -64,6 +64,8 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
         const path = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
+
+        await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml(path)).write());
       }
     };

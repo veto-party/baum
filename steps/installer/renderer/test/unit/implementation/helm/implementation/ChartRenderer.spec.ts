@@ -1,13 +1,16 @@
+import { describe, expect, it } from "vitest";
+
 import { GenericWorkspace, IWorkspace } from "@veto-party/baum__core";
 import { ChartRenderer } from "../../../../../src/implementation/helm/implementation/ChartRenderer.js";
 import { IWritable } from "../../../../../src/implementation/helm/interface/IWritable.js";
 
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from "node:url";
 import { INameProvider } from "../../../../../src/interface/INameProvider.js";
 import { compareDirectories } from "../../../../uility/compareDirectories.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
@@ -21,7 +24,7 @@ describe('A chart renderer test', () => {
         name: 'some-package'
     }, () => false);
 
-    it ('Should produce a file (global)', async () => {
+    it('Should produce a file (global)', async () => {
         writers.push(chartRenderer.renderGlobal([workspace], new Map()));
     });
 
@@ -40,6 +43,6 @@ describe('A chart renderer test', () => {
             }
         })));
 
-        await compareDirectories(actualDir, expectedDir);
+        expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
     })
 });

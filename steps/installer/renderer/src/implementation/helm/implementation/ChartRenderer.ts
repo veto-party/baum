@@ -1,10 +1,14 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { ThirdPartyRendererStorage } from '../interface/I3rdPartyRenderer.js';
 import type { IWritable } from '../interface/IWritable.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
+import { RawToken } from '../yaml/implementation/RawToken.js';
+
+const pathToFileURL = (path: string) => {
+    return new RawToken(`file://${path}`);
+}
 
 export class ChartRenderer {
   render(workspace: IWorkspace, externalDependencies: Map<string | number, ThirdPartyRendererStorage>): IWritable {
@@ -19,17 +23,18 @@ export class ChartRenderer {
           // TODO: version provider.
           version: '0.0.0',
           dependencies: [
-            externalDependencies.entries().map(([alias, entry]) => ({
+            Array.from(externalDependencies.entries().map(([alias, entry]) => ({
               alias,
               // TODO: Path is possibly relative to given workspace.
               repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, entry.definition.from_directory!.path)),
               name: entry.definition.origin.name!,
               version: entry.definition.origin.version
-            }))
-          ].flat()
+            })))
+          ].flat(3)
         };
 
-        await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml).write());
+        await FileSystem.mkdir(filepath, { recursive: true });
+        await FileSystem.writeFile(Path.join(filepath, 'Chart.yaml'), to_structured_data(yaml).write());
       }
     };
   }
@@ -38,7 +43,7 @@ export class ChartRenderer {
     return {
       write: async (root, resolver) => {
         const rootPath = await resolver.getNameByWorkspace(undefined);
-        const filepath = Path.join(root, 'helm', rootPath);
+        const rootFilePath = Path.join(root, 'helm', rootPath);
 
         const yaml = {
           type: 'application',
@@ -53,23 +58,24 @@ export class ChartRenderer {
                 return {
                   name: path,
                   alias: path,
-                  repository: pathToFileURL(Path.relative(rootPath, filepath)),
+                  repository: pathToFileURL(Path.relative(rootFilePath, filepath)),
                   // TODO: version provider.
                   version: '0.0.0'
                 };
               })
             ),
-            externalDependencies.entries().map(([alias, entry]) => ({
+            Array.from(externalDependencies.entries().map(([alias, entry]) => ({
               alias,
               // TODO: Path is possibly relative to given workspace.
               repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, entry.definition.from_directory!.path)),
               name: entry.definition.origin.name!,
               version: entry.definition.origin.version
-            }))
-          ].flat()
+            })))
+          ].flat(3)
         };
 
-        await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml).write());
+        await FileSystem.mkdir(rootFilePath, { recursive: true });
+        await FileSystem.writeFile(Path.join(rootFilePath, 'Chart.yaml'), to_structured_data(yaml).write());
       }
     };
   }

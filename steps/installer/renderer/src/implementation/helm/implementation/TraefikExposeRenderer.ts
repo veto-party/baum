@@ -190,6 +190,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
           .map((resolved) => resolved.write())
           .join(`${EOL}---${EOL}`);
 
+        await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'ingress.yaml'), fileContent);
       }
     };

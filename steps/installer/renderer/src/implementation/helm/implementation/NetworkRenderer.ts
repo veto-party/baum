@@ -191,6 +191,8 @@ export class NetworkRenderer implements INetworkRenderer {
 
           const path = await resolver.getNameByWorkspace(node.workspace);
           const filepath = Path.join(root, 'helm', path, 'templates');
+
+          await FileSystem.mkdir(filepath, { recursive: true });
           await FileSystem.writeFile(Path.join(filepath, `${[node.job ? 'job' : undefined, node.job, 'network'].filter(Boolean).join('-')}.yaml`), to_structured_data(await yaml(path, resolver, graph)).write());
         }
       }
