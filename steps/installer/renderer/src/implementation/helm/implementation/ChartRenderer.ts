@@ -23,13 +23,13 @@ export class ChartRenderer {
           // TODO: version provider.
           version: '0.0.0',
           dependencies: [
-            Array.from(externalDependencies.entries().map(([alias, entry]) => ({
+            Array.from(externalDependencies.entries()).map(([alias, entry]) => ({
               alias,
               // TODO: Path is possibly relative to given workspace.
               repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, entry.definition.from_directory!.path)),
               name: entry.definition.origin.name!,
               version: entry.definition.origin.version
-            })))
+            }))
           ].flat(3)
         };
 
@@ -64,13 +64,13 @@ export class ChartRenderer {
                 };
               })
             ),
-            Array.from(externalDependencies.entries().map(([alias, entry]) => ({
+            Array.from(externalDependencies.entries()).map(([alias, entry]) => ({
               alias,
               // TODO: Path is possibly relative to given workspace.
               repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, entry.definition.from_directory!.path)),
               name: entry.definition.origin.name!,
               version: entry.definition.origin.version
-            })))
+            }))
           ].flat(3)
         };
 
