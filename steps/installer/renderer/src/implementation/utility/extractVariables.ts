@@ -9,7 +9,7 @@ class VariableExtractor {
     const entriesToCheck = [Array.from(binding?.entries() ?? [])];
     const globalsToCheck = new Set<(typeof entriesToCheck)[number]>();
 
-    do {
+    while (entriesToCheck.length > 0) {
       const entries = entriesToCheck.pop()!;
       const possibleGlobalEntries: (typeof entriesToCheck)[number] = [];
 
@@ -33,13 +33,13 @@ class VariableExtractor {
           entriesToCheck.push(Object.entries(item.binding));
         }
       }
-    } while (entriesToCheck.length > 0);
+    }
 
-    do {
+    while (globalsToCheck.size > 0) {
       const [entries] = globalsToCheck.values().take(1);
       globalsToCheck.delete(entries);
 
-      for (const entry of entries) {
+      for (const entry of Array.from(entries)) {
         const [_key, lookupKey] = entry;
         const item = map?.get(undefined)?.get(lookupKey);
 
@@ -57,7 +57,7 @@ class VariableExtractor {
           globalsToCheck.add(Object.entries(item.binding));
         }
       }
-    } while (globalsToCheck.size > 0);
+    }
 
     return allItems;
   }

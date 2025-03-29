@@ -20,7 +20,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
     const allItems = new Map(
       extractVariables(workspace, map, binding)
         .entries()
-        .filter(([, value]) => value.secret === false)
+        .filter(([, value]) => !value.secret)
     );
 
     const structName = await this.nameProvider.getNameFor(workspace, name);
@@ -33,8 +33,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
         name: structName
       },
       data: Object.fromEntries(
-        allItems
-          .entries()
+        Array.from(allItems.entries())
           .filter(([, value]) => !value.static)
           .map(([key, value]) => [key, new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)])
       )
@@ -76,7 +75,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
 
-        await FileSystem.mkdir(filepath);
+        await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());
       }
     };
