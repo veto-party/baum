@@ -1,0 +1,41 @@
+"apiVersion": "apps/v1"
+"kind": "deployment"
+"metadata": 
+  "name": "some-package-depl"
+  
+"spec": 
+  "replicas": 1
+  "selector": 
+    "matchLabels": 
+      "app": "some-package-depl"
+      
+    
+  "template": 
+    "metadata": 
+      "labels": 
+        "app": "some-package-depl"
+        
+      
+    "spec": 
+      {{ if eq .Values.global.registry.type "secret" }}
+      "imagePullSecrets":   
+        - "name": "pull-secret"
+          
+      {{ end }}
+      "containers": 
+        
+        - "name": "some-package-pod"
+          "image": "some-package-image"
+          "ports": 
+          
+          "resources": 
+          
+          "nodeSelector": 
+            "label": "some-package-matcher"
+            
+          "env": 
+          
+          
+      
+    
+  

@@ -22,7 +22,7 @@ export class ObjectToken extends AToken {
         }
 
         if (originalValue instanceof ConditionalToken) {
-          result += `{{ ${originalValue.condition} }}${EOL}${JSON.stringify(key)}: ${value}${EOL}{{ end }}`;
+          result += `{{ ${originalValue.condition} }}${EOL}${JSON.stringify(key)}: ${value}${EOL}{{ end }}${EOL}`;
           return;
         }
       } else {
