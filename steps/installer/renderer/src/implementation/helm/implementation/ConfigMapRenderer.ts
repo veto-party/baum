@@ -24,6 +24,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
     );
 
     const structName = await this.nameProvider.getNameFor(workspace, name);
+    const globalStructName = await this.nameProvider.getNameFor(undefined, name);
 
     const yaml = () => ({
       apiVersion: 'v1',
@@ -55,7 +56,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     type: 'variable',
                     key: value.source,
                     global: value.type === 'global',
-                    store: value.type === 'global' ? 'global' : structName,
+                    store: value.type === 'global' ? globalStructName : structName,
                     recreate: value.maintainValueBetweenVersions ?? false
                   }) satisfies ConfigMapping
             ] as const;

@@ -22,6 +22,7 @@ export class SecretRenderer implements ISecretRenderer {
     );
 
     const secretName = await this.nameProvider.getNameFor(workspace, name);
+    const globalSecretName = await this.nameProvider.getNameFor(undefined, name);
 
     const yaml = () => ({
       apiVersion: 'v1',
@@ -43,7 +44,7 @@ export class SecretRenderer implements ISecretRenderer {
                 type: 'secret',
                 key: value.source,
                 global: value.type === 'global',
-                store: value.type === 'global' ? 'global' : secretName,
+                store: value.type === 'global' ? globalSecretName : secretName,
                 recreate: value.maintainValueBetweenVersions ?? false
               } satisfies SecretMapping
             ] as const;
