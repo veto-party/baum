@@ -5,28 +5,35 @@ import type { ThirdPartyRendererStorage } from '../interface/I3rdPartyRenderer.j
 import type { IWritable } from '../interface/IWritable.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
+import { IVersionProvider } from '../../../interface/IVersionProvider.js';
 
 const pathToFileURL = (path: string) => {
     return new RawToken(`file://${path}`);
 }
 
 export class ChartRenderer {
+
+  public constructor(
+    private versionProvider: IVersionProvider
+  ) {}
+
   render(workspace: IWorkspace, externalDependencies: Map<string | number, ThirdPartyRendererStorage>): IWritable {
     return {
       write: async (root, resolver) => {
         const rootPath = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(root, 'helm', rootPath);
 
+        const possiblyRelativePath = (path: string) => Path.isAbsolute(path) ? path : Path.resolve(workspace.getDirectory(), path);
+
         const yaml = {
           type: 'application',
           apiVersion: 'v2',
-          // TODO: version provider.
-          version: '0.0.0',
+          name: rootPath,
+          version: this.versionProvider.getVersionForWorkspace(workspace),
           dependencies: [
             Array.from(externalDependencies.entries()).map(([alias, entry]) => ({
               alias,
-              // TODO: Path is possibly relative to given workspace.
-              repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, entry.definition.from_directory!.path)),
+              repository: entry.definition.from_reference ?? pathToFileURL(Path.relative(rootPath, possiblyRelativePath(entry.definition.from_directory!.path))),
               name: entry.definition.origin.name!,
               version: entry.definition.origin.version
             }))
@@ -48,8 +55,8 @@ export class ChartRenderer {
         const yaml = {
           type: 'application',
           apiVersion: 'v2',
-          // TODO: version provider.
-          version: '0.0.0',
+          name: rootPath,
+          version: await this.versionProvider.getProjectVersion(),
           dependencies: [
             await Promise.all(
               workspaces.map(async (workspace) => {
@@ -60,7 +67,7 @@ export class ChartRenderer {
                   alias: path,
                   repository: pathToFileURL(Path.relative(rootFilePath, filepath)),
                   // TODO: version provider.
-                  version: '0.0.0'
+                  version: this.versionProvider.getVersionForWorkspace(workspace)
                 };
               })
             ),

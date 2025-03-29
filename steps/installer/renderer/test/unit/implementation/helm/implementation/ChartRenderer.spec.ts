@@ -8,13 +8,22 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from "node:url";
 import { INameProvider } from "../../../../../src/interface/INameProvider.js";
 import { compareDirectories } from "../../../../uility/compareDirectories.js";
+import { IVersionProvider } from "../../../../../src/interface/IVersionProvider.js";
 
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
-const chartRenderer = new ChartRenderer();
+const chartRenderer = new ChartRenderer(new class implements IVersionProvider {
+    getProjectVersion(): string | Promise<string> {
+        return '0.0.0';
+    }
+
+    getVersionForWorkspace(workspace: IWorkspace): string | Promise<string> {
+        return '1.0.1';
+    }
+});
 
 describe('A chart renderer test', () => {
 

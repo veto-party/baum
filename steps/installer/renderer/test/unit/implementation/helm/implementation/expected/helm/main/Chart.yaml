@@ -1,5 +1,6 @@
 "type": "application"
 "apiVersion": "v2"
+"name": "main"
 "version": "0.0.0"
 "dependencies": 
   
@@ -7,4 +8,4 @@
     "alias": "some-package"
     "repository": file://../some-package
     
-    "version": "0.0.0"
+    "version": "1.0.1"
