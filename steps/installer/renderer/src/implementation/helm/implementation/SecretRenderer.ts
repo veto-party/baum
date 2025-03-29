@@ -3,25 +3,32 @@ import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import { extractVariables } from '../../utility/extractVariables.js';
 import { toHelmPathWithPossibleIndex } from '../../utility/toHelmPathWithPossibleIndex.js';
-import type { IConfigMapStructure } from '../interface/IConfigMapRenderer.js';
-import type { ISecretRenderer, ISecretRendererResult, SecretMapping } from '../interface/ISecretRenderer.js';
+import type { IConfigMapStructure } from '../interface/factory/IConfigMapRenderer.js';
+import type { ISecretNameProvider, ISecretRenderer, ISecretRendererResult, SecretMapping } from '../interface/factory/ISecretRenderer.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class SecretRenderer implements ISecretRenderer {
-  render(workspace: IWorkspace | undefined, map: Map<IWorkspace, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): ISecretRendererResult | Promise<ISecretRendererResult> {
+
+  public constructor(
+    private nameProvider: ISecretNameProvider
+  ) {}
+
+  async render(workspace: IWorkspace | undefined, map: Map<IWorkspace, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<ISecretRendererResult> {
     const allItems = new Map(
       extractVariables(workspace, map, binding)
         .entries()
         .filter(([, value]) => value.secret === true)
     );
 
-    const yaml = (name: string) => ({
+    const secretName = await this.nameProvider.getNameFor(workspace, name);
+
+    const yaml = () => ({
       apiVersion: 'v1',
       kind: 'Secret',
       type: 'Opaque',
       metadata: {
-        name: `${name}-secrets`
+        name: secretName
       },
       stringData: Object.fromEntries(allItems.entries().map(([key, value]) => [key, value.static ? value.default : new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)]))
     });
@@ -36,7 +43,7 @@ export class SecretRenderer implements ISecretRenderer {
                 type: 'secret',
                 key: value.source,
                 global: value.type === 'global',
-                store: value.type === 'global' ? 'global' : undefined,
+                store: value.type === 'global' ? 'global' : secretName,
                 recreate: value.maintainValueBetweenVersions ?? false
               } satisfies SecretMapping
             ] as const;
@@ -56,7 +63,7 @@ export class SecretRenderer implements ISecretRenderer {
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
         await FileSystem.mkdir(filepath, { recursive: true });
-        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml(path)).write());
+        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());
       }
     };
   }

@@ -1,8 +1,8 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { ExposeStructure } from '../interface/IExposeRenderer.js';
-import type { IServiceRenderer, IServiceRendererResult } from '../interface/IServiceRenderer.js';
+import type { ExposeStructure } from '../interface/factory/IExposeRenderer.js';
+import type { IServiceRenderer, IServiceRendererResult } from '../interface/factory/IServiceRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class ServiceRenderer implements IServiceRenderer {

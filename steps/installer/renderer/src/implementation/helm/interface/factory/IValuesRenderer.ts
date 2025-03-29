@@ -1,5 +1,5 @@
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { IWritable } from './IWritable.js';
+import type { IWritable } from '../IWritable.js';
 
 export interface IValuesRendererResult extends IWritable {}
 

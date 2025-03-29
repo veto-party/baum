@@ -2,7 +2,7 @@ import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import { set } from 'lodash-es';
-import type { IValuesRenderer, IValuesRendererResult } from '../interface/IValuesRenderer.js';
+import type { IValuesRenderer, IValuesRendererResult } from '../interface/factory/IValuesRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class ValuesRenderer implements IValuesRenderer {

@@ -6,7 +6,7 @@ import type { INameProvider } from '../../../interface/INameProvider.js';
 import { HelmRenderer } from '../HelmRenderer.js';
 import type { IContainerName } from '../interface/IContainerName.js';
 import type { IMatchLabel } from '../interface/IMatchLabel.js';
-import type { INetworkRenderer, INetworkRendererResult, NetworkStorage } from '../interface/INetworkRenderer.js';
+import type { INetworkRenderer, INetworkRendererResult, NetworkStorage } from '../interface/factory/INetworkRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 type NodeType = { workspace: IWorkspace; job?: string } | { workspace?: undefined; job: string };

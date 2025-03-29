@@ -3,23 +3,33 @@ import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import { extractVariables } from '../../utility/extractVariables.js';
 import { toHelmPathWithPossibleIndex } from '../../utility/toHelmPathWithPossibleIndex.js';
-import type { ConfigMapping, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from '../interface/IConfigMapRenderer.js';
+import type { ConfigMapping, IConfigMapNameProvider, IConfigMapRenderer, IConfigMapRendererResult, IConfigMapStructure } from '../interface/factory/IConfigMapRenderer.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
-  render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name: string): IConfigMapRendererResult | Promise<IConfigMapRendererResult> {
+
+
+  public constructor(
+    private nameProvider: IConfigMapNameProvider
+  ) {
+
+  }
+
+  async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<IConfigMapRendererResult> {
     const allItems = new Map(
       extractVariables(workspace, map, binding)
         .entries()
         .filter(([, value]) => value.secret === false)
     );
 
-    const yaml = (name: string) => ({
+    const structName = await this.nameProvider.getNameFor(workspace, name);
+
+    const yaml = () => ({
       apiVersion: 'v1',
       kind: 'ConfigMap',
       metadata: {
-        name: `${name}-vars`
+        name: structName
       },
       data: Object.fromEntries(
         allItems
@@ -45,7 +55,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
                     type: 'variable',
                     key: value.source,
                     global: value.type === 'global',
-                    store: value.type === 'global' ? 'global' : undefined,
+                    store: value.type === 'global' ? 'global' : structName,
                     recreate: value.maintainValueBetweenVersions ?? false
                   }) satisfies ConfigMapping
             ] as const;
@@ -65,8 +75,8 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
 
-        await FileSystem.mkdir(filepath, { recursive: true });
-        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml(path)).write());
+        await FileSystem.mkdir(filepath);
+        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());
       }
     };
   }

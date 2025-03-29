@@ -1,5 +1,5 @@
 import { CachedFN, type IWorkspace } from '@veto-party/baum__core';
-import type { IConfigMapStructure } from '../helm/interface/IConfigMapRenderer.js';
+import type { IConfigMapStructure } from '../helm/interface/factory/IConfigMapRenderer.js';
 
 class VariableExtractor {
   @CachedFN(false)

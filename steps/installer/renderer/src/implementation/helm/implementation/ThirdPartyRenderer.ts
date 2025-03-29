@@ -1,5 +1,5 @@
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { I3rdPartyRenderer, I3rdPartyRendererResult, ThirdPartyRendererStorage } from '../interface/I3rdPartyRenderer.js';
+import type { I3rdPartyRenderer, I3rdPartyRendererResult, ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
 
 export class ThirdPartyRenderer implements I3rdPartyRenderer {
   render(workspace: IWorkspace | undefined, dependencies: Map<string | number, ThirdPartyRendererStorage>): I3rdPartyRendererResult | Promise<I3rdPartyRendererResult> {

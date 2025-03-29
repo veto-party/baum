@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { GenericWorkspace, IWorkspace } from "@veto-party/baum__core";
-import { ChartRenderer } from "../../../../../src/implementation/helm/implementation/ChartRenderer.js";
-import { IWritable } from "../../../../../src/implementation/helm/interface/IWritable.js";
+import { ChartRenderer } from "../../../../../../../src/implementation/helm/implementation/ChartRenderer.js";
+import { IWritable } from "../../../../../../../src/implementation/helm/interface/IWritable.js";
 
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from "node:url";
-import { INameProvider } from "../../../../../src/interface/INameProvider.js";
-import { compareDirectories } from "../../../../uility/compareDirectories.js";
-import { IVersionProvider } from "../../../../../src/interface/IVersionProvider.js";
+import { INameProvider } from "../../../../../../../src/interface/INameProvider.js";
+import { compareDirectories } from "../../../../../../uility/compareDirectories.js";
+import { IVersionProvider } from "../../../../../../../src/interface/IVersionProvider.js";
 
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
@@ -34,11 +34,11 @@ describe('A chart renderer test', () => {
     }, () => false);
 
     it('Should produce a file (global)', async () => {
-        writers.push(chartRenderer.renderGlobal([workspace], new Map()));
+        writers.push(await chartRenderer.renderGlobal([workspace], new Map()));
     });
 
-    it ('Should produce a file (scoped/workspace)', () => {
-        writers.push(chartRenderer.render(workspace, new Map()));
+    it ('Should produce a file (scoped/workspace)', async () => {
+        writers.push(await chartRenderer.render(workspace, new Map()));
     });
 
     it ('Should write them to the file system and they should match the contents.', async () => {

@@ -1,6 +1,6 @@
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { IFeature, VariableFeature } from '@veto-party/baum__steps__installer__features';
-import type { IWritable } from './IWritable.js';
+import type { IWritable } from '../IWritable.js';
 
 export type IConfigMapStructure = typeof VariableFeature.makeInstance extends () => IFeature<any, any, infer Structure> ? (Structure extends Record<infer Key, infer Value> ? Map<Key, Value> : never) : never;
 
@@ -29,6 +29,10 @@ export type ConfigMapping =
 export interface IConfigMapRendererResult extends IWritable {
   getResolvedWorkspaceVars(): Map<string | number, ConfigMapping>;
   getValues(): Map<string, any>;
+}
+
+export interface IConfigMapNameProvider {
+  getNameFor(workspace: IWorkspace|undefined, name?: string): string | Promise<string>;
 }
 
 export interface IConfigMapRenderer {

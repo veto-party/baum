@@ -1,6 +1,6 @@
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { ExposeFeature, IFeature } from '@veto-party/baum__steps__installer__features';
-import type { IWritable } from './IWritable.js';
+import type { IWritable } from '../IWritable.js';
 
 export interface IExposeRenderResult extends IWritable {
   getPorts(): Set<number>;

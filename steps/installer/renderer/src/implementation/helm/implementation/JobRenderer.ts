@@ -1,13 +1,13 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IPackageManager, IWorkspace } from '@veto-party/baum__core';
-import type { ConfigMapping } from '../interface/IConfigMapRenderer.js';
+import type { ConfigMapping } from '../interface/factory/IConfigMapRenderer.js';
 import type { IContainerName } from '../interface/IContainerName.js';
-import type { SystemUsageStorage } from '../interface/IDeploymentRenderer.js';
+import type { SystemUsageStorage } from '../interface/factory/IDeploymentRenderer.js';
 import type { IImageGenerator } from '../interface/IImageGenerator.js';
-import type { IJobRenderer, IJobRendererResult, JobStructure } from '../interface/IJobRenderer.js';
+import type { IJobRenderer, IJobRendererResult, JobStructure } from '../interface/factory/IJobRenderer.js';
 import type { IMatchLabel } from '../interface/IMatchLabel.js';
-import type { SecretMapping } from '../interface/ISecretRenderer.js';
+import type { SecretMapping } from '../interface/factory/ISecretRenderer.js';
 import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from '../yaml/implementation/ObjectToken.js';

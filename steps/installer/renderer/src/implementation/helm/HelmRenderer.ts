@@ -10,14 +10,14 @@ import { ARendererManager } from '../ARendererManager.js';
 import { RenderFeatureManager } from '../RenderFeatureManager.js';
 import { ChartRenderer } from './implementation/ChartRenderer.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
-import type { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/I3rdPartyRenderer.js';
-import type { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from './interface/IConfigMapRenderer.js';
-import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from './interface/IDeploymentRenderer.js';
-import type { ExposeStructure, IExposeRenderer } from './interface/IExposeRenderer.js';
+import type { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/factory/I3rdPartyRenderer.js';
+import type { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from './interface/factory/IConfigMapRenderer.js';
+import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from './interface/factory/IDeploymentRenderer.js';
+import type { ExposeStructure, IExposeRenderer } from './interface/factory/IExposeRenderer.js';
 import type { IImageGenerator } from './interface/IImageGenerator.js';
-import type { IJobRenderer, JobStructure } from './interface/IJobRenderer.js';
-import type { INetworkRenderer, NetworkStorage } from './interface/INetworkRenderer.js';
-import type { ISecretRenderer } from './interface/ISecretRenderer.js';
+import type { IJobRenderer, JobStructure } from './interface/factory/IJobRenderer.js';
+import type { INetworkRenderer, NetworkStorage } from './interface/factory/INetworkRenderer.js';
+import type { ISecretRenderer } from './interface/factory/ISecretRenderer.js';
 import type { IWritable } from './interface/IWritable.js';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>

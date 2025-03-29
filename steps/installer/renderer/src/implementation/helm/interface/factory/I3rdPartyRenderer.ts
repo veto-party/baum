@@ -1,6 +1,6 @@
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { IFeature, ServiceFeature } from '@veto-party/baum__steps__installer__features';
-import type { IWritable } from './IWritable.js';
+import type { IWritable } from '../IWritable.js';
 
 export type ThirdPartyRendererStorage = typeof ServiceFeature.makeInstance extends () => IFeature<any, any, infer Structure> ? (Structure extends Record<string, any> ? Structure[string] : never) : never;
 

@@ -1,7 +1,7 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { ThirdPartyRendererStorage } from '../interface/I3rdPartyRenderer.js';
+import type { ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
 import type { IWritable } from '../interface/IWritable.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
