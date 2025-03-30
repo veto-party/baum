@@ -87,7 +87,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
                 nodeSelector: {
                   label: this.labelProvider.getForContainer(name)
                 },
-                env: map.entries().map(([name, value]) => ({
+                env: Array.from(map.entries()).map(([name, value]) => ({
                   name,
                   ...('store' in value && value.store
                     ? {
