@@ -18,9 +18,8 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
 
   async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<IConfigMapRendererResult> {
     const allItems = new Map(
-      extractVariables(workspace, map, binding)
-        .entries()
-        .filter(([, value]) => !value.secret)
+      Array.from(extractVariables(workspace, map, binding).entries())
+        .filter(([, value]) => value.secret)
     );
 
     const structName = await this.nameProvider.getNameFor(workspace, name);
