@@ -77,7 +77,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
               {
                 name: this.containerNameProvider.getForContainer(name),
                 image: imageGenerator.generateImage(workspace).image,
-                ports: ports.values().map((port) => ({
+                ports: Array.from(ports.values()).map((port) => ({
                   containerPort: port
                 })),
                 resources: {
