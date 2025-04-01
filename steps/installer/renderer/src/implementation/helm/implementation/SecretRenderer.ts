@@ -37,8 +37,8 @@ export class SecretRenderer implements ISecretRenderer {
     return {
       getResolvedWorkspaceSecrets: () => {
         return new Map(
-          allItems.entries().map(([key, value]) => {
-            return [
+          Array.from(allItems.entries())
+            .map(([key, value]) => [
               key,
               {
                 type: 'secret',
@@ -47,14 +47,12 @@ export class SecretRenderer implements ISecretRenderer {
                 store: value.type === 'global' ? globalSecretName : secretName,
                 recreate: value.maintainValueBetweenVersions ?? false
               } satisfies SecretMapping
-            ] as const;
-          })
+            ] as const)
         );
       },
       getValues: () => {
         return new Map(
-          allItems
-            .entries()
+          Array.from(allItems.entries())
             .filter(([, value]) => !value.static)
             .map(([, value]) => [value.source, value.default] as const)
         );
