@@ -67,7 +67,7 @@ export class JobRenderer implements IJobRenderer {
           containers: [
             {
               name: this.containerNameProvider.getForJob(name, key),
-              image: 'image' in job.definition ? job.definition.image : imageGenerator.generateImage(await this.getPackageImageName(job.definition.on)),
+              image: 'image' in job.definition ? job.definition.image : imageGenerator.generateImage(await this.getPackageImageName(job.definition.project)),
               resources: {
                 limits: limits.length > 0 ? Object.fromEntries(limits) : undefined,
                 requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
@@ -103,7 +103,7 @@ export class JobRenderer implements IJobRenderer {
 
 
         await FileSystem.mkdir(filepath, { recursive: true });
-        await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(await yaml(path)).write());
+        await FileSystem.writeFile(Path.join(filepath, `job-${key}.yaml`), to_structured_data(await yaml(path)).write());
       }
     };
   }
