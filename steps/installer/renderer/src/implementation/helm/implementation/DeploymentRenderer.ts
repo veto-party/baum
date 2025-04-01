@@ -1,11 +1,11 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { ConfigMapping, IConfigMapNameProvider } from '../interface/factory/IConfigMapRenderer.js';
 import type { IContainerName } from '../interface/IContainerName.js';
-import type { IDeploymentRenderResult, IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from '../interface/factory/IDeploymentRenderer.js';
 import type { IImageGenerator } from '../interface/IImageGenerator.js';
 import type { IMatchLabel } from '../interface/IMatchLabel.js';
+import type { ConfigMapping } from '../interface/factory/IConfigMapRenderer.js';
+import type { IDeploymentRenderResult, IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from '../interface/factory/IDeploymentRenderer.js';
 import type { SecretMapping } from '../interface/factory/ISecretRenderer.js';
 import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
@@ -113,7 +113,6 @@ export class DeploymentRenderer implements IDeploymentRenderer {
       write: async (root, resolver) => {
         const path = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(root, 'helm', path, 'templates');
-
 
         await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'deployment.yaml'), to_structured_data(yaml(path)).write());

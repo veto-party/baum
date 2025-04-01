@@ -1,95 +1,108 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { GenericWorkspace, IPackageManager, IWorkspace } from "@veto-party/baum__core";
-import { IWritable } from "../../../../../../../src/implementation/helm/interface/IWritable.js";
+import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
+import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from "node:url";
-import { INameProvider } from "../../../../../../../src/interface/INameProvider.js";
-import { compareDirectories } from "../../../../../../uility/compareDirectories.js";
-import { IMatchLabel } from "../../../../../../../src/implementation/helm/interface/IMatchLabel.js";
-import { IContainerName } from "../../../../../../../src/implementation/helm/interface/IContainerName.js";
-import { NetworkRenderer } from "../../../../../../../src/implementation/helm/implementation/NetworkRenderer.js";
-
+import { fileURLToPath } from 'node:url';
+import { NetworkRenderer } from '../../../../../../../src/implementation/helm/implementation/NetworkRenderer.js';
+import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
+import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
+import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
+import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
-const chartRenderer = new NetworkRenderer(new class implements IContainerName {
+const chartRenderer = new NetworkRenderer(
+  new (class implements IContainerName {
     getForContainer(name: string): string {
-        return `${name}-pod`;
+      return `${name}-pod`;
     }
 
     getForJob(name: string, key: string): string {
-        return `${name}-j-${key}-pod`;
+      return `${name}-j-${key}-pod`;
     }
-}, new class implements IMatchLabel {
+  })(),
+  new (class implements IMatchLabel {
     getForContainer(name: string): string {
-        return `${name}-matcher`;
+      return `${name}-matcher`;
     }
 
     getForJob(name: string, key: string): string {
-        return `${name}-j-${key}-matcher`;
+      return `${name}-j-${key}-matcher`;
     }
-});
+  })()
+);
 
 describe('A network renderer test', () => {
+  const writers: IWritable[] = [];
 
-    let writers: IWritable[] = [];
+  const workspace = new GenericWorkspace(
+    __dirname,
+    {
+      name: 'some-package'
+    },
+    () => false
+  );
 
-    const workspace = new GenericWorkspace(__dirname, {
-        name: 'some-package'
-    }, () => false);
-
-    it('Should produce a file (global)', async () => {
-        const result = await chartRenderer.render(undefined, "some-job", {
-            allow_connections_to: [{
-                to: 'some-package',
-                policy: {
-                    type: 'SIMPLE'
-                }
-            }]
-        });
-
-        writers.push(result);
+  it('Should produce a file (global)', async () => {
+    const result = await chartRenderer.render(undefined, 'some-job', {
+      allow_connections_to: [
+        {
+          to: 'some-package',
+          policy: {
+            type: 'SIMPLE'
+          }
+        }
+      ]
     });
 
+    writers.push(result);
+  });
 
-    it('Should produce a file (scoped/workspace)', async () => {
-        const result = await chartRenderer.render(workspace, undefined, {
-            allow_connections_to: []
-        });
-
-        writers.push(result);
+  it('Should produce a file (scoped/workspace)', async () => {
+    const result = await chartRenderer.render(workspace, undefined, {
+      allow_connections_to: []
     });
 
+    writers.push(result);
+  });
 
-
-    it('Should produce a file (scoped/workspace + key)', async () => {
-        const result = await chartRenderer.render(workspace, "some-job", {
-            allow_connections_to: [{
-                to: 'some-package',
-                policy: {
-                    type: 'SIMPLE'
-                }
-            }]
-        });
-
-        writers.push(result);
+  it('Should produce a file (scoped/workspace + key)', async () => {
+    const result = await chartRenderer.render(workspace, 'some-job', {
+      allow_connections_to: [
+        {
+          to: 'some-package',
+          policy: {
+            type: 'SIMPLE'
+          }
+        }
+      ]
     });
 
-    it ('Should write them to the file system and they should match the contents.', async () => {
-        await Promise.all(writers.map((writer) => writer.write(actualDir, new class implements INameProvider {
+    writers.push(result);
+  });
+
+  it('Should write them to the file system and they should match the contents.', async () => {
+    await Promise.all(
+      writers.map((writer) =>
+        writer.write(
+          actualDir,
+          new (class implements INameProvider {
             getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
-                if (!workspace) {
-                    return 'main';
-                }
+              if (!workspace) {
+                return 'main';
+              }
 
-                return workspace.getName();
+              return workspace.getName();
             }
-        })));
+          })()
+        )
+      )
+    );
 
-        expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
-    })
+    expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
+  });
 });

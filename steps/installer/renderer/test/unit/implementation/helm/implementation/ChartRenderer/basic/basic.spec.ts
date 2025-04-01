@@ -1,57 +1,68 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { GenericWorkspace, IWorkspace } from "@veto-party/baum__core";
-import { ChartRenderer } from "../../../../../../../src/implementation/helm/implementation/ChartRenderer.js";
-import { IWritable } from "../../../../../../../src/implementation/helm/interface/IWritable.js";
+import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
+import { ChartRenderer } from '../../../../../../../src/implementation/helm/implementation/ChartRenderer.js';
+import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from "node:url";
-import { INameProvider } from "../../../../../../../src/interface/INameProvider.js";
-import { compareDirectories } from "../../../../../../uility/compareDirectories.js";
-import { IVersionProvider } from "../../../../../../../src/interface/IVersionProvider.js";
-
+import { fileURLToPath } from 'node:url';
+import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
+import type { IVersionProvider } from '../../../../../../../src/interface/IVersionProvider.js';
+import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
-const chartRenderer = new ChartRenderer(new class implements IVersionProvider {
+const chartRenderer = new ChartRenderer(
+  new (class implements IVersionProvider {
     getProjectVersion(): string | Promise<string> {
-        return '0.0.0';
+      return '0.0.0';
     }
 
     getVersionForWorkspace(workspace: IWorkspace): string | Promise<string> {
-        return '1.0.1';
+      return '1.0.1';
     }
-});
+  })()
+);
 
 describe('A chart renderer test', () => {
+  const writers: IWritable[] = [];
 
-    let writers: IWritable[] = [];
+  const workspace = new GenericWorkspace(
+    __dirname,
+    {
+      name: 'some-package'
+    },
+    () => false
+  );
 
-    const workspace = new GenericWorkspace(__dirname, {
-        name: 'some-package'
-    }, () => false);
+  it('Should produce a file (global)', async () => {
+    writers.push(await chartRenderer.renderGlobal([workspace], new Map()));
+  });
 
-    it('Should produce a file (global)', async () => {
-        writers.push(await chartRenderer.renderGlobal([workspace], new Map()));
-    });
+  it('Should produce a file (scoped/workspace)', async () => {
+    writers.push(await chartRenderer.render(workspace, new Map()));
+  });
 
-    it ('Should produce a file (scoped/workspace)', async () => {
-        writers.push(await chartRenderer.render(workspace, new Map()));
-    });
-
-    it ('Should write them to the file system and they should match the contents.', async () => {
-        await Promise.all(writers.map((writer) => writer.write(actualDir, new class implements INameProvider {
+  it('Should write them to the file system and they should match the contents.', async () => {
+    await Promise.all(
+      writers.map((writer) =>
+        writer.write(
+          actualDir,
+          new (class implements INameProvider {
             getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
-                if (!workspace) {
-                    return 'main';
-                }
+              if (!workspace) {
+                return 'main';
+              }
 
-                return workspace.getName();
+              return workspace.getName();
             }
-        })));
+          })()
+        )
+      )
+    );
 
-        expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
-    })
+    expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
+  });
 });

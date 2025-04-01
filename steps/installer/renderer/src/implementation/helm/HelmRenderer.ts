@@ -5,21 +5,21 @@ import { get, isEqual, merge, uniq } from 'lodash-es';
 import type { INameProvider } from '../../interface/INameProvider.js';
 import type { InferStructure, ProjectMetadata } from '../../interface/IRenderer.js';
 import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManager, InferNewRenderer, InferToFeatureManager } from '../../interface/IRendererManager.js';
+import type { IVersionProvider } from '../../interface/IVersionProvider.js';
 import { getDeepKeys } from '../../utility/getDeepKeys.js';
 import { ARendererManager } from '../ARendererManager.js';
 import { RenderFeatureManager } from '../RenderFeatureManager.js';
 import { ChartRenderer } from './implementation/ChartRenderer.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
+import type { IImageGenerator } from './interface/IImageGenerator.js';
+import type { IWritable } from './interface/IWritable.js';
 import type { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/factory/I3rdPartyRenderer.js';
 import type { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from './interface/factory/IConfigMapRenderer.js';
 import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from './interface/factory/IDeploymentRenderer.js';
 import type { ExposeStructure, IExposeRenderer } from './interface/factory/IExposeRenderer.js';
-import type { IImageGenerator } from './interface/IImageGenerator.js';
 import type { IJobRenderer, JobStructure } from './interface/factory/IJobRenderer.js';
 import type { INetworkRenderer, NetworkStorage } from './interface/factory/INetworkRenderer.js';
 import type { ISecretRenderer } from './interface/factory/ISecretRenderer.js';
-import type { IWritable } from './interface/IWritable.js';
-import { IVersionProvider } from '../../interface/IVersionProvider.js';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
   ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2>
@@ -124,7 +124,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
    * A writer is usually returned by a renderer.
    * It might contain usefull information for additional steps.
    */
-  public writers =  new Set<IWritable>();
+  public writers = new Set<IWritable>();
 
   protected constructor(
     feature: T,
@@ -373,7 +373,6 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       });
 
     return baseRenderer.addRenderer(async function (metadata) {
-
       if (this.networkStorage.has(metadata.project.workspace)) {
         this.writers.add(await this.networkRenderer.render(metadata.project.workspace, undefined, this.networkStorage.get(metadata.project.workspace)!));
       }
@@ -424,7 +423,6 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
           if (this.networkStorage.has(metadata.project.workspace)) {
             this.writers.add(await this.networkRenderer.render(metadata.project.workspace, undefined, this.jobNetworkStrorage.get(metadata.project.workspace)!.get(key)!));
           }
-    
 
           if (!propertyStorage || !bindingStorage) {
             continue;

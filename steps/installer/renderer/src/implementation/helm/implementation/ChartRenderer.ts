@@ -1,21 +1,18 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
+import type { IVersionProvider } from '../../../interface/IVersionProvider.js';
 import type { IWritable } from '../interface/IWritable.js';
-import { to_structured_data } from '../yaml/to_structured_data.js';
+import type { ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
-import { IVersionProvider } from '../../../interface/IVersionProvider.js';
+import { to_structured_data } from '../yaml/to_structured_data.js';
 
 const pathToFileURL = (path: string) => {
-    return new RawToken(`file://${path}`);
-}
+  return new RawToken(`file://${path}`);
+};
 
 export class ChartRenderer {
-
-  public constructor(
-    private versionProvider: IVersionProvider
-  ) {}
+  public constructor(private versionProvider: IVersionProvider) {}
 
   render(workspace: IWorkspace, externalDependencies: Map<string | number, ThirdPartyRendererStorage>): IWritable {
     return {
@@ -23,7 +20,7 @@ export class ChartRenderer {
         const rootPath = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(root, 'helm', rootPath);
 
-        const possiblyRelativePath = (path: string) => Path.isAbsolute(path) ? path : Path.resolve(workspace.getDirectory(), path);
+        const possiblyRelativePath = (path: string) => (Path.isAbsolute(path) ? path : Path.resolve(workspace.getDirectory(), path));
 
         const yaml = {
           type: 'application',

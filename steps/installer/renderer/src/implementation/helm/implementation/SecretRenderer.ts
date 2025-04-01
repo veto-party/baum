@@ -9,16 +9,10 @@ import { RawToken } from '../yaml/implementation/RawToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class SecretRenderer implements ISecretRenderer {
-
-  public constructor(
-    private nameProvider: ISecretNameProvider
-  ) {}
+  public constructor(private nameProvider: ISecretNameProvider) {}
 
   async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<ISecretRendererResult> {
-    const allItems = new Map(
-      Array.from(extractVariables(workspace, map, binding).entries())
-        .filter(([, value]) => value.secret === true)
-    );
+    const allItems = new Map(Array.from(extractVariables(workspace, map, binding).entries()).filter(([, value]) => value.secret === true));
 
     const secretName = await this.nameProvider.getNameFor(workspace, name);
     const globalSecretName = await this.nameProvider.getNameFor(undefined, name);
@@ -30,24 +24,25 @@ export class SecretRenderer implements ISecretRenderer {
       metadata: {
         name: secretName
       },
-      stringData: Object.fromEntries(Array.from(allItems.entries())
-        .map(([key, value]) => [key, value.static ? value.default : new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)]))
+      stringData: Object.fromEntries(Array.from(allItems.entries()).map(([key, value]) => [key, value.static ? value.default : new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)]))
     });
 
     return {
       getResolvedWorkspaceSecrets: () => {
         return new Map(
-          Array.from(allItems.entries())
-            .map(([key, value]) => [
-              key,
-              {
-                type: 'secret',
-                key: value.source,
-                global: value.type === 'global',
-                store: value.type === 'global' ? globalSecretName : secretName,
-                recreate: value.maintainValueBetweenVersions ?? false
-              } satisfies SecretMapping
-            ] as const)
+          Array.from(allItems.entries()).map(
+            ([key, value]) =>
+              [
+                key,
+                {
+                  type: 'secret',
+                  key: value.source,
+                  global: value.type === 'global',
+                  store: value.type === 'global' ? globalSecretName : secretName,
+                  recreate: value.maintainValueBetweenVersions ?? false
+                } satisfies SecretMapping
+              ] as const
+          )
         );
       },
       getValues: () => {

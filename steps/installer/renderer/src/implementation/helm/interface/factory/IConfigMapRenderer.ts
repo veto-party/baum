@@ -32,7 +32,7 @@ export interface IConfigMapRendererResult extends IWritable {
 }
 
 export interface IConfigMapNameProvider {
-  getNameFor(workspace: IWorkspace|undefined, name?: string): string | Promise<string>;
+  getNameFor(workspace: IWorkspace | undefined, name?: string): string | Promise<string>;
 }
 
 export interface IConfigMapRenderer {

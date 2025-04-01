@@ -8,19 +8,10 @@ import { RawToken } from '../yaml/implementation/RawToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 export class ConfigMapRenderer implements IConfigMapRenderer {
-
-
-  public constructor(
-    private nameProvider: IConfigMapNameProvider
-  ) {
-
-  }
+  public constructor(private nameProvider: IConfigMapNameProvider) {}
 
   async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<IConfigMapRendererResult> {
-    const allItems = new Map(
-      Array.from(extractVariables(workspace, map, binding).entries())
-        .filter(([, value]) => !value.secret)
-    );
+    const allItems = new Map(Array.from(extractVariables(workspace, map, binding).entries()).filter(([, value]) => !value.secret));
 
     const structName = await this.nameProvider.getNameFor(workspace, name);
     const globalStructName = await this.nameProvider.getNameFor(undefined, name);
@@ -72,7 +63,6 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
       write: async (root, resolver) => {
         const path = await resolver.getNameByWorkspace(workspace);
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
-
 
         await FileSystem.mkdir(filepath, { recursive: true });
         await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());

@@ -1,7 +1,7 @@
-import isEqualWith from 'lodash.isequalwith';
 import isEqualOR from 'lodash.isequal';
+import isEqualWith from 'lodash.isequalwith';
 
-const isEqual = (a: any, b: any) => isEqualWith(a, b, (a, b) => a === b || isEqualOR(a, b)); 
+const isEqual = (a: any, b: any) => isEqualWith(a, b, (a, b) => a === b || isEqualOR(a, b));
 
 type ComputedKeys<T> = keyof T;
 

@@ -171,7 +171,6 @@ export class NetworkRenderer implements INetworkRenderer {
                 throw new Error('Network not found.');
               }
 
-
               graph.addEdge(ensured_to, ensured, { props: graph.getEdgeProperties(ensured_to, ensured) ?? undefined });
               graph.addEdge(ensured, ensured_to, { props: ensured_to });
             });

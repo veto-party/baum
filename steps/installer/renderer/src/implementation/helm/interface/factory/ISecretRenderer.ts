@@ -1,6 +1,6 @@
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { ConfigMappingWithStore, IConfigMapStructure } from './IConfigMapRenderer.js';
 import type { IWritable } from '../IWritable.js';
+import type { ConfigMappingWithStore, IConfigMapStructure } from './IConfigMapRenderer.js';
 
 export type SecretMapping = {
   type: 'secret';
@@ -12,7 +12,7 @@ export interface ISecretRendererResult extends IWritable {
 }
 
 export interface ISecretNameProvider {
-  getNameFor(workspace: IWorkspace|undefined, name?: string): string | Promise<string>;
+  getNameFor(workspace: IWorkspace | undefined, name?: string): string | Promise<string>;
 }
 
 export interface ISecretRenderer {
