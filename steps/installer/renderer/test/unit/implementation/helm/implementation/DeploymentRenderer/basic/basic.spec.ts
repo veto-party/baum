@@ -35,7 +35,7 @@ const chartRenderer = new DeploymentRenderer(new class implements IContainerName
     }
 });
 
-describe('A chart renderer test', () => {
+describe('A deployment renderer test', () => {
 
     let writers: IWritable[] = [];
 

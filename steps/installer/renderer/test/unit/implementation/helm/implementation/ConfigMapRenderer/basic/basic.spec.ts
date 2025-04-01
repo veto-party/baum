@@ -21,7 +21,7 @@ const chartRenderer = new ConfigMapRenderer(new class implements IConfigMapNameP
     }
 });
 
-describe('A chart renderer test', () => {
+describe('A configmap renderer test', () => {
 
     let writers: IWritable[] = [];
 
