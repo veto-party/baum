@@ -30,7 +30,8 @@ export class SecretRenderer implements ISecretRenderer {
       metadata: {
         name: secretName
       },
-      stringData: Object.fromEntries(allItems.entries().map(([key, value]) => [key, value.static ? value.default : new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)]))
+      stringData: Object.fromEntries(Array.from(allItems.entries())
+        .map(([key, value]) => [key, value.static ? value.default : new RawToken(`{{ .${toHelmPathWithPossibleIndex(['Values', value.type === 'global' ? 'global' : undefined, value.source].filter(Boolean).join('.'))} | quote }}`)]))
     });
 
     return {
