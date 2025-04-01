@@ -1,0 +1,32 @@
+"apiVersion": "batch/v1"
+"kind": "job"
+"metadata": 
+  "name": "main-key"
+  "annotations": 
+    "helm.sh/hook": "hello, workd"
+    
+  
+"spec": 
+  "template": 
+    "restartPolicy": "OnFailure"
+    {{ if eq .Values.global.registry.type "secret" }}
+    "imagePullSecrets":   
+      - "name": "pull-secret"
+        
+    {{ end }}
+    "containers": 
+      
+      - "name": "job-main-key"
+        "image": 
+          "image": "@mockworkspace-image"
+          
+        "resources": 
+        
+        "nodeSelector": 
+          "label": "somejob-main"
+          
+        "env": 
+        
+        
+    
+  

@@ -70,6 +70,25 @@ describe('A job renderer test', () => {
         name: 'some-package'
     }, () => false);
 
+    it('Should produce a file (global)', async () => {
+        const result = await chartRenderer.render(undefined, "key", {
+            type: 'scoped',
+            definition: {
+                on: 'hello, workd',
+                project: '@mockworkspace'
+            },
+        }, new Map(), undefined, new class implements IImageGenerator {
+            generateImage(workspace: IWorkspace): { image: string; } {
+                return {
+                    image: `${workspace.getName()}-image`
+                };
+            }
+        });
+
+        writers.push(result);
+    });
+
+
     it('Should produce a file (scoped/workspace)', async () => {
         const result = await chartRenderer.render(workspace, "key", {
             type: 'scoped',
