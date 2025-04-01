@@ -14,7 +14,7 @@ export class SecretRenderer implements ISecretRenderer {
     private nameProvider: ISecretNameProvider
   ) {}
 
-  async render(workspace: IWorkspace | undefined, map: Map<IWorkspace, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<ISecretRendererResult> {
+  async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<ISecretRendererResult> {
     const allItems = new Map(
       extractVariables(workspace, map, binding)
         .entries()
@@ -64,7 +64,7 @@ export class SecretRenderer implements ISecretRenderer {
         const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
         await FileSystem.mkdir(filepath, { recursive: true });
-        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());
+        await FileSystem.writeFile(Path.join(filepath, 'secret.yaml'), to_structured_data(yaml()).write());
       }
     };
   }
