@@ -10,7 +10,7 @@ import type { INetworkRenderer, INetworkRendererResult, NetworkStorage } from '.
 import { to_structured_data } from '../yaml/to_structured_data.js';
 
 type NodeType = { workspace: IWorkspace; job?: string } | { workspace?: undefined; job: string };
-type EdgeType = NodeType;
+type EdgeType = NodeType | undefined;
 
 export class NetworkRenderer implements INetworkRenderer {
   public constructor(
@@ -29,7 +29,7 @@ export class NetworkRenderer implements INetworkRenderer {
   private workspaceByName = new Map<string, NodeType>();
 
   private async yamlForWorkspace(workspace: IWorkspace, name: string, provider: INameProvider, graph: Graph<NodeType, EdgeType>) {
-    const key = this.ensureKey(workspace);
+    const key = this.ensureKey(workspace, undefined);
     const connectedWorkspaces = graph.adjacent(key);
 
     const yaml: any = {
@@ -47,10 +47,10 @@ export class NetworkRenderer implements INetworkRenderer {
       }
     };
 
-    for (const workspace of connectedWorkspaces ?? []) {
+    for (const workspace of Array.from(connectedWorkspaces?.values() ?? [])) {
       const connections = [graph.getEdgeProperties(workspace, key), graph.getEdgeProperties(key, workspace)];
       const ingress = connections.includes(key);
-      const egress = connections.includes(workspace);
+      const egress = workspace && connections.includes(workspace);
 
       const selector = {
         podSelector: {
@@ -61,13 +61,13 @@ export class NetworkRenderer implements INetworkRenderer {
       };
 
       if (ingress) {
-        yaml.ingress.push({
+        yaml.spec.ingress.push({
           from: [selector]
         });
       }
 
       if (egress) {
-        yaml.egress.push({
+        yaml.spec.egress.push({
           to: [{ selector }]
         });
       }
@@ -95,7 +95,7 @@ export class NetworkRenderer implements INetworkRenderer {
       }
     };
 
-    for (const workspace of connectedWorkspaces ?? []) {
+    for (const workspace of Array.from(connectedWorkspaces?.values() ?? [])) {
       const connections = [graph.getEdgeProperties(workspace, key), graph.getEdgeProperties(key, workspace)];
       const ingress = connections.includes(key);
       const egress = connections.includes(workspace);
@@ -109,13 +109,13 @@ export class NetworkRenderer implements INetworkRenderer {
       };
 
       if (ingress) {
-        yaml.ingress.push({
+        yaml.spec.ingress.push({
           from: [selector]
         });
       }
 
       if (egress) {
-        yaml.egress.push({
+        yaml.spec.egress.push({
           to: [{ selector }]
         });
       }
@@ -144,7 +144,7 @@ export class NetworkRenderer implements INetworkRenderer {
 
           for (const job of Object.keys(jobs ?? {})) {
             const ensured = this.ensureKey(workspace, job);
-            this.workspaceByName.set(`${await resolver.getNameByWorkspace(workspace)}.${job}`, ensured);
+            this.workspaceByName.set([workspace?.getName?.(), job].filter(Boolean).join('.'), ensured);
             graph.addNode(ensured);
           }
         }
@@ -157,6 +157,8 @@ export class NetworkRenderer implements INetworkRenderer {
               if (!ensured_to) {
                 throw new Error('Network not found.');
               }
+
+              graph.addEdge(ensured_to, ensured, { props: graph.getEdgeProperties(ensured_to, ensured) ?? undefined });
               graph.addEdge(ensured, ensured_to, { props: ensured_to });
             });
           }
@@ -169,6 +171,8 @@ export class NetworkRenderer implements INetworkRenderer {
                 throw new Error('Network not found.');
               }
 
+
+              graph.addEdge(ensured_to, ensured, { props: graph.getEdgeProperties(ensured_to, ensured) ?? undefined });
               graph.addEdge(ensured, ensured_to, { props: ensured_to });
             });
           }
