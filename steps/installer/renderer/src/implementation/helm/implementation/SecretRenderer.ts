@@ -16,8 +16,7 @@ export class SecretRenderer implements ISecretRenderer {
 
   async render(workspace: IWorkspace | undefined, map: Map<IWorkspace | undefined, IConfigMapStructure>, binding: Map<string, string> | undefined, name?: string): Promise<ISecretRendererResult> {
     const allItems = new Map(
-      extractVariables(workspace, map, binding)
-        .entries()
+      Array.from(extractVariables(workspace, map, binding).entries())
         .filter(([, value]) => value.secret === true)
     );
 
