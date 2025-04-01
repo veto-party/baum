@@ -75,7 +75,7 @@ export class JobRenderer implements IJobRenderer {
               nodeSelector: {
                 label: this.labelProvider.getForJob(name, key)
               },
-              env: map.entries().map(([name, value]) => ({
+              env: Array.from(map.entries()).map(([name, value]) => ({
                 name,
                 ...('store' in value && value.store
                   ? {
