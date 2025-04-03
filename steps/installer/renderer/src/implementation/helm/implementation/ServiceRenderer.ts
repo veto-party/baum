@@ -4,8 +4,18 @@ import type { IWorkspace } from '@veto-party/baum__core';
 import type { ExposeStructure } from '../interface/factory/IExposeRenderer.js';
 import type { IServiceRenderer, IServiceRendererResult } from '../interface/factory/IServiceRenderer.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
+import { IMatchLabel } from '../interface/IMatchLabel.js';
+import { IContainerName } from '../interface/IContainerName.js';
+import { IDeploymentNameProvider } from '../interface/IDeploymentNameProvider.js';
 
 export class ServiceRenderer implements IServiceRenderer {
+
+  constructor(
+    private containerNameProvider: IContainerName,
+    private labelProvider: IMatchLabel,
+    private deploymentNameProvider: IDeploymentNameProvider
+  ) {}
+
   render(workspace: IWorkspace, ports: Map<string | number, ExposeStructure> | undefined): IServiceRendererResult | Promise<IServiceRendererResult> {
     if (ports === undefined || ports.size === 0) {
       return {
@@ -21,10 +31,10 @@ export class ServiceRenderer implements IServiceRenderer {
       },
       spec: {
         selector: {
-          name: `${name}-depl`
+          name: this.deploymentNameProvider.getName(name)
         },
         type: 'ClusterIP',
-        ports: ports.entries().map(([port]) => ({
+        ports: Array.from(ports.entries()).map(([port]) => ({
           name: `${name}-${port}`,
           protocol: 'TCP',
           port: Number(port),

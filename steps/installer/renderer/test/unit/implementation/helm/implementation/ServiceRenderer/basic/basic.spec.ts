@@ -5,19 +5,18 @@ import type { IWritable } from '../../../../../../../src/implementation/helm/int
 
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DeploymentRenderer } from '../../../../../../../src/implementation/helm/implementation/DeploymentRenderer.js';
 import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
-import type { IImageGenerator } from '../../../../../../../src/implementation/helm/interface/IImageGenerator.js';
 import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
+import { ServiceRenderer } from '../../../../../../../src/implementation/helm/implementation/ServiceRenderer.js';
 import { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
-const chartRenderer = new DeploymentRenderer(
+const chartRenderer = new ServiceRenderer(
   new (class implements IContainerName {
     getForContainer(name: string): string {
       return `${name}-pod`;
@@ -40,10 +39,10 @@ const chartRenderer = new DeploymentRenderer(
     getName(name: string): string {
       return `${name}-depl`;
     }
-  })
+  })()
 );
 
-describe('A deployment renderer test', () => {
+describe('A job renderer test', () => {
   const writers: IWritable[] = [];
 
   const workspace = new GenericWorkspace(
@@ -57,18 +56,7 @@ describe('A deployment renderer test', () => {
   it('Should produce a file (scoped/workspace)', async () => {
     const result = await chartRenderer.render(
       workspace,
-      new Map(),
-      new Set(),
-      undefined,
-      undefined,
-      undefined,
-      new (class implements IImageGenerator {
-        generateImage(workspace: IWorkspace): { image: string } {
-          return {
-            image: `${workspace.getName()}-image`
-          };
-        }
-      })()
+      new Map([[8080, { type: 'load-balancer' }], [3000, { type: 'internal' }]])
     );
 
     writers.push(result);

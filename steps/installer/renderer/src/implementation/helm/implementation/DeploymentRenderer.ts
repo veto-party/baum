@@ -11,11 +11,13 @@ import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from '../yaml/implementation/ObjectToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
+import { IDeploymentNameProvider } from '../interface/IDeploymentNameProvider.js';
 
 export class DeploymentRenderer implements IDeploymentRenderer {
   public constructor(
     private containerNameProvider: IContainerName,
     private labelProvider: IMatchLabel,
+    private deploymentNameProvider: IDeploymentNameProvider,
     private secretName = 'pull-secret'
   ) {}
 
@@ -35,7 +37,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
       apiVersion: 'apps/v1',
       kind: 'deployment',
       metadata: {
-        name: `${name}-depl`
+        name: this.deploymentNameProvider.getName(name)
       },
       spec: {
         replicas: scaling?.minPods ?? 1,
@@ -48,7 +50,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
           update?.type === 'RollingUpdate'
             ? {
                 type: 'RollingUpdate',
-                rollingUpdatge: {
+                rollingUpdate: {
                   maxSurge: update.maxSurge,
                   maxUnavailable: update.maxUnavailable
                 }
