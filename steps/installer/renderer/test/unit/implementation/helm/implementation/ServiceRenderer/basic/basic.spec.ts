@@ -5,12 +5,12 @@ import type { IWritable } from '../../../../../../../src/implementation/helm/int
 
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ServiceRenderer } from '../../../../../../../src/implementation/helm/implementation/ServiceRenderer.js';
 import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
+import type { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
-import { ServiceRenderer } from '../../../../../../../src/implementation/helm/implementation/ServiceRenderer.js';
-import { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -56,7 +56,10 @@ describe('A job renderer test', () => {
   it('Should produce a file (scoped/workspace)', async () => {
     const result = await chartRenderer.render(
       workspace,
-      new Map([[8080, { type: 'load-balancer' }], [3000, { type: 'internal' }]])
+      new Map([
+        [8080, { type: 'load-balancer' }],
+        [3000, { type: 'internal' }]
+      ])
     );
 
     writers.push(result);

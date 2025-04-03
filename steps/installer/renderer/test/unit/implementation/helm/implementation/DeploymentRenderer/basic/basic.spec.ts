@@ -7,11 +7,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DeploymentRenderer } from '../../../../../../../src/implementation/helm/implementation/DeploymentRenderer.js';
 import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
+import type { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 import type { IImageGenerator } from '../../../../../../../src/implementation/helm/interface/IImageGenerator.js';
 import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
-import { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -40,7 +40,7 @@ const chartRenderer = new DeploymentRenderer(
     getName(name: string): string {
       return `${name}-depl`;
     }
-  })
+  })()
 );
 
 describe('A deployment renderer test', () => {

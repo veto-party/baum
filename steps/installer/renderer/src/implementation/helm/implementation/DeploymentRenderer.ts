@@ -2,6 +2,7 @@ import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { IContainerName } from '../interface/IContainerName.js';
+import type { IDeploymentNameProvider } from '../interface/IDeploymentNameProvider.js';
 import type { IImageGenerator } from '../interface/IImageGenerator.js';
 import type { IMatchLabel } from '../interface/IMatchLabel.js';
 import type { ConfigMapping } from '../interface/factory/IConfigMapRenderer.js';
@@ -11,7 +12,6 @@ import { ArrayToken } from '../yaml/implementation/ArrayToken.js';
 import { ConditionalToken } from '../yaml/implementation/ConditionalToken.js';
 import { ObjectToken } from '../yaml/implementation/ObjectToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';
-import { IDeploymentNameProvider } from '../interface/IDeploymentNameProvider.js';
 
 export class DeploymentRenderer implements IDeploymentRenderer {
   public constructor(

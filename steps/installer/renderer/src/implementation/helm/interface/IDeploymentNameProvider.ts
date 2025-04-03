@@ -1,6 +1,3 @@
-
 export interface IDeploymentNameProvider {
-
-    getName(name:string): string;
-
+  getName(name: string): string;
 }
