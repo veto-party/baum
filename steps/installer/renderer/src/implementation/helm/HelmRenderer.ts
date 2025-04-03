@@ -387,7 +387,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       await (async () => {
         if (this.serviceStorage.has(metadata.project.workspace)) {
           const thirdPartyResult = await thirdPartyRenderer.render(metadata.project.workspace, this.serviceStorage.get(metadata.project.workspace)!);
-          configMap = HelmRenderer.mergeElements(configMap, thirdPartyResult.getConfigMap());
+          configMap = HelmRenderer.mergeElements(configMap, await thirdPartyResult.getConfigMap(this.nameProvider));
           this.writers.add(thirdPartyResult);
         }
       })();
@@ -527,7 +527,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     await (async () => {
       if (this.serviceStorage.has(undefined)) {
         const thirdPartyResult = await this.thirdPartyRenderer.render(undefined, this.serviceStorage.get(undefined)!);
-        configMap = HelmRenderer.mergeElements(configMap, thirdPartyResult.getConfigMap());
+        configMap = HelmRenderer.mergeElements(configMap, await thirdPartyResult.getConfigMap(this.nameProvider));
         this.writers.add(thirdPartyResult);
       }
     })();
