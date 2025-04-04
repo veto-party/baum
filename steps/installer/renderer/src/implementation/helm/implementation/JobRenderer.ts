@@ -73,7 +73,7 @@ export class JobRenderer implements IJobRenderer {
                 requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
               },
               nodeSelector: {
-                label: this.labelProvider.getForJob(name, key)
+                label: this.labelProvider.getLabelForJob(name, key)
               },
               env: Array.from(map.entries()).map(([name, value]) => ({
                 name,

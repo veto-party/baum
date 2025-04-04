@@ -26,11 +26,11 @@ const chartRenderer = new NetworkRenderer(
     }
   })(),
   new (class implements IMatchLabel {
-    getForContainer(name: string): string {
+    getLabelForContainer(name: string): string {
       return `${name}-matcher`;
     }
 
-    getForJob(name: string, key: string): string {
+    getLabelForJob(name: string, key: string): string {
       return `${name}-j-${key}-matcher`;
     }
   })()

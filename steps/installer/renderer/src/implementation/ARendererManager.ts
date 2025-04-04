@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { IWorkspace } from '@veto-party/baum__core';
+import { CachedFN, type IWorkspace } from '@veto-party/baum__core';
 import { GroupFeature, type IFeature, type MergeFeatures } from '@veto-party/baum__steps__installer__features';
 import type { InferStructure, ProjectMetadata } from '../interface/IRenderer.js';
 import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManager, InferNewRenderer, InferToFeatureManager } from '../interface/IRendererManager.js';
@@ -7,7 +7,7 @@ import { RenderFeatureManager } from './RenderFeatureManager.js';
 
 export abstract class ARendererManager<T extends IFeature<any, any, any>> extends RenderFeatureManager<T> implements IRendererManager<T> {
   protected featureCache = new Map<
-    string,
+    ReturnType<typeof this.getCacheKey>,
     {
       renderer: IRendererFeatureManager<T>;
       filter?: IFilter<T>;
@@ -38,14 +38,18 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
   protected abstract createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U>;
   protected abstract createFeatureManager(feature: T): IRendererFeatureManager<T>;
 
+  @CachedFN(false)
+  private getCacheKey(writePath: any, feature: IFeature<any, any, any>) {
+    return { writePath, feature }; 
+  }
+
   ensureFeature<WritePath, Feature extends IFeature<any, any, any>>(
     writePath: WritePath,
     feature: Feature,
     creator: (this: ARendererManager<MergeFeatures<T, WritePath, Feature>>, rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T>, Feature>>,
     filter?: IFilter<InferNewRenderer<WritePath, IFeatureManager<T>, Feature> extends IRendererManager<infer NewFeature> ? NewFeature : never>
   ): ARendererManager<MergeFeatures<T, WritePath, Feature>> {
-    const key = ARendererManager.createFeatureKey(feature, filter);
-    if (this.featureCache.has(key)) throw new Error('renderer for type is already given');
+    if (this.featureCache.has(this.getCacheKey(writePath, feature))) throw new Error('renderer for type is already given');
 
     if (!(this.groupFeature instanceof GroupFeature)) {
       throw new Error('Expected a group feature.');
@@ -54,7 +58,7 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
     const self = this.createSelf<MergeFeatures<T, WritePath, Feature>>(this.groupFeature.appendFeature(writePath, feature) as any);
     const renderer = creator.call(self, this.createFeatureManager(feature as any) as any);
 
-    self.featureCache.set(key, { renderer, filter } as any);
+    self.featureCache.set(this.getCacheKey(writePath, feature), { renderer, filter } as any);
     return self;
   }
 

@@ -58,11 +58,11 @@ const chartRenderer = new JobRenderer(
     }
   })(),
   new (class implements IMatchLabel {
-    getForContainer(name: string): string {
+    getLabelForContainer(name: string): string {
       return `pod-${name}`;
     }
 
-    getForJob(name: string): string {
+    getLabelForJob(name: string): string {
       return `somejob-${name}`;
     }
   })()

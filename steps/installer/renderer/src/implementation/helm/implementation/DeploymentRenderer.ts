@@ -87,7 +87,7 @@ export class DeploymentRenderer implements IDeploymentRenderer {
                   requests: requests.length > 0 ? Object.fromEntries(requests) : undefined
                 },
                 nodeSelector: {
-                  label: this.labelProvider.getForContainer(name)
+                  label: this.labelProvider.getLabelForContainer(name)
                 },
                 env: Array.from(map.entries()).map(([name, value]) => ({
                   name,

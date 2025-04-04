@@ -40,7 +40,7 @@ export class NetworkRenderer implements INetworkRenderer {
       },
       spec: {
         podSelector: {
-          matchLabel: this.labelSelector.getForContainer(name)
+          matchLabel: this.labelSelector.getLabelForContainer(name)
         },
         ingress: [],
         egress: []
@@ -55,7 +55,7 @@ export class NetworkRenderer implements INetworkRenderer {
       const selector = {
         podSelector: {
           matchLabels: {
-            label: workspace.job ? this.labelSelector.getForJob(await provider.getNameByWorkspace(workspace.workspace), workspace.job) : provider.getNameByWorkspace(workspace.workspace)
+            label: workspace.job ? this.labelSelector.getLabelForJob(await provider.getNameByWorkspace(workspace.workspace), workspace.job) : provider.getNameByWorkspace(workspace.workspace)
           }
         }
       };
@@ -88,7 +88,7 @@ export class NetworkRenderer implements INetworkRenderer {
       },
       spec: {
         podSelector: {
-          matchLabel: this.labelSelector.getForContainer(name)
+          matchLabel: this.labelSelector.getLabelForContainer(name)
         },
         ingress: [],
         egress: []
@@ -103,7 +103,7 @@ export class NetworkRenderer implements INetworkRenderer {
       const selector = {
         podSelector: {
           matchLabels: {
-            label: workspace.job ? this.labelSelector.getForJob(await provider.getNameByWorkspace(workspace.workspace), workspace.job) : provider.getNameByWorkspace(workspace.workspace)
+            label: workspace.job ? this.labelSelector.getLabelForJob(await provider.getNameByWorkspace(workspace.workspace), workspace.job) : provider.getNameByWorkspace(workspace.workspace)
           }
         }
       };
