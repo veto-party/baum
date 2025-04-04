@@ -5,10 +5,9 @@ import type { IWritable } from '../../../../../../../src/implementation/helm/int
 
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { IConfigMapNameProvider } from '../../../../../../../src/implementation/helm/interface/factory/IConfigMapRenderer.js';
+import { ValuesRenderer } from '../../../../../../../src/implementation/helm/implementation/ValuesRenderer.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
-import { ValuesRenderer } from '../../../../../../../src/implementation/helm/implementation/ValuesRenderer.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -31,12 +30,11 @@ describe('A values renderer test', () => {
     const result = await chartRenderer.render(
       undefined,
       new Map<string, any>([
-        ['hello', "test"],
+        ['hello', 'test'],
         ['world', 1234],
-        ["b", true],
-        ["o", {example: true}]
+        ['b', true],
+        ['o', { example: true }]
       ])
-
     );
 
     writers.push(result);
@@ -46,10 +44,10 @@ describe('A values renderer test', () => {
     const result = await chartRenderer.render(
       workspace,
       new Map<string, any>([
-        ['hello', "test"],
+        ['hello', 'test'],
         ['world', 1234],
-        ["b", true],
-        ["o", {example: true}]
+        ['b', true],
+        ['o', { example: true }]
       ])
     );
 

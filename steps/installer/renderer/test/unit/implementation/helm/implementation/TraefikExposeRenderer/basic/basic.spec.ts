@@ -6,9 +6,9 @@ import type { IWritable } from '../../../../../../../src/implementation/helm/int
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TraefikExposeRenderer } from '../../../../../../../src/implementation/helm/implementation/TraefikExposeRenderer.js';
+import type { ExposeStructure } from '../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
-import { ExposeStructure } from '../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -19,13 +19,14 @@ const renderer = new TraefikExposeRenderer('pull-secret');
 describe('A job renderer test', () => {
   const writers: IWritable[] = [];
 
-  const createWorkspace = (name: string) => new GenericWorkspace(
-    __dirname,
-    {
-      name
-    },
-    () => false
-  );
+  const createWorkspace = (name: string) =>
+    new GenericWorkspace(
+      __dirname,
+      {
+        name
+      },
+      () => false
+    );
 
   const workspace = createWorkspace('some-package');
   const corsWorkspace = createWorkspace('some-package-with-cors');
@@ -48,7 +49,7 @@ describe('A job renderer test', () => {
     const result = renderer.render(
       corsWorkspace,
       new Map([
-        [8080, { type: 'load-balancer', matcher:{ domain: 'some', domainIsAbsolute: false, path: undefined }, cors: { self: true, methods: ["GET", "POST"], origins: [{ domain: "baum"}]} } satisfies ExposeStructure],
+        [8080, { type: 'load-balancer', matcher: { domain: 'some', domainIsAbsolute: false, path: undefined }, cors: { self: true, methods: ['GET', 'POST'], origins: [{ domain: 'baum' }] } } satisfies ExposeStructure],
         [3000, { type: 'internal' } satisfies ExposeStructure]
       ])
     );
@@ -60,15 +61,13 @@ describe('A job renderer test', () => {
     const result = renderer.render(
       corsWorkspace,
       new Map([
-        [8080, { type: 'load-balancer', matcher:{ domain: 'some', domainIsAbsolute: false, path: undefined }, cors: { self: true, methods: ["GET", "POST"], origins: [{ domain: "baum"}]} } satisfies ExposeStructure],
+        [8080, { type: 'load-balancer', matcher: { domain: 'some', domainIsAbsolute: false, path: undefined }, cors: { self: true, methods: ['GET', 'POST'], origins: [{ domain: 'baum' }] } } satisfies ExposeStructure],
         [3000, { type: 'internal' } satisfies ExposeStructure]
       ])
     );
 
     writers.push(result);
   });
-
-
 
   it('Should produce a file (scoped/workspace + appendPath)', async () => {
     const result = renderer.render(
@@ -82,13 +81,11 @@ describe('A job renderer test', () => {
     writers.push(result);
   });
 
-
-
   it('Should produce a file (scoped/workspace + path matcher)', async () => {
     const result = renderer.render(
       workspace4,
       new Map([
-        [8080, { type: 'load-balancer', matcher:{ domain: 'some', domainIsAbsolute: false, path: '/' } } satisfies ExposeStructure],
+        [8080, { type: 'load-balancer', matcher: { domain: 'some', domainIsAbsolute: false, path: '/' } } satisfies ExposeStructure],
         [3000, { type: 'internal' } satisfies ExposeStructure]
       ])
     );

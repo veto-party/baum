@@ -79,7 +79,6 @@ export class TraefikExposeRenderer implements IExposeRenderer {
             }
             const { cors, matcher } = exposed;
 
-
             if (!cors) {
               return;
             }
