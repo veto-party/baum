@@ -5,14 +5,9 @@ import type { IWritable } from '../../../../../../../src/implementation/helm/int
 
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ServiceRenderer } from '../../../../../../../src/implementation/helm/implementation/ServiceRenderer.js';
-import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
-import type { IDeploymentNameProvider } from '../../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
-import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
-import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
-import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 import { ThirdPartyRenderer } from '../../../../../../../src/implementation/helm/implementation/ThirdPartyRenderer.js';
-import { ThirdPartyRendererStorage } from '../../../../../../../src/implementation/helm/interface/factory/I3rdPartyRenderer.js';
+import type { ThirdPartyRendererStorage } from '../../../../../../../src/implementation/helm/interface/factory/I3rdPartyRenderer.js';
+import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -31,19 +26,18 @@ describe('A job renderer test', () => {
     () => false
   );
 
-
-
   it('Should produce a file (scoped/workspace)', async () => {
     const result = await renderer.render(
       undefined,
       new Map([
-        ['global', { type: 'global', properties: {"test": "foo", "example": 1234, "debug": true, "object": {"test": true}}, definition: { origin: { name: "some-global-service", repository: "https://global.veto.dev", version: "1.0.1"}}, origin_name_var: "some.name_var_2" } satisfies ThirdPartyRendererStorage],
-        ['scoped', { type: 'scoped', definition: { origin: { name: "some-service", repository: "https://veto.dev", version: "0.0.0"}}, origin_name_var: 'origin.name_var' } satisfies ThirdPartyRendererStorage]
+        ['global', { type: 'global', properties: { test: 'foo', example: 1234, debug: true, object: { test: true } }, definition: { origin: { name: 'some-global-service', repository: 'https://global.veto.dev', version: '1.0.1' } }, origin_name_var: 'some.name_var_2' } satisfies ThirdPartyRendererStorage],
+        ['scoped', { type: 'scoped', definition: { origin: { name: 'some-service', repository: 'https://veto.dev', version: '0.0.0' } }, origin_name_var: 'origin.name_var' } satisfies ThirdPartyRendererStorage]
       ])
     );
 
-    const configMap = await result.getConfigMap(new (class implements INameProvider {
-      getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
+    const configMap = await result.getConfigMap(
+      new (class implements INameProvider {
+        getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
           if (!workspace) {
             return 'main';
           }
@@ -67,13 +61,14 @@ describe('A job renderer test', () => {
     const result = await renderer.render(
       workspace,
       new Map([
-        ['global', { type: 'global', properties: {"test": "foo", "example": 1234, "debug": true, "object": {"test": true}}, definition: { origin: { name: "some-global-service", repository: "https://global.veto.dev", version: "1.0.1"}}, origin_name_var: "some.name_var_2" } satisfies ThirdPartyRendererStorage],
-        ['scoped', { type: 'scoped', definition: { origin: { name: "some-service", repository: "https://veto.dev", version: "0.0.0"}}, origin_name_var: 'origin.name_var' } satisfies ThirdPartyRendererStorage]
+        ['global', { type: 'global', properties: { test: 'foo', example: 1234, debug: true, object: { test: true } }, definition: { origin: { name: 'some-global-service', repository: 'https://global.veto.dev', version: '1.0.1' } }, origin_name_var: 'some.name_var_2' } satisfies ThirdPartyRendererStorage],
+        ['scoped', { type: 'scoped', definition: { origin: { name: 'some-service', repository: 'https://veto.dev', version: '0.0.0' } }, origin_name_var: 'origin.name_var' } satisfies ThirdPartyRendererStorage]
       ])
     );
 
-    const configMap = await result.getConfigMap(new (class implements INameProvider {
-      getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
+    const configMap = await result.getConfigMap(
+      new (class implements INameProvider {
+        getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
           if (!workspace) {
             return 'main';
           }
