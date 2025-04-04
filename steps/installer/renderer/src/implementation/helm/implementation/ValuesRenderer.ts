@@ -10,7 +10,7 @@ export class ValuesRenderer implements IValuesRenderer {
     const yaml = () => {
       const obj: any = {};
 
-      dataMap.entries().forEach(([key, value]) => {
+      Array.from(dataMap.entries()).forEach(([key, value]) => {
         set(obj, key, value);
       });
 
@@ -20,10 +20,10 @@ export class ValuesRenderer implements IValuesRenderer {
     return {
       write: async (root, resolver) => {
         const path = await resolver.getNameByWorkspace(workspace);
-        const filepath = Path.join(...[root, 'helm', path, 'templates'].filter(<T>(value: T | undefined): value is T => Boolean(value)));
+        const filepath = Path.join(...[root, 'helm', path].filter(<T>(value: T | undefined): value is T => Boolean(value)));
 
         await FileSystem.mkdir(filepath, { recursive: true });
-        await FileSystem.writeFile(Path.join(filepath, 'configmap.yaml'), to_structured_data(yaml()).write());
+        await FileSystem.writeFile(Path.join(filepath, 'values.yaml'), to_structured_data(yaml()).write());
       }
     };
   }
