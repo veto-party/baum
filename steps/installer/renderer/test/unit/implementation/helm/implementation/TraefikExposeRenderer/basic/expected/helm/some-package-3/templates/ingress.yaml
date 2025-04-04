@@ -1,0 +1,35 @@
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata": 
+  "name": "some-package-3-8080-path"
+  
+"spec": 
+  "addPrefix": 
+    "prefix": "/test/"
+    
+  
+
+---
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "IngressRoute"
+"metadata": 
+  "name": "some-package-3-ingress"
+  
+"spec": 
+  "entryPoints": 
+    
+    - "pull-secret"
+  "routes": 
+    
+    - "kind": "Rule"
+      "match": 
+      "services": 
+        
+        - "name": "some-package-3-service"
+          "port": 8080
+          
+      "middlewares": 
+        
+        - "some-package-3-8080-path"
+      
+  

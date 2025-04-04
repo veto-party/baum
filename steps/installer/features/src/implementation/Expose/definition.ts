@@ -23,6 +23,7 @@ export const definition = asConst({
             },
             cors: {
               type: 'object',
+              additionalProperties: false,
               properties: {
                 self: {
                   type: 'boolean'

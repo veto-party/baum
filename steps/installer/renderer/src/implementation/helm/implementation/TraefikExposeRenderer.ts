@@ -77,9 +77,15 @@ export class TraefikExposeRenderer implements IExposeRenderer {
             if (exposed.type === 'internal') {
               return;
             }
+            const { cors, matcher } = exposed;
+
+
+            if (!cors) {
+              return;
+            }
 
             const origins: any[] = [];
-            const { cors, matcher } = exposed;
+
             if (cors?.self && matcher?.domain) {
               if (matcher.domainIsAbsolute) {
                 origins.push(matcher.domain);
@@ -97,7 +103,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
               origins.push(TraefikExposeRenderer.relativeDomain(origin.domain));
             });
 
-            return [port, TraefikExposeRenderer.buildCORSOption(`${name}-${port}-cors`, cors, origins)];
+            return [port.toString(), TraefikExposeRenderer.buildCORSOption(`${name}-${port}-cors`, cors, origins)];
           })
           .filter(<T>(value: T | undefined): value is T => value !== undefined)
       );
@@ -124,12 +130,12 @@ export class TraefikExposeRenderer implements IExposeRenderer {
               return;
             }
 
-            return merge({}, ...matchers);
+            return [port.toString(), merge({}, ...matchers)];
           })
           .filter(<T>(value: T | undefined): value is T => value !== undefined)
       );
 
-    const yaml = (name: string, filters: Record<string, { metadata: { name: string } }[]>[]) => [
+    const yaml = (name: string, filters: Record<string, { metadata: { name: string } }>[]) => [
       {
         apiVersion: 'traefik.io/v1alpha1',
         kind: 'IngressRoute',
@@ -138,8 +144,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
         },
         spec: {
           entryPoints: [this.entryPoint],
-          routes: config
-            ?.entries()
+          routes: Array.from(config?.entries() ?? [])
             .map(([port, exposed]) => {
               if (exposed.type === 'internal') {
                 return;
@@ -155,7 +160,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
                     passHostHeader: exposed.passHostHeader
                   }
                 ],
-                middlewares: filters?.flatMap((filter) => Object.values(filter[port.toString()] ?? {}).map((el) => el.metadata.name))
+                middlewares: filters?.flatMap((filter) => filter[port.toString()]?.metadata.name).filter(Boolean)
               };
             })
             .filter(Boolean)
