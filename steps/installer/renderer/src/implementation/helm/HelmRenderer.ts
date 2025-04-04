@@ -20,6 +20,7 @@ import type { ExposeStructure, IExposeRenderer } from './interface/factory/IExpo
 import type { IJobRenderer, JobStructure } from './interface/factory/IJobRenderer.js';
 import type { INetworkRenderer, NetworkStorage } from './interface/factory/INetworkRenderer.js';
 import type { ISecretRenderer } from './interface/factory/ISecretRenderer.js';
+import 'set.prototype.difference/auto';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
   ? typeof VariableFeature.makeInstance extends () => IFeature<infer B0, infer B1, infer B2>
