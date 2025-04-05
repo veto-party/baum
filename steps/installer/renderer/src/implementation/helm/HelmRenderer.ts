@@ -286,7 +286,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
       .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, baseRenderer.getGroup())
       .appendFeature(`patternProperties["^[a-zA-Z0-9]+$"]` as const, new JobFeature());
 
-    baseRenderer
+    const baseJobRenderer = baseRenderer
       .ensureFeature('properties.job' as const, jobStructure, function (feature) {
         const ensureJobBindings = HelmRenderer.ensurePropertyValueGenerator(this.jobBindingStorage, () => new Map());
         const ensureJobProperties = HelmRenderer.ensurePropertyValueGenerator(this.jobPropertyStorage, () => new Map());
@@ -373,7 +373,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
         });
       });
 
-    return baseRenderer.addRenderer(async function (metadata) {
+    return baseJobRenderer.addRenderer(async function (metadata) {
       if (this.networkStorage.has(metadata.project.workspace)) {
         this.writers.add(await this.networkRenderer.render(metadata.project.workspace, undefined, this.networkStorage.get(metadata.project.workspace)!));
       }

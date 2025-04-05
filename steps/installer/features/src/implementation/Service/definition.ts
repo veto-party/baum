@@ -1,6 +1,6 @@
 import { asConst } from 'json-schema-to-ts';
 
-export const pattern = '^[a-zA-Z0-9]+$';
+export const pattern = '^[a-zA-Z0-9_-]+$';
 
 export const mappingStructure = asConst({
   type: 'object',

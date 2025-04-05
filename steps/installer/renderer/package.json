@@ -18,6 +18,8 @@
     "diff": "^7.0.0",
     "@types/diff": "^7.0.2",
     "vitest": "^3.0.9",
-    "@veto-party/baum__package_manager__npm": "*"
+    "@veto-party/baum__package_manager__npm": "*",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
   }
 }

@@ -1,5 +1,4 @@
 {
-    "is_service": true,
     "variable": {
       "static_variable": {
         "type": "scoped",
@@ -42,7 +41,7 @@
             "name": "mariadb"
           }
         },
-        "environment": {
+        "properties": {
           "auth.forcePassword": {
             "default": true
           },
@@ -61,7 +60,7 @@
             "name": "mariadb"
           }
         },
-        "environment": {
+        "properties": {
           "auth.forcePassword": {
             "default": true
           },
