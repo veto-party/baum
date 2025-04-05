@@ -169,7 +169,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
 
     return {
       getPorts: () => {
-        const set = new Set((config?.keys() ?? []).map((el) => Number(el)));
+        const set = new Set(Array.from(config?.keys() ?? []).map((el) => Number(el)));
 
         for (const value of Array.from(set.values())) {
           if (!Number.isInteger(value) || Number.isNaN(value) || !Number.isFinite(value)) {

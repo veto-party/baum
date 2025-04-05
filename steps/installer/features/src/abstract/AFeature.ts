@@ -7,7 +7,9 @@ import type { FeatureContainer } from '../interface/IFeatureContainer.js';
 import type { ToDefinitionStructure } from '../interface/types/ToDefinitionStructure.js';
 
 export abstract class AFeature<T extends {} | Record<string, any>, Path, From = T extends {} ? any[] | any : FromSchema<T>> implements IFeature<T, Path, From> {
-  private ajv = new AJV.default();
+  private ajv = new AJV.default({
+    strict: false
+  });
 
   protected constructor(
     private schema: T,

@@ -32,7 +32,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
     return {
       getResolvedWorkspaceVars: () => {
         return new Map(
-          allItems.entries().map(([key, value]) => {
+          Array.from(allItems.entries()).map(([key, value]) => {
             return [
               key,
               (value.static === true
@@ -54,8 +54,7 @@ export class ConfigMapRenderer implements IConfigMapRenderer {
       },
       getValues: () => {
         return new Map(
-          allItems
-            .entries()
+          Array.from(allItems.entries())
             .filter(([, value]) => !value.static)
             .map(([, value]) => [value.source, value.default] as const)
         );

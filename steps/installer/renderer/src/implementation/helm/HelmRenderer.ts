@@ -406,7 +406,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
         const itemsMap = HelmRenderer.mergeElements(await configResult.getResolvedWorkspaceVars(), await secretResult.getResolvedWorkspaceSecrets());
 
-        itemsMap.entries().forEach(([key, entry]) => {
+        Array.from(itemsMap.entries()).forEach(([key, entry]) => {
           if ('store' in entry && entry.store && entry.global) {
             this.globalBindingStorage.set(key, entry);
           }
@@ -475,8 +475,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
     await (async () => {
       const binding = new Map(
-        this.globalBindingStorage
-          .entries()
+        Array.from(this.globalBindingStorage.entries())
           .map(([key, value]) => [key, typeof value.store === 'string' ? value.key : undefined] as const)
           .filter((entry): entry is readonly [string, string] => entry[1] !== undefined)
       );
@@ -553,9 +552,8 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
         HelmRenderer.mergeElements(
           ensureKey(workspace),
           new Map(
-            ensureJob(workspace)
-              .entries()
-              .flatMap(([baseKey, value]) => value.entries().map(([key, v]) => [`${baseKey}.${key}`, v] as const))
+            Array.from(ensureJob(workspace).entries())
+              .flatMap(([baseKey, value]) => Array.from(value.entries()).map(([key, v]) => [`${baseKey}.${key}`, v] as const), 1)
           )
         )
       );
@@ -564,8 +562,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
         HelmRenderer.mergeElements(
           ensureKey(workspace),
           new Map(
-            ensureService(workspace)
-              .entries()
+            Array.from(ensureService(workspace).entries())
               .flatMap(([baseKey, value]) =>
                 Object.entries(value.properties ?? {}).map(
                   ([key, v]) =>
@@ -576,7 +573,8 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
                         default: v as any
                       }
                     ] as const
-                )
+                ),
+                1
               )
           )
         )
