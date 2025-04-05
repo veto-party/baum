@@ -466,7 +466,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
 
     this.writers.add(
       new ChartRenderer(this.versionProvider).renderGlobal(
-        Array.from(this.serviceStorage.keys()).filter((value): value is IWorkspace => value !== undefined),
+        Array.from(structure.keys()).filter((value): value is IWorkspace => value !== undefined),
         this.serviceStorage.get(undefined) ?? new Map()
       )
     );

@@ -87,7 +87,15 @@ describe('A helm renderer test', () => {
 
         const workspaces = await packageManger.readWorkspace(path);
 
-        const structure = new Map(await Promise.all(workspaces.map(async (workspace) => [workspace, [JSON.parse((await readFile(join(workspace.getDirectory(), 'helm.veto.json'))).toString())]] as const)));
+        const structure = new Map(await Promise.all(workspaces.map(async (workspace) => {
+            const jsonStructure = JSON.parse((await readFile(join(workspace.getDirectory(), 'helm.veto.json'))).toString());
+
+            if (!helmRenderer.getGroup().verifyObject(jsonStructure)) {
+                throw new Error('Data is invalid.');
+            }
+
+            return [workspace, [jsonStructure]] as [IWorkspace, typeof jsonStructure[]];
+        })));
 
         helmRenderer.render({ packageManger, rootDirectory: path }, structure)
     })
