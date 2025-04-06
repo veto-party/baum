@@ -4,22 +4,25 @@ import { GroupFeature, type IFeature, type MergeFeatures } from '@veto-party/bau
 import type { InferStructure, ProjectMetadata } from '../interface/IRenderer.js';
 import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManager, InferNewRenderer, InferToFeatureManager } from '../interface/IRendererManager.js';
 import { RenderFeatureManager } from './RenderFeatureManager.js';
+import { uniq} from 'lodash-es';
 
-export abstract class ARendererManager<T extends IFeature<any, any, any>> extends RenderFeatureManager<T> implements IRendererManager<T> {
+export abstract class ARendererManager<T extends IFeature<any, any, any>, Self> extends RenderFeatureManager<T, Self> implements IRendererManager<T, Self> {
   protected featureCache = new Map<
     ReturnType<typeof this.getCacheKey>,
     {
-      renderer: IRendererFeatureManager<T>;
+      renderer: IRendererFeatureManager<T, Self>;
       filter?: IFilter<T>;
     }
   >();
+
+  protected features: ReturnType<typeof this.getCacheKey>[] = [];
 
   protected constructor(protected groupFeature: T) {
     super();
   }
 
-  protected abstract createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U>;
-  protected abstract createFeatureManager(feature: T): IRendererFeatureManager<T>;
+  protected abstract createSelf<U extends IFeature<any, any, any>>(feature: U): ARendererManager<U, Self>;
+  protected abstract createFeatureManager(feature: T): IRendererFeatureManager<T, Self>;
 
   @CachedFN(false)
   private getCacheKey(writePath: any, feature: IFeature<any, any, any>) {
@@ -29,9 +32,9 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
   ensureFeature<WritePath, Feature extends IFeature<any, any, any>>(
     writePath: WritePath,
     feature: Feature,
-    creator: (this: ARendererManager<MergeFeatures<T, WritePath, Feature>>, rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T>, Feature>>,
-    filter?: IFilter<InferNewRenderer<WritePath, IFeatureManager<T>, Feature> extends IRendererManager<infer NewFeature> ? NewFeature : never>
-  ): ARendererManager<MergeFeatures<T, WritePath, Feature>> {
+    creator: (this: Self, rendererGenerator: InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T, Self>, Feature>>) => InferToFeatureManager<InferNewRenderer<WritePath, IFeatureManager<T, Self>, Feature>>,
+    filter?: IFilter<InferNewRenderer<WritePath, IFeatureManager<T, Self>, Feature> extends IRendererManager<infer NewFeature, Self> ? NewFeature : never>
+  ): ARendererManager<MergeFeatures<T, WritePath, Feature>, Self> {
     if (this.featureCache.has(this.getCacheKey(writePath, feature))) throw new Error('renderer for type is already given');
 
     if (!(this.groupFeature instanceof GroupFeature)) {
@@ -39,10 +42,11 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
     }
 
     const self = this.createSelf<MergeFeatures<T, WritePath, Feature>>(this.groupFeature.appendFeature(writePath, feature) as any);
-    const renderer = creator.call(self, this.createFeatureManager(feature as any) as any);
+    const renderer = creator.call(self as any, this.createFeatureManager(feature as any) as any);
 
     self.featureCache.set(this.getCacheKey(writePath, feature), { renderer, filter } as any);
-    return self;
+    self.features.push(this.getCacheKey(writePath, feature));
+    return self as any;
   }
 
   getGroup(): T {
@@ -56,7 +60,8 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
 
   async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>) {
     for (const [workspace, givenStructure] of structure.entries()) {
-      for (const { renderer, filter } of this.featureCache.values()) {
+      for (const key of uniq(this.features)) {
+        const { renderer, filter } = this.featureCache.get(key)!;
         const metadata = {
           project: {
             ...projectMetadata,
@@ -68,7 +73,25 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>> extend
           return;
         }
 
-        await Promise.all([this.renderFeature(metadata, [...givenStructure]), renderer.renderFeature(metadata, [...givenStructure])]);
+        await renderer.renderFeature(metadata, [...givenStructure], this);
+      }
+    }
+
+    for (const [workspace, givenStructure] of structure.entries()) {
+      for (const key of uniq(this.features)) {
+        const { renderer, filter } = this.featureCache.get(key)!;
+        const metadata = {
+          project: {
+            ...projectMetadata,
+            workspace
+          }
+        };
+
+        if (filter && !ARendererManager.resolveFilter(filter)(givenStructure)) {
+          return;
+        }
+
+        await this.renderFeature(metadata, [...givenStructure], this);
       }
     }
   }

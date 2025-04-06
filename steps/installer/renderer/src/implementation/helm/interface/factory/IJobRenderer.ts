@@ -6,8 +6,9 @@ import type { IWritable } from '../IWritable.js';
 import type { ConfigMapping } from './IConfigMapRenderer.js';
 import type { SystemUsageStorage } from './IDeploymentRenderer.js';
 import type { SecretMapping } from './ISecretRenderer.js';
+import { ARendererManager } from '../../../ARendererManager.js';
 
-export type JobStructure = (typeof HelmRenderer)['buildBaseInstance'] extends (...args: any[]) => HelmRenderer<IFeature<infer A0, infer A1, infer A2>> ? (MergeFeatures<IFeature<A0, A1, A2>, undefined, JobFeature> extends IFeature<any, any, infer Structure> ? Structure : never) : never;
+export type JobStructure = (typeof HelmRenderer)['buildBaseInstance'] extends (...args: any[]) => ARendererManager<IFeature<infer A0, infer A1, infer A2>, any> ? (MergeFeatures<IFeature<A0, A1, A2>, undefined, JobFeature> extends IFeature<any, any, infer Structure> ? Structure : never) : never;
 
 export interface IJobRendererResult extends IWritable {}
 
