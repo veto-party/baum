@@ -55,6 +55,7 @@
         "type": "scoped",
         "origin_name_var": "fullnameOverride",
         "definition": {
+          "from_reference": "https://charts.bitnami.com/bitnami",
           "origin": {
             "repository": "https://charts.bitnami.com/bitnami",
             "version": "14.x.x",
