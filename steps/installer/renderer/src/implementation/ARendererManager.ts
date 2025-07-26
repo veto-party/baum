@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { CachedFN, type IWorkspace } from '@veto-party/baum__core';
+import { CachedFN, shakeWorkspacesIntoExecutionGroups, type IWorkspace } from '@veto-party/baum__core';
 import { GroupFeature, type IFeature, type MergeFeatures } from '@veto-party/baum__steps__installer__features';
 import type { InferStructure, ProjectMetadata } from '../interface/IRenderer.js';
 import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManager, InferNewRenderer, InferToFeatureManager } from '../interface/IRendererManager.js';
@@ -58,8 +58,37 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>, Self> 
     return filter.filter;
   }
 
+  private static sortByPath([workspaceA]: [IWorkspace, any], [workspaceB]: [IWorkspace, any]) {
+    return workspaceB.getDirectory().length - workspaceA.getDirectory().length;
+  }
+
   async render(projectMetadata: Omit<ProjectMetadata, 'workspace'>, structure: Map<IWorkspace, InferStructure<T>[]>) {
-    for (const [workspace, givenStructure] of structure.entries()) {
+
+    const allWorkspaces = Array.from(structure.keys());
+
+    for (const workspaceGroup of shakeWorkspacesIntoExecutionGroups(allWorkspaces, projectMetadata.packageManager)) {
+      for (const workspace of workspaceGroup) {
+        for (const key of uniq(this.features)) {
+        const { renderer, filter } = this.featureCache.get(key)!;
+        const metadata = {
+          project: {
+            ...projectMetadata,
+            workspace
+          }
+        };
+
+        if (filter && !ARendererManager.resolveFilter(filter)(structure.get(workspace)!)) {
+          return;
+        }
+
+        await renderer.renderFeature(metadata, [...structure.get(workspace)!], this);
+      }  
+      }
+    }
+
+
+
+    for (const [workspace, givenStructure] of Array.from(structure.entries()).sort(ARendererManager.sortByPath)) {
       for (const key of uniq(this.features)) {
         const { renderer, filter } = this.featureCache.get(key)!;
         const metadata = {
@@ -74,24 +103,6 @@ export abstract class ARendererManager<T extends IFeature<any, any, any>, Self> 
         }
 
         await renderer.renderFeature(metadata, [...givenStructure], this);
-      }
-    }
-
-    for (const [workspace, givenStructure] of structure.entries()) {
-      for (const key of uniq(this.features)) {
-        const { renderer, filter } = this.featureCache.get(key)!;
-        const metadata = {
-          project: {
-            ...projectMetadata,
-            workspace
-          }
-        };
-
-        if (filter && !ARendererManager.resolveFilter(filter)(givenStructure)) {
-          return;
-        }
-
-        await this.renderFeature(metadata, [...givenStructure], this);
       }
     }
   }

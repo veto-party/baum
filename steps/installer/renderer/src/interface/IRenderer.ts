@@ -5,7 +5,7 @@ export type InferStructure<T> = T extends IFeature<any, any, infer U> ? U : neve
 
 export type ProjectMetadata = {
   workspace: IWorkspace;
-  packageManger: IPackageManager;
+  packageManager: IPackageManager;
   rootDirectory: string;
 };
 

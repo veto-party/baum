@@ -1,8 +1,7 @@
 import * as semver from 'semver';
-import type { IExecutablePackageManager } from '../../../index.js';
-import type { IDependent, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
+import type { IDependent, IPackageManager, IWorkspace } from '../../../interface/PackageManager/IPackageManager.js';
 
-export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm: IExecutablePackageManager): IWorkspace[][] => {
+export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm: IPackageManager): IWorkspace[][] => {
   let nodes: [name: string, version: string, workspace: IWorkspace, deps: [version: string, dependent: IDependent][], index: number][] = [];
 
   const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {

@@ -97,6 +97,6 @@ describe('A helm renderer test', () => {
             return [workspace, [jsonStructure]] as [IWorkspace, typeof jsonStructure[]];
         })));
 
-        helmRenderer.render({ packageManger, rootDirectory: path }, structure)
+        helmRenderer.render({ packageManager: packageManger, rootDirectory: path }, structure)
     })
 });
