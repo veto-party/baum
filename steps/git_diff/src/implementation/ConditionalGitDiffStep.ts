@@ -39,9 +39,9 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
 
   @CachedFN(true)
   private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
-    const git = this.ensureGit(root);
-    const branch = await this.targetBranchGetter(root, git);
+    const branch = await this.targetBranchGetter(root);
 
+    const git = this.ensureGit(root);
     const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
 
     let prefix = 'refs/heads/';
@@ -68,19 +68,23 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
       }
     }
 
-    const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`).catch((error) => {
-      console.warn(error);
-      return git.diffSummary(`${prefix}${branch}..HEAD`);
-    });
-
-    console.log(raw_changes);
+    const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`);
 
     return raw_changes.files ?? [];
   }
 
+  private targetBranchGetter(root: string) {
+    if (typeof this.__targetBranchGetter === 'string') {
+      return this.__targetBranchGetter;
+    }
+
+    const git = this.ensureGit(root);
+    return this.__targetBranchGetter(root, git);
+  }
+
   constructor(
     step: IStep,
-    private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
+    private __targetBranchGetter: ((root: string, git: SimpleGit) => string | Promise<string>)|string,
     private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {

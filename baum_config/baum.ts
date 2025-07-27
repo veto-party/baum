@@ -17,12 +17,13 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setRootDirectory(__dirname);
 
   if (process.env.CI_TEST || !process.env.CI) {
+    console.log(process.env.GITHUB_BASE_REF);
     baum.addExecutionStep(
       'test',
       new ConditionalGitDiffStep(
         new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
-        () => process.env.GITHUB_BASE_REF ?? 'main',
-        (_, _git) => process.env.GITHUB_BASE_REF !== undefined
+        process.env.GITHUB_BASE_REF ?? 'main',
+        process.env.GITHUB_BASE_REF !== undefined
       )
     );
     if (process.env.CI_TEST) {
