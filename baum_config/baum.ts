@@ -17,7 +17,6 @@ export default async (baum: IBaumManagerConfiguration) => {
   baum.setRootDirectory(__dirname);
 
   if (process.env.CI_TEST || !process.env.CI) {
-    console.log(process.env.GITHUB_BASE_REF);
     baum.addExecutionStep(
       'test',
       new ConditionalGitDiffStep(
