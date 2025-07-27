@@ -1,6 +1,6 @@
 import type { IPackageManager, IStep, IWorkspace } from '../../index.js';
-import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 import type { IExecutionIntent, IExecutionIntentBuilder } from '../../interface/PackageManager/executor/IPackageManagerExecutor.js';
+import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 /**
  * Package Manager Step

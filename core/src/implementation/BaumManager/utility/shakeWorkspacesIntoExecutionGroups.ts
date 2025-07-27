@@ -11,12 +11,12 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
       const given = overrides[dependent.getName()] ?? [];
       const previous = overrides[workspace.getName()] ?? [];
       overrides[dependent.getName()] = [...given, ...previous, workspace.getOverrides()];
-    })
-  }
+    });
+  };
   const updateOverrides = (workspace: IWorkspace) => {
     const given = overrides[workspace.getName()] ?? [];
     workspace.setOverrides(given.reduce((prev, current) => ({ ...prev, ...current }), {}));
-  }
+  };
 
   const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
     previous[workspace.getName()] ??= [];
@@ -86,7 +86,6 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
   const workspaceGroups: IWorkspace[][] = [[]];
 
   while (dependenciesToCheck.length > 0) {
-
     const [sem, dependency, givenDepth] = dependenciesToCheck.shift()!;
     prepareOverridesFor(dependency);
 

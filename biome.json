@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
   "files": {
-    "experimentalScannerIgnores": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*", "./docs/schema/**/*"],
+    "experimentalScannerIgnores": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*", "./docs/schema/**/*", "core/src/index.ts"],
     "ignoreUnknown": true
   },
   "assist": {

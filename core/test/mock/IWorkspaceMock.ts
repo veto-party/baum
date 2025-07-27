@@ -12,7 +12,7 @@ class IWorkspaceMock implements IWorkspace {
   getFreshWorkspace(): IWorkspace {
     return this;
   }
-  
+
   getOverrides(): Record<string, string> {
     return this.overrides;
   }

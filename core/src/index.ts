@@ -17,7 +17,6 @@ export { ATemplateExecutor, type callbackArgs } from './implementation/Step/abst
 
 export { Resolver } from './utils/Resolver.js'; 
 
-/** @internal */
 export { ModifyNPMRC } from './implementation/Step/abstract/TemplateExecutor/intent/implementation/PublishIntent/ModifyNPMRC.js';
 export { CommandStep } from './implementation/Step/CommandStep.js';
 export { BaumManager } from './implementation/BaumManager/BaumManager.js';

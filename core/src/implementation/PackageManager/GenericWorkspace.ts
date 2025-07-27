@@ -2,11 +2,10 @@ import FileSystem from 'node:fs';
 import Path from 'node:path';
 import isEqual from 'lodash.isequal';
 import uniqBy from 'lodash.uniqby';
-import { CachedFN, clearCacheForFN, Resolver, type IDependent, type IWorkspace } from '../../index.js';
+import { CachedFN, clearCacheForFN, type IDependent, type IWorkspace, Resolver } from '../../index.js';
 import { GenericDependent } from './GenericDependent.js';
 
 export class GenericWorkspace implements IWorkspace {
-
   private overrides: Record<string, string> = {};
 
   constructor(

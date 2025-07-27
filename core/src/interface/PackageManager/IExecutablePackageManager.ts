@@ -1,6 +1,6 @@
-import type { IPackageManager } from './IPackageManager.js';
 import type { IPackageManagerExecutor } from './executor/IPackageManagerExecutor.js';
 import type { IExecutablePackageManagerParser } from './executor/IPackageManagerParser.js';
+import type { IPackageManager } from './IPackageManager.js';
 
 export interface IDependent {
   getName(): string;

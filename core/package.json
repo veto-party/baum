@@ -2,7 +2,9 @@
   "name": "@veto-party/baum__core",
   "main": "./src/index.ts",
   "type": "module",
-  "files": ["./dist/**"],
+  "files": [
+    "./dist/**"
+  ],
   "scripts": {
     "build": "tsc --project ./tsconfig.build.json",
     "test": "vitest run",
