@@ -3,10 +3,7 @@ import { CachedFN, clearCacheForFN } from '../../src/implementation/annotation/C
 describe('Should only run once using annotation', () => {
   it('Should be sync', () => {
     class Test {
-
-      constructor(
-        private counter: number = 0
-      ) {}
+      constructor(private counter: number = 0) {}
 
       clear() {
         clearCacheForFN(this, 'method');
@@ -36,10 +33,8 @@ describe('Should only run once using annotation', () => {
 
   it('Should be async', async () => {
     class Test {
-      constructor(
-        private counter: number = 0
-      ) {}
-      
+      constructor(private counter: number = 0) {}
+
       clear() {
         clearCacheForFN(this, 'method');
       }
@@ -49,7 +44,6 @@ describe('Should only run once using annotation', () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
         return this.incAndReturn();
       }
-
 
       private incAndReturn() {
         this.counter = this.counter + 1;
@@ -73,10 +67,7 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', () => {
     class Test {
-      constructor(
-        private counter: number
-    ) {
-      }
+      constructor(private counter: number) {}
 
       clear() {
         clearCacheForFN(this, 'method');
@@ -86,7 +77,6 @@ describe('Should only run once using annotation', () => {
       method() {
         return this.incAndReturn();
       }
-
 
       private incAndReturn() {
         this.counter = this.counter + 1;
@@ -124,9 +114,7 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', async () => {
     class Test {
-      constructor(private counter: number) {
-
-      }
+      constructor(private counter: number) {}
 
       clear() {
         clearCacheForFN(this, 'method');
@@ -137,7 +125,6 @@ describe('Should only run once using annotation', () => {
         await new Promise((resolve) => setTimeout(resolve, 10));
         return this.incAndReturn();
       }
-
 
       private incAndReturn() {
         this.counter = this.counter + 1;
