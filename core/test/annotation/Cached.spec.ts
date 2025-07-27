@@ -3,6 +3,11 @@ import { CachedFN, clearCacheForFN } from '../../src/implementation/annotation/C
 describe('Should only run once using annotation', () => {
   it('Should be sync', () => {
     class Test {
+
+      constructor(
+        private counter: number = 0
+      ) {}
+
       clear() {
         clearCacheForFN(this, 'method');
       }
@@ -26,6 +31,10 @@ describe('Should only run once using annotation', () => {
 
   it('Should be async', async () => {
     class Test {
+      constructor(
+        private counter: number = 0
+      ) {}
+      
       clear() {
         clearCacheForFN(this, 'method');
       }
@@ -53,8 +62,9 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', () => {
     class Test {
-      constructor(startValue: number) {
-        this.counter = startValue;
+      constructor(
+        private counter: number
+    ) {
       }
 
       clear() {
@@ -97,8 +107,7 @@ describe('Should only run once using annotation', () => {
 
   it('multiple instances sync', async () => {
     class Test {
-      constructor(startValue: number) {
-        this.counter = startValue;
+      constructor(private counter: number) {
       }
 
       clear() {
