@@ -1,5 +1,5 @@
 {
-  "name": "@veto-party/baum__steps__cache",
+  "name": "@veto-party/baum__registry__cache",
   "type": "module",
   "main": "./src/index.ts",
   "files": [

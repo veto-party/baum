@@ -10,5 +10,7 @@ export interface IBaumManagerConfiguration extends IBaumRegistrable {
   dontCopyLockFile(): this;
   setPackageManager(packageManager: IExecutablePackageManager): this;
 
+  addCleanup(cb: () => any): this;
+
   isFailed(): boolean;
 }

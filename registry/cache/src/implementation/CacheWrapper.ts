@@ -1,6 +1,5 @@
-import { type IPackageManager, type IWorkspace, Resolver } from "@veto-party/baum__core";
+import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IWorkspace, Resolver } from "@veto-party/baum__core";
 import type { ICacheWrapper } from "../ICacheWrapper.js";
-import type { ICurrentVersionManager } from "../ICurrentVersionManager.js";
 import type { ARegistryStep } from "@veto-party/baum__registry";
 import type { IVersionStrategy } from "../IVersionStrategy.js";
 import type { INameTransformer } from "../INameTransformer.js";
@@ -10,8 +9,9 @@ export class CacheWrapper implements ICacheWrapper {
 
     public constructor(
         private nameTransformer: INameTransformer,
-        private currentVersionManager: ICurrentVersionManager,
         private versionStrategy: IVersionStrategy,
+        private baum: IBaumManagerConfiguration,
+        private currentVersionManager: 
     ) {}
 
     async flush(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<void> {
@@ -30,8 +30,7 @@ export class CacheWrapper implements ICacheWrapper {
 
             const workspaces  = await packageManger.readWorkspace(root);
 
-            const oldVersion = await this.versionStrategy.getOldVersionNumber(workspace, root, packageManger);
-            const newVersion = await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)
+            const [oldVersion, newVersion] = await Promise.all([this.versionStrategy.getOldVersionNumber(workspace, root, packageManger), this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)] as const);
 
             if (oldVersion === newVersion) {
                 return;
@@ -59,6 +58,16 @@ export class CacheWrapper implements ICacheWrapper {
             }
 
         });
+    }
+
+    async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+        /** NO-OP */
+    }
+
+    async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+        if (!this.baum.isFailed()) {
+            await this.flush(workspace, rootDirectory, packageManager);
+        }
     }
     
 }
