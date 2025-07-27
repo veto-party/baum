@@ -33,7 +33,7 @@ export class VirtualWorkspace<T> implements IWorkspace {
     }
 
     getDynamicDependents(): IDependent[] {
-        return ['dependencies', 'optionalDependencies', 'devDependencies'].flatMap<IDependent>((depType) => {
+        return ['dependencies', 'optionalDependencies'/*, 'devDependencies'*/].flatMap<IDependent>((depType) => {
             if (typeof this.packageContent?.[depType] !== 'object') {
                 return [];
             }
@@ -58,5 +58,4 @@ export class VirtualWorkspace<T> implements IWorkspace {
     getPackageFile() {
      return this.packageContent;
     }
-
 }
