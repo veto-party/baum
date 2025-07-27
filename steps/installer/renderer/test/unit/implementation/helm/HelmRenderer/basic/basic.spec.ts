@@ -16,9 +16,9 @@ import type { IContainerName } from '../../../../../../src/implementation/helm/i
 import type { IDeploymentNameProvider } from '../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
 import type { IImageGenerator } from '../../../../../../src/implementation/helm/interface/IImageGenerator.js';
 import type { IMatchLabel } from '../../../../../../src/implementation/helm/interface/IMatchLabel.js';
+import { GatewayExposeRenderer } from '../../../../../../src/index.js';
 import type { INameProvider } from '../../../../../../src/interface/INameProvider.js';
 import type { IVersionProvider } from '../../../../../../src/interface/IVersionProvider.js';
-import { GatewayExposeRenderer } from '../../../../../../src/index.js';
 import { compareDirectories } from '../../../../../uility/compareDirectories.js';
 
 const getForWorkspace = (pm: IPackageManager, root: string, versionProvider: IVersionProvider) => {
