@@ -118,7 +118,7 @@ class CommandStep implements IStep {
     });
   }
 
-  clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     // NO-OP
     return Promise.resolve();
   }

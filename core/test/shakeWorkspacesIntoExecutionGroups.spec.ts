@@ -15,19 +15,19 @@ const pm = new (class implements IExecutablePackageManager {
   clearWorkspaceCache(): void {
     throw new Error('Method not implemented.');
   }
-  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<typeof FileSystem.writeFile>[1] | undefined> {
+  getCleanLockFile(_rootDirectory: string, _workspace: IWorkspace): Promise<Parameters<typeof FileSystem.writeFile>[1] | undefined> {
     throw new Error('Method not implemented.');
   }
   getLockFileName(): string {
     throw new Error('Method not implemented.');
   }
-  readWorkspace(rootDirectory: string): Promise<IWorkspace[]> {
+  readWorkspace(_rootDirectory: string): Promise<IWorkspace[]> {
     throw new Error('Method not implemented.');
   }
-  disableGlobalWorkspace(rootDirectory: string) {
+  disableGlobalWorkspace(_rootDirectory: string) {
     throw new Error('Method not implemented.');
   }
-  enableGlobalWorkspace(rootDirectory: string) {
+  enableGlobalWorkspace(_rootDirectory: string) {
     throw new Error('Method not implemented.');
   }
   modifyToRealVersionValue(version: string): string | false | undefined {

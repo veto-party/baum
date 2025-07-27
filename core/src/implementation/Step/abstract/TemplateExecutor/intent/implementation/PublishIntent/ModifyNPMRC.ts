@@ -14,12 +14,12 @@ class ModifyNPMRC implements IStep {
     this.hasRun.set(workspace, true);
     try {
       this.previousFileContent = await FileSystem.readFile(Path.join(workspace.getDirectory(), '.npmrc'));
-    } catch (error) {}
+    } catch (_error) {}
 
     await FileSystem.appendFile(Path.join(workspace.getDirectory(), '.npmrc'), typeof this.dataToAdd === 'function' ? await this.dataToAdd(workspace, packageManager, rootDirectory) : this.dataToAdd);
   }
 
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     if (!this.hasRun.has(workspace)) {
       return;
     }

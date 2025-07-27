@@ -15,7 +15,7 @@ export class RetryStep implements IStep {
     for (let i = 0; i <= this.retryCount; i++) {
       try {
         return await this.step.execute(workspace, packageManager, rootDirectory);
-      } catch (error) {
+      } catch (_error) {
         console.warn('Job failed for :', workspace.getName());
       }
     }

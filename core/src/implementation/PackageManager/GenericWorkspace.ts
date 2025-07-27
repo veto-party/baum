@@ -1,7 +1,6 @@
 import FileSystem from 'node:fs';
 import Path from 'node:path';
 import isEqual from 'lodash.isequal';
-import uniqBy from 'lodash.uniqby';
 import { CachedFN, clearCacheForFN, type IDependent, type IWorkspace, Resolver } from '../../index.js';
 import { GenericDependent } from './GenericDependent.js';
 

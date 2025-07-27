@@ -65,7 +65,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
         return dependencyMapping[dependent.getName()].some(([version]) => {
           try {
             return semver.satisfies(realVersion, version) || semver.eq(realVersion, version);
-          } catch (error) {
+          } catch (_error) {
             return semver.satisfies(version, realVersion) || realVersion === version;
           }
         });
