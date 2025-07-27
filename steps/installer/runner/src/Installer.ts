@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
+import { CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
 import type { IRendererManager } from '@veto-party/baum__steps__installer__renderer';
 import type { InferStructure } from '@veto-party/baum__steps__installer__renderer/src/interface/IRenderer.js';
@@ -18,15 +18,28 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
   }
 
   async execute(_workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    const workspaces = await packageManager.readWorkspace(rootDirectory);
-    for (const workspace of workspaces) {
-      await this.collect(workspace);
-    }
-
+    const metadatas = await this.collectAll(packageManager, rootDirectory)
     this.renderer.render({ packageManager, rootDirectory }, this.metadatas);
   }
 
-  public async collect(workspace: IWorkspace) {
+  @CachedFN(true)
+  private async collectAll(packageManager: IPackageManager, rootDirectory: string): Promise<Map<IWorkspace, InferStructure<T>>> {
+    const workspaces = await packageManager.readWorkspace(rootDirectory);
+    const allMaps: Map<IWorkspace, InferStructure<T>>[] = [];
+    for (const workspace of workspaces) {
+      allMaps.push(await this.collect(workspace));
+    }
+
+    const result = new Map<IWorkspace, InferStructure<T>>();
+
+    for (const map of allMaps) {
+      map.forEach((value, key) => result.set(key, value));
+    }
+
+    return result;
+  }
+
+  private async collect(workspace: IWorkspace) {
     if (!this.searchStrategy) {
       throw new Error('No search stragety defined.');
     }
@@ -34,13 +47,14 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     const files = await this.searchStrategy.search(workspace.getDirectory());
     const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
 
+    const map = new Map<IWorkspace, InferStructure<T>>();
+
     for (const file of files) {
       if (Resolver.ensureAbsolute(file.packagePath) === absWorkspacePath) {
         const fileContent = JSON.parse((await readFile(file.resultPath)).toString());
         this.renderer.getGroup().verifyObject(fileContent);
 
-        this.metadatas.set(workspace, fileContent);
-
+        map.set(workspace, fileContent);
         continue;
       }
 
@@ -49,14 +63,15 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
 
       const { name, version } = packageJSON;
 
-      await this.ensureVirtualWorkspaceCreatedAndSet(name, version, file.packagePath, packageJSON, fileContent);
+      map.set(this.ensureVirtualWorkspaceCreatedAndSet(name, version, file.packagePath, packageJSON), fileContent);
     }
+
+    return map;
   }
 
-  @CachedFN(true, [true, true, false, false, false]) /** Since content should not change, we ignore it whilist chaching */
-  private async ensureVirtualWorkspaceCreatedAndSet(packageName: string, packageVersion: string, packagePath: string, packageContent: any, content: InferStructure<T>): Promise<void> {
-    const workspace = new VirtualWorkspace(packageName, packageVersion, packagePath, packageContent);
-    this.metadatas.set(workspace, content);
+  @CachedFN(false, [true, true, false, false, false]) /** Since content should not change, we ignore it whilist chaching */
+  private ensureVirtualWorkspaceCreatedAndSet(packageName: string, packageVersion: string, packagePath: string, packageContent: any): IWorkspace {
+    return new VirtualWorkspace(packageName, packageVersion, packagePath, packageContent)
   }
 
   async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {}
