@@ -26,7 +26,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     const workspaces = await packageManager.readWorkspace(rootDirectory);
     const allMaps: Map<IWorkspace, InferStructure<T>>[] = [];
     for (const workspace of workspaces) {
-      allMaps.push(await this.collect(workspace));
+      allMaps.push(await this.collect(workspace, rootDirectory));
     }
 
     const result = new Map<IWorkspace, InferStructure<T>>();
@@ -38,18 +38,18 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     return result;
   }
 
-  private async collect(workspace: IWorkspace) {
+  private async collect(workspace: IWorkspace, rootDirectory: string) {
     if (!this.searchStrategy) {
       throw new Error('No search stragety defined.');
     }
 
     const files = await this.searchStrategy.search(workspace.getDirectory());
-    const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
+    const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory(), rootDirectory);
 
     const map = new Map<IWorkspace, InferStructure<T>>();
 
     for (const file of files) {
-      if (Resolver.ensureAbsolute(file.packagePath) === absWorkspacePath) {
+      if (Resolver.ensureAbsolute(file.packagePath, rootDirectory) === absWorkspacePath) {
         const fileContent = JSON.parse((await readFile(file.resultPath)).toString());
         this.renderer.getGroup().verifyObject(fileContent);
 

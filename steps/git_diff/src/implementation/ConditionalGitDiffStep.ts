@@ -1,5 +1,5 @@
 import Path from 'node:path';
-import { ConditionalStep, Resolver, type IStep } from '@veto-party/baum__core';
+import { CachedFN, ConditionalStep, Resolver, type IStep } from '@veto-party/baum__core';
 import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
@@ -7,12 +7,30 @@ const skipped = Symbol('skipped');
 export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
   private diffMap = new Map<string, DiffResult['files'] | typeof skipped>();
 
+  @CachedFN(false)
+  private ensureGit(root: string) {
+    return simpleGit(root, {
+      baseDir: root
+    });
+  }
+
   private async ensureGitDiff(root: string, base: string): Promise<DiffResult['files'] | typeof skipped> {
-    base = Path.resolve(base);
+
+    if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
+      return skipped;
+    }
+
+    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, this.ensureGit(root)))) {
+      return skipped;
+    }
+
+    const gitRoot = await this.ensureGit(root).revparse('--show-toplevel');
+    base = Resolver.ensureAbsolute(base, root);
+
     if (!this.diffMap.has(base)) {
       let result = await this.getGitDiff(root);
       if (result !== skipped) {
-        result = result.filter((file) => Resolver.ensureAbsolute(file.file).startsWith(base));
+        result = result.filter((file) => Resolver.ensureAbsolute(file.file, gitRoot).startsWith(base));
       }
       this.diffMap.set(base, result);
     }
@@ -21,25 +39,17 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   }
 
   private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
-    if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
-      return skipped;
-    }
-
-    const git = simpleGit(root, {
-      baseDir: root
-    });
-
-    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
-      return skipped;
-    }
-
+    const git = this.ensureGit(root);
     const branch = await this.targetBranchGetter(root, git);
 
-    await git.pull('origin', branch).catch(() => undefined);
+    const hasFetched = await git.fetch().then(() => true, () => false);
+    const hasPulled = hasFetched && await git.pull('origin', branch).then(() => true, () => false);
 
-    const raw_changes = await git.diffSummary(`origin/${branch}..HEAD`);
+    const raw_changes = await git.diffSummary(`HEAD..${hasPulled ? 'origin/' : ''}${branch}`);
 
-    return raw_changes.files;
+    console.log(raw_changes);
+
+    return raw_changes.files ?? [];
   }
 
   constructor(
