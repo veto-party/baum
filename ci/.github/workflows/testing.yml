@@ -34,7 +34,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: testing
-        run: npm run baum
+        run: npm run baum-test
         env:
           CI_TEST: true
         

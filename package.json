@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Tree shaking and building for monorepos",
   "scripts": {
-    "baum": "baum --config baum_config",
-    "biome": "biome"
+    "baum-publish": "baum --config ci/build",
+    "baum-test": "baum --config ci/test"
   },
   "workspaces": [
     "config",
@@ -20,7 +20,6 @@
     "steps/installer/runner"
   ],
   "devDependencies": {
-    "@biomejs/biome": "*",
     "baum": "*",
     "@veto-party/baum__package_manager__npm": "*"
   }

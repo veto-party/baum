@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm config -g set access public
-      - run: npm run baum
+      - run: npm run baum-publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           PUBLISH_VERSION: ${{ github.event.release.tag_name }}

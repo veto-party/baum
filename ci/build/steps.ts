@@ -1,40 +1,13 @@
-import Path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { PublicRegistryStep } from '@veto-party/baum__registry__public';
 import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
 import { type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, ParallelStep, PKGMStep } from 'baum';
-import { ConditionalGitDiffStep } from '../steps/git_diff/src/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.join(Path.dirname(__filename), '..');
-
-export default async (baum: IBaumManagerConfiguration) => {
-  const pm = new NPMPackageManager();
-
-  baum.setPackageManager(pm);
-  baum.setRootDirectory(__dirname);
-
-  if (process.env.CI_TEST || !process.env.CI) {
-    baum.addExecutionStep(
-      'test',
-      new ConditionalGitDiffStep(
-        new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('test')),
-        process.env.GITHUB_BASE_REF ?? 'main',
-        process.env.GITHUB_BASE_REF !== undefined
-      )
-    );
-    if (process.env.CI_TEST) {
-      return;
-    }
-  }
-
+export const buildSteps = (baum: IBaumManagerConfiguration) => {
   const version = process.env.PUBLISH_VERSION ?? 'v0.0.0';
-
   const commonStep = new ParallelStep([new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('build')), new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPGKMWhenKeyExists('generate'))]);
 
-  if (process.env.NODE_AUTH_TOKEN && process.env.CI) {
+  if (process.env.CI) {
     baum.addExecutionStep(
       'publish-npm',
       new (class extends PublicRegistryStep {
@@ -51,11 +24,11 @@ export default async (baum: IBaumManagerConfiguration) => {
           json.bugs = 'https://github.com/veto-party/baum/issues';
           json.homepage = 'https://github.com/veto-party/baum#readme';
         }
-      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN)
+      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN!)
         .addInstallStep()
         .addExecutionStep('prepare', commonStep)
     );
-  } else if (!process.env.CI) {
+  } else {
     baum.addExecutionStep(
       'publish',
       new (class extends VerdaccioRegistryStep {
