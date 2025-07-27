@@ -44,10 +44,10 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
 
     const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
 
-    let prefix = '';
+    let prefix = 'refs/heads/';
 
     for (const remote of remotes) {
-      
+
       if (remote === '') {
         continue;
       }
