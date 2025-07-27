@@ -52,7 +52,7 @@ export const definition = asConst({
                   }
                 },
                 maxAge: {
-                  type: "number"
+                  type: 'number'
                 },
                 origins: {
                   type: 'array',
@@ -83,7 +83,7 @@ export const definition = asConst({
             },
             sticky: {
               type: 'object',
-              required: ["fieldName"],
+              required: ['fieldName'],
               properties: {
                 fieldName: {
                   type: 'string'
