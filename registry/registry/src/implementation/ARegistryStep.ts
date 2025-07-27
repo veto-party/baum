@@ -8,6 +8,8 @@ import { GroupCollection } from './GroupCollection.js';
 export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   private collection: ICollection = new GroupCollection([]);
 
+  private modifiers = new Set<typeof this.modifyJSON>();
+
   private oldFiles: Record<string, string> = {};
 
   constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
@@ -18,6 +20,11 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   }
 
   abstract getPublishStep(workspace: IWorkspace): IStep | undefined;
+
+  public addModifier(modifier: typeof this.modifyJSON): this {
+    this.modifiers.add(modifier);
+    return this;
+  }
 
   private modifyVersion(version: string, pm: IPackageManager) {
     const resolved = pm.modifyToRealVersionValue(version);
@@ -61,6 +68,10 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     });
 
     await this.modifyJSON?.(jsonFile, manager, workspace, pm, root);
+
+    for (const modifier of this.modifiers) {
+      await modifier?.(jsonFile, manager, workspace, pm, root);
+    }
 
     await FileSystem.writeFile(givenPath, JSON.stringify(jsonFile));
     return true;

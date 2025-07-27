@@ -2,10 +2,10 @@ import { isAbsolute, resolve } from 'node:path';
 import uniqBy from 'lodash.uniqby';
 import { CachedFN } from '../implementation/annotation/Cached.js';
 
-export const dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'bundledDependencies'];
-
 export class Resolver {
   private constructor() {}
+
+  public static readonly dependencyFields = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'bundledDependencies'];
 
   @CachedFN(false)
   public static ensureAbsolute(path: string, to?: string) {
@@ -16,7 +16,7 @@ export class Resolver {
   public static resolve(directory: string, packageJson: Record<string, any>, overrides: Record<string, string>, ignores?: string[]) {
     const packageAndVersion: [string, string][] = [];
 
-    const givenFields = ignores && ignores.length > 0 ? dependencyFields.filter((el) => !ignores.includes(el)) : dependencyFields;
+    const givenFields = ignores && ignores.length > 0 ? Resolver.dependencyFields.filter((el) => !ignores.includes(el)) : Resolver.dependencyFields;
     for (const field of givenFields) {
       if (!packageJson?.[field]) continue;
 

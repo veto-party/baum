@@ -8,7 +8,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   private diffMap = new Map<string, DiffResult['files'] | typeof skipped>();
 
   @CachedFN(false)
-  private ensureGit(root: string) {
+  private static ensureGit(root: string) {
     return simpleGit(root, {
       baseDir: root
     });
@@ -19,15 +19,15 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
       return skipped;
     }
 
-    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, this.ensureGit(root)))) {
+    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, ConditionalGitDiffStep.ensureGit(root)))) {
       return skipped;
     }
 
-    const gitRoot = await this.ensureGit(root).revparse('--show-toplevel');
+    const gitRoot = await ConditionalGitDiffStep.ensureGit(root).revparse('--show-toplevel');
     base = Resolver.ensureAbsolute(base, root);
 
     if (!this.diffMap.has(base)) {
-      let result = await this.getGitDiff(root);
+      let result = await ConditionalGitDiffStep.getGitDiff(root, await this.targetBranchGetter(root));
       if (result !== skipped) {
         result = result.filter((file) => Resolver.ensureAbsolute(file.file, gitRoot).startsWith(base));
       }
@@ -38,10 +38,9 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   }
 
   @CachedFN(true)
-  private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
-    const branch = await this.targetBranchGetter(root);
+  public static async getGitDiff(root: string, branch: string): Promise<DiffResult['files'] | typeof skipped> {
 
-    const git = this.ensureGit(root);
+    const git = ConditionalGitDiffStep.ensureGit(root);
     const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
 
     let prefix = 'refs/heads/';
@@ -68,8 +67,11 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
       }
     }
 
-    const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`);
+    return await ConditionalGitDiffStep.diffSummary(root, `${prefix}${branch}`);
+  }
 
+  public static async diffSummary(root: string, target: string) {
+    const raw_changes = await ConditionalGitDiffStep.ensureGit(root).diffSummary(`HEAD..${target}`);
     return raw_changes.files ?? [];
   }
 
@@ -78,7 +80,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
       return this.__targetBranchGetter;
     }
 
-    const git = this.ensureGit(root);
+    const git = ConditionalGitDiffStep.ensureGit(root);
     return this.__targetBranchGetter(root, git);
   }
 
