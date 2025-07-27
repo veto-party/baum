@@ -29,7 +29,8 @@ class ModifyNPMRC implements IStep {
     if (this.previousFileContent) {
       // We should ensure execution order for modifynpmrc cleanup. (Store when which modifier was applied and make sure that we are not older then the latest revert) (static storage)
       if (SyncFileSystem.existsSync(Path.join(workspace.getDirectory(), '.npmrc'))) {
-        await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent);
+        // Buffer is okay, but types have changed, so any cast.
+        await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent as any);
       }
     } else {
       await FileSystem.rm(Path.join(workspace.getDirectory(), '.npmrc'));
