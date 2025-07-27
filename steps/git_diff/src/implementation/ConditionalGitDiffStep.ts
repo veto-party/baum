@@ -1,28 +1,32 @@
 import Path from 'node:path';
-import { ConditionalStep, type IStep } from '@veto-party/baum__core';
+import { ConditionalStep, Resolver, type IStep } from '@veto-party/baum__core';
 import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
 
 export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
-  private diffMap = new Map<string, DiffResult | typeof skipped>();
+  private diffMap = new Map<string, DiffResult['files'] | typeof skipped>();
 
-  private async ensureGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
+  private async ensureGitDiff(root: string, base: string): Promise<DiffResult['files'] | typeof skipped> {
     base = Path.resolve(base);
     if (!this.diffMap.has(base)) {
-      this.diffMap.set(base, await this.getGitDiff(root, base));
+      let result = await this.getGitDiff(root);
+      if (result !== skipped) {
+        result = result.filter((file) => Resolver.ensureAbsolute(file.file).startsWith(base));
+      }
+      this.diffMap.set(base, result);
     }
 
     return this.diffMap.get(base)!;
   }
 
-  private async getGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
+  private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
     if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
       return skipped;
     }
 
     const git = simpleGit(root, {
-      baseDir: base
+      baseDir: root
     });
 
     if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
@@ -35,9 +39,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
 
     const raw_changes = await git.diffSummary(`origin/${branch}..HEAD`);
 
-    console.log(raw_changes);
-
-    return raw_changes;
+    return raw_changes.files;
   }
 
   constructor(
@@ -53,7 +55,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
         return true;
       }
 
-      return diff.changed !== 0;
+      return diff.length !== 0;
     });
   }
 }
