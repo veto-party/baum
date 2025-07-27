@@ -47,7 +47,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     );
     const hasPulled =
       hasFetched &&
-      (await git.pull('origin', branch).then(
+      (await git.pull(undefined, branch).then(
         () => true,
         () => false
       ));
