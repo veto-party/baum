@@ -52,8 +52,10 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
         () => false
       ));
 
-    const raw_changes = await git.diffSummary(`HEAD..${hasPulled ? 'origin/' : ''}${branch}`).catch(() => {
-      return git.diffSummary(`${hasPulled ? 'origin/' : ''}${branch}..HEAD`);
+    const commitId = await git.revparse(`${hasPulled ? 'origin/' : ''}${branch}`);
+
+    const raw_changes = await git.diffSummary(`HEAD..${commitId}`).catch(() => {
+      return git.diffSummary(`${commitId}..HEAD`);
     });
 
     console.log(raw_changes);
