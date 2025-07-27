@@ -15,10 +15,10 @@ It is built with flexibility in mind.
 or
 `yarn add baum`
 
-1. Create a file named `baum.ts` in any diretory that belongs to the ci, it does not need to be part of the monorepo.
-2. Define some steps in your baum.ts file like in `ci/test/steps.ts` ignore the file name `steps.ts`, since these steps are used in multiple places whilist the `baum.ts` file just contains the configuration & also imports runs the function defined in `steps.ts`.
-3. Define the baum command in the package.json like this: `baum --config ci/test`.
-4. Now Run the defined command.
+2. Create a file named `baum.ts` in any diretory that belongs to the ci, it does not need to be part of the monorepo.
+3. Define some steps in your baum.ts file like in `ci/test/steps.ts` ignore the file name `steps.ts`, since these steps are used in multiple places whilist the `baum.ts` file just contains the configuration & also imports runs the function defined in `steps.ts`.
+4. Define the baum command in the package.json like this: `baum --config ci/test`.
+5. Now Run the defined command.
 
 
 ## How to install for development ?
