@@ -11,15 +11,14 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
   constructor(private renderer: IRendererManager<T, Self>) {}
 
   private searchStrategy: ISearchStrategy | undefined;
-  private metadatas: Map<IWorkspace, InferStructure<T>> = new Map();
 
   public setSearchStrategy(strategy: ISearchStrategy) {
     this.searchStrategy = strategy;
   }
 
   async execute(_workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    const metadatas = await this.collectAll(packageManager, rootDirectory)
-    this.renderer.render({ packageManager, rootDirectory }, this.metadatas);
+    const metadatas = await this.collectAll(packageManager, rootDirectory);
+    this.renderer.render({ packageManager, rootDirectory }, metadatas);
   }
 
   @CachedFN(true)
@@ -71,7 +70,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
 
   @CachedFN(false, [true, true, false, false, false]) /** Since content should not change, we ignore it whilist chaching */
   private ensureVirtualWorkspaceCreatedAndSet(packageName: string, packageVersion: string, packagePath: string, packageContent: any): IWorkspace {
-    return new VirtualWorkspace(packageName, packageVersion, packagePath, packageContent)
+    return new VirtualWorkspace(packageName, packageVersion, packagePath, packageContent);
   }
 
   async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {}
