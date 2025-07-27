@@ -29,7 +29,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           values.forEach((promiseTuple) => promiseTuple[index](value));
         };
 
-      context.value =  function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
+      context.value = function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
         let lookupArgs = [...givenArgs];
         if (paramsInclude !== undefined) {
           lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsInclude?.[index]));
