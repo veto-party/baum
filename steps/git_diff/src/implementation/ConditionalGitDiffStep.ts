@@ -37,6 +37,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     return this.diffMap.get(base)!;
   }
 
+  @CachedFN(true)
   private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
     const git = this.ensureGit(root);
     const branch = await this.targetBranchGetter(root, git);
@@ -59,14 +60,14 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
 
       if (hasPulled) {
         prefix = `${remote}/`;
+        break;
       }
     }
 
-    const commitId = await git.revparse(`${prefix}${branch}`);
 
-    const raw_changes = await git.diffSummary(`HEAD..${commitId}`).catch((error) => {
+    const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`).catch((error) => {
       console.warn(error);
-      return git.diffSummary(`${commitId}..HEAD`);
+      return git.diffSummary(`${prefix}${branch}..HEAD`);
     });
 
     console.log(raw_changes);
