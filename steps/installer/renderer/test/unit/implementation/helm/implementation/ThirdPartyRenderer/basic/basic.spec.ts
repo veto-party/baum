@@ -87,7 +87,6 @@ describe('A job renderer test', () => {
     writers.push(result);
   });
 
-
   it('Should write them to the file system and they should match the contents.', async () => {
     await Promise.all(
       writers.map((writer) =>

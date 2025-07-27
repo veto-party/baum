@@ -1,4 +1,4 @@
-import type { IDependent } from "@veto-party/baum__core";
+import type { IDependent } from '@veto-party/baum__core';
 
 class DependentMock implements IDependent {
   constructor(
