@@ -42,12 +42,16 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     const git = this.ensureGit(root);
     const branch = await this.targetBranchGetter(root, git);
 
-    const remotes = (await git.listRemote()).split('\n').map((el) => el.trim());
+    const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
 
     let prefix = '';
 
     for (const remote of remotes) {
-      console.log(remote);
+      
+      if (remote === '') {
+        continue;
+      }
+
       const hasFetched = await git.fetch(remote).then(
       () => true,
       () => false
