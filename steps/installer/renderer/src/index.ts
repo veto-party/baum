@@ -3,11 +3,12 @@ export { ChartRenderer } from './implementation/helm/implementation/ChartRendere
 export { ConfigMapRenderer } from './implementation/helm/implementation/ConfigMapRenderer.js';
 export { DeploymentRenderer } from './implementation/helm/implementation/DeploymentRenderer.js';
 export { JobRenderer } from './implementation/helm/implementation/JobRenderer.js';
-export { NetworkRenderer } from './implementation/helm/implementation/NetworkRenderer.js';
-export { SecretRenderer } from './implementation/helm/implementation/SecretRenderer.js';
+export { NetworkRenderer } from './implementation/helm/implementation//Network/NetworkRenderer.js';
+export { SecretRenderer } from './implementation/helm/implementation/Secret/SecretRenderer.js';
 export { ServiceRenderer } from './implementation/helm/implementation/ServiceRenderer.js';
 export { ThirdPartyRenderer } from './implementation/helm/implementation/ThirdPartyRenderer.js';
 export { TraefikExposeRenderer } from './implementation/helm/implementation/Expose/TraefikExposeRenderer.js';
+export { GatewayExposeRenderer } from './implementation/helm/implementation/Expose/GatewayExposeRenderer.js';
 export { ValuesRenderer } from './implementation/helm/implementation/ValuesRenderer.js';
 export type { IConfigMapNameProvider } from './implementation/helm/interface/factory/IConfigMapRenderer.js';
 export type { IContainerName } from './implementation/helm/interface/IContainerName.js';
