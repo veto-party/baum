@@ -41,20 +41,31 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     const git = this.ensureGit(root);
     const branch = await this.targetBranchGetter(root, git);
 
-    const hasFetched = await git.fetch().then(
+    const remotes = await git.listRemote();
+
+    let prefix = '';
+
+    for (const remote of remotes) {
+      const hasFetched = await git.fetch(remote).then(
       () => true,
       () => false
     );
-    const hasPulled =
-      hasFetched &&
-      (await git.pull(undefined, branch).then(
-        () => true,
-        () => false
-      ));
+      const hasPulled =
+        hasFetched &&
+        (await git.pull(remote, branch).then(
+          () => true,
+          () => false
+        ));
 
-    const commitId = await git.revparse(`${hasPulled ? 'origin/' : ''}${branch}`);
+      if (hasPulled) {
+        prefix = `${remote}/`;
+      }
+    }
 
-    const raw_changes = await git.diffSummary(`HEAD..${commitId}`).catch(() => {
+    const commitId = await git.revparse(`${prefix}${branch}`);
+
+    const raw_changes = await git.diffSummary(`HEAD..${commitId}`).catch((error) => {
+      console.warn(error);
       return git.diffSummary(`${commitId}..HEAD`);
     });
 
