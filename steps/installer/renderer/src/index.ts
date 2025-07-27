@@ -7,7 +7,7 @@ export { NetworkRenderer } from './implementation/helm/implementation/NetworkRen
 export { SecretRenderer } from './implementation/helm/implementation/SecretRenderer.js';
 export { ServiceRenderer } from './implementation/helm/implementation/ServiceRenderer.js';
 export { ThirdPartyRenderer } from './implementation/helm/implementation/ThirdPartyRenderer.js';
-export { TraefikExposeRenderer } from './implementation/helm/implementation/TraefikExposeRenderer.js';
+export { TraefikExposeRenderer } from './implementation/helm/implementation/Expose/TraefikExposeRenderer.js';
 export { ValuesRenderer } from './implementation/helm/implementation/ValuesRenderer.js';
 export type { IConfigMapNameProvider } from './implementation/helm/interface/factory/IConfigMapRenderer.js';
 export type { IContainerName } from './implementation/helm/interface/IContainerName.js';

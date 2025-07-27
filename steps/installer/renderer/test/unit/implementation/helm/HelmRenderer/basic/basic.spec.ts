@@ -11,7 +11,7 @@ import { JobRenderer } from '../../../../../../src/implementation/helm/implement
 import { NetworkRenderer } from '../../../../../../src/implementation/helm/implementation/NetworkRenderer.js';
 import { SecretRenderer } from '../../../../../../src/implementation/helm/implementation/SecretRenderer.js';
 import { ThirdPartyRenderer } from '../../../../../../src/implementation/helm/implementation/ThirdPartyRenderer.js';
-import { TraefikExposeRenderer } from '../../../../../../src/implementation/helm/implementation/TraefikExposeRenderer.js';
+import { TraefikExposeRenderer } from '../../../../../../src/implementation/helm/implementation/Expose/TraefikExposeRenderer.js';
 import type { IConfigMapNameProvider } from '../../../../../../src/implementation/helm/interface/factory/IConfigMapRenderer.js';
 import type { IContainerName } from '../../../../../../src/implementation/helm/interface/IContainerName.js';
 import type { IDeploymentNameProvider } from '../../../../../../src/implementation/helm/interface/IDeploymentNameProvider.js';
