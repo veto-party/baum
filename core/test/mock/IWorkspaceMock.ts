@@ -5,11 +5,20 @@ class IWorkspaceMock implements IWorkspace {
   constructor(
     private name: string,
     private version: string,
-    private dependents: IDependent[]
+    private dependents: IDependent[],
+    private overrides: Record<string, string> = {}
   ) {}
 
   getFreshWorkspace(): IWorkspace {
     return this;
+  }
+  
+  getOverrides(): Record<string, string> {
+    return this.overrides;
+  }
+
+  setOverrides(overrides: Record<string, string>): void {
+    this.overrides = overrides;
   }
 
   getName(): string {

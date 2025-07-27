@@ -15,7 +15,7 @@ export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) =>
   }
 };
 
-export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: TypeTuple<Parameters<T>, boolean | undefined>) => {
+export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: [...TypeTuple<Parameters<T>, boolean | undefined>, ...((boolean|undefined)[])]) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 

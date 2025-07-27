@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { CachedFN, RunOnce, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { CachedFN, Resolver, RunOnce, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
 import type { IRendererManager } from '@veto-party/baum__steps__installer__renderer';
 import type { ISearchStrategy } from './search/ISearchStrategy.js';
@@ -27,21 +27,17 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     this.renderer.render({ packageManager, rootDirectory}, this.metadatas);
   }
 
-  private static ensureAbsolute(path: string) {
-    return isAbsolute(path) ? path : resolve(path);
-  }
-
   public async collect(workspace: IWorkspace) {
     if (!this.searchStrategy) {
       throw new Error('No search stragety defined.');
     }
 
     const files = await this.searchStrategy.search(workspace.getDirectory());
-    const absWorkspacePath = InstallerRunner.ensureAbsolute(workspace.getDirectory());
+    const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
 
     for (const file of files) {
 
-      if (InstallerRunner.ensureAbsolute(file.packagePath) === absWorkspacePath) {
+      if (Resolver.ensureAbsolute(file.packagePath) === absWorkspacePath) {
         const fileContent = JSON.parse((await readFile(file.resultPath)).toString());
         this.renderer.getGroup().verifyObject(fileContent);
 

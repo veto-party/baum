@@ -15,6 +15,8 @@ export { RunOnce } from './implementation/annotation/RunOnce.js';
 export { TemplateBuilder } from './implementation/Step/abstract/TemplateExecutor/TemplateBuilder.js';
 export { ATemplateExecutor, type callbackArgs } from './implementation/Step/abstract/TemplateExecutor/ATemplateExecutor.js';
 
+export { Resolver } from './utils/Resolver.js'; 
+
 /** @internal */
 export { ModifyNPMRC } from './implementation/Step/abstract/TemplateExecutor/intent/implementation/PublishIntent/ModifyNPMRC.js';
 export { CommandStep } from './implementation/Step/CommandStep.js';

@@ -13,7 +13,10 @@ const pm = new (class implements IExecutablePackageManager {
   getExecutorParser(): IExecutablePackageManagerParser {
     throw new Error('Method not implemented.');
   }
-  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<ReturnType<(typeof FileSystem)['writeFile']>[1]> | undefined {
+  clearWorkspaceCache(): void {
+    throw new Error('Method not implemented.');
+  }
+  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<typeof FileSystem.writeFile>[1] | undefined> {
     throw new Error('Method not implemented.');
   }
   getLockFileName(): string {
