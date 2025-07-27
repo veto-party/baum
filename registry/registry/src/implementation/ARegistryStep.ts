@@ -12,7 +12,15 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
+
+  private cleanup: (() => any)[] = [];
+
   constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
+
+  addCleanup(cb: () => any): this {
+    this.cleanup.push(cb);
+    return this;
+  }
 
   addExecutionStep(name: string, step: IStep): this {
     this.collection.addExecutionStep(name, step);
@@ -57,15 +65,15 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     const allWorkspaces = await pm.readWorkspace(root);
 
-    keysToModify.forEach((key) => {
-      Object.entries((jsonFile[key] ?? {}) as Record<string, string>).forEach(([k, v]) => {
+    await Promise.all(keysToModify.flatMap((key) => {
+      Object.entries((jsonFile[key] ?? {}) as Record<string, string>).map(async ([k, v]) => {
         if (!allWorkspaces.some((w) => w.getName() === k)) {
           return;
         }
         const resolved = this.modifyVersion(v, pm);
-        jsonFile[key][k] = manager.getLatestVersionFor(k, resolved) ?? resolved;
+        jsonFile[key][k] = await manager.getLatestVersionFor(k, resolved) ?? resolved;
       });
-    });
+    }));
 
     await this.modifyJSON?.(jsonFile, manager, workspace, pm, root);
 
@@ -78,11 +86,17 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if ((await this.startExecution(workspace, packageManager, rootDirectory)) !== false) {
-      await (await this.getInstallStep(workspace))?.execute(workspace, packageManager, rootDirectory);
-      await this.collection.execute(workspace, packageManager, rootDirectory);
-      await this.getPublishStep(workspace)?.execute(workspace, packageManager, rootDirectory);
-      await this.doClean(workspace);
+    try {
+      if ((await this.startExecution(workspace, packageManager, rootDirectory)) !== false) {
+        await (await this.getInstallStep(workspace))?.execute(workspace, packageManager, rootDirectory);
+        await this.collection.execute(workspace, packageManager, rootDirectory);
+        await this.getPublishStep(workspace)?.execute(workspace, packageManager, rootDirectory);
+        await this.doClean(workspace);
+      }
+    } finally {
+      for (const cleanup of this.cleanup) {
+        await cleanup?.();
+      }
     }
   }
 

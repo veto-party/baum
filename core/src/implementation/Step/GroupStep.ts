@@ -2,11 +2,25 @@ import type { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 export class GroupStep implements IStep, IBaumRegistrable {
+
+  private cleanup: (() => any)[] = [];
+
   constructor(protected steps: IStep[]) {}
 
+  addCleanup(cb: () => any): this {
+    this.cleanup.push(cb);
+    return this;
+  }
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    for (const step of this.steps) {
-      await step.execute(workspace, packageManager, rootDirectory);
+    try {
+      for (const step of this.steps) {
+        await step.execute(workspace, packageManager, rootDirectory);
+      }
+    } finally {
+      for (const cleanup of this.cleanup) {
+        await cleanup?.();
+      }
     }
   }
 

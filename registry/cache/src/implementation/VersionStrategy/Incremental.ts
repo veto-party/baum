@@ -14,13 +14,17 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
         protected defaultVersion: string
     ) { }
 
+    getLatestVersionFor(name: string, versionRange: string): Promise<string | undefined> {
+        return this.__getOldVersionNumber(name);
+    }
+
     getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
         return this.__getCurrentVersionNumber(workspace);
     }
 
     @CachedFN(true)
     protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
-        return this.versionStatusUpdates.has(workspace) ? this.versionStatusUpdates.get(workspace) ?? this.defaultVersion : await this.getOldVersionNumber(workspace);
+        return this.versionStatusUpdates.has(workspace) ? this.versionStatusUpdates.get(workspace) ?? this.defaultVersion : await this.__getOldVersionNumber(workspace.getName());
     }
 
     protected async increment(workspace: IWorkspace, version: string) {
@@ -40,11 +44,15 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
         throw new Error(`Cannot increment version from ${await this.__getCurrentVersionNumber(workspace)} to ${version}, since to is smaller the from.`);
     }
 
-    async getOldVersionNumber(workspace: IWorkspace): Promise<string> {
+    async __getOldVersionNumber(workspaceName: string): Promise<string> {
 
-        const overrideVersion = (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspace.getName())));
-        overrideVersion !== undefined && this.nameTransformer.enableOverrideFor(workspace.getName());
-        return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspace.getName()))) ?? this.defaultVersion;
+        const overrideVersion = (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspaceName)));
+        overrideVersion !== undefined && this.nameTransformer.enableOverrideFor(workspaceName);
+        return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspaceName))) ?? this.defaultVersion;
+    }
+
+    async getOldVersionNumber(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<string> {
+        return this.__getOldVersionNumber(workspace.getName());
     }
 
     async flushNewVersion(workspace: IWorkspace): Promise<void> {

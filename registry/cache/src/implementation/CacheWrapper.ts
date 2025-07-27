@@ -1,16 +1,16 @@
-import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IWorkspace, Resolver } from "@veto-party/baum__core";
+import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, IStep, type IWorkspace, Resolver } from "@veto-party/baum__core";
 import type { ICacheWrapper } from "../ICacheWrapper.js";
-import type { ARegistryStep } from "@veto-party/baum__registry";
 import type { IVersionStrategy } from "../IVersionStrategy.js";
 import type { INameTransformer } from "../INameTransformer.js";
 import semver from 'semver';
+import type { ARegistryStep } from "@veto-party/baum__registry";
 
 export class CacheWrapper implements ICacheWrapper {
 
     public constructor(
         private nameTransformer: INameTransformer,
         private versionStrategy: IVersionStrategy,
-        private baum: IBaumManagerConfiguration 
+        private baum: IBaumManagerConfiguration
     ) {
         baum.addCleanup(async () => {
             await this.versionStrategy.getAttachedVersionManager?.()?.flush?.();
@@ -29,6 +29,7 @@ export class CacheWrapper implements ICacheWrapper {
 
     async registerModifyPackageJSON(step: ARegistryStep): Promise<void> {
         const fields = Resolver.dependencyFields.filter((el) => el !== 'devDepdencies');
+        step.addModifier()
         step.addModifier(async (file, _versionManager, workspace, packageManger, root) => {
 
             const workspaces  = await packageManger.readWorkspace(root);
@@ -56,7 +57,7 @@ export class CacheWrapper implements ICacheWrapper {
                     }
 
                     await this.nameTransformer.enableOverrideFor(workspace.getName());
-                    file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
+                    file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
                 }
             }
 

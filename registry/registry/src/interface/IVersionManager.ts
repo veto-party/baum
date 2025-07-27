@@ -1,3 +1,3 @@
 export interface IVersionManager {
-  getLatestVersionFor(name: string, versionRange: string): string | undefined;
+  getLatestVersionFor(name: string, versionRange: string): string | undefined | Promise<string | undefined>;
 }
