@@ -4,7 +4,7 @@ import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IVersionManager } from '@veto-party/baum__registry';
 import { PublicRegistryStep } from '@veto-party/baum__registry__public';
 import { VerdaccioRegistryStep } from '@veto-party/baum__registry__verdaccio';
-import { type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, PKGMStep, ParallelStep } from 'baum';
+import { type IBaumManagerConfiguration, type IPackageManager, type IWorkspace, ParallelStep, PKGMStep } from 'baum';
 import { ConditionalGitDiffStep } from '../steps/git_diff/src/index.js';
 
 const __filename = fileURLToPath(import.meta.url);

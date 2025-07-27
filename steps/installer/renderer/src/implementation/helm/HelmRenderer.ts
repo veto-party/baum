@@ -4,15 +4,13 @@ import type { MergeDeepForToDefinitionStructureWithTupleMerge } from '@veto-part
 import { get, isEqual, merge, uniq } from 'lodash-es';
 import type { INameProvider } from '../../interface/INameProvider.js';
 import type { InferStructure, IRenderer, ProjectMetadata } from '../../interface/IRenderer.js';
-import type { IFeatureManager, IFilter, IRendererFeatureManager, IRendererManager, InferNewRenderer, InferToFeatureManager } from '../../interface/IRendererManager.js';
+import type { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from '../../interface/IRendererManager.js';
 import type { IVersionProvider } from '../../interface/IVersionProvider.js';
 import { getDeepKeys } from '../../utility/getDeepKeys.js';
 import { ARendererManager } from '../ARendererManager.js';
 import { RenderFeatureManager } from '../RenderFeatureManager.js';
 import { ChartRenderer } from './implementation/ChartRenderer.js';
 import { ValuesRenderer } from './implementation/ValuesRenderer.js';
-import type { IImageGenerator } from './interface/IImageGenerator.js';
-import type { IWritable } from './interface/IWritable.js';
 import type { I3rdPartyRenderer, ThirdPartyRendererStorage } from './interface/factory/I3rdPartyRenderer.js';
 import type { ConfigMappingWithStore, IConfigMapRenderer, IConfigMapStructure } from './interface/factory/IConfigMapRenderer.js';
 import type { IDeploymentRenderer, ScalingStorage, SystemUsageStorage, UpdateStorage } from './interface/factory/IDeploymentRenderer.js';
@@ -20,6 +18,8 @@ import type { ExposeStructure, IExposeRenderer } from './interface/factory/IExpo
 import type { IJobRenderer, JobStructure } from './interface/factory/IJobRenderer.js';
 import type { INetworkRenderer, NetworkStorage } from './interface/factory/INetworkRenderer.js';
 import type { ISecretRenderer } from './interface/factory/ISecretRenderer.js';
+import type { IImageGenerator } from './interface/IImageGenerator.js';
+import type { IWritable } from './interface/IWritable.js';
 import 'set.prototype.difference/auto';
 
 type VariableStorageFeature = typeof BaseInstaller.makeInstance extends () => IFeature<infer A0, infer A1, infer A2>
@@ -34,7 +34,6 @@ type BindingStorageFeature = typeof BaseInstaller.makeInstance extends () => IFe
 
 const NOT_FOUND = Symbol('NOT_FOUND');
 
-
 interface IHelmRendererPublic {
   /**
    * These are the bindings for the given workspace.
@@ -42,42 +41,42 @@ interface IHelmRendererPublic {
    * A binding is a key that maps to a key of a property.
    * It is done this way so that a variable can be refenced multiple times (from multiple bindings).
    */
-  bindingStorage:  Map<IWorkspace, Map<string, string>>;
+  bindingStorage: Map<IWorkspace, Map<string, string>>;
 
   /**
    * Properties are a (workspace|undefined) mapping, where undefined represents the global scope.
    * Properties are the values (environment + secret environment), which in turn are consumed by the bindings.
    */
-  propertyStorage : Map<IWorkspace | undefined, IConfigMapStructure>;
+  propertyStorage: Map<IWorkspace | undefined, IConfigMapStructure>;
 
   /**
    * This is the metadata about scaling the containers.
    *
    * It contains info about how mutch and when to scale the container.(s)
    */
-  scalingStorage:  Map<IWorkspace, ScalingStorage>;
+  scalingStorage: Map<IWorkspace, ScalingStorage>;
 
   /**
    * This is the metadata about updating the containers.
    *
    * It contains the info on how to update the container.(s)
    */
-  updateStorage:  Map<IWorkspace, UpdateStorage>;
+  updateStorage: Map<IWorkspace, UpdateStorage>;
 
   /**
    * A structure that is an array of networks, which contains the info on how the services are connected.
    */
-  networkStorage:  Map<IWorkspace, NetworkStorage>;
+  networkStorage: Map<IWorkspace, NetworkStorage>;
 
   /**
    * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
    */
-  systemUsageStorage:  Map<IWorkspace, SystemUsageStorage>;
+  systemUsageStorage: Map<IWorkspace, SystemUsageStorage>;
 
   /**
    * This is the service mapping it contains a mapping for external helm charts.
    */
-  serviceStorage:  Map<IWorkspace | undefined, Map<string | number, ThirdPartyRendererStorage>>;
+  serviceStorage: Map<IWorkspace | undefined, Map<string | number, ThirdPartyRendererStorage>>;
 
   /**
    * Jobs are a (workspace|undefined) mapping, where undefined represents the global scope.
@@ -86,13 +85,13 @@ interface IHelmRendererPublic {
    *
    * This is called jobs since every (workspace|undefined) can have multiple jobs which are accessed by name.
    */
-  jobStorage:  Map<IWorkspace | undefined, Map<string, JobStructure>>;
+  jobStorage: Map<IWorkspace | undefined, Map<string, JobStructure>>;
 
   /**
    * Job bindings are a (workspace|undefined)(string) which in turn are used to map the scoped or global variables(evironment + secrets) to a specified job.
    * An entry is not necessarrly presnet when a job storage is present, if this is not present, there are no bindings to a job.
    */
-  jobBindingStorage:  Map<IWorkspace | undefined, Map<string, Map<string, string>>>;
+  jobBindingStorage: Map<IWorkspace | undefined, Map<string, Map<string, string>>>;
 
   /**
    * Job properties are a (workspace|undefined)(string) which in turn can be used multiple times.
@@ -101,23 +100,23 @@ interface IHelmRendererPublic {
    * The job somejob is defined and contains a variable called foo.
    * Then you access it using somejob.variable.a.
    */
-  jobPropertyStorage:  Map<IWorkspace | undefined, Map<string, IConfigMapStructure>>;
+  jobPropertyStorage: Map<IWorkspace | undefined, Map<string, IConfigMapStructure>>;
 
   /**
    * A structure that is an array of networks, which contains the info on how the jobs are connected to services.
    */
-  jobNetworkStrorage:  Map<IWorkspace | undefined, Map<string, NetworkFeature extends IFeature<any, any, infer Structure> ? Structure : never>>;
+  jobNetworkStrorage: Map<IWorkspace | undefined, Map<string, NetworkFeature extends IFeature<any, any, infer Structure> ? Structure : never>>;
 
   /**
    * A structure that is an object which contains system limits and requests, which in turn tell kubernetes on how to limit / allocate the ressources for the container(s) / pod(s).
    */
-  jobSystemUsageStorage:  Map<IWorkspace | undefined, Map<string, SystemUsageFeature extends IFeature<any, any, infer Structure> ? Structure : never>>;
+  jobSystemUsageStorage: Map<IWorkspace | undefined, Map<string, SystemUsageFeature extends IFeature<any, any, infer Structure> ? Structure : never>>;
 
   /**
    * This is the storage for all the bindings that come from the global storage.
    * It is later used to build the global config map and the global config secret.
    */
-  globalBindingStorage : Map<string | number, ConfigMappingWithStore>;
+  globalBindingStorage: Map<string | number, ConfigMappingWithStore>;
 
   /**
    * Writers are the temporary stored version a yaml file.
@@ -126,15 +125,13 @@ interface IHelmRendererPublic {
    * A writer is usually returned by a renderer.
    * It might contain usefull information for additional steps.
    */
-  writers : Set<IWritable>;
+  writers: Set<IWritable>;
 
   networkRenderer: INetworkRenderer;
   versionProvider: IVersionProvider;
   nameProvider: INameProvider;
 
   buildPropertyMap(properties: Map<IWorkspace | undefined, IConfigMapStructure>, givenWorkspace: IWorkspace | undefined): Map<IWorkspace | undefined, IConfigMapStructure>;
-
-
 }
 
 export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererManager<T, IHelmRendererPublic> implements IHelmRendererPublic {
@@ -650,23 +647,14 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     const propertyMap = new Map([[givenWorkspace, ensureKey(givenWorkspace)]]);
 
     const mergeWithWorkspace = (workspace: IWorkspace | undefined) => {
+      propertyMap.set(workspace, HelmRenderer.mergeElements(ensureKey(workspace), new Map(Array.from(ensureJob(workspace).entries()).flatMap(([baseKey, value]) => Array.from(value.entries()).map(([key, v]) => [`${baseKey}.${key}`, v] as const), 1))));
       propertyMap.set(
         workspace,
         HelmRenderer.mergeElements(
           ensureKey(workspace),
           new Map(
-            Array.from(ensureJob(workspace).entries())
-              .flatMap(([baseKey, value]) => Array.from(value.entries()).map(([key, v]) => [`${baseKey}.${key}`, v] as const), 1)
-          )
-        )
-      );
-      propertyMap.set(
-        workspace,
-        HelmRenderer.mergeElements(
-          ensureKey(workspace),
-          new Map(
-            Array.from(ensureService(workspace).entries())
-              .flatMap(([baseKey, value]) =>
+            Array.from(ensureService(workspace).entries()).flatMap(
+              ([baseKey, value]) =>
                 Object.entries(value.properties ?? {}).map(
                   ([key, v]) =>
                     [
@@ -677,8 +665,8 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
                       }
                     ] as const
                 ),
-                1
-              )
+              1
+            )
           )
         )
       );

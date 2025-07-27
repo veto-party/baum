@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
-import { CachedFN, Resolver, RunOnce, type IExecutablePackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { isAbsolute, join, resolve } from 'node:path';
+import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
 import type { IRendererManager } from '@veto-party/baum__steps__installer__renderer';
-import type { ISearchStrategy } from './search/ISearchStrategy.js';
 import type { InferStructure } from '@veto-party/baum__steps__installer__renderer/src/interface/IRenderer.js';
-import { isAbsolute, join, resolve } from 'node:path';
+import type { ISearchStrategy } from './search/ISearchStrategy.js';
 import { VirtualWorkspace } from './VirtualWorkspace.js';
 
 @RunOnce()
@@ -24,7 +24,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
       await this.collect(workspace);
     }
 
-    this.renderer.render({ packageManager, rootDirectory}, this.metadatas);
+    this.renderer.render({ packageManager, rootDirectory }, this.metadatas);
   }
 
   public async collect(workspace: IWorkspace) {
@@ -36,17 +36,16 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
 
     for (const file of files) {
-
       if (Resolver.ensureAbsolute(file.packagePath) === absWorkspacePath) {
         const fileContent = JSON.parse((await readFile(file.resultPath)).toString());
         this.renderer.getGroup().verifyObject(fileContent);
 
         this.metadatas.set(workspace, fileContent);
-        
+
         continue;
       }
 
-      const [fileContent, packageJSON] = (await Promise.all([readFile(file.resultPath), readFile(file.packagePath)])).map((file => JSON.parse(file.toString())));
+      const [fileContent, packageJSON] = (await Promise.all([readFile(file.resultPath), readFile(file.packagePath)])).map((file) => JSON.parse(file.toString()));
       this.renderer.getGroup().verifyObject(fileContent);
 
       const { name, version } = packageJSON;

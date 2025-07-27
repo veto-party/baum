@@ -3,7 +3,7 @@ import { EOL } from 'node:os';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
 import { merge } from 'lodash-es';
-import type { ExposeStructure, IExposeRenderResult, IExposeRenderer } from '../interface/factory/IExposeRenderer.js';
+import type { ExposeStructure, IExposeRenderer, IExposeRenderResult } from '../interface/factory/IExposeRenderer.js';
 import type { AToken } from '../yaml/AToken.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
 import { to_structured_data } from '../yaml/to_structured_data.js';

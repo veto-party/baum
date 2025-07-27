@@ -1,13 +1,10 @@
-import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
-
+import Crypto from 'node:crypto';
 import FileSystem from 'node:fs/promises';
-import yaml from 'yaml';
-
 import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import Crypto from 'node:crypto';
+import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
 import { DockerBuildStep } from '@veto-party/baum__steps__docker';
+import yaml from 'yaml';
 
 const __rootDir = Path.dirname(fileURLToPath(import.meta.resolve('@veto-party/baum__registry__verdaccio/package.json')));
 

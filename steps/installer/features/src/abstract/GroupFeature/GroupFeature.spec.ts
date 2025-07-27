@@ -1,4 +1,4 @@
-import { type FromSchema, asConst } from 'json-schema-to-ts';
+import { asConst, type FromSchema } from 'json-schema-to-ts';
 import { describe, expect, test } from 'vitest';
 import { BindingFeature } from '../../implementation/Binding/Binding.js';
 import { definitionDefinitionPattern } from '../../implementation/Binding/definition.js';

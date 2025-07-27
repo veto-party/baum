@@ -2,7 +2,9 @@
   "name": "@veto-party/baum__steps__git_diff",
   "type": "module",
   "main": "./src/index.ts",
-  "files": ["./dist/**"],
+  "files": [
+    "./dist/**"
+  ],
   "scripts": {
     "build": "tsc --project ./build.tsconfig.json",
     "test": "node --loader ts-node/esm ./test/start-testing.mjs"
