@@ -10,9 +10,12 @@ export class CacheWrapper implements ICacheWrapper {
     public constructor(
         private nameTransformer: INameTransformer,
         private versionStrategy: IVersionStrategy,
-        private baum: IBaumManagerConfiguration,
-        private currentVersionManager: 
-    ) {}
+        private baum: IBaumManagerConfiguration 
+    ) {
+        baum.addCleanup(async () => {
+            await this.versionStrategy.getAttachedVersionManager?.()?.flush?.();
+        })
+    }
 
     async flush(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<void> {
         const oldVersion = this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
