@@ -1,5 +1,5 @@
 import Path from 'node:path';
-import { CachedFN, ConditionalStep, Resolver, type IStep } from '@veto-party/baum__core';
+import { CachedFN, ConditionalStep, type IStep, Resolver } from '@veto-party/baum__core';
 import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
@@ -15,7 +15,6 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   }
 
   private async ensureGitDiff(root: string, base: string): Promise<DiffResult['files'] | typeof skipped> {
-
     if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
       return skipped;
     }
@@ -42,8 +41,16 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     const git = this.ensureGit(root);
     const branch = await this.targetBranchGetter(root, git);
 
-    const hasFetched = await git.fetch().then(() => true, () => false);
-    const hasPulled = hasFetched && await git.pull('origin', branch).then(() => true, () => false);
+    const hasFetched = await git.fetch().then(
+      () => true,
+      () => false
+    );
+    const hasPulled =
+      hasFetched &&
+      (await git.pull('origin', branch).then(
+        () => true,
+        () => false
+      ));
 
     const raw_changes = await git.diffSummary(`HEAD..${hasPulled ? 'origin/' : ''}${branch}`);
 
