@@ -10,7 +10,7 @@ class WorkspaceMock implements IWorkspace {
   getOverrides(): Record<string, string> {
     throw new Error('Method not implemented.');
   }
-  setOverrides(overrides: Record<string, string>): void {
+  setOverrides(_overrides: Record<string, string>): void {
     throw new Error('Method not implemented.');
   }
 
