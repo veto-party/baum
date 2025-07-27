@@ -9,7 +9,7 @@ import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
+  async getCleanLockFile(_rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
     return undefined;
   }
 

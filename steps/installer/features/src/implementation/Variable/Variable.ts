@@ -44,7 +44,7 @@ export class VariableFeature<T extends typeof definition = typeof definition> ex
     return resolvedDefinition;
   }
 
-  protected do_construct(value: any, path: string | undefined): GroupFeature<any, 'variable'> {
+  protected do_construct(value: any, _path: string | undefined): GroupFeature<any, 'variable'> {
     return new VariableFeature<any>(value);
   }
 

@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises';
-import { isAbsolute, join, resolve } from 'node:path';
 import { CachedFN, type IExecutablePackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
 import type { IRendererManager } from '@veto-party/baum__steps__installer__renderer';
@@ -18,7 +17,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     this.searchStrategy = strategy;
   }
 
-  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async execute(_workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const workspaces = await packageManager.readWorkspace(rootDirectory);
     for (const workspace of workspaces) {
       await this.collect(workspace);
@@ -60,5 +59,5 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     this.metadatas.set(workspace, content);
   }
 
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {}
+  async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {}
 }

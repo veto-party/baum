@@ -3,8 +3,8 @@ import { BaseInstaller, BindingFeature, ExposeFeature, type IFeature, JobFeature
 import type { MergeDeepForToDefinitionStructureWithTupleMerge } from '@veto-party/baum__steps__installer__features/src/abstract/types/MergeDeepForToDefinitionStructureWithTupleMerge.js';
 import { get, isEqual, merge, uniq } from 'lodash-es';
 import type { INameProvider } from '../../interface/INameProvider.js';
-import type { InferStructure, IRenderer, ProjectMetadata } from '../../interface/IRenderer.js';
-import type { IFeatureManager, IFilter, InferNewRenderer, InferToFeatureManager, IRendererFeatureManager, IRendererManager } from '../../interface/IRendererManager.js';
+import type { InferStructure, ProjectMetadata } from '../../interface/IRenderer.js';
+import type { IFeatureManager, IRendererFeatureManager } from '../../interface/IRendererManager.js';
 import type { IVersionProvider } from '../../interface/IVersionProvider.js';
 import { getDeepKeys } from '../../utility/getDeepKeys.js';
 import { ARendererManager } from '../ARendererManager.js';

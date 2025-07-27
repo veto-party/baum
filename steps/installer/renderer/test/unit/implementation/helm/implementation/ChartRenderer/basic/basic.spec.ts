@@ -18,7 +18,7 @@ const chartRenderer = new ChartRenderer(
       return '0.0.0';
     }
 
-    getVersionForWorkspace(workspace: IWorkspace): string | Promise<string> {
+    getVersionForWorkspace(_workspace: IWorkspace): string | Promise<string> {
       return '1.0.1';
     }
   })()

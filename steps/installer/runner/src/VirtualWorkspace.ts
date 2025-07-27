@@ -1,9 +1,8 @@
 import { dirname } from 'node:path';
 import { CachedFN, clearCacheForFN, type IDependent, type IWorkspace, Resolver } from '@veto-party/baum__core';
-import { InferStructure } from '@veto-party/baum__steps__installer__renderer/src/interface/IRenderer.js';
 import { VirtualDependent } from './VirtualDependent.js';
 
-export class VirtualWorkspace<T> implements IWorkspace {
+export class VirtualWorkspace implements IWorkspace {
   private directory: string;
   private overrides: Record<string, string> = {};
 

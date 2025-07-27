@@ -1,12 +1,18 @@
 import type { IDependent, IWorkspace } from '@veto-party/baum__core';
-import IDependentMock from './IDependentMock.js';
+import DependentMock from './DependentMock.js';
 
-class IWorkspaceMock implements IWorkspace {
+class WorkspaceMock implements IWorkspace {
   constructor(
     private name: string,
     private version: string,
     private dependents: IDependent[]
   ) {}
+  getOverrides(): Record<string, string> {
+    throw new Error('Method not implemented.');
+  }
+  setOverrides(overrides: Record<string, string>): void {
+    throw new Error('Method not implemented.');
+  }
 
   getFreshWorkspace(): IWorkspace {
     throw new Error('Method not implemented.');
@@ -28,7 +34,7 @@ class IWorkspaceMock implements IWorkspace {
   }
 
   toDepdendent() {
-    return new IDependentMock(this.name, this.version);
+    return new DependentMock(this.name, this.version);
   }
 
   getDirectory(): string {
@@ -45,4 +51,4 @@ class IWorkspaceMock implements IWorkspace {
   }
 }
 
-export default IWorkspaceMock;
+export default WorkspaceMock;

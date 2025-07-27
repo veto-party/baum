@@ -8,7 +8,7 @@ import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
 
 export class NPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
+  async getCleanLockFile(rootDirectory: string, _workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
     const parser = JSON.parse(content);

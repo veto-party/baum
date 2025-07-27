@@ -26,7 +26,7 @@ export class GenericVersionManager implements IVersionManager {
     this.mapToVersions(workspaces);
   }
 
-  protected starToVersion(name: string, version: string) {
+  protected starToVersion(_name: string, version: string) {
     return version === '*' ? GenericVersionManager.MIN_VERSION : version;
   }
 

@@ -1,6 +1,6 @@
-import type { IDependent } from '../../src/index.js';
+import type { IDependent } from "@veto-party/baum__core";
 
-class IDependentMock implements IDependent {
+class DependentMock implements IDependent {
   constructor(
     private name: string,
     private version: string
@@ -14,4 +14,4 @@ class IDependentMock implements IDependent {
   }
 }
 
-export default IDependentMock;
+export default DependentMock;

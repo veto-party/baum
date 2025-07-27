@@ -6,6 +6,7 @@ import { ThirdPartyRenderer } from '../../../../../../../src/implementation/helm
 import type { ThirdPartyRendererStorage } from '../../../../../../../src/implementation/helm/interface/factory/I3rdPartyRenderer.js';
 import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
+import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -84,5 +85,27 @@ describe('A job renderer test', () => {
     expect(configMap.get('some-package.global.object')).toEqual({ test: true });
 
     writers.push(result);
+  });
+
+
+  it('Should write them to the file system and they should match the contents.', async () => {
+    await Promise.all(
+      writers.map((writer) =>
+        writer.write(
+          actualDir,
+          new (class implements INameProvider {
+            getNameByWorkspace(workspace: IWorkspace | undefined): string | Promise<string> {
+              if (!workspace) {
+                return 'main';
+              }
+
+              return workspace.getName();
+            }
+          })()
+        )
+      )
+    );
+
+    expect(await compareDirectories(actualDir, expectedDir)).toBeTruthy();
   });
 });

@@ -67,7 +67,7 @@ export class PrepareStep extends DockerBuildStep {
 
     await super.execute(workspace, pm, rootDirectory);
   }
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     // NO-OP
   }
 }

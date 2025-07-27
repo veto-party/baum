@@ -1,5 +1,5 @@
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
-import type { IFeatureRenderer, InferStructure, RendererMetadata } from '../interface/IRenderer.js';
+import type { InferStructure, RendererMetadata } from '../interface/IRenderer.js';
 import type { IRendererFeatureManager } from '../interface/IRendererManager.js';
 
 export class RenderFeatureManager<T extends IFeature<any, any, any>, Self> implements IRendererFeatureManager<T, Self> {

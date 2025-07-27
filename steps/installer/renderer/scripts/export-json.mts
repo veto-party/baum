@@ -64,7 +64,7 @@ const renderer = HelmRenderer.makeInstance(
     getProjectVersion(): string | Promise<string> {
       throw new Error('Method not implemented.');
     }
-    getVersionForWorkspace(workspace: IWorkspace): string | Promise<string> {
+    getVersionForWorkspace(_workspace: IWorkspace): string | Promise<string> {
       throw new Error('Method not implemented.');
     }
   })()
