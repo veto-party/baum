@@ -47,15 +47,14 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     let prefix = 'refs/heads/';
 
     for (const remote of remotes) {
-
       if (remote === '') {
         continue;
       }
 
       const hasFetched = await git.fetch(remote).then(
-      () => true,
-      () => false
-    );
+        () => true,
+        () => false
+      );
       const hasPulled =
         hasFetched &&
         (await git.pull(remote, branch).then(
@@ -68,7 +67,6 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
         break;
       }
     }
-
 
     const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`).catch((error) => {
       console.warn(error);
