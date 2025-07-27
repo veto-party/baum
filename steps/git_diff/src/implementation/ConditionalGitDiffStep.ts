@@ -47,6 +47,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     let prefix = '';
 
     for (const remote of remotes) {
+      console.log(remote);
       const hasFetched = await git.fetch(remote).then(
       () => true,
       () => false
