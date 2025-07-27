@@ -3,9 +3,9 @@ import { fileURLToPath } from 'node:url';
 import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
 import { describe, expect, it } from 'vitest';
 import { GatewayExposeRenderer } from '../../../../../../../../src/implementation/helm/implementation/Expose/GatewayExposeRenderer.js';
-import { IWritable } from '../../../../../../../../src/implementation/helm/interface/IWritable.js';
-import { ExposeStructure } from '../../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
-import { INameProvider } from '../../../../../../../../src/index.js';
+import type { ExposeStructure } from '../../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
+import type { IWritable } from '../../../../../../../../src/implementation/helm/interface/IWritable.js';
+import type { INameProvider } from '../../../../../../../../src/index.js';
 import { compareDirectories } from '../../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
