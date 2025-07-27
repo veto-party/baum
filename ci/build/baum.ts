@@ -1,18 +1,14 @@
-import Path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IBaumManagerConfiguration } from 'baum';
+import { __project_dir } from '../config.js';
 import { testSteps } from '../test/steps.js';
 import { buildSteps } from './steps.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.join(Path.dirname(__filename), '..');
 
 export default async (baum: IBaumManagerConfiguration) => {
   const pm = new NPMPackageManager();
 
   baum.setPackageManager(pm);
-  baum.setRootDirectory(__dirname);
+  baum.setRootDirectory(__project_dir);
 
   testSteps(baum);
   buildSteps(baum);
