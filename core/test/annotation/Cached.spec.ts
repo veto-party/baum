@@ -14,7 +14,12 @@ describe('Should only run once using annotation', () => {
 
       @CachedFN(false)
       method() {
-        return ++this.counter;
+        return this.incAndReturn();
+      }
+
+      private incAndReturn() {
+        this.counter = this.counter + 1;
+        return this.counter;
       }
     }
 
@@ -42,7 +47,13 @@ describe('Should only run once using annotation', () => {
       @CachedFN(true)
       async method() {
         await new Promise((resolve) => setTimeout(resolve, 100));
-        return ++this.counter;
+        return this.incAndReturn();
+      }
+
+
+      private incAndReturn() {
+        this.counter = this.counter + 1;
+        return this.counter;
       }
     }
 
@@ -73,7 +84,13 @@ describe('Should only run once using annotation', () => {
 
       @CachedFN(false)
       method() {
-        return ++this.counter;
+        return this.incAndReturn();
+      }
+
+
+      private incAndReturn() {
+        this.counter = this.counter + 1;
+        return this.counter;
       }
     }
 
@@ -108,6 +125,7 @@ describe('Should only run once using annotation', () => {
   it('multiple instances sync', async () => {
     class Test {
       constructor(private counter: number) {
+
       }
 
       clear() {
@@ -117,7 +135,13 @@ describe('Should only run once using annotation', () => {
       @CachedFN(true)
       async method() {
         await new Promise((resolve) => setTimeout(resolve, 10));
-        return ++this.counter;
+        return this.incAndReturn();
+      }
+
+
+      private incAndReturn() {
+        this.counter = this.counter + 1;
+        return this.counter;
       }
     }
 

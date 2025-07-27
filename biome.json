@@ -43,7 +43,8 @@
       "correctness": {
         "noVoidTypeReturn": "off",
         "useExhaustiveDependencies": "off",
-        "noUnusedImports": "error"
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "off"
       },
       "a11y": {
         "useKeyWithClickEvents": "off",
