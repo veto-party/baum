@@ -9,8 +9,8 @@ import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(_rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
-    return undefined;
+  getCleanLockFile(_rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
+    return Promise.resolve(undefined);
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {
@@ -52,7 +52,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
         if (path.endsWith(`${Path.sep}*`) || path.endsWith('**')) {
           // https://github.com/sindresorhus/globby/issues/155
           // globby is b0rked on Windows: .sync nor .async deliver /any/ result.
-          return globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+          return await globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
         const packagePath = Path.join(cwd, path, 'package.json');

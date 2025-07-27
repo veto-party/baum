@@ -635,7 +635,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     this.writers.add(await new ValuesRenderer().render(undefined, configMap));
 
     for (const writer of this.writers) {
-      writer.write(projectMetadata.rootDirectory, this.nameProvider);
+      await writer.write(projectMetadata.rootDirectory, this.nameProvider);
     }
   }
 

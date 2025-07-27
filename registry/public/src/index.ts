@@ -30,8 +30,8 @@ export class PublicRegistryStep extends ARegistryStep {
   }
 
   @CachedFN(true)
-  async getInstallStep(): Promise<IStep | undefined> {
-    return new NPMRCForSpecifiedRegistryStep(this.registry);
+  getInstallStep(): Promise<IStep | undefined> {
+    return Promise.resolve(new NPMRCForSpecifiedRegistryStep(this.registry));
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {

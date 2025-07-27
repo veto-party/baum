@@ -35,7 +35,7 @@ export class PKGMStep implements IStep {
       this.workspaceMapping.set(workspace, packageManager.getExecutorParser().parseAbstractSyntax([intent].flat()));
     }
 
-    return this.workspaceMapping.get(workspace)!.execute(workspace, packageManager, rootDirectory);
+    return await this.workspaceMapping.get(workspace)!.execute(workspace, packageManager, rootDirectory);
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
@@ -43,6 +43,6 @@ export class PKGMStep implements IStep {
       return;
     }
 
-    return this.workspaceMapping.get(workspace)!.clean(workspace, packageManager, root);
+    return await this.workspaceMapping.get(workspace)!.clean(workspace, packageManager, root);
   }
 }
