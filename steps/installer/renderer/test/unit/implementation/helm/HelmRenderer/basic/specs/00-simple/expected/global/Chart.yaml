@@ -1,0 +1,17 @@
+"type": "application"
+"apiVersion": "v2"
+"name": "global"
+"version": "1.0.1"
+"dependencies": 
+  
+  - "name": "test_workspace"
+    "alias": "test_workspace"
+    "repository": file://../test_workspace
+    "version": "0.0.1"
+    
+  
+  - "alias": "global_database"
+    "repository": "https://charts.bitnami.com/bitnami"
+    "name": "mariadb"
+    "version": "14.x.x"
+    

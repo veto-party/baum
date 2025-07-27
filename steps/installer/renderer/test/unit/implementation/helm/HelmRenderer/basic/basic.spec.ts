@@ -7,10 +7,9 @@ import { describe, it } from 'vitest';
 import { HelmRenderer } from '../../../../../../src/implementation/helm/HelmRenderer.js';
 import { ConfigMapRenderer } from '../../../../../../src/implementation/helm/implementation/ConfigMapRenderer.js';
 import { DeploymentRenderer } from '../../../../../../src/implementation/helm/implementation/DeploymentRenderer.js';
-import { TraefikExposeRenderer } from '../../../../../../src/implementation/helm/implementation/Expose/TraefikExposeRenderer.js';
 import { JobRenderer } from '../../../../../../src/implementation/helm/implementation/JobRenderer.js';
-import { NetworkRenderer } from '../../../../../../src/implementation/helm/implementation/NetworkRenderer.js';
-import { SecretRenderer } from '../../../../../../src/implementation/helm/implementation/SecretRenderer.js';
+import { NetworkRenderer } from '../../../../../../src/implementation/helm/implementation//Network/NetworkRenderer.js';
+import { SecretRenderer } from '../../../../../../src/implementation/helm/implementation//Secret/SecretRenderer.js';
 import { ThirdPartyRenderer } from '../../../../../../src/implementation/helm/implementation/ThirdPartyRenderer.js';
 import type { IConfigMapNameProvider } from '../../../../../../src/implementation/helm/interface/factory/IConfigMapRenderer.js';
 import type { IContainerName } from '../../../../../../src/implementation/helm/interface/IContainerName.js';
@@ -19,6 +18,8 @@ import type { IImageGenerator } from '../../../../../../src/implementation/helm/
 import type { IMatchLabel } from '../../../../../../src/implementation/helm/interface/IMatchLabel.js';
 import type { INameProvider } from '../../../../../../src/interface/INameProvider.js';
 import type { IVersionProvider } from '../../../../../../src/interface/IVersionProvider.js';
+import { GatewayExposeRenderer } from '../../../../../../src/index.js';
+import { compareDirectories } from '../../../../../uility/compareDirectories.js';
 
 const getForWorkspace = (pm: IPackageManager, root: string, versionProvider: IVersionProvider) => {
   const nameProvider = new (class implements INameProvider, IConfigMapNameProvider, IContainerName, IMatchLabel, IDeploymentNameProvider, IImageGenerator {
@@ -54,7 +55,7 @@ const getForWorkspace = (pm: IPackageManager, root: string, versionProvider: IVe
     new ConfigMapRenderer(nameProvider),
     new SecretRenderer(nameProvider),
     new DeploymentRenderer(nameProvider, nameProvider, nameProvider, 'veto-secret'),
-    new TraefikExposeRenderer('veto-secret'),
+    new GatewayExposeRenderer(),
     new NetworkRenderer(nameProvider, nameProvider),
     new JobRenderer(pm, root, 'veto-secret', nameProvider, nameProvider),
     nameProvider,
@@ -100,6 +101,7 @@ describe('A helm renderer test', () => {
       )
     );
 
-    helmRenderer.render({ packageManager: packageManger, rootDirectory: path }, structure);
+    await helmRenderer.render({ packageManager: packageManger, rootDirectory: path }, structure);
+    compareDirectories(join(__dirname, 'specs', '00-simple', 'helm'), join(__dirname, 'specs', '00-simple', 'expected'));
   });
 });
