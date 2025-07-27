@@ -35,6 +35,8 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
 
     const raw_changes = await git.diffSummary(`origin/${branch}..HEAD`);
 
+    console.log(raw_changes);
+
     return raw_changes;
   }
 
