@@ -18,10 +18,10 @@ import type { IImageGenerator } from '../../../../../../src/implementation/helm/
 import type { IMatchLabel } from '../../../../../../src/implementation/helm/interface/IMatchLabel.js';
 import { GatewayExposeRenderer } from '../../../../../../src/index.js';
 import type { INameProvider } from '../../../../../../src/interface/INameProvider.js';
-import type { IVersionProvider } from '../../../../../../src/interface/IVersionProvider.js';
+import type { IHelmVersionInfoProvider } from '../../../../../../src/interface/IVersionProvider.js';
 import { compareDirectories } from '../../../../../uility/compareDirectories.js';
 
-const getForWorkspace = (pm: IPackageManager, root: string, versionProvider: IVersionProvider) => {
+const getForWorkspace = (pm: IPackageManager, root: string, versionProvider: IHelmVersionInfoProvider) => {
   const nameProvider = new (class implements INameProvider, IConfigMapNameProvider, IContainerName, IMatchLabel, IDeploymentNameProvider, IImageGenerator {
     generateImage(workspace: IWorkspace): { image: string } {
       return {
@@ -75,7 +75,7 @@ describe('A helm renderer test', () => {
     const helmRenderer = getForWorkspace(
       packageManger,
       path,
-      new (class implements IVersionProvider {
+      new (class implements IHelmVersionInfoProvider {
         getProjectVersion(): string | Promise<string> {
           return '1.0.1';
         }

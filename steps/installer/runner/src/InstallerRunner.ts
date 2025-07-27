@@ -18,7 +18,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
 
   async execute(_workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     const metadatas = await this.collectAll(packageManager, rootDirectory);
-    this.renderer.render({ packageManager, rootDirectory }, metadatas);
+    await this.renderer.render({ packageManager, rootDirectory }, metadatas);
   }
 
   @CachedFN(true)

@@ -1,7 +1,7 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import type { IVersionProvider } from '../../../interface/IVersionProvider.js';
+import type { IHelmVersionInfoProvider } from '../../../interface/IVersionProvider.js';
 import type { ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
 import type { IWritable } from '../interface/IWritable.js';
 import { RawToken } from '../yaml/implementation/RawToken.js';
@@ -12,7 +12,7 @@ const pathToFileURL = (path: string) => {
 };
 
 export class ChartRenderer {
-  public constructor(private versionProvider: IVersionProvider) {}
+  public constructor(private versionProvider: IHelmVersionInfoProvider) {}
 
   render(workspace: IWorkspace, externalDependencies: Map<string | number, ThirdPartyRendererStorage>): IWritable {
     return {

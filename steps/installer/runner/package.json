@@ -5,7 +5,8 @@
   "dependencies": {
     "@veto-party/baum__core": "*",
     "@veto-party/baum__steps__installer__features": "*",
-    "@veto-party/baum__steps__installer__renderer": "*"
+    "@veto-party/baum__steps__installer__renderer": "*",
+    "globby": "^14.1.0"
   },
   "devDependencies": {
     "@veto-party/config": "*"

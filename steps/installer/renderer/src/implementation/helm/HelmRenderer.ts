@@ -5,7 +5,7 @@ import { get, isEqual, merge, uniq } from 'lodash-es';
 import type { INameProvider } from '../../interface/INameProvider.js';
 import type { InferStructure, ProjectMetadata } from '../../interface/IRenderer.js';
 import type { IFeatureManager, IRendererFeatureManager } from '../../interface/IRendererManager.js';
-import type { IVersionProvider } from '../../interface/IVersionProvider.js';
+import type { IHelmVersionInfoProvider } from '../../interface/IVersionProvider.js';
 import { getDeepKeys } from '../../utility/getDeepKeys.js';
 import { ARendererManager } from '../ARendererManager.js';
 import { RenderFeatureManager } from '../RenderFeatureManager.js';
@@ -128,7 +128,7 @@ interface IHelmRendererPublic {
   writers: Set<IWritable>;
 
   networkRenderer: INetworkRenderer;
-  versionProvider: IVersionProvider;
+  versionProvider: IHelmVersionInfoProvider;
   nameProvider: INameProvider;
 
   buildPropertyMap(properties: Map<IWorkspace | undefined, IConfigMapStructure>, givenWorkspace: IWorkspace | undefined): Map<IWorkspace | undefined, IConfigMapStructure>;
@@ -235,7 +235,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     private jobRenderer: IJobRenderer,
     private imageNameGenerator: IImageGenerator,
     private thirdPartyRenderer: I3rdPartyRenderer,
-    public versionProvider: IVersionProvider,
+    public versionProvider: IHelmVersionInfoProvider,
     public networkRenderer: INetworkRenderer
   ) {
     super(feature);
@@ -334,7 +334,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     return value.reduce<Value[Key] | undefined>((a, b) => (a !== undefined ? HelmRenderer.warnAboutDifferences(a as any, b?.[key] !== undefined ? (b[key] as any) : a) : b), value.pop()?.[key]);
   }
 
-  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer, imageGenerator: IImageGenerator, thirdPartyRenderer: I3rdPartyRenderer, versionProvider: IVersionProvider, networkRenderer: INetworkRenderer) {
+  public static buildBaseInstance(secretRenderer: ISecretRenderer, configMapRenderer: IConfigMapRenderer, nameProvider: INameProvider, jobRenderer: IJobRenderer, imageGenerator: IImageGenerator, thirdPartyRenderer: I3rdPartyRenderer, versionProvider: IHelmVersionInfoProvider, networkRenderer: INetworkRenderer) {
     return (
       new HelmRenderer(BaseInstaller.makeInstance(), secretRenderer, configMapRenderer, nameProvider, jobRenderer, imageGenerator, thirdPartyRenderer, versionProvider, networkRenderer)
         .ensureFeature('properties' as const, VariableFeature.makeInstance(), function (feature) {
@@ -375,7 +375,7 @@ export class HelmRenderer<T extends IFeature<any, any, any>> extends ARendererMa
     nameProvider: INameProvider,
     imageNameGenerator: IImageGenerator,
     thirdPartyRenderer: I3rdPartyRenderer,
-    versionProvider: IVersionProvider
+    versionProvider: IHelmVersionInfoProvider
   ) {
     const exposeStorage = new Map<IWorkspace, Map<string, ExposeStructure>>();
     const ensureExposeStorage = HelmRenderer.ensurePropertyValueGenerator(exposeStorage, () => new Map());

@@ -18,4 +18,4 @@ export type { IMatchLabel } from './implementation/helm/interface/IMatchLabel.js
 export type { INameProvider } from './interface/INameProvider.js';
 export type { IRenderer } from './interface/IRenderer.js';
 export type { IFeatureManager as IRendererFeatureManager, IFilter, IRendererManager } from './interface/IRendererManager.js';
-export type { IVersionProvider } from './interface/IVersionProvider.js';
+export type { IHelmVersionInfoProvider as IVersionProvider } from './interface/IVersionProvider.js';
