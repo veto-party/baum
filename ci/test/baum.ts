@@ -1,7 +1,7 @@
 import { NPMPackageManager } from '@veto-party/baum__package_manager__npm';
 import type { IBaumManagerConfiguration } from 'baum';
-import { testSteps } from './steps.js';
 import { __project_dir } from '../config.js';
+import { testSteps } from './steps.js';
 
 export default async (baum: IBaumManagerConfiguration) => {
   const pm = new NPMPackageManager();
