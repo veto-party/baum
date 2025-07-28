@@ -8,14 +8,14 @@ export class RetryStep implements IStep {
   ) {}
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    return this.step.clean(workspace, packageManager, rootDirectory);
+    return await this.step.clean(workspace, packageManager, rootDirectory);
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     for (let i = 0; i <= this.retryCount; i++) {
       try {
         return await this.step.execute(workspace, packageManager, rootDirectory);
-      } catch (error) {
+      } catch (_error) {
         console.warn('Job failed for :', workspace.getName());
       }
     }

@@ -1,0 +1,11 @@
+"global_database": 
+  "auth": 
+    "forcePassword": 
+      "default": true
+      
+    "rootPassword": 
+      "default": "should be generated"
+      
+    
+  "fullnameOverride": "global_database"
+  

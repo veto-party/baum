@@ -32,7 +32,7 @@ export class DockerLifecycleStep implements IStep {
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     try {
       await this.startStep.execute(workspace, packageManager, rootDirectory);
-    } catch (error) {
+    } catch (_error) {
       // If running from last time, make sure to try to stop old version.
       await this.stopStep.execute(workspace, packageManager, rootDirectory);
       await this.startStep.execute(workspace, packageManager, rootDirectory);

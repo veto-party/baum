@@ -28,7 +28,7 @@ import yargs from 'yargs/yargs';
 
   jasmine.exitOnCompletion = true;
 
-  let f: string | undefined = undefined;
+  let f: string | undefined;
 
   if (argv.f) {
     f = argv.f.toString();

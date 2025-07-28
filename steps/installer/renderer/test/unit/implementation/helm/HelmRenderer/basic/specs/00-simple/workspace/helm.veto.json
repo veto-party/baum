@@ -1,0 +1,91 @@
+{
+  "variable": {
+    "static_variable": {
+      "type": "scoped",
+      "static": true,
+      "default": "hello world"
+    },
+    "scoped_variable": {
+      "type": "scoped",
+      "default": "example"
+    },
+    "service_host_address": {
+      "type": "global",
+      "default": "replace_me"
+    },
+    "service_host_port": {
+      "type": "global",
+      "default": "replace_me"
+    },
+    "service_host": {
+      "type": "global",
+      "binding": {
+        "SERVICE_HOST_ADDRESS": "service_host_address",
+        "SERVICE_HOST_PORT": "service_host_port"
+      },
+      "default": "http://${SERVICE_HOST_ADDRESS}:${SERVICE_HOST_PORT}"
+    },
+    "service_host_domain": {
+      "type": "global",
+      "default": "replace-me"
+    }
+  },
+  "service": {
+    "global_database": {
+      "type": "global",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "from_reference": "https://charts.bitnami.com/bitnami",
+        "origin": {
+          "repository": "unused",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "properties": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        }
+      }
+    },
+    "scoped_database": {
+      "type": "scoped",
+      "origin_name_var": "fullnameOverride",
+      "definition": {
+        "from_reference": "https://charts.bitnami.com/bitnami",
+        "origin": {
+          "repository": "https://charts.bitnami.com/bitnami",
+          "version": "14.x.x",
+          "name": "mariadb"
+        }
+      },
+      "properties": {
+        "auth.forcePassword": {
+          "default": true
+        },
+        "auth.rootPassword": {
+          "default": "should be generated"
+        }
+      }
+    }
+  },
+  "expose": {
+    "80": {
+      "type": "load-balancer",
+      "path": "/",
+      "domainPrefix": "test"
+    },
+    "5000": {
+      "type": "internal"
+    }
+  },
+  "binding": {
+    "example_url": "service_host",
+    "scoped_variable": "scoped_variable",
+    "example_host": "service_host_domain",
+    "static_variable": "static_variable"
+  }
+}

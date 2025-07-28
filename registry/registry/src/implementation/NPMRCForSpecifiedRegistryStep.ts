@@ -1,4 +1,4 @@
-import { type IWorkspace, ModifyNPMRC, getDependentWorkspaces } from '@veto-party/baum__core';
+import { getDependentWorkspaces, type IWorkspace, ModifyNPMRC } from '@veto-party/baum__core';
 
 export class NPMRCForSpecifiedRegistryStep extends ModifyNPMRC {
   constructor(private registry: string) {

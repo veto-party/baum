@@ -3,13 +3,12 @@ import OldFileSystem from 'node:fs';
 import FileSystem from 'node:fs/promises';
 import OS from 'node:os';
 import Path from 'node:path';
-import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder, allSettledButFailure } from '@veto-party/baum__core';
-import { clearCacheForFN } from '@veto-party/baum__core';
+import { allSettledButFailure, CachedFN, clearCacheForFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { globby } from 'globby';
 import { NPMExecutor } from './NPMExecutor.js';
 
 export class NPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
+  async getCleanLockFile(rootDirectory: string, _workspace: IWorkspace): Promise<Parameters<(typeof FileSystem)['writeFile']>[1]> {
     const file = await FileSystem.readFile(Path.join(rootDirectory, 'package-lock.json'));
     const content = file.toString();
     const parser = JSON.parse(content);
@@ -68,7 +67,7 @@ export class NPMPackageManager implements IExecutablePackageManager {
         if (path.endsWith(`${Path.sep}*`) || path.endsWith('**')) {
           // https://github.com/sindresorhus/globby/issues/155
           // globby is b0rked on Windows: .sync nor .async deliver /any/ result.
-          return globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+          return await globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
         const packagePath = Path.join(cwd, path, 'package.json');

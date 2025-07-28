@@ -1,0 +1,8 @@
+"apiVersion": "v1"
+"kind": "ConfigMap"
+"metadata": 
+  "name": "some-package"
+  
+"data": 
+  "world2": {{ .Values.hello2 | quote }}
+  

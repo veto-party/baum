@@ -13,7 +13,7 @@ export class ParallelStep implements IStep, IBaumRegistrable {
     await allSettledButFailure(this.steps.map((step) => step.execute(workspace, packageManager, rootDirectory)));
   }
 
-  addExecutionStep(name: string, step: IStep): this {
+  addExecutionStep(_name: string, step: IStep): this {
     this.steps.push(step);
     return this;
   }

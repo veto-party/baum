@@ -14,6 +14,8 @@ export interface IWorkspace {
   getScriptNames(): string[];
   isPublishable(): boolean;
   getPackageFile(): any;
+  getOverrides(): Record<string, string>;
+  setOverrides(overrides: Record<string, string>): void;
 }
 
 export interface IPackageManager {

@@ -63,7 +63,7 @@ export class CopyStep implements IStep {
     throw new Error('Unkown FileSystem.stat response.');
   }
 
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     if (!this.keepFiles) {
       await allSettledButFailure(
         ensureMapEntry(this.filesThatGotCopied, workspace, []).map(async (file) => {

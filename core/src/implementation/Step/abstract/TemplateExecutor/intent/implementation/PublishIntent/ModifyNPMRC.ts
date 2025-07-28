@@ -14,12 +14,12 @@ class ModifyNPMRC implements IStep {
     this.hasRun.set(workspace, true);
     try {
       this.previousFileContent = await FileSystem.readFile(Path.join(workspace.getDirectory(), '.npmrc'));
-    } catch (error) {}
+    } catch (_error) {}
 
     await FileSystem.appendFile(Path.join(workspace.getDirectory(), '.npmrc'), typeof this.dataToAdd === 'function' ? await this.dataToAdd(workspace, packageManager, rootDirectory) : this.dataToAdd);
   }
 
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     if (!this.hasRun.has(workspace)) {
       return;
     }
@@ -29,7 +29,8 @@ class ModifyNPMRC implements IStep {
     if (this.previousFileContent) {
       // We should ensure execution order for modifynpmrc cleanup. (Store when which modifier was applied and make sure that we are not older then the latest revert) (static storage)
       if (SyncFileSystem.existsSync(Path.join(workspace.getDirectory(), '.npmrc'))) {
-        await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent);
+        // Buffer is okay, but types have changed, so any cast.
+        await FileSystem.writeFile(Path.join(workspace.getDirectory(), '.npmrc'), this.previousFileContent as any);
       }
     } else {
       await FileSystem.rm(Path.join(workspace.getDirectory(), '.npmrc'));

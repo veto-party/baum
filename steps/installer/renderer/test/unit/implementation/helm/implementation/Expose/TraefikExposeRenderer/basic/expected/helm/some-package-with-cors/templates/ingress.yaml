@@ -1,0 +1,49 @@
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "Middleware"
+"metadata": 
+  "name": "some-package-with-cors-8080-cors"
+  
+"spec": 
+  "headers": 
+    "accessControlAllowMethods": 
+      
+      - "GET"
+      
+      - "POST"
+    "accessControlAllowHeaders": 
+      
+      - "*"
+    "accessControlAllowOriginList": 
+      
+      - "some{{ .Values.global.host.domain }}"
+      
+      - "baum{{ .Values.global.host.domain }}"
+    "accessControlMaxAge": 100
+    "addVaryHeader": true
+    
+  
+
+---
+"apiVersion": "traefik.io/v1alpha1"
+"kind": "IngressRoute"
+"metadata": 
+  "name": "some-package-with-cors-ingress"
+  
+"spec": 
+  "entryPoints": 
+    
+    - "pull-secret"
+  "routes": 
+    
+    - "kind": "Rule"
+      "match": Host(some{{.Values.global.host.domain}}`)
+      "services": 
+        
+        - "name": "some-package-with-cors-service"
+          "port": 8080
+          
+      "middlewares": 
+        
+        - "some-package-with-cors-8080-cors"
+      
+  

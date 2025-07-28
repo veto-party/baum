@@ -1,6 +1,0 @@
-"apiVersion": "v1"
-"kind": "ConfigMap"
-"metadata":
-  "name": "third"
-"data":
-  "scoped_variable": {{ .Values.scoped_variable | quote }}

@@ -1,7 +1,0 @@
-"apiVersion": "v1"
-"kind": "ConfigMap"
-"metadata":
-  "name": "some-service"
-"data":
-  "test3": {{ .Values.kdr17cin6_scoped_database.fullnameOverride | quote }}
-  "scoped_variable": {{ .Values.scoped_variable | quote }}

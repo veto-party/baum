@@ -1,0 +1,33 @@
+"kind": "NetworkPolicy"
+"apiVersion": "networking.k8s.io/v1"
+"metadata": 
+  "name": "some-package-pod-net"
+  
+"spec": 
+  "podSelector": 
+    "matchLabel": "some-package-matcher"
+    
+  "ingress": 
+    
+    - "from": 
+        
+        - "podSelector": 
+            "matchLabels": 
+              "label": "main-j-some-job-matcher"
+              
+            
+          
+      
+    
+    - "from": 
+        
+        - "podSelector": 
+            "matchLabels": 
+              "label": "some-package-j-some-job-matcher"
+              
+            
+          
+      
+  "egress": 
+  
+  

@@ -1,10 +1,9 @@
+import type FileSystem from 'node:fs/promises';
 import * as semver from 'semver';
 import { shakeWorkspacesIntoExecutionGroups } from '../src/implementation/BaumManager/utility/shakeWorkspacesIntoExecutionGroups.js';
 import type { IExecutablePackageManager, IExecutablePackageManagerParser, IPackageManagerExecutor, IWorkspace } from '../src/index.js';
 import IDependentMock from './mock/IDependentMock.js';
 import IWorkspaceMock from './mock/IWorkspaceMock.js';
-
-import type FileSystem from 'node:fs/promises';
 
 const pm = new (class implements IExecutablePackageManager {
   getExecutor(): IPackageManagerExecutor {
@@ -13,19 +12,22 @@ const pm = new (class implements IExecutablePackageManager {
   getExecutorParser(): IExecutablePackageManagerParser {
     throw new Error('Method not implemented.');
   }
-  getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<ReturnType<(typeof FileSystem)['writeFile']>[1]> | undefined {
+  clearWorkspaceCache(): void {
+    throw new Error('Method not implemented.');
+  }
+  getCleanLockFile(_rootDirectory: string, _workspace: IWorkspace): Promise<Parameters<typeof FileSystem.writeFile>[1] | undefined> {
     throw new Error('Method not implemented.');
   }
   getLockFileName(): string {
     throw new Error('Method not implemented.');
   }
-  readWorkspace(rootDirectory: string): Promise<IWorkspace[]> {
+  readWorkspace(_rootDirectory: string): Promise<IWorkspace[]> {
     throw new Error('Method not implemented.');
   }
-  disableGlobalWorkspace(rootDirectory: string) {
+  disableGlobalWorkspace(_rootDirectory: string) {
     throw new Error('Method not implemented.');
   }
-  enableGlobalWorkspace(rootDirectory: string) {
+  enableGlobalWorkspace(_rootDirectory: string) {
     throw new Error('Method not implemented.');
   }
   modifyToRealVersionValue(version: string): string | false | undefined {

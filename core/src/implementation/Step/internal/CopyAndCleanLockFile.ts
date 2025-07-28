@@ -12,7 +12,7 @@ export class CopyAndCleanLockFileStep implements IStep {
     }
   }
 
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     await FileSystem.rm(Path.join(workspace.getDirectory(), packageManager.getLockFileName())).catch(() => {});
   }
 }

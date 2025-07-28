@@ -77,7 +77,7 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     ]);
   }
 
-  checkForPublish(workspace: IWorkspace) {
+  checkForPublish(_workspace: IWorkspace) {
     return true;
   }
 

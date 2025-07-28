@@ -1,0 +1,27 @@
+{
+  "name": "@veto-party/baum__steps__installer__renderer",
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": [
+    "./dist/**"
+  ],
+  "scripts": {
+    "build": "tsc --project ./build.tsconfig.json",
+    "test": "vitest",
+    "generate": "node --loader ts-node/esm ./scripts/export-json.mjs"
+  },
+  "dependencies": {
+    "@veto-party/baum__steps__installer__features": "*",
+    "graph-data-structure": "^4.5.0",
+    "set.prototype.difference": "1.1.7"
+  },
+  "devDependencies": {
+    "@veto-party/config": "*",
+    "diff": "^7.0.0",
+    "@types/diff": "^7.0.2",
+    "vitest": "^3.0.9",
+    "@veto-party/baum__package_manager__npm": "*",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
+  }
+}

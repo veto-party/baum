@@ -1,0 +1,14 @@
+{
+  "name": "@veto-party/baum__steps__installer__runner",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "@veto-party/baum__steps__installer__features": "*",
+    "@veto-party/baum__steps__installer__renderer": "*",
+    "globby": "^14.1.0"
+  },
+  "devDependencies": {
+    "@veto-party/config": "*"
+  }
+}
