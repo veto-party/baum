@@ -30,7 +30,7 @@ jobs:
       - name: json schema
         run: |
           mkdir -p $GITHUB_WORKSPACE/docs/schema/steps/helm/${{ github.event.release.tag_name }}
-          mv $GITHUB_WORKSPACE/steps/helm/out.json $GITHUB_WORKSPACE/docs/schema/steps/helm/${{ github.event.release.tag_name }}/schema.json
+          mv $GITHUB_WORKSPACE/steps/installer/renderer/schema.json $GITHUB_WORKSPACE/docs/schema/steps/helm/${{ github.event.release.tag_name }}/schema.json
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add $GITHUB_WORKSPACE/docs/schema/steps/helm/${{ github.event.release.tag_name }}/schema.json
