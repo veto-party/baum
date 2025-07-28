@@ -13,7 +13,7 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
       new (class extends PublicRegistryStep {
         async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
           await super.modifyJSON(json, versionManager, workspace, pm, root);
-          if (json.scripts?.build.includes('tsc')) {
+          if (json.scripts?.build?.includes?.('tsc')) {
             json.main = './dist/index.js';
           }
 
