@@ -37,7 +37,7 @@ export abstract class AMergeFeature<T extends {} | Record<string, any>, Path, Fr
 
     let currentLayer: [string, FeatureContainer][] = extractByFilter(([, obj]) => obj.children.length === 0);
 
-    let current: From | undefined = undefined;
+    let current: From | undefined;
 
     do {
       const newKeys = new Set(currentLayer.flatMap(([, obj]) => obj.children));

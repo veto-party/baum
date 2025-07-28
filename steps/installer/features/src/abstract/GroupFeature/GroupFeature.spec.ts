@@ -1,4 +1,4 @@
-import { type FromSchema, asConst } from 'json-schema-to-ts';
+import { asConst, type FromSchema } from 'json-schema-to-ts';
 import { describe, expect, test } from 'vitest';
 import { BindingFeature } from '../../implementation/Binding/Binding.js';
 import { definitionDefinitionPattern } from '../../implementation/Binding/definition.js';
@@ -72,20 +72,20 @@ describe('GroupFeature', () => {
     });
 
     const Group = class extends GroupFeature<typeof definition, undefined, FromSchema<typeof definition>> {
-      constructor(defintion: any) {
-        super(definition, undefined);
+      constructor(givenDefinition: any) {
+        super(givenDefinition, undefined);
       }
     };
 
     class SomeFeature extends AFeature<typeof definition, undefined, FromSchema<typeof definition>> {
-      constructor() {
-        super(definition, undefined);
+      constructor(givenDefinition: any) {
+        super(givenDefinition, undefined);
       }
     }
 
     const groupInstance = new Group(definition);
 
-    const clonedGroup = groupInstance.appendFeature('properties.test' as const, new SomeFeature());
+    const clonedGroup = groupInstance.appendFeature('properties.test' as const, new SomeFeature(definition));
 
     type GivenTForCloned = typeof clonedGroup extends IFeature<infer T, any, any> ? T : never;
 

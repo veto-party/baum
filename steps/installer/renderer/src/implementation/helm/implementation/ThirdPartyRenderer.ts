@@ -14,7 +14,7 @@ export class ThirdPartyRenderer implements I3rdPartyRenderer {
           new Map(Array.from(dependencies.entries()).map(([key, data]) => [[name, key, data.origin_name_var].filter(Boolean).join('.'), key] as const))
         );
       },
-      write: async (root, resolver) => {}
+      write: async (_root, _resolver) => {}
     };
   }
 }

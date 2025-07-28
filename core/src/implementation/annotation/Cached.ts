@@ -15,7 +15,7 @@ export const clearCacheForFN = <T>(scope: T, forCallbackKey: ComputedKeys<T>) =>
   }
 };
 
-export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: TypeTuple<Parameters<T>, boolean | undefined>) => {
+export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T> extends Promise<any> ? true : false, paramsInclude?: [...TypeTuple<Parameters<T>, boolean | undefined>, ...(boolean | undefined)[]]) => {
   return (_target: any, __propertyKey: string, context: TypedPropertyDescriptor<T>) => {
     const previous = context.value;
 
@@ -29,7 +29,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           values.forEach((promiseTuple) => promiseTuple[index](value));
         };
 
-      context.value = async function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
+      context.value = function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {
         let lookupArgs = [...givenArgs];
         if (paramsInclude !== undefined) {
           lookupArgs = lookupArgs.filter((_, index) => [true, undefined].includes(paramsInclude?.[index]));
@@ -59,7 +59,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           });
         }
 
-        return new Promise<ReturnType<T>>(async (resolve, reject) => {
+        return new Promise<ReturnType<T>>((resolve, reject) => {
           promises.push([resolve, reject]);
 
           (async (): Promise<ReturnType<T>> => {

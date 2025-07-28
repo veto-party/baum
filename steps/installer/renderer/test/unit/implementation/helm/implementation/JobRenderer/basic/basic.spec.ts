@@ -1,15 +1,13 @@
-import { describe, expect, it } from 'vitest';
-
-import { GenericWorkspace, type IPackageManager, type IWorkspace } from '@veto-party/baum__core';
-import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
-
 import type { writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { GenericWorkspace, type IPackageManager, type IWorkspace } from '@veto-party/baum__core';
+import { describe, expect, it } from 'vitest';
 import { JobRenderer } from '../../../../../../../src/implementation/helm/implementation/JobRenderer.js';
 import type { IContainerName } from '../../../../../../../src/implementation/helm/interface/IContainerName.js';
 import type { IImageGenerator } from '../../../../../../../src/implementation/helm/interface/IImageGenerator.js';
 import type { IMatchLabel } from '../../../../../../../src/implementation/helm/interface/IMatchLabel.js';
+import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 
@@ -19,7 +17,7 @@ const expectedDir = join(__dirname, 'expected');
 
 const chartRenderer = new JobRenderer(
   new (class implements IPackageManager {
-    async getCleanLockFile(rootDirectory: string, workspace: IWorkspace): Promise<Parameters<typeof writeFile>[1] | undefined> {
+    async getCleanLockFile(_rootDirectory: string, _workspace: IWorkspace): Promise<Parameters<typeof writeFile>[1] | undefined> {
       throw new Error('Method not implemented.');
     }
     getLockFileName(): string {
@@ -36,13 +34,13 @@ const chartRenderer = new JobRenderer(
         )
       ];
     }
-    disableGlobalWorkspace(rootDirectory: string): any {
+    disableGlobalWorkspace(_rootDirectory: string): any {
       throw new Error('Method not implemented.');
     }
-    enableGlobalWorkspace(rootDirectory: string): any {
+    enableGlobalWorkspace(_rootDirectory: string): any {
       throw new Error('Method not implemented.');
     }
-    modifyToRealVersionValue(version: string): string | false | undefined {
+    modifyToRealVersionValue(_version: string): string | false | undefined {
       throw new Error('Method not implemented.');
     }
   })(),

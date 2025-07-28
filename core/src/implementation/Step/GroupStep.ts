@@ -20,7 +20,7 @@ export class GroupStep implements IStep, IBaumRegistrable {
     }
   }
 
-  addExecutionStep(name: string, step: IStep): this {
+  addExecutionStep(_name: string, step: IStep): this {
     this.steps.push(step);
     return this;
   }

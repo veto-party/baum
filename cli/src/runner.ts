@@ -14,7 +14,7 @@ if (typeof argv.config === 'string') {
   path = process.cwd();
 }
 
-await (await import(`file:///${path}`).catch((error) => import(`file:///${Path.join(path, 'baum.js')}`))).default(baum);
+await (await import(`file:///${path}`).catch(() => import(`file:///${Path.join(path, 'baum.js')}`))).default(baum);
 
 console.log('Running baum now!');
 const success = await baum.run().then(

@@ -2,7 +2,11 @@
   "name": "@veto-party/baum__registry__verdaccio",
   "type": "module",
   "main": "./src/index.ts",
-  "files": ["./dist/**", "./base.config.yaml", "./Dockerfile"],
+  "files": [
+    "./dist/**",
+    "./base.config.yaml",
+    "./Dockerfile"
+  ],
   "scripts": {
     "build": "tsc"
   },

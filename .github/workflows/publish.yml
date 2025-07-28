@@ -13,13 +13,16 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org/
+          cache: 'npm'
       - run: npm ci
       - run: npm config -g set access public
-      - run: npm run baum
+      - run: npm run baum-publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           PUBLISH_VERSION: ${{ github.event.release.tag_name }}

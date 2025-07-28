@@ -10,7 +10,7 @@ export class VersionManagerVersionOverride extends GenericVersionManager {
     super(workspaces, pm);
   }
 
-  protected starToVersion(name: string, version: string): string {
+  protected starToVersion(_name: string, version: string): string {
     return version === '*' ? this.versionOverride : version;
   }
 

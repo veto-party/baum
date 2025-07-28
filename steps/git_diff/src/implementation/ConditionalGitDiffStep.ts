@@ -1,46 +1,90 @@
 import Path from 'node:path';
-import { ConditionalStep, type IStep } from '@veto-party/baum__core';
+import { CachedFN, ConditionalStep, type IStep, Resolver } from '@veto-party/baum__core';
 import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
 
 export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffStep> {
-  private diffMap = new Map<string, DiffResult | typeof skipped>();
+  private diffMap = new Map<string, DiffResult['files'] | typeof skipped>();
 
-  private async ensureGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
-    base = Path.resolve(base);
+  @CachedFN(false)
+  private ensureGit(root: string) {
+    return simpleGit(root, {
+      baseDir: root
+    });
+  }
+
+  private async ensureGitDiff(root: string, base: string): Promise<DiffResult['files'] | typeof skipped> {
+    if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
+      return skipped;
+    }
+
+    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, this.ensureGit(root)))) {
+      return skipped;
+    }
+
+    const gitRoot = await this.ensureGit(root).revparse('--show-toplevel');
+    base = Resolver.ensureAbsolute(base, root);
+
     if (!this.diffMap.has(base)) {
-      this.diffMap.set(base, await this.getGitDiff(root, base));
+      let result = await this.getGitDiff(root);
+      if (result !== skipped) {
+        result = result.filter((file) => Resolver.ensureAbsolute(file.file, gitRoot).startsWith(base));
+      }
+      this.diffMap.set(base, result);
     }
 
     return this.diffMap.get(base)!;
   }
 
-  private async getGitDiff(root: string, base: string): Promise<DiffResult | typeof skipped> {
-    if (typeof this.dontSkipChangeChecks === 'boolean' && !this.dontSkipChangeChecks) {
-      return skipped;
+  @CachedFN(true)
+  private async getGitDiff(root: string): Promise<DiffResult['files'] | typeof skipped> {
+    const branch = await this.targetBranchGetter(root);
+
+    const git = this.ensureGit(root);
+    const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
+
+    let prefix = 'refs/heads/';
+
+    for (const remote of remotes) {
+      if (remote === '') {
+        continue;
+      }
+
+      const hasFetched = await git.fetch(remote).then(
+        () => true,
+        () => false
+      );
+      const hasPulled =
+        hasFetched &&
+        (await git.pull(remote, branch).then(
+          () => true,
+          () => false
+        ));
+
+      if (hasPulled) {
+        prefix = `${remote}/`;
+        break;
+      }
     }
 
-    const git = simpleGit(root, {
-      baseDir: base
-    });
+    const raw_changes = await git.diffSummary(`HEAD..${prefix}${branch}`);
 
-    if (typeof this.dontSkipChangeChecks === 'function' && !(await this.dontSkipChangeChecks(root, git))) {
-      return skipped;
+    return raw_changes.files ?? [];
+  }
+
+  private targetBranchGetter(root: string) {
+    if (typeof this.__targetBranchGetter === 'string') {
+      return this.__targetBranchGetter;
     }
 
-    const branch = await this.targetBranchGetter(root, git);
-
-    await git.pull('origin', branch).catch(() => undefined);
-
-    const raw_changes = await git.diffSummary(`HEAD..${branch}`);
-
-    return raw_changes;
+    const git = this.ensureGit(root);
+    return this.__targetBranchGetter(root, git);
   }
 
   constructor(
     step: IStep,
-    private targetBranchGetter: (root: string, git: SimpleGit) => string | Promise<string>,
+    private __targetBranchGetter: ((root: string, git: SimpleGit) => string | Promise<string>) | string,
     private dontSkipChangeChecks: boolean | ((root: string, git: SimpleGit) => boolean | Promise<boolean>) = true
   ) {
     super(step, async (workspace, _pm, rootDirectory) => {
@@ -51,7 +95,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
         return true;
       }
 
-      return diff.changed !== 0;
+      return diff.length !== 0;
     });
   }
 }

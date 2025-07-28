@@ -1,62 +1,62 @@
-import { IDependent, IWorkspace } from "@veto-party/baum__core";
-import { InferStructure } from "@veto-party/baum__steps__installer__renderer/src/interface/IRenderer.js";
-import { dirname } from "node:path";
-import { VirtualDependent } from "./VirtualDependent.js";
+import { dirname } from 'node:path';
+import { CachedFN, clearCacheForFN, type IDependent, type IWorkspace, Resolver } from '@veto-party/baum__core';
+import { VirtualDependent } from './VirtualDependent.js';
 
-export class VirtualWorkspace<T> implements IWorkspace {
+export class VirtualWorkspace implements IWorkspace {
+  private directory: string;
+  private overrides: Record<string, string> = {};
 
-    private directory: string;
+  constructor(
+    private packageName: string,
+    private packageVersion: string,
+    packagePath: string,
+    private packageContent: any
+  ) {
+    this.directory = dirname(packagePath);
+  }
 
-    constructor (
-       private packageName: string,
-       private packageVersion: string, 
-       packagePath: string, 
-       private packageContent: any
-    ) {
-        this.directory = dirname(packagePath);
-    }
+  getName(): string {
+    return this.packageName;
+  }
 
-    getName(): string {
-        return this.packageName;
-    }
-    
-    getVersion(): string {
-        return this.packageVersion;
-    }
+  getVersion(): string {
+    return this.packageVersion;
+  }
 
-    getDirectory(): string {
-        return this.directory;
-    }
+  getDirectory(): string {
+    return this.directory;
+  }
 
-    getFreshWorkspace(): IWorkspace {
-        return this;
-    }
+  getFreshWorkspace(): IWorkspace {
+    return this;
+  }
 
-    getDynamicDependents(): IDependent[] {
-        return ['dependencies', 'optionalDependencies', 'devDependencies'].flatMap<IDependent>((depType) => {
-            if (typeof this.packageContent?.[depType] !== 'object') {
-                return [];
-            }
+  getOverrides(): Record<string, string> {
+    return this.packageContent?.overrides ?? {};
+  }
 
-            return Object.entries(this.packageContent[depType]).map<IDependent>(([el, version]) => {
-                if (typeof version !== 'string') {
-                    throw new Error(`Version is expected to be a string for: ${this.getDirectory()}:${depType}${el}`);
-                }
-                return new VirtualDependent(el, version);
-            });
-        })
-    }
+  @CachedFN(false)
+  setOverrides(overrides: Record<string, string>): void {
+    this.overrides = overrides;
+    clearCacheForFN(this, 'setOverrides');
+    clearCacheForFN(this, 'getDynamicDependents');
+  }
 
-    getScriptNames(): string[] {
-        return [];
-    }
+  @CachedFN(false)
+  getDynamicDependents(): IDependent[] {
+    const dependencies = Resolver.resolve(this.directory, this.packageContent, this.overrides, ['devDependencies']);
+    return dependencies.filter(([, version]) => !version.startsWith('file:')).map(([name, version]) => new VirtualDependent(name, version));
+  }
 
-    isPublishable(): boolean {
-        return false;
-    }
+  getScriptNames(): string[] {
+    return [];
+  }
 
-    getPackageFile() {
-     return this.packageContent;
-    }
+  isPublishable(): boolean {
+    return false;
+  }
 
+  getPackageFile() {
+    return this.packageContent;
+  }
 }

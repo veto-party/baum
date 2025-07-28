@@ -1,16 +1,24 @@
 import FileSystem from 'node:fs';
 import Path from 'node:path';
 import isEqual from 'lodash.isequal';
-import uniqBy from 'lodash.uniqby';
-import { CachedFN, type IDependent, type IWorkspace } from '../../index.js';
+import { CachedFN, clearCacheForFN, type IDependent, type IWorkspace, Resolver } from '../../index.js';
 import { GenericDependent } from './GenericDependent.js';
 
 export class GenericWorkspace implements IWorkspace {
+  private overrides: Record<string, string> = {};
+
   constructor(
     private directory: string,
     private pkgFile: any,
     private modifyToRealVersionValue: (version: string) => string | false | undefined
   ) {}
+
+  @CachedFN(false)
+  setOverrides(overrides: Record<string, string>): void {
+    this.overrides = overrides;
+    clearCacheForFN(this, 'getDynamicDependents');
+    clearCacheForFN(this, 'setOverrides');
+  }
 
   getFreshWorkspace(): IWorkspace {
     const newPackage = JSON.parse(FileSystem.readFileSync(Path.join(this.directory, 'package.json')).toString());
@@ -20,6 +28,10 @@ export class GenericWorkspace implements IWorkspace {
     }
 
     return new GenericWorkspace(this.directory, JSON.parse(FileSystem.readFileSync(Path.join(this.directory, 'package.json')).toString()), this.modifyToRealVersionValue);
+  }
+
+  getOverrides(): Record<string, string> {
+    return this.pkgFile?.overrides ?? {};
   }
 
   getName(): string {
@@ -40,26 +52,8 @@ export class GenericWorkspace implements IWorkspace {
 
   @CachedFN(false)
   getDynamicDependents(): IDependent[] {
-    const dependents = [
-      Object.entries(this.pkgFile.dependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
-        .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
-        .map(([name, version]) => new GenericDependent(name, version)),
-      Object.entries(this.pkgFile.devDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
-        .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
-        .map(([name, version]) => new GenericDependent(name, version)),
-      Object.entries(this.pkgFile.optionalDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
-        .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
-        .map(([name, version]) => new GenericDependent(name, version)),
-      Object.entries(this.pkgFile.peerDependencies ?? {})
-        .map(([name, version]) => [name, this.modifyToRealVersionValue(version as string) || version] as const)
-        .filter((pkg): pkg is [string, string] => !!typeof pkg[1])
-        .map(([name, version]) => new GenericDependent(name, version))
-    ].flat();
-
-    return uniqBy(dependents, (d) => `${d.getName()}@${d.getVersion()}`).filter((dependent) => !dependent.getVersion().startsWith('file:'));
+    const dependencies = Resolver.resolve(this.directory, this.pkgFile, this.overrides).map(([name, version]) => new GenericDependent(name, version));
+    return dependencies.filter((dependent) => !dependent.getVersion().startsWith('file:'));
   }
 
   getScriptNames(): string[] {

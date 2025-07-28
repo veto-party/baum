@@ -3,14 +3,14 @@ import OldFileSystem from 'node:fs';
 import FileSystem from 'node:fs/promises';
 import OS from 'node:os';
 import Path from 'node:path';
-import { CachedFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder, allSettledButFailure, clearCacheForFN } from '@veto-party/baum__core';
+import { allSettledButFailure, CachedFN, clearCacheForFN, GenericWorkspace, type IExecutablePackageManager, type IExecutablePackageManagerParser, type IExecutionIntentBuilder, type IPackageManagerExecutor, type IWorkspace, TemplateBuilder } from '@veto-party/baum__core';
 import { globby } from 'globby';
 import yaml from 'yaml';
 import { PNPMExecutor } from './PNPMExecutor.js';
 
 export class PNPMPackageManager implements IExecutablePackageManager {
-  async getCleanLockFile(rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
-    return undefined;
+  getCleanLockFile(_rootDirectory: string): Promise<Parameters<(typeof FileSystem)['writeFile']>[1] | undefined> {
+    return Promise.resolve(undefined);
   }
 
   modifyToRealVersionValue(version: string): string | false | undefined {
@@ -52,7 +52,7 @@ export class PNPMPackageManager implements IExecutablePackageManager {
         if (path.endsWith(`${Path.sep}*`) || path.endsWith('**')) {
           // https://github.com/sindresorhus/globby/issues/155
           // globby is b0rked on Windows: .sync nor .async deliver /any/ result.
-          return globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
+          return await globby(Path.join(path, 'package.json').replace(/\\/g, '//'), { cwd: cwd.replace(/\\/g, '//'), absolute: true, ignore: [Path.join('**', 'node_modules', '**')] });
         }
 
         const packagePath = Path.join(cwd, path, 'package.json');

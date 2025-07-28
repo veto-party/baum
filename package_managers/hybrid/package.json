@@ -5,7 +5,9 @@
   "scripts": {
     "build": "tsc"
   },
-  "files": ["./dist/**"],
+  "files": [
+    "./dist/**"
+  ],
   "dependencies": {
     "@veto-party/baum__core": "*",
     "globby": "^14.0.1",

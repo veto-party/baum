@@ -1,14 +1,12 @@
-import { describe, expect, it } from 'vitest';
-
-import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
-import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
-
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TraefikExposeRenderer } from '../../../../../../../src/implementation/helm/implementation/TraefikExposeRenderer.js';
-import type { ExposeStructure } from '../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
-import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
-import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
+import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
+import { describe, expect, it } from 'vitest';
+import { TraefikExposeRenderer } from '../../../../../../../../src/implementation/helm/implementation/Expose/TraefikExposeRenderer.js';
+import type { ExposeStructure } from '../../../../../../../../src/implementation/helm/interface/factory/IExposeRenderer.js';
+import type { IWritable } from '../../../../../../../../src/implementation/helm/interface/IWritable.js';
+import type { INameProvider } from '../../../../../../../../src/interface/INameProvider.js';
+import { compareDirectories } from '../../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 const actualDir = join(__dirname, 'actual');
@@ -16,7 +14,7 @@ const expectedDir = join(__dirname, 'expected');
 
 const renderer = new TraefikExposeRenderer('pull-secret');
 
-describe('A job renderer test', () => {
+describe('A traefik expose renderer test', () => {
   const writers: IWritable[] = [];
 
   const createWorkspace = (name: string) =>

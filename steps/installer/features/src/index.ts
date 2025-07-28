@@ -1,19 +1,13 @@
-export type { ToDefinitionStructure } from './interface/types/ToDefinitionStructure.js';
-
-export type { IFeature, IngestResult } from './interface/IFeature.js';
-export type { FeatureContainer } from './interface/IFeatureContainer.js';
-
 export { AFeature } from './abstract/AFeature.js';
-
-export { AMergeFeature } from './abstract/AMergeFeature/AMergeFeature.js';
 export { AKeyOverrideFeature } from './abstract/AMergeFeature/AKeyOverride/AKeyOverride.js';
-
+export { AMergeFeature } from './abstract/AMergeFeature/AMergeFeature.js';
 export { GroupFeature } from './abstract/GroupFeature/GroupFeature.js';
-export type { ToDefinitionStructureWithTupleMerge } from './abstract/types/ToDefinitionStructureWithTupleMerge.js';
 export type { MergeFeatures } from './abstract/types/MergeFeatures.js';
-
+export type { ToDefinitionStructureWithTupleMerge } from './abstract/types/ToDefinitionStructureWithTupleMerge.js';
+export { BaseInstaller } from './BaseInstaller.js';
 export { BindingFeature } from './implementation/Binding/Binding.js';
 export { ExposeFeature } from './implementation/Expose/Expose.js';
+export { JobFeature } from './implementation/Job/JobFeature.js';
 export { NetworkFeature } from './implementation/Network/NetworkFeature.js';
 export { ScalingFeature } from './implementation/Scaling/ScalingFeature.js';
 export { ServiceFeature } from './implementation/Service/ServiceFeature.js';
@@ -21,6 +15,6 @@ export { SystemUsageFeature } from './implementation/SystemUsageFeature/SystemUs
 export { UpdateStrategy } from './implementation/UpdateStrategyFeature/UpdateStrategyFeature.js';
 export { VariableFeature } from './implementation/Variable/Variable.js';
 export { VolumeFeature } from './implementation/Volume/Volume.js';
-export { JobFeature } from './implementation/Job/JobFeature.js';
-
-export { BaseInstaller } from './BaseInstaller.js';
+export type { IFeature, IngestResult } from './interface/IFeature.js';
+export type { FeatureContainer } from './interface/IFeatureContainer.js';
+export type { ToDefinitionStructure } from './interface/types/ToDefinitionStructure.js';

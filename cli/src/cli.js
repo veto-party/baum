@@ -26,5 +26,5 @@ else {
     windowsHide: true
   });
 
-  process.exit(childProcess.status || 0);
+  process.exit(childProcess.status ?? (childProcess.error ? 1 : 0));
 }

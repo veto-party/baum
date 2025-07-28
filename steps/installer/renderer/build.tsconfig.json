@@ -4,6 +4,6 @@
   "include": ["./src/"],
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["ESNext"],
+    "lib": ["ESNext"]
   }
 }

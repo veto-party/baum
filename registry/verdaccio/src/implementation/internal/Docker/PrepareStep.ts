@@ -1,13 +1,10 @@
-import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
-
+import Crypto from 'node:crypto';
 import FileSystem from 'node:fs/promises';
-import yaml from 'yaml';
-
 import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import Crypto from 'node:crypto';
+import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
 import { DockerBuildStep } from '@veto-party/baum__steps__docker';
+import yaml from 'yaml';
 
 const __rootDir = Path.dirname(fileURLToPath(import.meta.resolve('@veto-party/baum__registry__verdaccio/package.json')));
 
@@ -70,7 +67,7 @@ export class PrepareStep extends DockerBuildStep {
 
     await super.execute(workspace, pm, rootDirectory);
   }
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     // NO-OP
   }
 }
