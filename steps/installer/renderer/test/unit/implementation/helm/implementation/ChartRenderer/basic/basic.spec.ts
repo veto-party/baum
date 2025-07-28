@@ -1,13 +1,11 @@
-import { describe, expect, it } from 'vitest';
-
-import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
-import { ChartRenderer } from '../../../../../../../src/implementation/helm/implementation/ChartRenderer.js';
-import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
-
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
+import { describe, expect, it } from 'vitest';
+import { ChartRenderer } from '../../../../../../../src/implementation/helm/implementation/ChartRenderer.js';
+import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
-import type { IVersionProvider } from '../../../../../../../src/interface/IVersionProvider.js';
+import type { IHelmVersionInfoProvider } from '../../../../../../../src/interface/IVersionProvider.js';
 import { compareDirectories } from '../../../../../../uility/compareDirectories.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
@@ -15,12 +13,12 @@ const actualDir = join(__dirname, 'actual');
 const expectedDir = join(__dirname, 'expected');
 
 const chartRenderer = new ChartRenderer(
-  new (class implements IVersionProvider {
+  new (class implements IHelmVersionInfoProvider {
     getProjectVersion(): string | Promise<string> {
       return '0.0.0';
     }
 
-    getVersionForWorkspace(workspace: IWorkspace): string | Promise<string> {
+    getVersionForWorkspace(_workspace: IWorkspace): string | Promise<string> {
       return '1.0.1';
     }
   })()

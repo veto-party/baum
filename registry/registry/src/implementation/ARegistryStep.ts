@@ -28,7 +28,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     return version;
   }
 
-  async modifyJSON(file: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
+  async modifyJSON(_file: any, _versionManager: IVersionManager, _workspace: IWorkspace, _pm: IPackageManager, _root: string) {
     // NO-OP (This is for overloading)
   }
 

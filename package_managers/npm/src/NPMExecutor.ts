@@ -22,7 +22,7 @@ export class NPMExecutor extends ATemplateExecutor {
     super((name, ...rest) => {
       const params = (to_object[name] as (...args: any[]) => any)(...rest);
 
-      return ejs.compile(raw_commands[name], { client: true })(params, undefined, (path, givenData) => {
+      return ejs.compile(raw_commands[name], { client: true })(params, undefined, (_path, givenData) => {
         return ejs.render(Buffer.from(givenData!.$$template, 'base64').toString(), params);
       });
     });

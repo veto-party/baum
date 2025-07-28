@@ -8,8 +8,8 @@ export class Resolver {
   private constructor() {}
 
   @CachedFN(false)
-  public static ensureAbsolute(path: string) {
-    return isAbsolute(path) ? path : resolve(path);
+  public static ensureAbsolute(path: string, to?: string) {
+    return isAbsolute(path) ? path : to ? resolve(to, path) : resolve(path);
   }
 
   @CachedFN(false, [false, true, true, true])

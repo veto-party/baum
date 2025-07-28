@@ -34,6 +34,26 @@ export const definition = asConst({
                     type: 'string'
                   }
                 },
+                headers: {
+                  type: 'object',
+                  properties: {
+                    outgoing: {
+                      type: 'array',
+                      items: {
+                        type: 'string'
+                      }
+                    },
+                    incomming: {
+                      type: 'array',
+                      items: {
+                        type: 'string'
+                      }
+                    }
+                  }
+                },
+                maxAge: {
+                  type: 'number'
+                },
                 origins: {
                   type: 'array',
                   items: {
@@ -60,6 +80,18 @@ export const definition = asConst({
             },
             passHostHeader: {
               type: 'boolean'
+            },
+            sticky: {
+              type: 'object',
+              required: ['fieldName'],
+              properties: {
+                fieldName: {
+                  type: 'string'
+                },
+                lifetime: {
+                  type: 'string'
+                }
+              }
             },
             matcher: {
               type: 'object',

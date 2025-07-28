@@ -1,17 +1,13 @@
-import { describe, expect, it } from 'vitest';
-
-import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
-import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
-
-import { dirname, join, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { GenericWorkspace, type IWorkspace } from '@veto-party/baum__core';
+import { describe, expect, it } from 'vitest';
 import { ThirdPartyRenderer } from '../../../../../../../src/implementation/helm/implementation/ThirdPartyRenderer.js';
 import type { ThirdPartyRendererStorage } from '../../../../../../../src/implementation/helm/interface/factory/I3rdPartyRenderer.js';
+import type { IWritable } from '../../../../../../../src/implementation/helm/interface/IWritable.js';
 import type { INameProvider } from '../../../../../../../src/interface/INameProvider.js';
 
 const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
-const actualDir = join(__dirname, 'actual');
-const expectedDir = join(__dirname, 'expected');
 
 const renderer = new ThirdPartyRenderer();
 

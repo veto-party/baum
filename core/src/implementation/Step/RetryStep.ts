@@ -8,7 +8,7 @@ export class RetryStep implements IStep {
   ) {}
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    return this.step.clean(workspace, packageManager, rootDirectory);
+    return await this.step.clean(workspace, packageManager, rootDirectory);
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

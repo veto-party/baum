@@ -1,4 +1,4 @@
-import type { FromSchema, JSONSchema, asConst } from 'json-schema-to-ts';
+import type { asConst, FromSchema, JSONSchema } from 'json-schema-to-ts';
 import { cloneDeep, set, toPath } from 'lodash-es';
 import type { IFeature } from '../../interface/IFeature.js';
 import { AFeature } from '../AFeature.js';

@@ -1,5 +1,7 @@
 {
-    "name": "@veto-party/test-helm-00",
-    "type": "module",
-    "workspaces": ["./workspace/**"]
-  }
+  "name": "@veto-party/test-helm-00",
+  "type": "module",
+  "workspaces": [
+    "./workspace/**"
+  ]
+}

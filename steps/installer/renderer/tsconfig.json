@@ -3,6 +3,6 @@
   "extends": "@veto-party/config/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["ESNext"],
+    "lib": ["ESNext"]
   }
 }

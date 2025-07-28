@@ -14,7 +14,7 @@ class PromiseStorage<T extends (...args: any[]) => any> {
   public async call(...args: Parameters<T>) {
     // Explicitly ignore parameters for callback.
     this.result ??= this.callback(...args);
-    return this.resolve();
+    return await this.resolve();
   }
 }
 

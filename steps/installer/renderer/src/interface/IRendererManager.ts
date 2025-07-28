@@ -1,5 +1,5 @@
 import type { IFeature, MergeFeatures } from '@veto-party/baum__steps__installer__features';
-import type { IFeatureRenderer, IRenderer, InferStructure, RendererMetadata } from './IRenderer.js';
+import type { IFeatureRenderer, InferStructure, IRenderer, RendererMetadata } from './IRenderer.js';
 
 export type IFilter<T extends IFeature<any, any, any>> =
   | (<U extends InferStructure<T>>(obj: U[]) => boolean)
@@ -15,7 +15,11 @@ export interface IFeatureManager<T extends IFeature<any, any, any>, Self> {
 
 export interface IRendererFeatureManager<T extends IFeature<any, any, any>, Self> extends IFeatureRenderer<T>, IFeatureManager<T, Self> {}
 
-export type InferNewRenderer<WritePath, R extends IRendererManager<any, any> | IFeatureManager<any, any>, Feature extends IFeature<any, any, any>> = R extends IRendererManager<infer T, any> ? IRenderer<MergeFeatures<T, WritePath, Feature>> : R extends IFeatureManager<infer T, any> ? IRenderer<MergeFeatures<T, WritePath, Feature>> : never;
+export type InferNewRenderer<WritePath, R extends IRendererManager<any, any> | IFeatureManager<any, any>, Feature extends IFeature<any, any, any>> = R extends IRendererManager<infer T, any>
+  ? IRenderer<MergeFeatures<T, WritePath, Feature>>
+  : R extends IFeatureManager<infer T, any>
+    ? IRenderer<MergeFeatures<T, WritePath, Feature>>
+    : never;
 
 export type InferToFeatureManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IFeatureManager<Feature, any> : never;
 export type InferToRendererManager<T extends IRenderer<any>> = T extends IRenderer<infer Feature> ? IRendererManager<Feature, any> : never;

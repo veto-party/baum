@@ -1,12 +1,12 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
 import type { IWorkspace } from '@veto-party/baum__core';
-import { extractVariables } from '../../utility/extractVariables.js';
-import { toHelmPathWithPossibleIndex } from '../../utility/toHelmPathWithPossibleIndex.js';
-import type { IConfigMapStructure } from '../interface/factory/IConfigMapRenderer.js';
-import type { ISecretNameProvider, ISecretRenderer, ISecretRendererResult, SecretMapping } from '../interface/factory/ISecretRenderer.js';
-import { RawToken } from '../yaml/implementation/RawToken.js';
-import { to_structured_data } from '../yaml/to_structured_data.js';
+import { extractVariables } from '../../../utility/extractVariables.js';
+import { toHelmPathWithPossibleIndex } from '../../../utility/toHelmPathWithPossibleIndex.js';
+import type { IConfigMapStructure } from '../../interface/factory/IConfigMapRenderer.js';
+import type { ISecretNameProvider, ISecretRenderer, ISecretRendererResult, SecretMapping } from '../../interface/factory/ISecretRenderer.js';
+import { RawToken } from '../../yaml/implementation/RawToken.js';
+import { to_structured_data } from '../../yaml/to_structured_data.js';
 
 export class SecretRenderer implements ISecretRenderer {
   public constructor(private nameProvider: ISecretNameProvider) {}
