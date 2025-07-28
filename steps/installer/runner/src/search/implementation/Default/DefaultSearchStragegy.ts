@@ -1,5 +1,5 @@
 import FileSystem from 'node:fs/promises';
-import Path from 'path';
+import Path from 'node:path';
 import { globby } from 'globby';
 import type { ISearchStrategy, ISearchStrategyResult } from '../../ISearchStrategy.js';
 

@@ -13,11 +13,11 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     protected defaultVersion: string
   ) {}
 
-  getLatestVersionFor(name: string, versionRange: string): Promise<string | undefined> {
+  getLatestVersionFor(name: string, _versionRange: string): Promise<string | undefined> {
     return this.__getOldVersionNumber(name);
   }
 
-  getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
+  getCurrentVersionNumber(workspace: IWorkspace, _root: string, _packageManger: IPackageManager | undefined): Promise<string> {
     return this.__getCurrentVersionNumber(workspace);
   }
 
@@ -49,7 +49,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspaceName))) ?? this.defaultVersion;
   }
 
-  async getOldVersionNumber(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<string> {
+  async getOldVersionNumber(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<string> {
     return this.__getOldVersionNumber(workspace.getName());
   }
 

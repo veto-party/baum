@@ -60,7 +60,7 @@ export class CacheWrapper implements ICacheWrapper {
     });
   }
 
-  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+  async execute(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
     /** NO-OP */
   }
 

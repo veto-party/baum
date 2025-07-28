@@ -3,7 +3,7 @@ import type { INameTransformer } from '../../INameTransformer.js';
 export class StaticNameTranformer implements INameTransformer {
   public constructor(private prefix: string = '@internal') {}
 
-  enableOverrideFor(name: string): void {
+  enableOverrideFor(_name: string): void {
     /** NO-OP */
   }
 
