@@ -17,7 +17,7 @@ import {
   SecretRenderer,
   ThirdPartyRenderer,
   TraefikExposeRenderer
-} from '../dist/index.js';
+} from '../src/index.js';
 
 const nameProvider = new (class implements INameProvider, IConfigMapNameProvider, IContainerName, IMatchLabel, IDeploymentNameProvider, IImageGenerator {
   generateImage(workspace: IWorkspace): { image: string } {
