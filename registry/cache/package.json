@@ -1,0 +1,22 @@
+{
+  "name": "@veto-party/baum__registry__cache",
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": [
+    "./dist/**"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "simple-git": "^3.28.0",
+    "semver": "^7.7.2",
+    "@veto-party/baum__steps__git_diff": "*",
+    "@veto-party/baum__registry": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2",
+    "@veto-party/config": "*"
+  }
+}

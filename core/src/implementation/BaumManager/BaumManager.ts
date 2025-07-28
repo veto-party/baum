@@ -15,6 +15,8 @@ export class BaumManager implements IBaumManager {
 
   protected steps: { name: string; step: IStep }[] = [];
 
+  private cleanups: (() => any)[] = [];
+
   protected doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
   protected disableWorkspace = true;
@@ -29,6 +31,11 @@ export class BaumManager implements IBaumManager {
 
   isFailed(): boolean {
     return this.failed ?? false;
+  }
+
+  addCleanup(cb: () => any): this {
+    this.cleanups.push(cb);
+    return this;
   }
 
   setRootDirectory(root: string): this {
@@ -143,6 +150,14 @@ export class BaumManager implements IBaumManager {
           await this.doClean(currentGroup, steps);
         } catch (error) {
           console.warn('Failed to clean up group.', error);
+        }
+      }
+
+      for (const cleanup of this.cleanups) {
+        try {
+          await cleanup?.();
+        } catch (error) {
+          console.warn(`Cleanup failed, reason: `, error);
         }
       }
 
