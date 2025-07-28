@@ -2,7 +2,6 @@ import type { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
 
 export class GroupStep implements IStep, IBaumRegistrable {
-
   private cleanup: (() => any)[] = [];
 
   constructor(protected steps: IStep[]) {}

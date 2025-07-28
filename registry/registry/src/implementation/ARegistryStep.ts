@@ -12,7 +12,6 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-
   private cleanup: (() => any)[] = [];
 
   constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
@@ -65,15 +64,17 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     const allWorkspaces = await pm.readWorkspace(root);
 
-    await Promise.all(keysToModify.flatMap((key) => {
-      Object.entries((jsonFile[key] ?? {}) as Record<string, string>).map(async ([k, v]) => {
-        if (!allWorkspaces.some((w) => w.getName() === k)) {
-          return;
-        }
-        const resolved = this.modifyVersion(v, pm);
-        jsonFile[key][k] = await manager.getLatestVersionFor(k, resolved) ?? resolved;
-      });
-    }));
+    await Promise.all(
+      keysToModify.flatMap((key) => {
+        Object.entries((jsonFile[key] ?? {}) as Record<string, string>).map(async ([k, v]) => {
+          if (!allWorkspaces.some((w) => w.getName() === k)) {
+            return;
+          }
+          const resolved = this.modifyVersion(v, pm);
+          jsonFile[key][k] = (await manager.getLatestVersionFor(k, resolved)) ?? resolved;
+        });
+      })
+    );
 
     await this.modifyJSON?.(jsonFile, manager, workspace, pm, root);
 

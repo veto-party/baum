@@ -1,4 +1,3 @@
-
 export interface INameTransformer {
   getName(name: string): string;
   getOverrideName(name: string): string;

@@ -3,7 +3,6 @@ import type { IExecutablePackageManager } from '../../interface/PackageManager/I
 import { allSettledButFailure, allSettledButNoFailures } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 export class ParallelStep implements IStep, IBaumRegistrable {
-  
   private cleanup: (() => any)[] = [];
 
   constructor(protected steps: IStep[]) {}
