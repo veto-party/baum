@@ -1,7 +1,7 @@
 import isEqualOR from 'lodash.isequal';
 import isEqualWith from 'lodash.isequalwith';
 
-const isEqual = (a: any, b: any) => isEqualWith(a, b, (a, b) => a === b || isEqualOR(a, b));
+const isEqual = (a: any, b: any) => isEqualWith(a, b, (subA, subB) => subA === subB || isEqualOR(subA, subB));
 
 type ComputedKeys<T> = keyof T;
 
@@ -44,7 +44,7 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
           return Promise.resolve(currentResult[1]);
         }
 
-        let promisesTuple = storedPromises.filter((storedPromise) => isEqual(storedPromise[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
+        let promisesTuple = storedPromises.filter((current) => isEqual(current[0].slice(1), lookupArgs)).find((current) => current[0][0] === this);
 
         if (promisesTuple?.length !== 2) {
           promisesTuple = [[this, ...lookupArgs], []];
@@ -75,8 +75,8 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
       } as any;
     } else {
       context.value = function (this: any, ...givenArgs: Parameters<T>): ReturnType<T> {
-        this[`storage__cache__${__propertyKey}`] ??= [];
-        const storage: [[T, ...any[]], any][] = this[`storage__cache__${__propertyKey}`];
+        this[generateKey(__propertyKey)] ??= [];
+        const storage: [[T, ...any[]], any][] = this[generateKey(__propertyKey)];
 
         let lookupArgs = [...givenArgs];
         if (paramsInclude !== undefined) {

@@ -154,4 +154,33 @@ describe('Should only run once using annotation', () => {
 
     expect(await data.method()).toEqual(2);
   });
+
+
+  it('parameters', async () => {
+    class Test {
+      clear() {
+        clearCacheForFN(this, 'method');
+      }
+
+      @CachedFN(true)
+      async method<T>(test: T): Promise<T> {
+        return test;
+      }
+    }
+
+    const data = new Test();
+
+    expect(await data.method(1)).toEqual(1);
+    expect(await data.method(1)).toEqual(1);
+
+    expect(await data.method(1)).toEqual(1);
+
+    expect(await data.method(2)).toEqual(2);
+    expect(await data.method(2)).toEqual(2);
+
+    expect(await data.method(7)).toEqual(7);
+    expect(await data.method(7)).toEqual(7);
+
+    expect(await data.method(2)).toEqual(2);
+  });
 });
