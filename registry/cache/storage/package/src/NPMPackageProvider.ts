@@ -40,12 +40,10 @@ export class NPMPackageProvider {
   private async loadPackage(packageName: string) {
     const givenPackage: any = await registryFetch.json(packageName, this.getFetchParams()).catch(() => 404);
 
-    let tarball: any = undefined;
+    let tarball: any = givenPackage;
 
     if (givenPackage === 404) {
-      tarball = await registryFetch.json(`${this.packageName}/latest`, this.getFetchParams()).catch(() => undefined);
-    } else {
-      tarball = givenPackage.versions[givenPackage['dist-tags'].latest];
+      tarball = await registryFetch.json(`${packageName}/latest`, this.getFetchParams()).catch(() => undefined);
     }
 
     if (tarball === undefined) {
@@ -56,17 +54,19 @@ export class NPMPackageProvider {
     return tarball;
   }
 
-  @CachedFN(true)
+  @CachedFN(true, [true])
   private async ensureCurrentPackage() {
 
-    const tarball = await this.loadPackage(this.packageName);
+    const givenPackage = await this.loadPackage(this.packageName);
 
-    if (tarball === undefined) {
+    if (givenPackage === undefined) {
       return {
         self_version: undefined,
         versions: {}
       };
     }
+
+    const tarball = givenPackage?.dist?.tarball ?? givenPackage.versions[givenPackage['dist-tags'].latest];
 
     const tarBuffer = await registryFetch(tarball.dist.tarball, this.getFetchParams()).then((response) => response.buffer());
 
@@ -97,14 +97,16 @@ export class NPMPackageProvider {
   }
 
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    const cachedLastest = (await this.ensureCurrentPackage()).versions[name];
-    const realLatest = (await this.loadPackage(name))?.version;
+    const cachedLatest = (await this.ensureCurrentPackage()).versions[name];
+    const realLatestPackage = (await this.loadPackage(name));
 
-    if (realLatest && cachedLastest) {
-      return semver.gte(realLatest, cachedLastest) ? realLatest : cachedLastest;
+    const realLatest = realLatestPackage?.version ?? realLatestPackage?.['dist-tags']?.latest;
+
+    if (realLatest && cachedLatest) {
+      return semver.gte(realLatest, cachedLatest) ? realLatest : cachedLatest;
     }
 
-    return cachedLastest ?? realLatest;
+    return cachedLatest ?? realLatest;
   }
 
   public async updateCurrentVersionFor(name: string, version: string): Promise<void> {
@@ -268,5 +270,6 @@ export class NPMPackageProvider {
 
     this.newVersions = {};
     clearCacheForFN(this, 'loadPackage' as any);
+    clearCacheForFN(this, 'ensureCurrentPackage' as any);
   }
 }
