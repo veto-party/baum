@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@veto-party/baum__core": "*",
+    "@veto-party/baum__registry__cache__base": "*",
     "semver": "^7.7.2",
     "normalize-package-data": "8.0.0",
     "@types/normalize-package-data": "2.4.4",

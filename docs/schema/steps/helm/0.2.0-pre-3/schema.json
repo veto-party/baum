@@ -9,17 +9,11 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "global",
-                "scoped",
-                "scoped-name"
-              ]
+              "enum": ["global", "scoped", "scoped-name"]
             },
             "case": {
               "type": "string",
-              "enum": [
-                "snake"
-              ]
+              "enum": ["snake"]
             },
             "static": {
               "type": "boolean"
@@ -63,9 +57,7 @@
               "additionalProperties": false
             }
           },
-          "required": [
-            "type"
-          ],
+          "required": ["type"],
           "additionalProperties": false
         }
       },
@@ -89,21 +81,11 @@
           "properties": {
             "allow_outgoing": {
               "type": "string",
-              "enum": [
-                "IN_NAMESPACE",
-                "NONE",
-                "ALL",
-                "STRICT"
-              ]
+              "enum": ["IN_NAMESPACE", "NONE", "ALL", "STRICT"]
             },
             "allow_incoming": {
               "type": "string",
-              "enum": [
-                "IN_NAMESPACE",
-                "NONE",
-                "ALL",
-                "STRICT"
-              ]
+              "enum": ["IN_NAMESPACE", "NONE", "ALL", "STRICT"]
             }
           }
         },
@@ -120,18 +102,13 @@
                 "properties": {
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "SIMPLE",
-                      "ROUND_ROBIN"
-                    ]
+                    "enum": ["SIMPLE", "ROUND_ROBIN"]
                   }
                 },
                 "additionalProperties": false
               }
             },
-            "required": [
-              "to"
-            ],
+            "required": ["to"],
             "additionalProperties": false
           }
         }
@@ -179,27 +156,18 @@
       "patternProperties": {
         "^[a-zA-Z0-9]+$": {
           "type": "object",
-          "required": [
-            "type",
-            "definition"
-          ],
+          "required": ["type", "definition"],
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "global",
-                "scoped"
-              ]
+              "enum": ["global", "scoped"]
             },
             "definition": {
               "type": "object",
               "oneOf": [
                 {
                   "type": "object",
-                  "required": [
-                    "on",
-                    "image"
-                  ],
+                  "required": ["on", "image"],
                   "properties": {
                     "on": {
                       "type": "string"
@@ -212,10 +180,7 @@
                 },
                 {
                   "type": "object",
-                  "required": [
-                    "on",
-                    "project"
-                  ],
+                  "required": ["on", "project"],
                   "properties": {
                     "on": {
                       "type": "string"
@@ -242,22 +207,16 @@
               "type": "string"
             }
           },
-          "required": [
-            "type"
-          ],
+          "required": ["type"],
           "oneOf": [
             {
               "type": "object",
               "additionalProperties": false,
-              "required": [
-                "type"
-              ],
+              "required": ["type"],
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": [
-                    "load-balancer"
-                  ]
+                  "enum": ["load-balancer"]
                 },
                 "cors": {
                   "type": "object",
@@ -304,9 +263,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "domain"
-                        ],
+                        "required": ["domain"],
                         "additionalProperties": false
                       }
                     }
@@ -323,9 +280,7 @@
                 },
                 "sticky": {
                   "type": "object",
-                  "required": [
-                    "fieldName"
-                  ],
+                  "required": ["fieldName"],
                   "properties": {
                     "fieldName": {
                       "type": "string"
@@ -354,16 +309,12 @@
             },
             {
               "type": "object",
-              "required": [
-                "type"
-              ],
+              "required": ["type"],
               "additionalProperties": false,
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": [
-                    "internal"
-                  ]
+                  "enum": ["internal"]
                 }
               }
             }
@@ -385,17 +336,11 @@
           "patternProperties": {
             ".*": {
               "type": "object",
-              "required": [
-                "type",
-                "average"
-              ],
+              "required": ["type", "average"],
               "properties": {
                 "type": {
                   "type": "string",
-                  "enum": [
-                    "AverageValue",
-                    "Utilization"
-                  ]
+                  "enum": ["AverageValue", "Utilization"]
                 },
                 "average": {
                   "type": "string"
@@ -410,18 +355,14 @@
     },
     "update_strategy": {
       "type": "object",
-      "required": [
-        "type"
-      ],
+      "required": ["type"],
       "oneOf": [
         {
           "type": "object",
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "RollingUpdate"
-              ]
+              "enum": ["RollingUpdate"]
             },
             "maxSurge": {
               "type": "string"
@@ -437,9 +378,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "Rereate"
-              ]
+              "enum": ["Rereate"]
             }
           },
           "additionalProperties": false
@@ -454,10 +393,7 @@
           "properties": {
             "type": {
               "type": "string",
-              "enum": [
-                "global",
-                "scoped"
-              ]
+              "enum": ["global", "scoped"]
             },
             "definition": {
               "type": "object",
@@ -476,11 +412,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "repository",
-                    "version",
-                    "name"
-                  ],
+                  "required": ["repository", "version", "name"],
                   "additionalProperties": false
                 },
                 "from_reference": {
@@ -496,16 +428,11 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "version",
-                    "path"
-                  ],
+                  "required": ["version", "path"],
                   "additionalProperties": false
                 }
               },
-              "required": [
-                "origin"
-              ],
+              "required": ["origin"],
               "additionalProperties": false
             },
             "origin_name_var": {
@@ -515,23 +442,12 @@
               "type": "object",
               "patternProperties": {
                 "^[a-zA-Z0-9.]+$": {
-                  "type": [
-                    "number",
-                    "string",
-                    "boolean",
-                    "object",
-                    "array",
-                    "null"
-                  ]
+                  "type": ["number", "string", "boolean", "object", "array", "null"]
                 }
               }
             }
           },
-          "required": [
-            "type",
-            "definition",
-            "origin_name_var"
-          ],
+          "required": ["type", "definition", "origin_name_var"],
           "additionalProperties": false,
           "binding": {
             "type": "object",

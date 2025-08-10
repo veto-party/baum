@@ -155,7 +155,6 @@ describe('Should only run once using annotation', () => {
     expect(await data.method()).toEqual(2);
   });
 
-
   it('parameters', async () => {
     class Test {
       clear() {
