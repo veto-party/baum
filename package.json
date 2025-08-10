@@ -14,6 +14,8 @@
     "cli",
     "package_managers/*",
     "registry/*",
+    "registry/cache/base",
+    "registry/cache/storage/package",
     "steps/*",
     "steps/installer/features",
     "steps/installer/renderer",
