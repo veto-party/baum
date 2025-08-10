@@ -1,2 +1,1 @@
-
-export { NPMPackageProvider } from "./NPMPackageProvider.js";
+export { NPMPackageProvider } from './NPMPackageProvider.js';

@@ -4,13 +4,12 @@ import { buffer } from 'node:stream/consumers';
 import { URL } from 'node:url';
 import zlib from 'node:zlib';
 import { CachedFN, clearCacheForFN } from '@veto-party/baum__core';
+import normalizer from 'normalize-package-data';
 import npa from 'npm-package-arg';
 import registryFetch from 'npm-registry-fetch';
 import semver from 'semver';
 import ssri from 'ssri';
 import tarstream from 'tar-stream';
-
-import normalizer from 'normalize-package-data';
 
 export class NPMPackageProvider {
   private newVersions: Record<string, string> = {};
@@ -50,13 +49,11 @@ export class NPMPackageProvider {
       return undefined;
     }
 
-
     return tarball;
   }
 
   @CachedFN(true, [true])
   private async ensureCurrentPackage() {
-
     const givenPackage = await this.loadPackage(this.packageName);
 
     if (givenPackage === undefined) {
@@ -98,7 +95,7 @@ export class NPMPackageProvider {
 
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
     const cachedLatest = (await this.ensureCurrentPackage()).versions[name];
-    const realLatestPackage = (await this.loadPackage(name));
+    const realLatestPackage = await this.loadPackage(name);
 
     const realLatest = realLatestPackage?.version ?? realLatestPackage?.['dist-tags']?.latest;
 
@@ -233,7 +230,7 @@ export class NPMPackageProvider {
 
       if (currentVersions.indexOf(newVersion) !== -1) {
         const { name: pkgid, version } = current;
-        throw new Error(`Cannot publish ${pkgid}@${newVersion} over existing version.`);
+        throw new Error(`Cannot publish ${pkgid}@${newVersion} over existing version(${version}).`);
       }
 
       current.versions ??= {};
