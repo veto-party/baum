@@ -45,7 +45,14 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   @CachedFN(true)
   private async getAllGitChanges(workspace: IWorkspace, root: string): Promise<string[]> {
     const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
-    return (await ConditionalGitDiffStep.diffSummary(root, await this.versionProvider.getGitHashFor(workspace))).map((e) => Resolver.ensureAbsolute(e.file)).filter((e) => e.startsWith(absWorkspacePath));
+
+    const hash = await this.versionProvider.getGitHashFor(workspace);
+
+    if (hash === undefined) {
+      return ['virtual_change_initial'];
+    }
+
+    return (await ConditionalGitDiffStep.diffSummary(root, hash)).map((e) => Resolver.ensureAbsolute(e.file)).filter((e) => e.startsWith(absWorkspacePath));
   }
 
   private async incrementUsingStatusUpdate(workspace: IWorkspace, currentVersion: string | Promise<string>, type: VersionStatusUpdateType) {
@@ -71,5 +78,10 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     }
 
     return currentVersion;
+  }
+
+  async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
+    await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
+    await super.flushNewVersion(workspace, root, packageManager);
   }
 }

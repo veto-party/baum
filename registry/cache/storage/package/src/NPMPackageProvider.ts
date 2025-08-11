@@ -12,7 +12,7 @@ import ssri from 'ssri';
 import tarstream from 'tar-stream';
 
 export class NPMPackageProvider {
-  private newVersions: Record<string, string> = {};
+  protected newVersions: Record<string, string> = {};
 
   constructor(
     private registry: string,
