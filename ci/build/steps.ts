@@ -25,7 +25,6 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
           json.homepage = 'https://github.com/veto-party/baum#readme';
         }
       })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN!)
-        .addInstallStep()
         .addExecutionStep('prepare', commonStep)
     );
   } else {
@@ -39,7 +38,6 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
           }
         }
       })(version)
-        .addInstallStep()
         .addExecutionStep('prepare', commonStep)
     );
   }

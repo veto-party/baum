@@ -45,7 +45,8 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: IStep;
   private initStep: InitStep;
 
-  private doInstall = false;
+
+  private installStep = new GroupStep([]);
 
   constructor(
     private pinVersion: string,
@@ -55,26 +56,26 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     this.initStep = new InitStep(this.dockerAddress);
   }
 
-  addInstallStep(): this {
-    this.doInstall = true;
-    return this;
-  }
-
   @CachedFN(true)
-  async getInstallStep(): Promise<IStep | undefined> {
-    if (!this.doInstall) {
-      return undefined;
-    }
+  async addInstallStep(): Promise<this> {
+
 
     const port = await this.initStep.getPort();
     const url = new URL(`${this.dockerAddress}:${port}`);
+    
+    this.installStep.addExecutionStep('npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`));
+    this.installStep.addExecutionStep('modify-npmrc', new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`));
 
-    return new GroupStep([
-      new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`),
-      new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`),
+
       // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
-      new PKGMStep((intent) => intent.install().install())
-    ]);
+    this.installStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().install()));
+    
+    return this;
+  }
+
+  
+  async getInstallStep(): Promise<IStep | undefined> {
+    return this.installStep;
   }
 
   checkForPublish(_workspace: IWorkspace) {
