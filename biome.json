@@ -5,7 +5,7 @@
     "ignoreUnknown": true
   },
   "overrides": [{
-    "includes": ["docs/schema/steps/helm"],
+    "includes": ["./docs/schema/steps/helm/**/*"],
     "json": {
       "formatter": {
         "enabled": false
