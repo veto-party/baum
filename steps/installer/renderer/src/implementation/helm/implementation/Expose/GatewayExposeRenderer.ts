@@ -38,7 +38,7 @@ export class GatewayExposeRenderer implements IExposeRenderer {
     const gatewayConfigs = (name: string) =>
       Array.from(config?.entries?.() ?? []).map(([port, exposed]) => {
         if (exposed.type === 'internal') {
-          return;
+          return undefined;
         }
 
         return {

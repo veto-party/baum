@@ -1,6 +1,6 @@
 import type { INameTransformer } from '../../INameTransformer.js';
 
-export class StaticNameTranformer implements INameTransformer {
+export class StaticNameTransformer implements INameTransformer {
   public constructor(private prefix: string = '@internal') {}
 
   enableOverrideFor(_name: string): void {

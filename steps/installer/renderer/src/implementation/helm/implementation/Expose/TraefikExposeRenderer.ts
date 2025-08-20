@@ -75,12 +75,12 @@ export class TraefikExposeRenderer implements IExposeRenderer {
         Array.from(config?.entries?.() ?? [])
           .map(([port, exposed]) => {
             if (exposed.type === 'internal') {
-              return;
+              return undefined;
             }
             const { cors, matcher } = exposed;
 
             if (!cors) {
-              return;
+              return undefined;
             }
 
             const origins: any[] = [];
@@ -112,7 +112,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
         Array.from(config?.entries?.() ?? [])
           .map(([port, exposed]) => {
             if (exposed.type === 'internal') {
-              return;
+              return undefined;
             }
 
             const matchers: any[] = [];
@@ -126,7 +126,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
             }
 
             if (matchers.length === 0) {
-              return;
+              return undefined;
             }
 
             return [port.toString(), merge({}, ...matchers)];
@@ -146,7 +146,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
           routes: Array.from(config?.entries() ?? [])
             .map(([port, exposed]) => {
               if (exposed.type === 'internal') {
-                return;
+                return undefined;
               }
 
               return {

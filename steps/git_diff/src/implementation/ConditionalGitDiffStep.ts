@@ -69,6 +69,11 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
     return await ConditionalGitDiffStep.diffSummary(root, `${prefix}${branch}`);
   }
 
+  @CachedFN(true)
+  public static async gitHash(root: string) {
+    return await ConditionalGitDiffStep.ensureGit(root).revparse('HEAD');
+  }
+
   public static async diffSummary(root: string, target: string) {
     const raw_changes = await ConditionalGitDiffStep.ensureGit(root).diffSummary(`HEAD..${target}`);
     return raw_changes.files ?? [];

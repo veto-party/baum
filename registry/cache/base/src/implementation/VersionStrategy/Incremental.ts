@@ -53,7 +53,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     return this.__getOldVersionNumber(workspace.getName());
   }
 
-  async flushNewVersion(workspace: IWorkspace): Promise<void> {
+  async flushNewVersion(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<void> {
     if (this.versionStatusUpdates.has(workspace)) {
       await this.versionProvider.updateCurrentVersionFor(this.nameTransformer.getOverrideName(workspace.getName()), this.versionStatusUpdates.get(workspace)!);
     }

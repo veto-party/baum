@@ -15,7 +15,7 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
   };
   const updateOverrides = (workspace: IWorkspace) => {
     const given = overrides[workspace.getName()] ?? [];
-    workspace.setOverrides(given.reduce((prev, current) => ({ ...prev, ...current }), {}));
+    workspace.setOverrides(Object.fromEntries(given.flatMap((prev) => Object.entries(prev))));
   };
 
   const dependencyMapping = workspaces.reduce<Record<string, [string, IWorkspace][]>>((previous, workspace) => {
@@ -47,7 +47,9 @@ export const shakeWorkspacesIntoExecutionGroups = (workspaces: IWorkspace[], pm:
   }, {});
 
   // Sort (mutate) arrays.
-  Object.values(dependencyMapping).forEach((entries) => entries.sort(([a], [b]) => semver.compare(a, b) || semver.compareBuild(a, b)));
+  Object.values(dependencyMapping).forEach((entries) => {
+    entries.sort(([a], [b]) => semver.compare(a, b) || semver.compareBuild(a, b));
+  });
 
   const withoutDependencies = workspaces.filter((workspace) => {
     return !workspace.getDynamicDependents().some((dependent) => {

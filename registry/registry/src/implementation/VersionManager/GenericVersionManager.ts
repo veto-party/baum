@@ -16,7 +16,11 @@ export class GenericVersionManager implements IVersionManager {
       this.nameToVersionOrder[workspace.getName()].push(workspace);
     }
 
-    Object.values(this.nameToVersionOrder).forEach((workspaceMapping) => Object.values(workspaceMapping).sort((workspaceA, workspaceB) => semver.compare(workspaceA.getVersion(), workspaceB.getVersion()) || semver.compareBuild(workspaceA.getVersion(), workspaceB.getVersion())));
+    // TODO: check if unused
+    // Object.values(this.nameToVersionOrder).forEach((workspaceMapping) => {
+    //   Object.values(workspaceMapping)
+    //     .sort((workspaceA, workspaceB) => semver.compare(workspaceA.getVersion(), workspaceB.getVersion()) || semver.compareBuild(workspaceA.getVersion(), workspaceB.getVersion()));
+    // });
   }
 
   constructor(

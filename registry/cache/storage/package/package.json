@@ -1,0 +1,33 @@
+{
+  "name": "@veto-party/baum__registry__cache__storage__npm",
+  "type": "module",
+  "main": "./src/index.ts",
+  "files": [
+    "./dist/**"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --loader ts-node/esm ./test/start-testing.mjs"
+  },
+  "dependencies": {
+    "@veto-party/baum__core": "*",
+    "@veto-party/baum__registry__cache__base": "*",
+    "semver": "^7.7.2",
+    "normalize-package-data": "8.0.0",
+    "@types/normalize-package-data": "2.4.4",
+    "npm-registry-fetch": "19.0.0",
+    "@types/npm-registry-fetch": "8.0.8",
+    "ssri": "12.0.0",
+    "@types/ssri": "7.1.5",
+    "npm-package-arg": "13.0.0",
+    "@types/npm-package-arg": "6.1.4",
+    "tar-stream": "3.1.7",
+    "@types/tar-stream": "^3.1.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2",
+    "@veto-party/config": "*",
+    "jasmine": "^5.1.0",
+    "@types/jasmine": "^5.1.4"
+  }
+}
