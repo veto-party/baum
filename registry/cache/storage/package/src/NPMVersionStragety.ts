@@ -24,7 +24,7 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
     const hash = await this.provider.getCurrentVersionFor(`git.${workspace.getName()}`);
 
     if (!hash) {
-      throw new Error('No hash present!');
+      return undefined;
     }
 
     return hash;
