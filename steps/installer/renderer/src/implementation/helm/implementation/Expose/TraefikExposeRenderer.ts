@@ -146,7 +146,7 @@ export class TraefikExposeRenderer implements IExposeRenderer {
           routes: Array.from(config?.entries() ?? [])
             .map(([port, exposed]) => {
               if (exposed.type === 'internal') {
-                return;
+                return undefined;
               }
 
               return {
