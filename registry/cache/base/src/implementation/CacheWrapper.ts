@@ -98,7 +98,6 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-
     if (!(await this.shouldExecuteStep(workspace, packageManager, rootDirectory))) {
       return;
     }
