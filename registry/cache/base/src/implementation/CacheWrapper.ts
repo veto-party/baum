@@ -49,27 +49,27 @@ export class CacheWrapper implements ICacheWrapper {
 
       for (const field of fields) {
         for (const name in file[field] ?? {}) {
-
           const lookupVersion = packageManger.modifyToRealVersionValue(file[field][name]) ?? file[field][name];
 
-          const givenWorkspace = nameMap.get(name)?.find((el) => {
-            const resolved = packageManger.modifyToRealVersionValue(el.getVersion());
+          const givenWorkspace =
+            nameMap.get(name)?.find((el) => {
+              const resolved = packageManger.modifyToRealVersionValue(el.getVersion());
 
-            if (!resolved) {
-              return false;
-            }
+              if (!resolved) {
+                return false;
+              }
 
-            return semver.satisfies(lookupVersion, resolved);
-          }) ?? nameMap.get(name)?.find((el) => {
-            const result = packageManger.modifyToRealVersionValue(el.getVersion());
+              return semver.satisfies(lookupVersion, resolved);
+            }) ??
+            nameMap.get(name)?.find((el) => {
+              const result = packageManger.modifyToRealVersionValue(el.getVersion());
 
-            return !result || result === '*';
-          });
+              return !result || result === '*';
+            });
 
           if (!givenWorkspace) {
             continue;
           }
-
 
           file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
         }
