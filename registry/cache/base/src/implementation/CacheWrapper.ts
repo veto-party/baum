@@ -3,12 +3,12 @@ import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
 import type { INameTransformer } from '../INameTransformer.js';
-import type { IVersionStrategy } from '../IVersionStrategy.js';
+import type { IncrementalVersionStrategy } from './VersionStrategy/Incremental.js';
 
 export class CacheWrapper implements ICacheWrapper {
   public constructor(
     private nameTransformer: INameTransformer,
-    private versionStrategy: IVersionStrategy,
+    private versionStrategy: IncrementalVersionStrategy,
     private baum: IBaumManagerConfiguration,
     private wrapped: IStep
   ) {
@@ -34,7 +34,7 @@ export class CacheWrapper implements ICacheWrapper {
 
       const [oldVersion, newVersion] = await Promise.all([this.versionStrategy.getOldVersionNumber(workspace, root, packageManger), this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)] as const);
 
-      if (oldVersion === newVersion && oldVersion !== this.versionStrategy.getDefaultVersion()) {
+      if (oldVersion === newVersion) {
         return;
       }
 
@@ -49,13 +49,21 @@ export class CacheWrapper implements ICacheWrapper {
 
       for (const field of fields) {
         for (const name in file[field] ?? {}) {
-          const result = (await Promise.all(nameMap.get(name)?.map(async (el) => [el, await this.versionStrategy.getCurrentVersionNumber(el, root, packageManger)] as const) ?? [])).find(([, version]) => semver.satisfies(file[field][name], version));
+          const givenWorkspace = nameMap.get(name)?.find((el) => {
+            const resolved = packageManger.modifyToRealVersionValue(el.getVersion());
+            
+            if (!resolved) {
+              return false;
+            }
+            
+            return semver.satisfies(file[field][name], resolved);
+          });
 
-          if (!result) {
+          if (!givenWorkspace) {
             continue;
           }
 
-          const [workspace, version] = result;
+          const version = await this.versionStrategy.getCurrentVersionNumber(givenWorkspace, root, packageManger);
 
           file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${version}`;
         }

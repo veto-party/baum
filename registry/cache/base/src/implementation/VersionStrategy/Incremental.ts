@@ -26,7 +26,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
   @CachedFN(true)
   protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
-    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace.getName()));
+    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace.getName())) ?? this.defaultVersion;
   }
 
   protected async increment(workspace: IWorkspace, version: string) {
@@ -76,13 +76,13 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     throw new Error(`Cannot increment version from ${await this.__getCurrentVersionNumber(workspace)} to ${version}, since to is smaller the from.`);
   }
 
-  async __getOldVersionNumber(workspaceName: string): Promise<string> {
+  async __getOldVersionNumber(workspaceName: string): Promise<string | undefined> {
     const overrideVersion = await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspaceName));
     overrideVersion !== undefined && this.nameTransformer.enableOverrideFor(workspaceName);
-    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspaceName))) ?? this.defaultVersion;
+    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspaceName)));
   }
 
-  async getOldVersionNumber(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<string> {
+  async getOldVersionNumber(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<string | undefined> {
     return this.__getOldVersionNumber(workspace.getName());
   }
 
