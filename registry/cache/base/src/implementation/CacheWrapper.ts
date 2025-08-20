@@ -75,7 +75,7 @@ export class CacheWrapper implements ICacheWrapper {
   private async shouldExecuteStep(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string) {
     const oldVersion = this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
     const newVersion = this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
-    if ((await oldVersion) === (await newVersion) && (await oldVersion) !== this.versionStrategy.getDefaultVersion()) {
+    if ((await oldVersion) === (await newVersion)) {
       return false;
     }
 
