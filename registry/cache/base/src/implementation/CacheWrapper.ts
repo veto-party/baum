@@ -73,10 +73,10 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
-    if (!await this.shouldExecuteStep(workspace, packageManager, root)) {
+    if (!(await this.shouldExecuteStep(workspace, packageManager, root))) {
       return;
     }
-    
+
     await this.wrapped.execute(workspace, packageManager, root);
   }
 
@@ -85,7 +85,7 @@ export class CacheWrapper implements ICacheWrapper {
       await this.flush(workspace, rootDirectory, packageManager);
     }
 
-    if (!await this.shouldExecuteStep(workspace, packageManager, rootDirectory)) {
+    if (!(await this.shouldExecuteStep(workspace, packageManager, rootDirectory))) {
       return;
     }
 
