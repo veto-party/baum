@@ -1,4 +1,4 @@
-import { CachedFN, type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
+import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
 import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
@@ -49,6 +49,9 @@ export class CacheWrapper implements ICacheWrapper {
 
       for (const field of fields) {
         for (const name in file[field] ?? {}) {
+
+          const lookupVersion = packageManger.modifyToRealVersionValue(file[field][name]) ?? file[field][name];
+
           const givenWorkspace = nameMap.get(name)?.find((el) => {
             const resolved = packageManger.modifyToRealVersionValue(el.getVersion());
 
@@ -56,22 +59,24 @@ export class CacheWrapper implements ICacheWrapper {
               return false;
             }
 
-            return semver.satisfies(file[field][name], resolved);
+            return semver.satisfies(lookupVersion, resolved);
+          }) ?? nameMap.get(name)?.find((el) => {
+            const result = packageManger.modifyToRealVersionValue(el.getVersion());
+
+            return !result || result === '*';
           });
 
           if (!givenWorkspace) {
             continue;
           }
 
-          const version = await this.versionStrategy.getCurrentVersionNumber(givenWorkspace, root, packageManger);
 
-          file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${version}`;
+          file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
         }
       }
     });
   }
 
-  @CachedFN(true)
   private async shouldExecuteStep(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string) {
     const oldVersion = this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
     const newVersion = this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
