@@ -34,7 +34,7 @@ export class CacheWrapper implements ICacheWrapper {
 
       const newVersion = await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger);
       const oldVersion = await this.versionStrategy.getOldVersionNumber(workspace, root, packageManger);
-      
+
       if (oldVersion === newVersion) {
         return;
       }
