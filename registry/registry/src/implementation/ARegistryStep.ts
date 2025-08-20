@@ -65,15 +65,16 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     const allWorkspaces = await pm.readWorkspace(root);
 
     await Promise.all(
-      keysToModify.map((key) => [key, Object.entries((jsonFile[key] ?? {}) as Record<string, string>)] as const )
-      .flatMap(([key, entries]) => {
-        return entries
-          .filter(([k]) => allWorkspaces.some((w) => w.getName() === k))
-          .map(async ([k, v]) => {
-            const resolved = this.modifyVersion(v, pm);
-            jsonFile[key][k] = (await manager.getLatestVersionFor(k, resolved)) ?? resolved;
-          });
-      })
+      keysToModify
+        .map((key) => [key, Object.entries((jsonFile[key] ?? {}) as Record<string, string>)] as const)
+        .flatMap(([key, entries]) => {
+          return entries
+            .filter(([k]) => allWorkspaces.some((w) => w.getName() === k))
+            .map(async ([k, v]) => {
+              const resolved = this.modifyVersion(v, pm);
+              jsonFile[key][k] = (await manager.getLatestVersionFor(k, resolved)) ?? resolved;
+            });
+        })
     );
 
     await this.modifyJSON?.(jsonFile, manager, workspace, pm, root);
