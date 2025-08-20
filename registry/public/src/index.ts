@@ -10,9 +10,7 @@ export class PublicRegistryStep extends ARegistryStep {
     private token: string
   ) {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
-    this.initStep = new GroupStep([
-      new NPMRCForSpecifiedRegistryStep(registry),
-    ]);
+    this.initStep = new GroupStep([new NPMRCForSpecifiedRegistryStep(registry)]);
   }
 
   async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {

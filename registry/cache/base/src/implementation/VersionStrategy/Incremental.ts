@@ -23,7 +23,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
   @CachedFN(true)
   protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
-    return this.versionStatusUpdates.get(workspace) ?? await this.__getOldVersionNumber(workspace.getName());
+    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace.getName()));
   }
 
   protected async increment(workspace: IWorkspace, version: string) {
