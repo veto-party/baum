@@ -4,14 +4,16 @@
     "experimentalScannerIgnores": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*", "./docs/schema/**/*", "core/src/index.ts", "docs/schema/steps/helm"],
     "ignoreUnknown": true
   },
-  "overrides": [{
-    "includes": ["./docs/schema/steps/helm/**/*"],
-    "json": {
-      "formatter": {
-        "enabled": false
+  "overrides": [
+    {
+      "includes": ["./docs/schema/steps/helm/**/*"],
+      "json": {
+        "formatter": {
+          "enabled": false
+        }
       }
     }
-  }],
+  ],
   "assist": {
     "actions": {
       "source": {
