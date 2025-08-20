@@ -79,7 +79,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   async __getOldVersionNumber(workspaceName: string): Promise<string | undefined> {
     const overrideVersion = await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspaceName));
     overrideVersion !== undefined && this.nameTransformer.enableOverrideFor(workspaceName);
-    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getDefaultName(workspaceName)));
+    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getName(workspaceName)));
   }
 
   async getOldVersionNumber(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<string | undefined> {

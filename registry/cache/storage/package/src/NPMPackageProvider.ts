@@ -93,17 +93,16 @@ export class NPMPackageProvider {
   }
 
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    const cachedLatest = (await this.ensureCurrentPackage()).versions[name];
+    return (await this.ensureCurrentPackage()).versions[name];
+  }
+
+  async getPackageVersionFor(name: string): Promise<string | undefined> {
     const realLatestPackage = await this.loadPackage(name);
 
     const realLatestMetadata = realLatestPackage?.dist?.tarball ?? realLatestPackage?.versions?.[realLatestPackage?.['dist-tags']?.latest];
     const realLatest = realLatestMetadata?.version;
 
-    if (realLatest && cachedLatest) {
-      return semver.gte(realLatest, cachedLatest) ? realLatest : cachedLatest;
-    }
-
-    return cachedLatest ?? realLatest;
+    return realLatest;
   }
 
   public async updateCurrentVersionFor(name: string, version: string): Promise<void> {
