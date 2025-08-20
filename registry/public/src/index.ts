@@ -37,7 +37,7 @@ export class PublicRegistryStep extends ARegistryStep {
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {
     if (this.hasInstallStep) {
-      this.initStep ??= new PKGMStep(e => e.install().install());
+      this.initStep ??= new PKGMStep((e) => e.install().install());
     }
 
     return await super.startExecution(workspace, pm, root);
