@@ -72,7 +72,7 @@ export class CacheWrapper implements ICacheWrapper {
             continue;
           }
 
-          file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
+          file[field][name] = `npm:${this.nameTransformer.getName(givenWorkspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(givenWorkspace, root, packageManger)}`;
         }
       }
     });
@@ -94,12 +94,10 @@ export class CacheWrapper implements ICacheWrapper {
     }
 
     await this.wrapped.execute(workspace, packageManager, root);
+    await this.flush(workspace, root, packageManager);
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    if (!this.baum.isFailed()) {
-      await this.flush(workspace, rootDirectory, packageManager);
-    }
 
     if (!(await this.shouldExecuteStep(workspace, packageManager, rootDirectory))) {
       return;
