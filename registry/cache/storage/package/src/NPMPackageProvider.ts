@@ -23,7 +23,6 @@ export class NPMPackageProvider {
   private partialRegistry(): string {
     const url = new URL(this.registry);
     const regKey = `//${url.host}${url.pathname}`;
-    // regKey = regKey.replace(/([^/]+|\/)$/, '')
     return `${regKey}:_authToken`;
   }
 
