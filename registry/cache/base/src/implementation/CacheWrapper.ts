@@ -1,4 +1,4 @@
-import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IWorkspace, Resolver } from '@veto-party/baum__core';
+import { CachedFN, type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
 import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
@@ -9,7 +9,8 @@ export class CacheWrapper implements ICacheWrapper {
   public constructor(
     private nameTransformer: INameTransformer,
     private versionStrategy: IVersionStrategy,
-    private baum: IBaumManagerConfiguration
+    private baum: IBaumManagerConfiguration,
+    private wrapped: IStep
   ) {
     baum.addCleanup(async () => {
       await this.versionStrategy.getAttachedVersionManager?.()?.flush?.();
@@ -60,13 +61,34 @@ export class CacheWrapper implements ICacheWrapper {
     });
   }
 
-  async execute(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string): Promise<void> {
-    /** NO-OP */
+  @CachedFN(true)
+  private async shouldExecuteStep(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string) {
+    const oldVersion = this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
+    const newVersion = this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
+    if ((await oldVersion) === (await newVersion)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
+    if (!await this.shouldExecuteStep(workspace, packageManager, root)) {
+      return;
+    }
+    
+    await this.wrapped.execute(workspace, packageManager, root);
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
     if (!this.baum.isFailed()) {
       await this.flush(workspace, rootDirectory, packageManager);
     }
+
+    if (!await this.shouldExecuteStep(workspace, packageManager, rootDirectory)) {
+      return;
+    }
+
+    await this.wrapped.clean(workspace, packageManager, rootDirectory);
   }
 }
