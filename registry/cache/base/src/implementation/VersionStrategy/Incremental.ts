@@ -23,7 +23,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
   @CachedFN(true)
   protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
-    return this.versionStatusUpdates.has(workspace) ? (this.versionStatusUpdates.get(workspace) ?? this.defaultVersion) : await this.__getOldVersionNumber(workspace.getName());
+    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace.getName()));
   }
 
   protected async increment(workspace: IWorkspace, version: string) {
@@ -35,7 +35,33 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
     if (result === -1) {
       this.nameTransformer.enableOverrideFor(workspace.getName());
-      this.versionStatusUpdates.set(workspace, version);
+
+      const oldVersionResolved = await this.__getOldVersionNumber(workspace.getName());
+
+      if (!oldVersionResolved || semver.gte(version, oldVersionResolved)) {
+        this.versionStatusUpdates.set(workspace, version);
+      } else if (oldVersionResolved) {
+        const diff = semver.diff(version, oldVersionResolved);
+
+        if (diff === null) {
+          throw new Error(`internal error could not resolve diff for version (${version}) and (${oldVersionResolved})`);
+        }
+
+        let newVersion = oldVersionResolved;
+
+        const diffTypes = ['major', 'minor', 'patch'] as const;
+
+        for (const diffType of diffTypes) {
+          for (let i = 0; i <= semver[diffType](diff); i++) {
+            newVersion = semver.inc(newVersion, diffType)!;
+          }
+        }
+
+        this.versionStatusUpdates.set(workspace, newVersion);
+      } else {
+        this.versionStatusUpdates.set(workspace, version);
+      }
+
       clearCacheForFN(this, '__getCurrentVersionNumber' as any);
       return;
     }
