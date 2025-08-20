@@ -96,7 +96,7 @@ export class NPMPackageProvider {
     const cachedLatest = (await this.ensureCurrentPackage()).versions[name];
     const realLatestPackage = await this.loadPackage(name);
 
-    const realLatestMetadata = realLatestPackage?.dist?.tarball ?? realLatestPackage.versions[realLatestPackage['dist-tags'].latest];
+    const realLatestMetadata = realLatestPackage?.dist?.tarball ?? realLatestPackage?.versions?.[realLatestPackage?.['dist-tags']?.latest];
     const realLatest = realLatestMetadata?.version;
 
     if (realLatest && cachedLatest) {
