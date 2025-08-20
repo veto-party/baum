@@ -49,13 +49,17 @@ export class CacheWrapper implements ICacheWrapper {
 
       for (const field of fields) {
         for (const name in file[field] ?? {}) {
-          const workspace = nameMap.get(name)?.find((el) => semver.satisfies(file[field][name], el.getVersion()));
-          if (!workspace) {
+          const result = (await Promise.all(nameMap.get(name)
+            ?.map(async (el) => [el, await this.versionStrategy.getCurrentVersionNumber(el, root, packageManger)] as const) ?? []
+        )).find(([, version]) => semver.satisfies(file[field][name], version));
+
+          if (!result) {
             continue;
           }
 
-          await this.nameTransformer.enableOverrideFor(workspace.getName());
-          file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger)}`;
+          const [workspace, version] = result;
+
+          file[field][name] = `npm:${this.nameTransformer.getName(workspace.getName())}@${version}`;
         }
       }
     });

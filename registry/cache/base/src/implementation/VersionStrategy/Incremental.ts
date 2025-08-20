@@ -38,10 +38,15 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
       const oldVersionResolved = await this.__getOldVersionNumber(workspace.getName());
 
-      if (!oldVersionResolved || semver.gte(version, oldVersionResolved)) {
+      if (!oldVersionResolved || semver.gt(version, oldVersionResolved)) {
         this.versionStatusUpdates.set(workspace, version);
       } else if (oldVersionResolved) {
-        const diff = semver.diff(version, oldVersionResolved);
+        let diff: string | null = semver.diff(version, oldVersionResolved);
+
+
+        if (diff === null) {
+          diff = semver.inc(version, 'minor');
+        }
 
         if (diff === null) {
           throw new Error(`internal error could not resolve diff for version (${version}) and (${oldVersionResolved})`);
