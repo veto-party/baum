@@ -26,7 +26,7 @@ export class PublicRegistryStep extends ARegistryStep {
   }
 
   getPublishStep(): IStep | undefined {
-    return this.initStep;
+    return new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)));
   }
 
   @CachedFN(true)
@@ -36,7 +36,7 @@ export class PublicRegistryStep extends ARegistryStep {
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {
     if (this.hasInstallStep) {
-      this.initStep ??= new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)));
+      this.initStep ??= new PKGMStep(e => e.install().install());
     }
 
     return await super.startExecution(workspace, pm, root);
