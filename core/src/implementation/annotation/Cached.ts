@@ -26,7 +26,9 @@ export const CachedFN = <T extends (...args: any[]) => any>(async: ReturnType<T>
       const resolveOrReject =
         <Index extends 0 | 1>(values: MapValue[], index: Index) =>
         (value: Parameters<MapValue[typeof index]>[0]) => {
-          values.forEach((promiseTuple) => promiseTuple[index](value));
+          values.forEach((promiseTuple) => {
+            promiseTuple[index](value);
+          });
         };
 
       context.value = function (this: any, ...givenArgs: Parameters<T>): Promise<ReturnType<T>> {

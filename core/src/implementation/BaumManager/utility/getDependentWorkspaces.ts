@@ -13,8 +13,8 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
   }, {});
 
   // Sort (mutate) arrays.
-  Object.values(mappedPackages).forEach((entries) =>
-    entries.sort((a, b) => {
+  Object.values(mappedPackages).forEach((entries) => {
+     entries.sort((a, b) => {
       const resolvedA = pm.modifyToRealVersionValue(a.getVersion()) || a.getVersion();
       const resolvedB = pm.modifyToRealVersionValue(b.getVersion()) || b.getVersion();
 
@@ -31,8 +31,8 @@ export const getDependentWorkspaces = (workspace: IWorkspace, others: IWorkspace
       }
 
       return semver.compare(a.getVersion(), b.getVersion()) || semver.compareBuild(a.getVersion(), b.getVersion());
-    })
-  );
+    });
+  });
 
   const resolveToVersion = (name: string, version: string) => {
     if (version === '*') {

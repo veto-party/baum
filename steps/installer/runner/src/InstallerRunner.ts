@@ -32,7 +32,9 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
     const result = new Map<IWorkspace, InferStructure<T>>();
 
     for (const map of allMaps) {
-      map.forEach((value, key) => result.set(key, value));
+      map.forEach((value, key) => {
+        result.set(key, value);
+      });
     }
 
     return result;
