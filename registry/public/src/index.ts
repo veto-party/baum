@@ -25,6 +25,7 @@ export class PublicRegistryStep extends ARegistryStep {
     return this;
   }
 
+  @CachedFN(false)
   getPublishStep(): IStep | undefined {
     return new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)));
   }
