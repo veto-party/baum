@@ -1,10 +1,8 @@
-import { CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 
 export class PublicRegistryStep extends ARegistryStep {
-  private initStep?: IStep;
-
-  private hasInstallStep = false;
+  private initStep: GroupStep;
 
   constructor(
     private pinVersion: string,
@@ -12,6 +10,9 @@ export class PublicRegistryStep extends ARegistryStep {
     private token: string
   ) {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
+    this.initStep = new GroupStep([
+      new NPMRCForSpecifiedRegistryStep(registry),
+    ]);
   }
 
   async modifyJSON(json: any, versionManager: IVersionManager, workspace: IWorkspace, pm: IPackageManager, root: string) {
@@ -20,8 +21,9 @@ export class PublicRegistryStep extends ARegistryStep {
     delete json.private;
   }
 
+  @CachedFN(false as any)
   addInstallStep(): this {
-    this.hasInstallStep = true;
+    this.initStep.addExecutionStep('install', new PKGMStep((e) => e.install().install()));
     return this;
   }
 
@@ -30,16 +32,11 @@ export class PublicRegistryStep extends ARegistryStep {
     return new PKGMStep(PKGMStep.DEFAULT_TYPES.RunPublishIfRequired((intent) => intent.setRegistry(this.registry).setAuthorization(this.token)));
   }
 
-  @CachedFN(true)
-  getInstallStep(): Promise<IStep | undefined> {
-    return Promise.resolve(new NPMRCForSpecifiedRegistryStep(this.registry));
+  async getInstallStep(): Promise<IStep | undefined> {
+    return this.initStep;
   }
 
   protected async startExecution(workspace: IWorkspace, pm: IExecutablePackageManager, root: string): Promise<boolean> {
-    if (this.hasInstallStep) {
-      this.initStep ??= new PKGMStep((e) => e.install().install());
-    }
-
     return await super.startExecution(workspace, pm, root);
   }
 }
