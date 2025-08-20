@@ -51,11 +51,11 @@ export class CacheWrapper implements ICacheWrapper {
         for (const name in file[field] ?? {}) {
           const givenWorkspace = nameMap.get(name)?.find((el) => {
             const resolved = packageManger.modifyToRealVersionValue(el.getVersion());
-            
+
             if (!resolved) {
               return false;
             }
-            
+
             return semver.satisfies(file[field][name], resolved);
           });
 
