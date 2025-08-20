@@ -7,5 +7,7 @@ export interface IVersionStrategy extends IVersionManager {
   getOldVersionNumber(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<string>;
   flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<void>;
 
+  getDefaultVersion(): string;
+
   getAttachedVersionManager?: () => ICurrentVersionManager | undefined;
 }

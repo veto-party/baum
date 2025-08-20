@@ -12,6 +12,9 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     protected nameTransformer: INameTransformer,
     protected defaultVersion: string
   ) {}
+  getDefaultVersion(): string {
+    return this.defaultVersion;
+  }
 
   getLatestVersionFor(name: string, _versionRange: string): Promise<string | undefined> {
     return this.__getOldVersionNumber(name);
