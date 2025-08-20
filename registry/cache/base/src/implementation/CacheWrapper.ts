@@ -49,9 +49,7 @@ export class CacheWrapper implements ICacheWrapper {
 
       for (const field of fields) {
         for (const name in file[field] ?? {}) {
-          const result = (await Promise.all(nameMap.get(name)
-            ?.map(async (el) => [el, await this.versionStrategy.getCurrentVersionNumber(el, root, packageManger)] as const) ?? []
-        )).find(([, version]) => semver.satisfies(file[field][name], version));
+          const result = (await Promise.all(nameMap.get(name)?.map(async (el) => [el, await this.versionStrategy.getCurrentVersionNumber(el, root, packageManger)] as const) ?? [])).find(([, version]) => semver.satisfies(file[field][name], version));
 
           if (!result) {
             continue;

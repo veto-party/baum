@@ -46,7 +46,6 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
       } else if (oldVersionResolved) {
         let diff: string | null = semver.diff(version, oldVersionResolved);
 
-
         if (diff === null) {
           diff = semver.inc(version, 'minor');
         }
