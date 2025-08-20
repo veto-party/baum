@@ -28,7 +28,7 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   async registerModifyPackageJSON(step: ARegistryStep): Promise<void> {
-    const fields = Resolver.dependencyFields.filter((el) => el !== 'devDepdencies');
+    const fields = Resolver.dependencyFields;
     step.addModifier(async (file, _versionManager, workspace, packageManger, root) => {
       const workspaces = await packageManger.readWorkspace(root);
 
