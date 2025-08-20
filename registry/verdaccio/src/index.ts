@@ -45,7 +45,6 @@ export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: IStep;
   private initStep: InitStep;
 
-
   private installStep = new GroupStep([]);
 
   constructor(
@@ -58,22 +57,18 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
   @CachedFN(true)
   async addInstallStep(): Promise<this> {
-
-
     const port = await this.initStep.getPort();
     const url = new URL(`${this.dockerAddress}:${port}`);
-    
+
     this.installStep.addExecutionStep('npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`));
     this.installStep.addExecutionStep('modify-npmrc', new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`));
 
-
-      // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
+    // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
     this.installStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().install()));
-    
+
     return this;
   }
 
-  
   async getInstallStep(): Promise<IStep | undefined> {
     return this.installStep;
   }

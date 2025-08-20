@@ -46,7 +46,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
     // NO-OP (This is for overloading)
   }
 
-  abstract addInstallStep(): this|Promise<this>;
+  abstract addInstallStep(): this | Promise<this>;
 
   abstract getInstallStep(workspace: IWorkspace): Promise<IStep | undefined>;
 

@@ -24,8 +24,7 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
           json.bugs = 'https://github.com/veto-party/baum/issues';
           json.homepage = 'https://github.com/veto-party/baum#readme';
         }
-      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN!)
-        .addExecutionStep('prepare', commonStep)
+      })(version, 'https://registry.npmjs.org/', process.env.NODE_AUTH_TOKEN!).addExecutionStep('prepare', commonStep)
     );
   } else {
     baum.addExecutionStep(
@@ -37,8 +36,7 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
             json.main = './dist/index.js';
           }
         }
-      })(version)
-        .addExecutionStep('prepare', commonStep)
+      })(version).addExecutionStep('prepare', commonStep)
     );
   }
 };
