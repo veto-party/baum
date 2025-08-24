@@ -11,7 +11,7 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
     registry: string,
     packageName: string,
     token?: string | undefined,
-    private defaultVersion: string = '0.0.0'
+    private defaultVersion?: string
   ) {
     this.provider = new NPMPackageProvider(registry, packageName, token);
   }
