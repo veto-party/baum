@@ -1,6 +1,5 @@
 import { URL } from 'node:url';
 import { CachedFN, clearCacheForFN } from '@veto-party/baum__core';
-import npa from 'npm-package-arg';
 import registryFetch from 'npm-registry-fetch';
 import tarstream from 'tar-stream';
 import { Readable } from 'node:stream';
