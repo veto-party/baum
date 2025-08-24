@@ -103,6 +103,6 @@ export class NPMPackageProvider {
 
     this.newVersions = {};
     clearCacheForFN(this, 'ensureCurrentPackage' as any);
-    clearCacheForFN(this.getter, 'getCurrentVersionFor');
+    clearCacheForFN(this.getter, 'loadPackage');
   }
 }
