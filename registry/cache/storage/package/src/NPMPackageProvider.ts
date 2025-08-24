@@ -97,7 +97,7 @@ export class NPMPackageProvider {
       throw new Error('Something went wrong, please contact us!');
     }
 
-    this.writer.flushPackageWithMetadata(this.packageName, newVersion, {
+    await this.writer.flushPackageWithMetadata(this.packageName, newVersion, {
       'package/versions.json': Buffer.from(JSON.stringify(newVersions))
     });
 
