@@ -55,8 +55,6 @@ export class NPMPackageWriter {
       archive.entry({ name }, files[name]);
     }
 
-    //FS.writeFile('./test.tgz', archive);
-
     archive.finalize();
 
     const tarball = await tarPromise;
