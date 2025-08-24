@@ -19,7 +19,6 @@ export class NPMPackageProvider {
   private getter: NPMPackageGetter;
   private writer: NPMPackageWriter;
 
-
   @CachedFN(true, [true])
   private async ensureCurrentPackage() {
     const givenPackage = await this.getter.loadPackage(this.packageName);
@@ -85,7 +84,6 @@ export class NPMPackageProvider {
    * https://github.com/npm/libnpmpublish/blob/main/publish.js#L60
    */
   public async flush() {
-
     const loaded = await this.ensureCurrentPackage();
     const newVersions = { ...loaded.versions };
 
@@ -101,7 +99,7 @@ export class NPMPackageProvider {
 
     this.writer.flushPackageWithMetadata(this.packageName, newVersion, {
       'package/versions.json': Buffer.from(JSON.stringify(newVersions))
-    })
+    });
 
     this.newVersions = {};
     clearCacheForFN(this, 'loadPackage' as any);

@@ -3,7 +3,7 @@ import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
 import type { INameTransformer } from '../INameTransformer.js';
-import { IVersionStrategy } from '../IVersionStrategy.js';
+import type { IVersionStrategy } from '../IVersionStrategy.js';
 
 export class CacheWrapper implements ICacheWrapper {
   public constructor(

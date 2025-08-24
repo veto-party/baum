@@ -1,9 +1,9 @@
-import { CachedFN, IExecutablePackageManager, type IPackageManager, IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
+import { CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
 import { ConditionalGitDiffStep } from '@veto-party/baum__steps__git_diff';
 import semver from 'semver';
-import { IncrementalVersionStrategy } from './Incremental.js';
+import type { INameTransformer } from '../../INameTransformer.js';
 import type { IStorage } from '../../IStorage.js';
-import { INameTransformer } from '../../INameTransformer.js';
+import { IncrementalVersionStrategy } from './Incremental.js';
 
 export enum VersionStatusUpdateType {
   PATCH = 0,
@@ -15,11 +15,11 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
   public constructor(
     private storage: IStorage,
     private nameTransformer: INameTransformer,
-    private prepareCleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean>|boolean,
+    private prepareCleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean,
     private step: T,
     private key: string = 'packages'
   ) {
-    this.storage.store(this.key, (prev: any) => [...prev ?? [].filter((e) => !this.cleaned.includes(e))]);
+    this.storage.store(this.key, (prev: any) => [...(prev ?? [].filter((e) => !this.cleaned.includes(e)))]);
   }
 
   private cleaned: string[] = [];
@@ -31,9 +31,9 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
 
   @CachedFN(true)
   private async getElementsToRemove(rootDirectory: string) {
-    const stored: Record<string, string[]> = {...await this.storage.resolve('@CacheCleanerWrapper/packages')};
+    const stored: Record<string, string[]> = { ...(await this.storage.resolve('@CacheCleanerWrapper/packages')) };
 
-    for (const branch of (await ConditionalGitDiffStep.getAllBranches(rootDirectory))) {
+    for (const branch of await ConditionalGitDiffStep.getAllBranches(rootDirectory)) {
       delete stored[branch];
     }
 
@@ -60,12 +60,12 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
       }
 
       const givenPrev = prev ?? {};
-      
+
       return {
         ...givenPrev,
         [branch]: [...(givenPrev[branch] ?? []), overrideName]
       };
-    })
+    });
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
@@ -79,7 +79,6 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
       await this.step.clean(workspace, packageManager, rootDirectory);
     }
   }
-
 }
 
 export class GitVersionStrategy extends IncrementalVersionStrategy {
@@ -89,7 +88,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return this.dependentMap.get(`${workspace.getName()}@${workspace.getVersion()}`);
   }
 
-  public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean>|boolean, step: T, root: string): IStep {
+  public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean, step: T, root: string): IStep {
     const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step);
 
     this.listener.addListener('switched_to_branch_specific_name', async ({ workspace }) => {

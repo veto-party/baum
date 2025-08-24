@@ -1,14 +1,14 @@
 import { CachedFN, clearCacheForFN, type IPackageManager, type IWorkspace } from '@veto-party/baum__core';
+import { EventEmitter } from 'eventemitter3';
 import semver from 'semver';
 import type { ICurrentVersionManager } from '../../ICurrentVersionManager.js';
 import type { INameTransformer } from '../../INameTransformer.js';
 import type { IVersionStrategy } from '../../IVersionStrategy.js';
-import { EventEmitter } from 'eventemitter3';
 
 export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   private versionStatusUpdates = new Map<IWorkspace, string>();
 
-  public readonly listener = new EventEmitter<'switched_to_branch_specific_name' | 'updated_version', { workspace: IWorkspace; version?: string; }>();
+  public readonly listener = new EventEmitter<'switched_to_branch_specific_name' | 'updated_version', { workspace: IWorkspace; version?: string }>();
 
   constructor(
     protected versionProvider: ICurrentVersionManager,
@@ -93,7 +93,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     const overrideVersion = await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspace.getName()));
 
     if (overrideVersion) {
-      this.nameTransformer.enableOverrideFor(workspace.getName())
+      this.nameTransformer.enableOverrideFor(workspace.getName());
       this.emitSwitchToBranchSpecificName(workspace);
     }
 
