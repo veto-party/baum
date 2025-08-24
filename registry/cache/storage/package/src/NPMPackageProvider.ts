@@ -19,7 +19,7 @@ export class NPMPackageProvider {
   private getter: NPMPackageGetter;
   private writer: NPMPackageWriter;
 
-  @CachedFN(true, [true])
+  @CachedFN(true)
   private async ensureCurrentPackage() {
     const givenPackage = await this.getter.loadPackage(this.packageName);
 
@@ -102,8 +102,7 @@ export class NPMPackageProvider {
     });
 
     this.newVersions = {};
-    clearCacheForFN(this, 'loadPackage' as any);
-    clearCacheForFN(this.getter, 'getCurrentVersionFor');
     clearCacheForFN(this, 'ensureCurrentPackage' as any);
+    clearCacheForFN(this.getter, 'getCurrentVersionFor');
   }
 }
