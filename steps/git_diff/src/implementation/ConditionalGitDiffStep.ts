@@ -38,6 +38,20 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   }
 
   @CachedFN(true)
+  public static async getCurrentBranch(root: string) {
+    const git = ConditionalGitDiffStep.ensureGit(root);
+    return (await git.branch(['--show-current'])).current;
+  }
+
+  @CachedFN(true)
+  public static async getAllBranches(root: string) {
+    const git = ConditionalGitDiffStep.ensureGit(root);
+    const branches = (await Promise.all([git.branch().then(branch => branch.all), git.branchLocal().then(branch => branch.all)])).flat(2);
+
+    return branches;
+  }
+
+  @CachedFN(true)
   public static async getGitDiff(root: string, branch: string): Promise<DiffResult['files'] | typeof skipped> {
     const git = ConditionalGitDiffStep.ensureGit(root);
     const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());

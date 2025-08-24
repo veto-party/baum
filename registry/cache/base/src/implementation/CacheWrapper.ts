@@ -1,4 +1,4 @@
-import { type IBaumManagerConfiguration, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
+import { type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
 import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
@@ -9,7 +9,7 @@ export class CacheWrapper implements ICacheWrapper {
   public constructor(
     private nameTransformer: INameTransformer,
     public versionStrategy: IVersionStrategy,
-    baum: IBaumManagerConfiguration,
+    baum: IBaumRegistrable,
     private wrapped: IStep
   ) {
     baum.addCleanup(async () => {

@@ -3,6 +3,7 @@ import { buffer } from 'node:stream/consumers';
 import { NPMPackageGetter } from "./access/NPMPackageGetter.js";
 import { NPMPackageWriter } from "./access/NPMPackageWriter.js";
 import semver from "semver";
+import { isEqual } from 'lodash-es';
 
 export class NPMPackageStorage implements IStorage {
 
@@ -25,6 +26,17 @@ export class NPMPackageStorage implements IStorage {
     async store(key: string, value: ((prev: any) => any | Promise<any>) | any) {
         this.modifiers[key] ??= [];
         this.modifiers[key].push(value);
+    }
+
+    async resolve(key: string): Promise<any | undefined> {
+        const resolved = await this.getModifiedRecordAndVersion();
+        
+        if (!resolved) {
+            return undefined;
+        }
+
+        const [elements] = resolved;
+        return elements[key];
     }
 
     private async getModifiedRecordAndVersion(): Promise<[elements: Record<string, any>, version: string|undefined]> {
@@ -99,6 +111,12 @@ export class NPMPackageStorage implements IStorage {
 
         if (newLatest) {
             newLatest = semver.inc(newLatest, 'patch') ?? undefined;
+        }
+
+        const oldState = Object.fromEntries(await Promise.all(Object.entries(items).map(async ([key]) => [key, await this.resolve(key)] as const)));
+
+        if (isEqual(oldState, items)) {
+            return;
         }
 
         newLatest ??= '0.0.0';
