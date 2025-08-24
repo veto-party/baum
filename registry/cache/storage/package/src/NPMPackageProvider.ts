@@ -1,59 +1,27 @@
-import FS from 'node:fs/promises';
-import { PassThrough, Readable } from 'node:stream';
 import { buffer } from 'node:stream/consumers';
-import { URL } from 'node:url';
-import zlib from 'node:zlib';
 import { CachedFN, clearCacheForFN } from '@veto-party/baum__core';
-import normalizer from 'normalize-package-data';
-import npa from 'npm-package-arg';
-import registryFetch from 'npm-registry-fetch';
 import semver from 'semver';
-import ssri from 'ssri';
-import tarstream from 'tar-stream';
+import { NPMPackageGetter } from './access/NPMPackageGetter.js';
+import { NPMPackageWriter } from './access/NPMPackageWriter.js';
 
 export class NPMPackageProvider {
   protected newVersions: Record<string, string> = {};
 
   constructor(
-    private registry: string,
+    registry: string,
     private packageName: string,
-    private token?: string
-  ) {}
-
-  private partialRegistry(): string {
-    const url = new URL(this.registry);
-    const regKey = `//${url.host}${url.pathname}`;
-    return `${regKey}:_authToken`;
+    token?: string
+  ) {
+    this.writer = new NPMPackageWriter(registry, token);
+    this.getter = new NPMPackageGetter(registry, token);
   }
 
-  protected getFetchParams(params?: Parameters<typeof registryFetch.json>[1]) {
-    return {
-      ...params,
-      registry: this.registry,
-      [this.partialRegistry()]: this.token
-    };
-  }
+  private getter: NPMPackageGetter;
+  private writer: NPMPackageWriter;
 
   @CachedFN(true)
-  private async loadPackage(packageName: string) {
-    const givenPackage: any = await registryFetch.json(packageName, this.getFetchParams()).catch(() => 404);
-
-    let tarball: any = givenPackage;
-
-    if (givenPackage === 404) {
-      tarball = await registryFetch.json(`${packageName}/latest`, this.getFetchParams()).catch(() => undefined);
-    }
-
-    if (tarball === undefined) {
-      return undefined;
-    }
-
-    return tarball;
-  }
-
-  @CachedFN(true, [true])
   private async ensureCurrentPackage() {
-    const givenPackage = await this.loadPackage(this.packageName);
+    const givenPackage = await this.getter.loadPackage(this.packageName);
 
     if (givenPackage === undefined) {
       return {
@@ -62,12 +30,17 @@ export class NPMPackageProvider {
       };
     }
 
-    const tarball = givenPackage?.dist?.tarball ?? givenPackage.versions[givenPackage['dist-tags'].latest];
+    const version = givenPackage['dist-tags'].latest;
 
-    const tarBuffer = await registryFetch(tarball.dist.tarball, this.getFetchParams()).then((response) => response.buffer());
+    const result = await this.getter.fetchAndExtract(this.packageName, version);
+
+    if (!result) {
+      throw new Error('Could not load package.');
+    }
+
+    const { read, start } = result;
 
     const file = await new Promise<Buffer>((resolve, reject) => {
-      const read = tarstream.extract();
       read.on('entry', (header, stream, next) => {
         if (header.name.endsWith('versions.json')) {
           resolve(buffer(stream));
@@ -77,9 +50,7 @@ export class NPMPackageProvider {
       });
 
       read.on('finish', () => reject(new Error('File not found')));
-
-      const readable = Readable.from(tarBuffer).pipe(zlib.createGunzip());
-      readable.pipe(read);
+      start();
     });
 
     if (!file) {
@@ -87,7 +58,7 @@ export class NPMPackageProvider {
     }
 
     return {
-      self_version: typeof tarball.version === 'string' ? tarball.version : undefined,
+      self_version: version,
       versions: JSON.parse(file.toString())
     };
   }
@@ -97,7 +68,7 @@ export class NPMPackageProvider {
   }
 
   async getPackageVersionFor(name: string): Promise<string | undefined> {
-    const realLatestPackage = await this.loadPackage(name);
+    const realLatestPackage = await this.getter.loadPackage(name);
 
     const realLatestMetadata = realLatestPackage?.dist?.tarball ?? realLatestPackage?.versions?.[realLatestPackage?.['dist-tags']?.latest];
     const realLatest = realLatestMetadata?.version;
@@ -126,146 +97,12 @@ export class NPMPackageProvider {
       throw new Error('Something went wrong, please contact us!');
     }
 
-    const manifest: Record<string, any> = {
-      name: this.packageName,
-      version: newVersion
-    };
-
-    normalizer(manifest, console.warn, true);
-
-    const packageJSONPassThrough = new PassThrough();
-    packageJSONPassThrough.end(JSON.stringify(manifest));
-
-    const newVersionsPassThrough = new PassThrough();
-    newVersionsPassThrough.end(JSON.stringify(newVersions));
-
-    const archive = tarstream.pack({
-      emitClose: true
+    await this.writer.flushPackageWithMetadata(this.packageName, newVersion, {
+      'package/versions.json': Buffer.from(JSON.stringify(newVersions))
     });
-
-    const tarPromise = buffer(archive.pipe(zlib.createGzip()));
-
-    archive.entry({ name: 'package/package.json' }, Buffer.from(JSON.stringify(manifest)));
-    archive.entry({ name: 'package/versions.json' }, Buffer.from(JSON.stringify(newVersions)));
-
-    FS.writeFile('./test.tgz', archive);
-
-    archive.finalize();
-
-    const tarball = await tarPromise;
-
-    const metadata = {
-      _id: manifest.name,
-      name: manifest.name,
-      'dist-tags': {} as Record<string, string>,
-      versions: {} as Record<string, typeof manifest>,
-      _attachments: {} as Record<string, any>
-    };
-
-    metadata.versions[manifest.version] = manifest;
-    metadata['dist-tags'].latest = manifest.version;
-    metadata['dist-tags'][manifest.version] = manifest.version;
-
-    if (!tarball) {
-      throw new Error('Something went wrong, please contact us! REASON (tarball was empty)');
-    }
-
-    const tarballName = `${manifest.name}-${manifest.version}.tgz`;
-    const tarballURI = `${manifest.name}/-/${tarballName}`;
-    const integrity = ssri.fromData(tarball, {
-      algorithms: ['sha1', 'sha512']
-    });
-
-    manifest._id = `${manifest.name}@${manifest.version}`;
-    manifest.dist ??= {};
-    manifest.dist.tarball = new URL(tarballURI, this.registry);
-    manifest.dist.integrity = integrity.sha512[0].toString();
-    manifest.dist.shasum = (integrity.sha1[0] as any).hexDigest();
-
-    metadata._attachments = {};
-    metadata._attachments[tarballName] = {
-      content_type: 'application/octet-stream',
-      data: tarball.toString('base64'),
-      length: tarball.length
-    };
-
-    const spec = npa.resolve(manifest.name, manifest.version);
-
-    if (!spec.escapedName) {
-      throw new Error('Esaped name is missing?');
-    }
-
-    try {
-      await registryFetch(
-        spec.escapedName,
-        this.getFetchParams({
-          method: 'PUT',
-          body: metadata,
-          ignoreBody: true
-        })
-      );
-    } catch (error) {
-      if ((error as any)?.code !== 'E409' && (error as any)?.code !== 'E403') {
-        console.error('Publish failed: ', error);
-        throw new Error('Could not put', {
-          cause: error
-        });
-      }
-
-      const current = await registryFetch.json(
-        spec.escapedName,
-        this.getFetchParams({
-          query: { write: true }
-        })
-      );
-
-      const currentVersions = Object.keys(current.versions || {})
-        .map((v) => semver.clean(v, true))
-        .concat(
-          Object.keys(current.time || {})
-            .map((v) => semver.valid(v, true) && semver.clean(v, true))
-            .filter((v) => v)
-        );
-
-      if (currentVersions.indexOf(newVersion) !== -1) {
-        const { name: pkgid, version } = current;
-        throw new Error(`Cannot publish ${pkgid}@${newVersion} over existing version(${version}).`);
-      }
-
-      current.versions ??= {};
-      (current as any).versions[newVersion] = metadata.versions[newVersion];
-
-      for (const i in metadata) {
-        switch (i) {
-          // objects that copy over the new stuffs
-          case 'dist-tags':
-          case 'versions':
-          case '_attachments':
-            for (const j in metadata[i]) {
-              current[i] = current[i] ?? {};
-              (current as any)[i][j] = metadata[i][j];
-            }
-            break;
-
-          // copy
-          default:
-            (current as any)[i] = metadata[i as keyof typeof metadata];
-            break;
-        }
-      }
-
-      await registryFetch(
-        spec.escapedName,
-        this.getFetchParams({
-          method: 'PUT',
-          body: current,
-          ignoreBody: true
-        })
-      );
-    }
 
     this.newVersions = {};
-    clearCacheForFN(this, 'loadPackage' as any);
     clearCacheForFN(this, 'ensureCurrentPackage' as any);
+    clearCacheForFN(this.getter, 'loadPackage');
   }
 }

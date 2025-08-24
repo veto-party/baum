@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "files": {
     "experimentalScannerIgnores": ["**/node-modules/**/*", "**/dist/**/*", "**/build/**/*", "./docs/schema/**/*", "core/src/index.ts", "docs/schema/steps/helm"],
     "ignoreUnknown": true
