@@ -3,13 +3,13 @@ import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
 import type { INameTransformer } from '../INameTransformer.js';
-import type { IncrementalVersionStrategy } from './VersionStrategy/Incremental.js';
+import { IVersionStrategy } from '../IVersionStrategy.js';
 
 export class CacheWrapper implements ICacheWrapper {
   public constructor(
     private nameTransformer: INameTransformer,
-    private versionStrategy: IncrementalVersionStrategy,
-    private baum: IBaumManagerConfiguration,
+    public versionStrategy: IVersionStrategy,
+    baum: IBaumManagerConfiguration,
     private wrapped: IStep
   ) {
     baum.addCleanup(async () => {

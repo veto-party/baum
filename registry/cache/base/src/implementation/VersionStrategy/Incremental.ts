@@ -3,33 +3,42 @@ import semver from 'semver';
 import type { ICurrentVersionManager } from '../../ICurrentVersionManager.js';
 import type { INameTransformer } from '../../INameTransformer.js';
 import type { IVersionStrategy } from '../../IVersionStrategy.js';
+import { EventEmitter } from 'eventemitter3';
 
 export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   private versionStatusUpdates = new Map<IWorkspace, string>();
+
+  public readonly listener = new EventEmitter<'switched_to_branch_specific_name' | 'updated_version', { workspace: IWorkspace; version?: string; }>();
 
   constructor(
     protected versionProvider: ICurrentVersionManager,
     protected nameTransformer: INameTransformer,
     protected defaultVersion: string
   ) {}
+
   getDefaultVersion(): string {
     return this.defaultVersion;
-  }
-
-  getLatestVersionFor(name: string, _versionRange: string): Promise<string | undefined> {
-    return this.__getOldVersionNumber(name);
   }
 
   getCurrentVersionNumber(workspace: IWorkspace, _root: string, _packageManger: IPackageManager | undefined): Promise<string> {
     return this.__getCurrentVersionNumber(workspace);
   }
 
-  @CachedFN(true)
-  protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
-    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace.getName())) ?? this.defaultVersion;
+  @CachedFN(false)
+  private emitSwitchToBranchSpecificName(workspace: IWorkspace) {
+    this.listener.emit('switched_to_branch_specific_name', { workspace });
   }
 
-  protected async increment(workspace: IWorkspace, version: string) {
+  private emitUpdatedVersion(workspace: IWorkspace, version: string) {
+    this.listener.emit('updated_version', { workspace, version });
+  }
+
+  @CachedFN(true)
+  private async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
+    return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace)) ?? this.defaultVersion;
+  }
+
+  public async increment(workspace: IWorkspace, version: string) {
     const result = await semver.compare(await this.__getCurrentVersionNumber(workspace), version);
 
     if (result === 0) {
@@ -38,11 +47,13 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
     if (result === -1) {
       this.nameTransformer.enableOverrideFor(workspace.getName());
+      this.emitSwitchToBranchSpecificName(workspace);
 
-      const oldVersionResolved = await this.__getOldVersionNumber(workspace.getName());
+      const oldVersionResolved = await this.__getOldVersionNumber(workspace);
 
       if (!oldVersionResolved || semver.gt(version, oldVersionResolved)) {
         this.versionStatusUpdates.set(workspace, version);
+        this.emitUpdatedVersion(workspace, version);
       } else if (oldVersionResolved) {
         let diff: string | null = semver.diff(version, oldVersionResolved);
 
@@ -64,8 +75,10 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
           }
         }
 
+        this.emitUpdatedVersion(workspace, newVersion);
         this.versionStatusUpdates.set(workspace, newVersion);
       } else {
+        this.emitUpdatedVersion(workspace, version);
         this.versionStatusUpdates.set(workspace, version);
       }
 
@@ -76,14 +89,19 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     throw new Error(`Cannot increment version from ${await this.__getCurrentVersionNumber(workspace)} to ${version}, since to is smaller the from.`);
   }
 
-  async __getOldVersionNumber(workspaceName: string): Promise<string | undefined> {
-    const overrideVersion = await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspaceName));
-    overrideVersion !== undefined && this.nameTransformer.enableOverrideFor(workspaceName);
-    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getName(workspaceName)));
+  private async __getOldVersionNumber(workspace: IWorkspace): Promise<string | undefined> {
+    const overrideVersion = await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getOverrideName(workspace.getName()));
+
+    if (overrideVersion) {
+      this.nameTransformer.enableOverrideFor(workspace.getName())
+      this.emitSwitchToBranchSpecificName(workspace);
+    }
+
+    return overrideVersion ?? (await this.versionProvider.getCurrentVersionFor(this.nameTransformer.getName(workspace.getName())));
   }
 
   async getOldVersionNumber(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<string | undefined> {
-    return this.__getOldVersionNumber(workspace.getName());
+    return this.__getOldVersionNumber(workspace);
   }
 
   async flushNewVersion(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<void> {
