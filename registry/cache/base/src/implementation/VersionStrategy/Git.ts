@@ -41,7 +41,7 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
 
   @CachedFN(true)
   private async getElementsToRemove(rootDirectory: string) {
-    const stored: Record<string, string[]> = { ...(await this.storage.resolve('@CacheCleanerWrapper/packages')) };
+    const stored: Record<string, string[]> = { ...(await this.storage.resolve(this.key)) };
 
     for (const branch of await ConditionalGitDiffStep.getAllBranches(rootDirectory)) {
       delete stored[branch];
