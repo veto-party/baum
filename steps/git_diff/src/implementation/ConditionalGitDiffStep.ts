@@ -40,7 +40,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   @CachedFN(true)
   public static async getCurrentBranch(root: string) {
     const git = ConditionalGitDiffStep.ensureGit(root);
-    return (await git.branch(['--show-current'])).current;
+    return (await git.branch()).current;
   }
 
   @CachedFN(true)
