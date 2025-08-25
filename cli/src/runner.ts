@@ -6,7 +6,6 @@ import yargs from 'yargs/yargs';
 const argv = await yargs(hideBin(process.argv)).argv;
 
 export const run = async () => {
-
   const baum = new BaumManager();
 
   let path: string;
@@ -30,5 +29,4 @@ export const run = async () => {
   if (!success) {
     process.exit(1);
   }
-}
-
+};

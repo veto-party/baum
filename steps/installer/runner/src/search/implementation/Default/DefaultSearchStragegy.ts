@@ -1,8 +1,8 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
+import { allSettledButNoFailures } from '@veto-party/baum__core';
 import { globby } from 'globby';
 import type { ISearchStrategy, ISearchStrategyResult } from '../../ISearchStrategy.js';
-import { allSettledButNoFailures } from '@veto-party/baum__core';
 
 export class DefaultSearchStrategy implements ISearchStrategy {
   async search(base_dir: string): Promise<ISearchStrategyResult[]> {
