@@ -90,7 +90,7 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
         Object.entries(givenPrev)
           .map(([key, values]) => [key, values.filter((e) => !cleanedPackages.includes(e))])
           .filter(([, values]) => values.length > 0)
-      ); 
+      );
     });
 
     if (await this.callClean(rootDirectory, this.step)) {
