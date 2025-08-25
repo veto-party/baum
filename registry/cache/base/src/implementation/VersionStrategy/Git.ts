@@ -20,7 +20,15 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
     private currentBranch?: (detected: string) => Promise<string> | string,
     private key: string = 'packages'
   ) {
-    this.storage.store(this.key, (prev: any) => [...(prev ?? [].filter((e) => !this.cleaned.includes(e)))]);
+    this.storage.store(this.key, (prev: any) => {
+      const givenPrev = prev ?? {};
+
+      for (const cleaned of this.cleaned) {
+        delete givenPrev[cleaned];
+      }
+
+      return givenPrev;
+    });
   }
 
   private cleaned: string[] = [];
