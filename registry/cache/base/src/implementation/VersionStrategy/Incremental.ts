@@ -9,8 +9,8 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   private versionStatusUpdates = new Map<IWorkspace, string>();
 
   public readonly listener = new EventEmitter<{
-    'switched_to_branch_specific_name': (cb: { workspace: IWorkspace; }) => any;
-    'updated_version': (cb: { workspace: IWorkspace; version: string; }) => any;
+    switched_to_branch_specific_name: (cb: { workspace: IWorkspace }) => any;
+    updated_version: (cb: { workspace: IWorkspace; version: string }) => any;
   }>();
 
   constructor(

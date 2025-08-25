@@ -1,10 +1,10 @@
 import { buffer } from 'node:stream/consumers';
+import { CachedFN } from '@veto-party/baum__core';
 import type { IStorage } from '@veto-party/baum__registry__cache__base';
 import { isEqual } from 'lodash-es';
 import semver from 'semver';
 import { NPMPackageGetter } from './access/NPMPackageGetter.js';
 import { NPMPackageWriter } from './access/NPMPackageWriter.js';
-import { CachedFN } from '@veto-party/baum__core';
 
 export class NPMPackageStorage implements IStorage {
   public constructor(
