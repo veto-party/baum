@@ -16,8 +16,8 @@ export class NPMPackageProvider {
     this.getter = new NPMPackageGetter(registry, token);
   }
 
-  private getter: NPMPackageGetter;
-  private writer: NPMPackageWriter;
+  public readonly getter: NPMPackageGetter;
+  public readonly writer: NPMPackageWriter;
 
   @CachedFN(true)
   private async ensureCurrentPackage() {

@@ -1,5 +1,6 @@
 import type { IWorkspace } from '@veto-party/baum__core';
 import type { ICurrentVersionManager } from '@veto-party/baum__registry__cache__base';
+import semver from 'semver';
 import { NPMPackageProvider } from './NPMPackageProvider.js';
 
 export class NPMVersionStrategy implements ICurrentVersionManager {
@@ -15,8 +16,26 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
   ) {
     this.provider = new NPMPackageProvider(registry, packageName, token);
   }
+
+  private async resolveVersion(name: string) {
+    const [resolved, latest] = await Promise.all([this.provider.getCurrentVersionFor(`base.${name}`), this.provider.getter.getCurrentVersionFor(name)]);
+
+    if (resolved && latest) {
+      switch (semver.compare(resolved, latest)) {
+        case 0:
+          return resolved;
+        case 1:
+          return resolved;
+        case -1:
+          return latest;
+      }
+    }
+
+    return resolved ?? latest ?? this.defaultVersion;
+  }
+
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    this.newVersions[name] ??= (await this.provider.getCurrentVersionFor(`base.${name}`)) ?? this.defaultVersion;
+    this.newVersions[name] ??= await this.resolveVersion(name);
     return this.newVersions[name];
   }
 
