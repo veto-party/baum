@@ -21,13 +21,13 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
     private key: string = 'packages'
   ) {
     this.storage.store(this.key, (prev: any) => {
-       const givenPrev = prev ?? {};
+      const givenPrev = prev ?? {};
 
-       for (const cleaned of this.cleaned) {
+      for (const cleaned of this.cleaned) {
         delete givenPrev[cleaned];
-       }
+      }
 
-       return givenPrev;
+      return givenPrev;
     });
   }
 
@@ -43,7 +43,7 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
   private async getElementsToRemove(rootDirectory: string) {
     const stored: Record<string, string[]> = { ...(await this.storage.resolve('@CacheCleanerWrapper/packages')) };
 
-    for (const branch of (await ConditionalGitDiffStep.getAllBranches(rootDirectory))) {
+    for (const branch of await ConditionalGitDiffStep.getAllBranches(rootDirectory)) {
       delete stored[branch];
     }
 
