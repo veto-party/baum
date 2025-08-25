@@ -17,6 +17,7 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
     private nameTransformer: INameTransformer,
     private prepareCleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean,
     private step: T,
+    private currentBranch?: (detected: string) => Promise<string> | string,
     private key: string = 'packages'
   ) {
     this.storage.store(this.key, (prev: any) => [...(prev ?? [].filter((e) => !this.cleaned.includes(e)))]);
@@ -26,7 +27,8 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
 
   @CachedFN(true)
   private async getBranch(root: string) {
-    return await ConditionalGitDiffStep.getCurrentBranch(root);
+    const detected = await ConditionalGitDiffStep.getCurrentBranch(root);
+    return (await this.currentBranch?.(detected)) ?? detected;
   }
 
   @CachedFN(true)
@@ -88,8 +90,8 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return this.dependentMap.get(`${workspace.getName()}@${workspace.getVersion()}`);
   }
 
-  public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean, step: T, root: string): IStep {
-    const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step);
+  public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean, step: T, root: string, currentBranch?: () => Promise<string> | string): IStep {
+    const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step, currentBranch);
 
     this.listener.on('switched_to_branch_specific_name', async ({ workspace }) => {
       await wrapper.doStore(workspace, root);
