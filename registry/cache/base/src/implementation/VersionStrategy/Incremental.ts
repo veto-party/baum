@@ -8,7 +8,10 @@ import type { IVersionStrategy } from '../../IVersionStrategy.js';
 export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   private versionStatusUpdates = new Map<IWorkspace, string>();
 
-  public readonly listener = new EventEmitter<'switched_to_branch_specific_name' | 'updated_version', { workspace: IWorkspace; version?: string }>();
+  public readonly listener = new EventEmitter<{
+    switched_to_branch_specific_name: (cb: { workspace: IWorkspace }) => any;
+    updated_version: (cb: { workspace: IWorkspace; version: string }) => any;
+  }>();
 
   constructor(
     protected versionProvider: ICurrentVersionManager,
@@ -24,7 +27,6 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     return this.__getCurrentVersionNumber(workspace);
   }
 
-  @CachedFN(false)
   private emitSwitchToBranchSpecificName(workspace: IWorkspace) {
     this.listener.emit('switched_to_branch_specific_name', { workspace });
   }
@@ -41,11 +43,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   public async increment(workspace: IWorkspace, version: string) {
     const result = await semver.compare(await this.__getCurrentVersionNumber(workspace), version);
 
-    if (result === 0) {
-      return;
-    }
-
-    if (result === -1) {
+    if (result === -1 || result === 0) {
       this.nameTransformer.enableOverrideFor(workspace.getName());
       this.emitSwitchToBranchSpecificName(workspace);
 

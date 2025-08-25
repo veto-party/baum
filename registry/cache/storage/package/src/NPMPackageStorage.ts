@@ -1,4 +1,5 @@
 import { buffer } from 'node:stream/consumers';
+import { CachedFN } from '@veto-party/baum__core';
 import type { IStorage } from '@veto-party/baum__registry__cache__base';
 import { isEqual } from 'lodash-es';
 import semver from 'semver';
@@ -27,18 +28,23 @@ export class NPMPackageStorage implements IStorage {
     this.modifiers[key].push(value);
   }
 
-  async resolve(key: string): Promise<any | undefined> {
-    const resolved = await this.getModifiedRecordAndVersion();
+  @CachedFN(true)
+  public async resolveBase() {
+    const { items } = await this.runGetter(async (data) => data);
+    return items;
+  }
 
-    if (!resolved) {
+  async resolve(key: string): Promise<any | undefined> {
+    const items = await this.resolveBase();
+
+    if (!items) {
       return undefined;
     }
 
-    const [elements] = resolved;
-    return elements[key];
+    return items[key];
   }
 
-  private async getModifiedRecordAndVersion(): Promise<[elements: Record<string, any>, version: string | undefined]> {
+  private async runGetter(modifier: (data: any, key: string) => Promise<any>) {
     const getter = this.createPackageGetter();
 
     const items: Record<string, any> = {};
@@ -54,33 +60,49 @@ export class NPMPackageStorage implements IStorage {
       const { read, start } = result;
 
       await new Promise<void>((resolve) => {
-        for (const modifierKey in this.modifiers) {
-          read.on('entry', async (header, stream, next) => {
-            if (header.name === `package/metadata/${modifierKey}.json`) {
-              try {
-                items[modifierKey] = JSON.parse((await buffer(stream)).toString());
-              } catch {
-                items[modifierKey] = undefined;
-              }
+        read.on('entry', async (header, stream, next) => {
+          const modifierKey = header.name.startsWith('package/metadata/') && header.name.endsWith('.json') ? header.name.substring('package/metadata/'.length, header.name.length - '.json'.length) : undefined;
 
-              for (const modifier of this.modifiers[modifierKey] ?? []) {
-                if (typeof modifier === 'function') {
-                  items[modifierKey] = await modifier(items[modifierKey]);
-                  continue;
-                }
-
-                items[modifierKey] = modifier;
-              }
+          if (modifierKey) {
+            try {
+              items[modifierKey] = JSON.parse((await buffer(stream)).toString());
+            } catch {
+              items[modifierKey] = undefined;
             }
+          }
 
-            next();
-          });
-        }
+          if (modifierKey) {
+            items[modifierKey] = await modifier(items[modifierKey], modifierKey);
+          }
+
+          next();
+        });
 
         read.on('finish', () => resolve());
         start();
       });
     }
+
+    return { items, latest };
+  }
+
+  private async getModifiedRecordAndVersion(): Promise<[elements: Record<string, any>, version: string | undefined]> {
+    const { items, latest } = await this.runGetter(async (data, key) => {
+      if (!(key in this.modifiers)) {
+        return data;
+      }
+
+      for (const modifier of this.modifiers[key] ?? []) {
+        if (typeof modifier === 'function') {
+          data = await modifier(data);
+          continue;
+        }
+
+        data = modifier;
+      }
+
+      return data;
+    });
 
     const missingKeys = Object.keys(this.modifiers).filter((e) => !(e in items));
 
@@ -103,16 +125,16 @@ export class NPMPackageStorage implements IStorage {
   async flush(): Promise<any> {
     const [items, resolvedVersion] = await this.getModifiedRecordAndVersion();
 
+    const oldState = await this.resolveBase();
+
+    if (isEqual(oldState, items)) {
+      return;
+    }
+
     let newLatest = resolvedVersion;
 
     if (newLatest) {
       newLatest = semver.inc(newLatest, 'patch') ?? undefined;
-    }
-
-    const oldState = Object.fromEntries(await Promise.all(Object.entries(items).map(async ([key]) => [key, await this.resolve(key)] as const)));
-
-    if (isEqual(oldState, items)) {
-      return;
     }
 
     newLatest ??= '0.0.0';
