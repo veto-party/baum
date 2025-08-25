@@ -49,8 +49,7 @@ export class NPMPackageGetter {
   async getCurrentVersionFor(packageName: string): Promise<string | undefined> {
     await clearCacheForFN(this, 'loadPackage');
     const realLatestPackage = await this.loadPackage(packageName);
-    const realLatestMetadata = realLatestPackage?.versions?.[realLatestPackage?.['dist-tags']?.latest];
-    return realLatestMetadata;
+    return realLatestPackage?.['dist-tags']?.latest;
   }
 
   public async fetchAndExtract(packageName: string, version: string) {
