@@ -1,5 +1,5 @@
 import Path from 'node:path';
-import { CachedFN, ConditionalStep, type IStep, Resolver } from '@veto-party/baum__core';
+import { allSettledButNoFailures, CachedFN, ConditionalStep, type IStep, Resolver } from '@veto-party/baum__core';
 import { type DiffResult, type SimpleGit, simpleGit } from 'simple-git';
 
 const skipped = Symbol('skipped');
@@ -46,7 +46,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   @CachedFN(true)
   public static async getAllBranches(root: string) {
     const git = ConditionalGitDiffStep.ensureGit(root);
-    const branches = (await Promise.all([git.branch().then((branch) => branch.all), git.branchLocal().then((branch) => branch.all)])).flat(2);
+    const branches = (await allSettledButNoFailures([git.branch().then((branch) => branch.all), git.branchLocal().then((branch) => branch.all)])).flat(2);
 
     return branches;
   }
