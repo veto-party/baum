@@ -17,21 +17,10 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
     private nameTransformer: INameTransformer,
     private prepareCleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean,
     private step: T,
+    private getCleanedPackages: (step: T, branches: string[], packages: string[]) => Promise<string[]> | string[],
     private currentBranch?: (detected: string) => Promise<string> | string,
     private key: string = 'packages'
-  ) {
-    this.storage.store(this.key, (prev: any) => {
-      const givenPrev = prev ?? {};
-
-      for (const cleaned of this.cleaned) {
-        delete givenPrev[cleaned];
-      }
-
-      return givenPrev;
-    });
-  }
-
-  private cleaned: string[] = [];
+  ) {}
 
   @CachedFN(true)
   private async getBranch(root: string) {
@@ -85,6 +74,25 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
+    const toRemove = await this.getElementsToRemove(rootDirectory);
+
+    if (!toRemove) {
+      return;
+    }
+
+    const [elements, branches] = toRemove;
+
+    const cleanedPackages = await this.getCleanedPackages(this.step, branches, elements);
+
+    this.storage.store(this.key, (prev: any) => {
+      const givenPrev = (prev ?? {}) as Record<string, string[]>;
+      return Object.fromEntries(
+        Object.entries(givenPrev)
+          .map(([key, values]) => [key, values.filter((e) => !cleanedPackages.includes(e))])
+          .filter(([, values]) => values.length > 0)
+      ); 
+    });
+
     if (await this.callClean(rootDirectory, this.step)) {
       await this.step.clean(workspace, packageManager, rootDirectory);
     }
@@ -98,8 +106,15 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return this.dependentMap.get(`${workspace.getName()}@${workspace.getVersion()}`);
   }
 
-  public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean, step: T, root: string, currentBranch?: () => Promise<string> | string): IStep {
-    const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step, currentBranch);
+  public getCacherAndCleaner<T extends IStep>(
+    storage: IStorage,
+    cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean,
+    step: T,
+    root: string,
+    getCleanedPackages: (step: T, branches: string[], packages: string[]) => Promise<string[]> | string[],
+    currentBranch?: () => Promise<string> | string
+  ): IStep {
+    const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step, getCleanedPackages, currentBranch);
 
     this.listener.on('switched_to_branch_specific_name', async ({ workspace }) => {
       await wrapper.doStore(workspace, root);
