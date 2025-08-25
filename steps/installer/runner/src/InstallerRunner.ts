@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
+import { allSettledButNoFailures, CachedFN, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver, RunOnce } from '@veto-party/baum__core';
 import type { IFeature } from '@veto-party/baum__steps__installer__features';
 import type { IRendererManager } from '@veto-party/baum__steps__installer__renderer';
 import type { InferStructure } from '@veto-party/baum__steps__installer__renderer/src/interface/IRenderer.js';
@@ -59,7 +59,7 @@ export class InstallerRunner<T extends IFeature<any, any, any>, Self> implements
         continue;
       }
 
-      const [fileContent, packageJSON] = (await Promise.all([readFile(file.resultPath), readFile(file.packagePath)])).map((file) => JSON.parse(file.toString()));
+      const [fileContent, packageJSON] = (await allSettledButNoFailures([readFile(file.resultPath), readFile(file.packagePath)])).map((file) => JSON.parse(file.toString()));
       this.renderer.getGroup().verifyObject(fileContent);
 
       const { name, version } = packageJSON;

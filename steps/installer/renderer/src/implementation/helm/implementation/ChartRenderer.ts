@@ -1,6 +1,6 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import type { IWorkspace } from '@veto-party/baum__core';
+import { allSettledButNoFailures, type IWorkspace } from '@veto-party/baum__core';
 import type { IHelmVersionInfoProvider } from '../../../interface/IVersionProvider.js';
 import type { ThirdPartyRendererStorage } from '../interface/factory/I3rdPartyRenderer.js';
 import type { IWritable } from '../interface/IWritable.js';
@@ -55,7 +55,7 @@ export class ChartRenderer {
           name: rootPath,
           version: await this.versionProvider.getProjectVersion(),
           dependencies: [
-            await Promise.all(
+            await allSettledButNoFailures(
               workspaces.map(async (workspace) => {
                 const path = await resolver.getNameByWorkspace(workspace);
                 const filepath = Path.join(root, 'helm', path);
