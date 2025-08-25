@@ -91,7 +91,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   public getCacherAndCleaner<T extends IStep>(storage: IStorage, cleanup: (step: T, branches: string[], packages: string[]) => Promise<boolean> | boolean, step: T, root: string): IStep {
     const wrapper = new CacheCleanerWrapper(storage, this.nameTransformer, cleanup, step);
 
-    this.listener.addListener('switched_to_branch_specific_name', async ({ workspace }) => {
+    this.listener.on('switched_to_branch_specific_name', async ({ workspace }) => {
       await wrapper.doStore(workspace, root);
     });
 
