@@ -28,13 +28,12 @@ if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
       process.exit(1);
     }
   } catch (error) {
-    console.error("error", error, Error.captureStackTrace(error));
+    console.error('error', error, Error.captureStackTrace(error));
     throw error;
   }
 
   process.exit(0);
 }
-
 
 /**
  * This code will get executed in js environment only.
