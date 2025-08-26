@@ -27,7 +27,6 @@ if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
     if (!success) {
       process.exit(1);
     }
-
   } catch (error) {
     console.error(error);
   }
