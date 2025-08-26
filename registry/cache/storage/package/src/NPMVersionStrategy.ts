@@ -49,7 +49,7 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
     return hash;
   }
 
-  async updateGitHashFor(workspace: IWorkspace, hash: string): Promise<void> {
+  async updateGitHashFor(workspace: IWorkspace, hash: string | undefined): Promise<void> {
     await this.provider.updateCurrentVersionFor(`git.${workspace.getName()}`, hash);
   }
 
