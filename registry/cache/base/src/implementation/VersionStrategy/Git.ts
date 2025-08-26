@@ -100,16 +100,10 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
 }
 
 export class GitVersionStrategy extends IncrementalVersionStrategy {
-  private dependentMap = new Map<string, Map<string, VersionStatusUpdateType>>();
+  private dependentMap = new Map<string, VersionStatusUpdateType>();
 
   private hasDependentUpdate(workspace: IWorkspace) {
-    const baseMap = this.dependentMap.get(workspace.getName());
-
-    if (!baseMap) {
-      return undefined;
-    }
-
-    return baseMap.get(workspace.getVersion()) ?? baseMap.get('*');
+    return this.dependentMap.get(workspace.getName());
   }
 
   public getCacherAndCleaner<T extends IStep>(
@@ -170,11 +164,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
 
   private async incrementUsingStatusUpdate(workspace: IWorkspace, packageManager: IPackageManager | undefined, currentVersion: string | Promise<string>, type: VersionStatusUpdateType) {
     workspace.getDynamicDependents().forEach((el) => {
-      const map = this.dependentMap.get(el.getName()) ?? new Map();
-      this.dependentMap.set(el.getName(), map);
-
-      const version = semver.valid(packageManager?.modifyToRealVersionValue(el.getVersion()) || el.getVersion()) ?? '*';
-      map.set(version, type);
+      this.dependentMap.set(el.getName(), type);
     });
 
     await this.increment(workspace, GitVersionStrategy.incrementVersion(await currentVersion, type));
@@ -189,7 +179,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     }
 
     const updateType = this.hasDependentUpdate(workspace);
-    if (updateType) {
+    if (updateType !== undefined) {
       await this.incrementUsingStatusUpdate(workspace, packageManger, await currentVersion, updateType);
       return await super.getCurrentVersionNumber(workspace, root, packageManger);
     }
@@ -198,17 +188,12 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
-    const innerDependentMap = this.dependentMap.get(workspace.getName());
-
-    if (!innerDependentMap?.delete(workspace.getVersion())) {
-      innerDependentMap?.delete('*');
-    }
-
+    this.dependentMap.delete(workspace.getName());
     await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
     await super.flushNewVersion(workspace, root, packageManager);
   }
 
   filterWorkspacesForUnprocessed(workspaces: IWorkspace[]): IWorkspace[] {
-    return workspaces.filter((workspace) => this.hasDependentUpdate(workspace));
+    return workspaces.filter((workspace) => this.hasDependentUpdate(workspace) !== undefined);
   }
 }
