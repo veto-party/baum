@@ -100,10 +100,16 @@ class CacheCleanerWrapper<T extends IStep> implements IStep {
 }
 
 export class GitVersionStrategy extends IncrementalVersionStrategy {
-  private dependentMap = new Map<string, VersionStatusUpdateType>();
+  private dependentMap = new Map<string, Map<string, VersionStatusUpdateType>>();
 
   private hasDependentUpdate(workspace: IWorkspace) {
-    return this.dependentMap.get(`${workspace.getName()}@${workspace.getVersion()}`);
+    const baseMap = this.dependentMap.get(workspace.getName());
+
+    if (!baseMap) {
+      return undefined;
+    }
+
+    return baseMap.get(workspace.getVersion()) ?? baseMap.get('*');
   }
 
   public getCacherAndCleaner<T extends IStep>(
@@ -162,9 +168,13 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return (await ConditionalGitDiffStep.diffSummary(root, hash)).map((e) => Resolver.ensureAbsolute(e.file)).filter((e) => e.startsWith(absWorkspacePath));
   }
 
-  private async incrementUsingStatusUpdate(workspace: IWorkspace, currentVersion: string | Promise<string>, type: VersionStatusUpdateType) {
+  private async incrementUsingStatusUpdate(workspace: IWorkspace, packageManager: IPackageManager | undefined, currentVersion: string | Promise<string>, type: VersionStatusUpdateType) {
     workspace.getDynamicDependents().forEach((el) => {
-      this.dependentMap.set(`${el.getName()}@${el.getVersion()}`, type);
+      const map = this.dependentMap.get(el.getName()) ?? new Map();
+      this.dependentMap.set(el.getName(), map);
+
+      const version = semver.valid(packageManager?.modifyToRealVersionValue(el.getVersion()) || el.getVersion()) ?? '*';
+      map.set(version, type);
     });
 
     await this.increment(workspace, GitVersionStrategy.incrementVersion(await currentVersion, type));
@@ -174,13 +184,13 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   async getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
     const currentVersion = super.getCurrentVersionNumber(workspace, root, packageManger);
     if ((await this.getAllGitChanges(workspace, root)).length > 0) {
-      await this.incrementUsingStatusUpdate(workspace, await currentVersion, VersionStatusUpdateType.MAJOR);
+      await this.incrementUsingStatusUpdate(workspace, packageManger, await currentVersion, VersionStatusUpdateType.MAJOR);
       return await super.getCurrentVersionNumber(workspace, root, packageManger);
     }
 
     const updateType = this.hasDependentUpdate(workspace);
     if (updateType) {
-      await this.incrementUsingStatusUpdate(workspace, await currentVersion, updateType);
+      await this.incrementUsingStatusUpdate(workspace, packageManger, await currentVersion, updateType);
       return await super.getCurrentVersionNumber(workspace, root, packageManger);
     }
 
