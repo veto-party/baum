@@ -1,4 +1,4 @@
-import { type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
+import { CachedFN, type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, Resolver } from '@veto-party/baum__core';
 import type { ARegistryStep } from '@veto-party/baum__registry';
 import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
@@ -9,7 +9,7 @@ export class CacheWrapper implements ICacheWrapper {
   public constructor(
     private nameTransformer: INameTransformer,
     public versionStrategy: IVersionStrategy,
-    baum: IBaumRegistrable,
+    private baum: IBaumRegistrable,
     private wrapped: IStep
   ) {
     baum.addCleanup(async () => {
@@ -88,10 +88,27 @@ export class CacheWrapper implements ICacheWrapper {
     return true;
   }
 
+  @CachedFN(false)
+  private registerCleanup(packageManager: IExecutablePackageManager, root: string) {
+    this.baum.addCleanup(async () => {
+      const versionManager = this.versionStrategy.getAttachedVersionManager?.();
+      if (!versionManager || typeof versionManager.updateGitHashFor !== 'function') {
+        console.warn('CacheWrapper: No attached version manager available for cleanup (updateGitHashFor).');
+        return;
+      }
+
+      for (const workspace of await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root))) {
+        await versionManager.updateGitHashFor(workspace, undefined);
+      }
+    });
+  }
+
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
     if (!(await this.shouldExecuteStep(workspace, packageManager, root))) {
       return;
     }
+
+    this.registerCleanup(packageManager, root);
 
     await this.wrapped.execute(workspace, packageManager, root);
     await this.flush(workspace, root, packageManager);

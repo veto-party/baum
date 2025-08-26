@@ -111,4 +111,6 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   getAttachedVersionManager() {
     return this.versionProvider;
   }
+
+  abstract filterWorkspacesForUnprocessed(workspaces: IWorkspace[]): IWorkspace[];
 }

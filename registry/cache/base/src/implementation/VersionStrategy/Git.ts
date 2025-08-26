@@ -198,7 +198,17 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
+    const innerDependentMap = this.dependentMap.get(workspace.getName());
+
+    if (!innerDependentMap?.delete(workspace.getVersion())) {
+      innerDependentMap?.delete('*');
+    }
+
     await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
     await super.flushNewVersion(workspace, root, packageManager);
+  }
+
+  filterWorkspacesForUnprocessed(workspaces: IWorkspace[]): IWorkspace[] {
+    return workspaces.filter((workspace) => this.hasDependentUpdate(workspace));
   }
 }

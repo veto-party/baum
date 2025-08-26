@@ -9,4 +9,6 @@ export interface IVersionStrategy {
   getDefaultVersion(): string;
 
   getAttachedVersionManager?: () => ICurrentVersionManager | undefined;
+
+  filterWorkspacesForUnprocessed(workspaces: IWorkspace[]): IWorkspace[];
 }

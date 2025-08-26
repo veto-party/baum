@@ -5,7 +5,7 @@ import { NPMPackageGetter } from './access/NPMPackageGetter.js';
 import { NPMPackageWriter } from './access/NPMPackageWriter.js';
 
 export class NPMPackageProvider {
-  protected newVersions: Record<string, string> = {};
+  protected newVersions: Record<string, string | undefined> = {};
 
   constructor(
     registry: string,
@@ -76,7 +76,7 @@ export class NPMPackageProvider {
     return realLatest;
   }
 
-  public async updateCurrentVersionFor(name: string, version: string): Promise<void> {
+  public async updateCurrentVersionFor(name: string, version: string | undefined): Promise<void> {
     this.newVersions[name] = version;
   }
 
