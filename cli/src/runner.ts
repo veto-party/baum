@@ -26,7 +26,5 @@ export const run = async () => {
     }
   );
 
-  if (!success) {
-    process.exit(1);
-  }
+  return success;
 };

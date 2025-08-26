@@ -49,10 +49,10 @@ export class NPMPackageWriter {
 
     const tarPromise = buffer(archive.pipe(zlib.createGzip()));
 
-    archive.entry({ name: 'package/package.json' }, Buffer.from(JSON.stringify(manifest)));
+    await new Promise<void>((resolve, reject) => archive.entry({ name: 'package/package.json' }, Buffer.from(JSON.stringify(manifest)), (err) => err ? reject(err) : resolve()));
 
     for (const name in files) {
-      archive.entry({ name }, files[name]);
+      await new Promise<void>((resolve, reject) => archive.entry({ name }, files[name], (err) => err ? reject(err) : resolve()));
     }
 
     archive.finalize();

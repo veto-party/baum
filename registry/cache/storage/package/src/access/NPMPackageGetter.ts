@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 import { URL } from 'node:url';
 import zlib from 'node:zlib';
-import { CachedFN, clearCacheForFN } from '@veto-party/baum__core';
+import { CachedFN } from '@veto-party/baum__core';
 import registryFetch from 'npm-registry-fetch';
 import tarstream from 'tar-stream';
 
@@ -47,7 +47,6 @@ export class NPMPackageGetter {
   }
 
   async getCurrentVersionFor(packageName: string): Promise<string | undefined> {
-    await clearCacheForFN(this, 'loadPackage');
     const realLatestPackage = await this.loadPackage(packageName);
     return realLatestPackage?.['dist-tags']?.latest;
   }
