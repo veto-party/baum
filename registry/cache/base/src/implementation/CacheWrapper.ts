@@ -91,15 +91,15 @@ export class CacheWrapper implements ICacheWrapper {
   @CachedFN(false)
   private registerCleanup(packageManager: IExecutablePackageManager, root: string) {
     this.baum.addCleanup(async () => {
-        const versionManager = this.versionStrategy.getAttachedVersionManager?.();
-        if (!versionManager || typeof versionManager.updateGitHashFor !== 'function') {
-          console.warn('CacheWrapper: No attached version manager available for cleanup (updateGitHashFor).');
-          return;
-        }
+      const versionManager = this.versionStrategy.getAttachedVersionManager?.();
+      if (!versionManager || typeof versionManager.updateGitHashFor !== 'function') {
+        console.warn('CacheWrapper: No attached version manager available for cleanup (updateGitHashFor).');
+        return;
+      }
 
-        for (const workspace of await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root))) {
-          await versionManager.updateGitHashFor(workspace, undefined);
-        }
+      for (const workspace of await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root))) {
+        await versionManager.updateGitHashFor(workspace, undefined);
+      }
     });
   }
 
@@ -108,7 +108,7 @@ export class CacheWrapper implements ICacheWrapper {
       return;
     }
 
-    await this.registerCleanup(packageManager, root);
+    this.registerCleanup(packageManager, root);
 
     await this.wrapped.execute(workspace, packageManager, root);
     await this.flush(workspace, root, packageManager);
