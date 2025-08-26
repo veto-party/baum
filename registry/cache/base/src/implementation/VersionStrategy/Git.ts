@@ -198,7 +198,6 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
-
     const innerDependentMap = this.dependentMap.get(workspace.getName());
 
     if (!innerDependentMap?.delete(workspace.getVersion())) {

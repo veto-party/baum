@@ -91,10 +91,9 @@ export class CacheWrapper implements ICacheWrapper {
   @CachedFN(false)
   private registerCleanup(packageManager: IExecutablePackageManager, root: string) {
     this.baum.addCleanup(async () => {
-      for (const workspace of (await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root)))) {
+      for (const workspace of await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root))) {
         this.versionStrategy.getAttachedVersionManager?.()?.updateGitHashFor(workspace, undefined);
       }
-
     });
   }
 
