@@ -17,8 +17,8 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   private dependentMap = new Map<string, VersionStatusUpdateType>();
   private workedSet = new Set<IWorkspace>();
 
-  private hasDependentUpdate(workspace: IWorkspace) {
-    if (this.workedSet.has(workspace)) {
+  private hasDependentUpdate(workspace: IWorkspace, checkForWork: boolean) {
+    if (checkForWork && this.workedSet.has(workspace)) {
       return undefined;
     }
 
@@ -94,16 +94,16 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
 
   @CachedFN(true)
   async getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
-    const currentVersion = super.getCurrentVersionNumber(workspace, root, packageManger);
+    const currentVersion = super.__getCurrentVersionNumber(workspace);
     if ((await this.getAllGitChanges(workspace, root)).length > 0) {
       await this.incrementUsingStatusUpdate(workspace, packageManger, await currentVersion, VersionStatusUpdateType.MINOR);
-      return await super.getCurrentVersionNumber(workspace, root, packageManger);
+      return await super.__getCurrentVersionNumber(workspace);
     }
 
-    const updateType = this.hasDependentUpdate(workspace);
+    const updateType = this.hasDependentUpdate(workspace, false);
     if (updateType !== undefined) {
       await this.incrementUsingStatusUpdate(workspace, packageManger, await currentVersion, updateType);
-      return await super.getCurrentVersionNumber(workspace, root, packageManger);
+      return await super.__getCurrentVersionNumber(workspace);
     }
 
     return currentVersion;
@@ -119,6 +119,6 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   filterWorkspacesForUnprocessed(workspaces: IWorkspace[]): IWorkspace[] {
-    return workspaces.filter((workspace) => this.hasDependentUpdate(workspace) !== undefined);
+    return workspaces.filter((workspace) => this.hasDependentUpdate(workspace, true) !== undefined);
   }
 }

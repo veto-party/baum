@@ -23,16 +23,10 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   async registerModifyPackageJSON(step: ARegistryStep): Promise<void> {
-    const fields = Resolver.dependencyFields;
     step.addModifier(async (file, _versionManager, workspace, packageManger, root) => {
       const workspaces = await packageManger.readWorkspace(root);
 
       const newVersion = await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManger);
-      const oldVersion = await this.versionStrategy.getOldVersionNumber(workspace, root, packageManger);
-
-      if (oldVersion === newVersion) {
-        return;
-      }
 
       file.name = this.nameTransformer.getName(file.name);
       file.version = newVersion;
@@ -43,7 +37,7 @@ export class CacheWrapper implements ICacheWrapper {
         nameMap.set(workspace.getName(), [...(nameMap.get(workspace.getName()) || []), workspace]);
       }
 
-      for (const field of fields) {
+      for (const field of Resolver.dependencyFields) {
         for (const name in file[field] ?? {}) {
           const lookupVersion = packageManger.modifyToRealVersionValue(file[field][name]) ?? file[field][name];
 
@@ -74,9 +68,10 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   private async shouldExecuteStep(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string) {
-    const oldVersion = this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
-    const newVersion = this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
-    if ((await oldVersion) === (await newVersion)) {
+    const oldVersion = await this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
+    const newVersion = await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
+
+    if (oldVersion !== undefined && oldVersion === newVersion) {
       return false;
     }
 
@@ -100,6 +95,7 @@ export class CacheWrapper implements ICacheWrapper {
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
     if (!(await this.shouldExecuteStep(workspace, packageManager, root))) {
+      console.log(workspace.getName(), 'is already up to date.');
       return;
     }
 

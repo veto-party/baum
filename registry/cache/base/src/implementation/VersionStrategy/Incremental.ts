@@ -23,9 +23,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
     return this.defaultVersion;
   }
 
-  getCurrentVersionNumber(workspace: IWorkspace, _root: string, _packageManger: IPackageManager | undefined): Promise<string> {
-    return this.__getCurrentVersionNumber(workspace);
-  }
+  abstract getCurrentVersionNumber(workspace: IWorkspace, _root: string, _packageManger: IPackageManager | undefined): Promise<string>;
 
   private emitSwitchToBranchSpecificName(workspace: IWorkspace) {
     this.listener.emit('switched_to_branch_specific_name', { workspace });
@@ -36,7 +34,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   }
 
   @CachedFN(true)
-  private async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
+  protected async __getCurrentVersionNumber(workspace: IWorkspace): Promise<string> {
     return this.versionStatusUpdates.get(workspace) ?? (await this.__getOldVersionNumber(workspace)) ?? this.defaultVersion;
   }
 
@@ -74,6 +72,10 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
           }
         }
 
+        if (newVersion === null) {
+          throw new Error(`Could not increase.`);
+        }
+
         this.emitUpdatedVersion(workspace, newVersion);
         this.versionStatusUpdates.set(workspace, newVersion);
       }
@@ -102,7 +104,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
   async flushNewVersion(workspace: IWorkspace, _root: string, _packageManager: IPackageManager | undefined): Promise<void> {
     if (this.versionStatusUpdates.has(workspace)) {
-      await this.versionProvider.updateCurrentVersionFor(this.nameTransformer.getOverrideName(workspace.getName()), this.versionStatusUpdates.get(workspace)!);
+      await this.versionProvider.updateCurrentVersionFor(this.nameTransformer.getName(workspace.getName()), this.versionStatusUpdates.get(workspace)!);
     }
   }
 

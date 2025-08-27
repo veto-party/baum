@@ -3,10 +3,8 @@ import type { ICurrentVersionManager } from '@veto-party/baum__registry__cache__
 import semver from 'semver';
 import { NPMPackageProvider } from './NPMPackageProvider.js';
 
-export class NPMVersionStrategy implements ICurrentVersionManager {
+export class NPMVersionManager implements ICurrentVersionManager {
   private provider: NPMPackageProvider;
-
-  private newVersions: Record<string, string | undefined> = {};
 
   public constructor(
     registry: string,
@@ -17,26 +15,23 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
     this.provider = new NPMPackageProvider(registry, packageName, token);
   }
 
-  private async resolveVersion(name: string) {
+  async getCurrentVersionFor(name: string): Promise<string | undefined> {
     const [resolved, latest] = await allSettledButFailure([this.provider.getCurrentVersionFor(`base.${name}`), this.provider.getter.getCurrentVersionFor(name)]);
 
-    if (resolved && latest) {
-      switch (semver.compare(resolved, latest)) {
+    const resolvedPackageVersion = resolved ?? this.defaultVersion;
+
+    if (resolvedPackageVersion && latest) {
+      switch (semver.compare(resolvedPackageVersion, latest)) {
         case 0:
-          return resolved;
+          return resolvedPackageVersion;
         case 1:
-          return resolved;
+          return resolvedPackageVersion;
         case -1:
           return latest;
       }
     }
 
     return resolved ?? latest ?? this.defaultVersion;
-  }
-
-  async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    this.newVersions[name] ??= await this.resolveVersion(name);
-    return this.newVersions[name];
   }
 
   async getGitHashFor(workspace: IWorkspace): Promise<string | undefined> {
