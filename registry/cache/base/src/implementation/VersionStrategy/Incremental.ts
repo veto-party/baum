@@ -52,10 +52,17 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
         this.versionStatusUpdates.set(workspace, version);
         this.emitUpdatedVersion(workspace, version);
       } else {
-        let diff: string | null = semver.diff(version, oldVersionResolved ?? currentVersion);
+        const v1 = semver.parse(currentVersion);
+        const v2 = semver.parse(oldVersionResolved ?? currentVersion);
+
+        const majorDiff = Math.abs((v1?.major ?? 0) - (v2?.major ?? 0));
+        const minorDiff = Math.abs((v1?.minor ?? 0) - (v2?.minor ?? 0));
+        const patchDiff = Math.abs((v1?.patch ?? 0) - (v2?.patch ?? 0));
+
+        let diff = semver.parse(`${majorDiff}.${minorDiff}.${patchDiff}`);
 
         if (diff === null) {
-          diff = semver.inc(version, 'minor');
+          diff = semver.parse(semver.inc(version, 'minor'));
         }
 
         if (diff === null) {
