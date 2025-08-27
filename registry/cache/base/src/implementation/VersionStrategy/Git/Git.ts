@@ -13,13 +13,12 @@ export enum VersionStatusUpdateType {
 
 export const overrideHash = '##__MANUAL-OVERRIDE__##';
 
-
 export class GitVersionStrategy extends IncrementalVersionStrategy {
   private dependentMap = new Map<string, VersionStatusUpdateType>();
 
   private hasDependentUpdate(workspace: IWorkspace) {
     for (const dependent of workspace.getDynamicDependents()) {
-      const value = this.dependentMap.get(dependent.getName());;
+      const value = this.dependentMap.get(dependent.getName());
       if (value !== undefined) {
         return value;
       }
