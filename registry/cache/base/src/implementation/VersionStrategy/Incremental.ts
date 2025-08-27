@@ -41,7 +41,8 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
   }
 
   public async increment(workspace: IWorkspace, version: string) {
-    const result = await semver.compare(await this.__getCurrentVersionNumber(workspace), version);
+    const currentVersion = await this.__getCurrentVersionNumber(workspace);
+    const result = await semver.compare(currentVersion, version);
 
     if (result === -1 || result === 0) {
       this.nameTransformer.enableOverrideFor(workspace.getName());
@@ -49,11 +50,11 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
       const oldVersionResolved = await this.__getOldVersionNumber(workspace);
 
-      if (!oldVersionResolved || semver.gt(version, oldVersionResolved)) {
+      if (oldVersionResolved && semver.gt(version, oldVersionResolved)) {
         this.versionStatusUpdates.set(workspace, version);
         this.emitUpdatedVersion(workspace, version);
-      } else if (oldVersionResolved) {
-        let diff: string | null = semver.diff(version, oldVersionResolved);
+      } else {
+        let diff: string | null = semver.diff(version, oldVersionResolved ?? currentVersion);
 
         if (diff === null) {
           diff = semver.inc(version, 'minor');
@@ -63,7 +64,7 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
           throw new Error(`internal error could not resolve diff for version (${version}) and (${oldVersionResolved})`);
         }
 
-        let newVersion = oldVersionResolved;
+        let newVersion = oldVersionResolved ?? currentVersion;
 
         const diffTypes = ['major', 'minor', 'patch'] as const;
 
@@ -75,9 +76,6 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
 
         this.emitUpdatedVersion(workspace, newVersion);
         this.versionStatusUpdates.set(workspace, newVersion);
-      } else {
-        this.emitUpdatedVersion(workspace, version);
-        this.versionStatusUpdates.set(workspace, version);
       }
 
       clearCacheForFN(this, '__getCurrentVersionNumber' as any);

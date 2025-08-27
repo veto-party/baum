@@ -75,7 +75,6 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return newVersion;
   };
 
-  @CachedFN(true)
   private async getAllGitChanges(workspace: IWorkspace, root: string): Promise<string[]> {
     const absWorkspacePath = Resolver.ensureAbsolute(workspace.getDirectory());
 
@@ -93,6 +92,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     await this.increment(workspace, GitVersionStrategy.incrementVersion(currentVersion, type));
   }
 
+  @CachedFN(true)
   async getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
     const currentVersion = super.getCurrentVersionNumber(workspace, root, packageManger);
     if ((await this.getAllGitChanges(workspace, root)).length > 0) {

@@ -64,7 +64,7 @@ export class NPMPackageProvider {
   }
 
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    return (await this.ensureCurrentPackage()).versions[name];
+    return this.newVersions[name] ?? (await this.ensureCurrentPackage()).versions[name];
   }
 
   async getPackageVersionFor(name: string): Promise<string | undefined> {
