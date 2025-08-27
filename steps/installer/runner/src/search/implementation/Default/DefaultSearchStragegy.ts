@@ -1,6 +1,6 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { allSettledButFailure, allSettledButNoFailures } from '@veto-party/baum__core';
+import { allSettledButFailure } from '@veto-party/baum__core';
 import { globby } from 'globby';
 import type { ISearchStrategy, ISearchStrategyResult } from '../../ISearchStrategy.js';
 

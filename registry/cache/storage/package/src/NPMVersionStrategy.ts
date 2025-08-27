@@ -1,4 +1,4 @@
-import { allSettledButFailure, allSettledButNoFailures, type IWorkspace } from '@veto-party/baum__core';
+import { allSettledButFailure, type IWorkspace } from '@veto-party/baum__core';
 import type { ICurrentVersionManager } from '@veto-party/baum__registry__cache__base';
 import semver from 'semver';
 import { NPMPackageProvider } from './NPMPackageProvider.js';

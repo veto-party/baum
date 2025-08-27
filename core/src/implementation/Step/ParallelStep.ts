@@ -1,6 +1,6 @@
 import type { IBaumRegistrable, IStep, IWorkspace } from '../../index.js';
 import type { IExecutablePackageManager } from '../../interface/PackageManager/IExecutablePackageManager.js';
-import { allSettledButFailure, allSettledButNoFailures } from '../BaumManager/utility/allSettledButNoFailure.js';
+import { allSettledButFailure } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 export class ParallelStep implements IStep, IBaumRegistrable {
   private cleanup: (() => any)[] = [];
