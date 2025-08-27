@@ -153,7 +153,7 @@ export class BaumManager implements IBaumManager {
         }
       }
 
-      for (const [cleanup] of this.cleanups.toSorted(([, a], [, b]) => a - b)) {
+      for (const [cleanup] of this.cleanups.sort(([, a], [, b]) => a - b)) {
         await cleanup?.();
       }
 

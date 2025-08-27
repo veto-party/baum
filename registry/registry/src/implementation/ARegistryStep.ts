@@ -96,7 +96,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
         await this.doClean(workspace);
       }
     } finally {
-      for (const [cleanup] of this.cleanup.toSorted(([, a], [, b]) => a - b)) {
+      for (const [cleanup] of this.cleanup.sort(([, a], [, b]) => a - b)) {
         await cleanup?.();
       }
     }

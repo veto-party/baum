@@ -20,7 +20,7 @@ export class ParallelStep implements IStep, IBaumRegistrable {
     try {
       await allSettledButFailure(this.steps.map((step) => step.execute(workspace, packageManager, rootDirectory)));
     } finally {
-      for (const [cleanup] of this.cleanup.toSorted(([, a], [, b]) => a - b)) {
+      for (const [cleanup] of this.cleanup.sort(([, a], [, b]) => a - b)) {
         await cleanup?.();
       }
     }
