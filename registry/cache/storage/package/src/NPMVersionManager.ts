@@ -15,8 +15,26 @@ export class NPMVersionManager implements ICurrentVersionManager {
     this.provider = new NPMPackageProvider(registry, packageName, token);
   }
 
+  private async existsOrUndefined(name: string, version: string | undefined) {
+    if (version === undefined) {
+      return undefined;
+    }
+
+    const packageMetadata = await this.provider.getter.loadPackage(name);
+
+    if (!packageMetadata || !packageMetadata.versions) {
+      return undefined;
+    }
+
+    if (!packageMetadata.versions[version]) {
+      return undefined;
+    }
+
+    return version;
+  }
+
   async getCurrentVersionFor(name: string): Promise<string | undefined> {
-    const [resolved, latest] = await allSettledButFailure([this.provider.getCurrentVersionFor(`base.${name}`), this.provider.getter.getCurrentVersionFor(name)]);
+    const [resolved, latest] = await allSettledButFailure([this.provider.getCurrentVersionFor(`base.${name}`).then((version) => this.existsOrUndefined(name, version)), this.provider.getter.getCurrentVersionFor(name)]);
 
     const resolvedPackageVersion = resolved ?? this.defaultVersion;
 
@@ -29,6 +47,10 @@ export class NPMVersionManager implements ICurrentVersionManager {
         case -1:
           return latest;
       }
+    }
+
+    if (!resolved) {
+      return this.defaultVersion;
     }
 
     return resolved ?? latest ?? this.defaultVersion;
