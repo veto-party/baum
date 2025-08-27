@@ -51,8 +51,6 @@ async function main() {
     console.error('error', error, Error.captureStackTrace(error));
     throw error;
   }
-
-  process.exit(0);
 }
 
 main();

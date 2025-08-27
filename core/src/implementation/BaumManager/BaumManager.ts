@@ -92,7 +92,7 @@ export class BaumManager implements IBaumManager {
         stepsForReversal.push(step.step);
 
         if (steps !== undefined && !steps.includes(step.name)) {
-          return;
+          continue;
         }
 
         console.log('executing step', step.name);
