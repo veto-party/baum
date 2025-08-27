@@ -4,7 +4,7 @@ import type { IExecutablePackageManager } from '../PackageManager/IExecutablePac
 export interface IBaumRegistrable {
   addExecutionStep(name: string, step: IStep): this;
 
-  addCleanup(cb: () => any): this;
+  addCleanup(cb: () => any, priority?: number): this;
 }
 
 export interface IBaumManagerConfiguration extends IBaumRegistrable {

@@ -15,8 +15,13 @@ export const overrideHash = '##__MANUAL-OVERRIDE__##';
 
 export class GitVersionStrategy extends IncrementalVersionStrategy {
   private dependentMap = new Map<string, VersionStatusUpdateType>();
+  private workedSet = new Set<IWorkspace>();
 
   private hasDependentUpdate(workspace: IWorkspace) {
+    if (this.workedSet.has(workspace)) {
+      return undefined;
+    }
+
     for (const dependent of workspace.getDynamicDependents()) {
       const value = this.dependentMap.get(dependent.getName());
       if (value !== undefined) {
@@ -106,10 +111,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
-    for (const dependent of workspace.getDynamicDependents()) {
-      this.dependentMap.delete(dependent.getName());
-    }
-
+    this.workedSet.add(workspace);
     await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
     await super.flushNewVersion(workspace, root, packageManager);
   }

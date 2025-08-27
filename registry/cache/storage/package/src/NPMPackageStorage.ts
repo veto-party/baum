@@ -127,7 +127,7 @@ export class NPMPackageStorage implements IStorage {
 
     const oldState = await this.resolveBase();
 
-    if (isEqual(oldState, items)) {
+    if (oldState && items && isEqual(oldState, items)) {
       return;
     }
 

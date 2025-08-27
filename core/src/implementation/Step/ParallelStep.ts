@@ -3,12 +3,12 @@ import type { IExecutablePackageManager } from '../../interface/PackageManager/I
 import { allSettledButFailure } from '../BaumManager/utility/allSettledButNoFailure.js';
 
 export class ParallelStep implements IStep, IBaumRegistrable {
-  private cleanup: (() => any)[] = [];
+  private cleanup: [() => any, number][] = [];
 
   constructor(protected steps: IStep[]) {}
 
-  addCleanup(cb: () => any): this {
-    this.cleanup.push(cb);
+  addCleanup(cb: () => any, priority = 0): this {
+    this.cleanup.push([cb, priority]);
     return this;
   }
 
@@ -20,7 +20,7 @@ export class ParallelStep implements IStep, IBaumRegistrable {
     try {
       await allSettledButFailure(this.steps.map((step) => step.execute(workspace, packageManager, rootDirectory)));
     } finally {
-      for (const cleanup of this.cleanup) {
+      for (const [cleanup] of this.cleanup.toSorted(([, a], [, b]) => a - b)) {
         await cleanup?.();
       }
     }

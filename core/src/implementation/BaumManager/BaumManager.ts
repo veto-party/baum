@@ -15,7 +15,7 @@ export class BaumManager implements IBaumManager {
 
   protected steps: { name: string; step: IStep }[] = [];
 
-  private cleanups: (() => any)[] = [];
+  private cleanups: [() => any, number][] = [];
 
   protected doCopyLockFileStep: CopyAndCleanLockFileStep | undefined = new CopyAndCleanLockFileStep();
 
@@ -33,8 +33,8 @@ export class BaumManager implements IBaumManager {
     return this.failed ?? false;
   }
 
-  addCleanup(cb: () => any): this {
-    this.cleanups.push(cb);
+  addCleanup(cb: () => any, priority = 0): this {
+    this.cleanups.push([cb, priority]);
     return this;
   }
 
@@ -103,7 +103,7 @@ export class BaumManager implements IBaumManager {
 
       while (stepsForReversal.length > 0) {
         const step = stepsForReversal.shift()!;
-        await allSettledButNoFailures(workspaces.map((workspace) => step.clean(workspace, this.packageManager!, this.rootDirectory!)));
+        await allSettledButFailure(workspaces.map((workspace) => step.clean(workspace, this.packageManager!, this.rootDirectory!)));
       }
       throw error;
     }
@@ -153,12 +153,8 @@ export class BaumManager implements IBaumManager {
         }
       }
 
-      for (const cleanup of this.cleanups) {
-        try {
-          await cleanup?.();
-        } catch (error) {
-          console.warn(`Cleanup failed, reason: `, error);
-        }
+      for (const [cleanup] of this.cleanups.toSorted(([, a], [, b]) => a - b)) {
+        await cleanup?.();
       }
 
       if (disableWorkspace) {

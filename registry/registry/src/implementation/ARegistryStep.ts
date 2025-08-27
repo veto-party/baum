@@ -12,12 +12,12 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
   private oldFiles: Record<string, string> = {};
 
-  private cleanup: (() => any)[] = [];
+  private cleanup: [() => any, number][] = [];
 
   constructor(protected VersionManagerClass: (workspaces: IWorkspace[], pm: IPackageManager) => IVersionManager) {}
 
-  addCleanup(cb: () => any): this {
-    this.cleanup.push(cb);
+  addCleanup(cb: () => any, priority = 0): this {
+    this.cleanup.push([cb, priority]);
     return this;
   }
 
@@ -96,7 +96,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
         await this.doClean(workspace);
       }
     } finally {
-      for (const cleanup of this.cleanup) {
+      for (const [cleanup] of this.cleanup.toSorted(([, a], [, b]) => a - b)) {
         await cleanup?.();
       }
     }
