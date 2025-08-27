@@ -109,7 +109,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     for (const dependent of workspace.getDynamicDependents()) {
       this.dependentMap.delete(dependent.getName());
     }
-    
+
     await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
     await super.flushNewVersion(workspace, root, packageManager);
   }
