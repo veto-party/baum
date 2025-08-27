@@ -15,7 +15,7 @@ export class CacheWrapper implements ICacheWrapper {
   ) {
     baum.addCleanup(async () => {
       await this.versionStrategy.getAttachedVersionManager?.()?.flush?.();
-    });
+    }, 1000);
   }
 
   async flush(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<void> {

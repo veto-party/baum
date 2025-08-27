@@ -42,20 +42,30 @@ export class CacheCleanerWrapper<T extends IStep> implements IStep {
     return await this.prepareCleanup(step, branches, elements);
   }
 
+  @CachedFN(true)
   async doStore(workspace: IWorkspace, root: string) {
     const branch = await this.getBranch(root);
-    this.storage.store(this.key, (prev: any) => {
+    this.storage.store(this.key, async (prev: any) => {
       const overrideName = this.nameTransformer.getOverrideName(workspace.getName());
       if (this.nameTransformer.getName(workspace.getName()) !== overrideName) {
         return prev;
       }
 
-      const givenPrev = prev ?? {};
+      const [elements, branches] = await this.getElementsToRemove(root);
+      const cleanedPackages = await this.getCleanedPackages(this.step, branches, elements);
 
-      return {
+      const givenPrev = (prev ?? {}) as Record<string, string[]>;
+
+      const newPrev = {
         ...givenPrev,
         [branch]: [...(givenPrev[branch] ?? []), overrideName]
       };
+
+      return Object.fromEntries(
+        Object.entries(newPrev)
+          .map(([key, values]) => [key, values.filter((e) => !cleanedPackages.includes(e))])
+          .filter(([, values]) => values.length > 0)
+      );
     });
   }
 
@@ -66,19 +76,6 @@ export class CacheCleanerWrapper<T extends IStep> implements IStep {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    const [elements, branches] = await this.getElementsToRemove(rootDirectory);
-
-    const cleanedPackages = await this.getCleanedPackages(this.step, branches, elements);
-
-    this.storage.store(this.key, (prev: any) => {
-      const givenPrev = (prev ?? {}) as Record<string, string[]>;
-      return Object.fromEntries(
-        Object.entries(givenPrev)
-          .map(([key, values]) => [key, values.filter((e) => !cleanedPackages.includes(e))])
-          .filter(([, values]) => values.length > 0)
-      );
-    });
-
     if (await this.callClean(rootDirectory, this.step)) {
       await this.step.clean(workspace, packageManager, rootDirectory);
     }
