@@ -4,6 +4,7 @@ import semver from 'semver';
 import type { ICacheWrapper } from '../ICacheWrapper.js';
 import type { INameTransformer } from '../INameTransformer.js';
 import type { IVersionStrategy } from '../IVersionStrategy.js';
+import { overrideHash } from './VersionStrategy/Git/Git.js';
 
 export class CacheWrapper implements ICacheWrapper {
   public constructor(
@@ -98,7 +99,7 @@ export class CacheWrapper implements ICacheWrapper {
       }
 
       for (const workspace of await this.versionStrategy.filterWorkspacesForUnprocessed(await packageManager.readWorkspace(root))) {
-        await versionManager.updateGitHashFor(workspace, undefined);
+        await versionManager.updateGitHashFor(workspace, overrideHash);
       }
     });
   }

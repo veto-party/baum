@@ -6,6 +6,6 @@ export type { IVersionStrategy } from './IVersionStrategy.js';
 export { CacheWrapper } from './implementation/CacheWrapper.js';
 export { StaticNameTransformer } from './implementation/NameProvider/StaticNameTransformer.js';
 export { SwitchNameTransformer } from './implementation/NameProvider/SwitchNameTransformer.js';
-export { GitVersionStrategy } from './implementation/VersionStrategy/Git.js';
+export { GitVersionStrategy } from './implementation/VersionStrategy/Git/Git.js';
 /** @internal */
 export { IncrementalVersionStrategy } from './implementation/VersionStrategy/Incremental.js';
