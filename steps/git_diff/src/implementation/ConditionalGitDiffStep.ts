@@ -46,6 +46,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   @CachedFN(true)
   public static async getAllBranches(root: string) {
     const git = ConditionalGitDiffStep.ensureGit(root);
+    await git.fetch();
     const branches = (await allSettledButNoFailures([git.branch().then((branch) => branch.all), git.branchLocal().then((branch) => branch.all)])).flat(2);
 
     return branches;

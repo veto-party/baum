@@ -13,7 +13,7 @@ export class ParallelStep implements IStep, IBaumRegistrable {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await allSettledButNoFailures(this.steps.map(async (step) => await step.clean(workspace, packageManager, rootDirectory)));
+    await allSettledButFailure(this.steps.map(async (step) => await step.clean(workspace, packageManager, rootDirectory)));
   }
 
   async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {

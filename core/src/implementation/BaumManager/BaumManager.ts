@@ -73,7 +73,7 @@ export class BaumManager implements IBaumManager {
       const step = current_steps.pop()!;
 
       if (steps !== undefined && !steps.includes(step.name)) {
-        return;
+        continue;
       }
 
       // TODO: Log errors.

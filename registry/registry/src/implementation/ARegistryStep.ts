@@ -1,6 +1,6 @@
 import FileSystem from 'node:fs/promises';
 import Path from 'node:path';
-import { allSettledButNoFailures, type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
+import { allSettledButFailure, allSettledButNoFailures, type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace } from '@veto-party/baum__core';
 import type { ICollection } from '../index.js';
 import type { IVersionManager } from '../interface/IVersionManager.js';
 import { GroupCollection } from './GroupCollection.js';
@@ -64,7 +64,7 @@ export abstract class ARegistryStep implements IStep, IBaumRegistrable {
 
     const allWorkspaces = await pm.readWorkspace(root);
 
-    await allSettledButNoFailures(
+    await allSettledButFailure(
       keysToModify
         .map((key) => [key, Object.entries((jsonFile[key] ?? {}) as Record<string, string>)] as const)
         .flatMap(([key, entries]) => {

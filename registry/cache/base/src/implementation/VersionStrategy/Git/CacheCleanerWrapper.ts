@@ -28,7 +28,7 @@ export class CacheCleanerWrapper<T extends IStep> implements IStep {
       delete stored[branch];
     }
 
-    return [Object.values(stored).flat(), Object.keys(stored)];
+    return [Object.values(stored).flat(), Object.keys(stored)] as const;
   }
 
   @CachedFN(true)
@@ -66,13 +66,7 @@ export class CacheCleanerWrapper<T extends IStep> implements IStep {
   }
 
   async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    const toRemove = await this.getElementsToRemove(rootDirectory);
-
-    if (!toRemove) {
-      return;
-    }
-
-    const [elements, branches] = toRemove;
+    const [elements, branches] = await this.getElementsToRemove(rootDirectory);
 
     const cleanedPackages = await this.getCleanedPackages(this.step, branches, elements);
 

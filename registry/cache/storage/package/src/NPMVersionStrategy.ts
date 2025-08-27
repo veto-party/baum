@@ -1,4 +1,4 @@
-import { allSettledButNoFailures, type IWorkspace } from '@veto-party/baum__core';
+import { allSettledButFailure, allSettledButNoFailures, type IWorkspace } from '@veto-party/baum__core';
 import type { ICurrentVersionManager } from '@veto-party/baum__registry__cache__base';
 import semver from 'semver';
 import { NPMPackageProvider } from './NPMPackageProvider.js';
@@ -18,7 +18,7 @@ export class NPMVersionStrategy implements ICurrentVersionManager {
   }
 
   private async resolveVersion(name: string) {
-    const [resolved, latest] = await allSettledButNoFailures([this.provider.getCurrentVersionFor(`base.${name}`), this.provider.getter.getCurrentVersionFor(name)]);
+    const [resolved, latest] = await allSettledButFailure([this.provider.getCurrentVersionFor(`base.${name}`), this.provider.getter.getCurrentVersionFor(name)]);
 
     if (resolved && latest) {
       switch (semver.compare(resolved, latest)) {
