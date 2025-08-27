@@ -19,7 +19,7 @@ process.on('unhandledRejection', (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
-if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
+async function main() {
   try {
     const { run } = await import('./runner.js');
     const success = await run();
@@ -33,6 +33,10 @@ if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
   }
 
   process.exit(0);
+}
+
+if ((process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
+  main();
 }
 
 /**
