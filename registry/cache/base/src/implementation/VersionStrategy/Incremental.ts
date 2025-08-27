@@ -65,9 +65,14 @@ export abstract class IncrementalVersionStrategy implements IVersionStrategy {
         let newVersion = oldVersionResolved ?? currentVersion;
 
         const diffTypes = ['major', 'minor', 'patch'] as const;
+        const parsed = semver.parse(diff);
+
+        if (parsed === null) {
+          throw new Error(`cannot parse ${diff}`);
+        }
 
         for (const diffType of diffTypes) {
-          for (let i = 0; i <= Math.abs(semver[diffType](diff)); i++) {
+          for (let i = 0; i <= Math.abs(parsed[diffType]); i++) {
             newVersion = semver.inc(newVersion, diffType)!;
           }
         }
