@@ -106,7 +106,10 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
   }
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
-    this.dependentMap.delete(workspace.getName());
+    for (const dependent of workspace.getDynamicDependents()) {
+      this.dependentMap.delete(dependent.getName());
+    }
+    
     await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
     await super.flushNewVersion(workspace, root, packageManager);
   }
