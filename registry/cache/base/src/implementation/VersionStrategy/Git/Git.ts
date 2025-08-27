@@ -93,7 +93,6 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     await this.increment(workspace, GitVersionStrategy.incrementVersion(currentVersion, type));
   }
 
-  @CachedFN(true)
   async getCurrentVersionNumber(workspace: IWorkspace, root: string, packageManger: IPackageManager | undefined): Promise<string> {
     const currentVersion = super.getCurrentVersionNumber(workspace, root, packageManger);
     if ((await this.getAllGitChanges(workspace, root)).length > 0) {
@@ -112,7 +111,10 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
 
   async flushNewVersion(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined) {
     this.workedSet.add(workspace);
-    await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
+    if ((await this.getCurrentVersionNumber(workspace, root, packageManager)) !== (await this.getOldVersionNumber(workspace, root, packageManager))) {
+      await this.versionProvider.updateGitHashFor(workspace, await ConditionalGitDiffStep.gitHash(root));
+    }
+
     await super.flushNewVersion(workspace, root, packageManager);
   }
 

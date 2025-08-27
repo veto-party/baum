@@ -19,12 +19,6 @@ export class CacheWrapper implements ICacheWrapper {
   }
 
   async flush(workspace: IWorkspace, root: string, packageManager: IPackageManager | undefined): Promise<void> {
-    const newVersion = await this.versionStrategy.getCurrentVersionNumber(workspace, root, packageManager);
-    const oldVersion = await this.versionStrategy.getOldVersionNumber(workspace, root, packageManager);
-    if ((await oldVersion) === (await newVersion)) {
-      return;
-    }
-
     await this.versionStrategy.flushNewVersion(workspace, root, packageManager);
   }
 
