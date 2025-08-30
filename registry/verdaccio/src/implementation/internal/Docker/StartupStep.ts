@@ -4,8 +4,7 @@ import type { Container } from 'dockerode';
 
 @RunOnce()
 export class StartupStep extends ADockerStep {
-
-  private resolvedContainers: Container[] = []; 
+  private resolvedContainers: Container[] = [];
 
   public get containers(): Readonly<typeof this.resolvedContainers> {
     return this.resolvedContainers;
@@ -23,7 +22,7 @@ export class StartupStep extends ADockerStep {
         } catch {}
 
         container = await docker.createContainer({
-          Image: givenImage.id, 
+          Image: givenImage.id,
           Cmd: ['verdaccio', '--config /config.yaml --listen 0.0.0.0:4873'],
           AttachStdin: false,
           AttachStderr: false,
@@ -38,10 +37,9 @@ export class StartupStep extends ADockerStep {
         });
       }
 
-
       await container.start();
       await container.wait();
-    })
+    });
   }
 
   async clean(_workspace: IWorkspace, _packageManager: IExecutablePackageManager, _rootDirectory: string) {

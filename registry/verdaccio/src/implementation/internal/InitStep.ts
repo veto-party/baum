@@ -1,14 +1,13 @@
 import Crypto from 'node:crypto';
+import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace } from '@veto-party/baum__core';
 import portFinder from 'portfinder';
 import { PrepareStep } from './Docker/PrepareStep.js';
 import { StartupStep } from './Docker/StartupStep.js';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IWorkspace } from '@veto-party/baum__core';
 
 export class InitStep extends GroupStep {
-
   constructor(
     private address: string,
-    private port?: number,
+    private port?: number
   ) {
     super([]);
   }
@@ -28,15 +27,14 @@ export class InitStep extends GroupStep {
     if (hash === undefined || port === undefined) {
       throw new Error('Could not create startup step');
     }
-    return new StartupStep(hash, (await port).toString())
+    return new StartupStep(hash, (await port).toString());
   }
 
   @CachedFN(true)
   public async init(root: string) {
-    
     const port = await this.getPort();
 
-    const hash = Crypto.createHash('sha256').update(root).update(port.toString()).digest('hex')
+    const hash = Crypto.createHash('sha256').update(root).update(port.toString()).digest('hex');
 
     this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${port.toString()}`));
     this.addExecutionStep('startup', await this.ensureStartup(hash, port));

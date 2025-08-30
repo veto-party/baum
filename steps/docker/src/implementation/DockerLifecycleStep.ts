@@ -2,17 +2,12 @@ import type { IExecutablePackageManager, IStep, IWorkspace } from '@veto-party/b
 import { DockerRunStep } from './DockerRunStep.js';
 import { DockerStopStep } from './DockerStopStep.js';
 
-
 export class DockerLifecycleStep implements IStep {
   private startStep: IStep;
 
   private stopStep: IStep | undefined;
 
-  constructor(
-    image: string,
-    cmd?: string[],
-    doStop = true
-  ) {
+  constructor(image: string, cmd?: string[], doStop = true) {
     this.startStep = new DockerRunStep(image, cmd);
     this.stopStep = doStop ? new DockerStopStep(image) : undefined;
   }

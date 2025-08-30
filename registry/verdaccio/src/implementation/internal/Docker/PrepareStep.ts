@@ -18,7 +18,7 @@ export class PrepareStep extends DockerBuildStep {
     private public_address: string
   ) {
     super(Path.join(cwd, 'Dockerfile'), name, () => ({
-      'CONFIG_PATH': newConfigPath(cwd, false)
+      CONFIG_PATH: newConfigPath(cwd, false)
     }));
   }
 

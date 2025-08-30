@@ -3,7 +3,7 @@ import { ADockerStep } from './ADockerStep.js';
 
 export class DockerRunStep extends ADockerStep {
   constructor(image: string, cmd?: string[]) {
-    super(async (docker, workspace, root) => {
+    super(async (docker, _, root) => {
       await docker.pull(image, {});
       const name = ADockerStep.getContainerName(root, image);
       const container = await docker.createContainer({

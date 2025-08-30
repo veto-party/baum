@@ -2,7 +2,6 @@ import { CachedFN, GroupStep, type IBaumRegistrable, type IExecutablePackageMana
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
 import { InitStep } from './implementation/internal/InitStep.js';
 
-
 export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: IStep;
   private initStep: InitStep;
@@ -19,13 +18,13 @@ export class VerdaccioRegistryStep extends ARegistryStep {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
     this.initStep = new InitStep(this.dockerAddress, port);
 
-    doStop && manager.addCleanup(async () => {
-
-      for (const test of (await this.initStep.ensureStartup().catch(() => ({ containers: [] }))).containers) {
-        await test.stop();
-        await test.remove();
-      }
-    })
+    doStop &&
+      manager.addCleanup(async () => {
+        for (const test of (await this.initStep.ensureStartup().catch(() => ({ containers: [] }))).containers) {
+          await test.stop();
+          await test.remove();
+        }
+      });
   }
 
   @CachedFN(true)
