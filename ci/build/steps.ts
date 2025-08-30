@@ -36,7 +36,7 @@ export const buildSteps = (baum: IBaumManagerConfiguration) => {
             json.main = './dist/index.js';
           }
         }
-      })(version).addExecutionStep('prepare', commonStep)
+      })(version, baum, undefined, undefined, true).addExecutionStep('prepare', commonStep)
     );
   }
 };
