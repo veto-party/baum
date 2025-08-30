@@ -1,5 +1,5 @@
 import { type IExecutablePackageManager, type IWorkspace, RunOnce } from '@veto-party/baum__core';
-import { ADockerStep } from '@veto-party/baum__steps__docker/src/implementation/ADockerStep.js';
+import { ADockerStep } from '@veto-party/baum__steps__docker';
 import type { Container } from 'dockerode';
 
 @RunOnce()
