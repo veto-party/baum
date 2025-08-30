@@ -9,7 +9,9 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@veto-party/baum__core": "*"
+    "@veto-party/baum__core": "*",
+    "dockerode": "^4.0.7",
+    "@types/dockerode": "^3.3.43"
   },
   "devDependencies": {
     "typescript": "^5.4.2",
