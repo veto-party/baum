@@ -17,7 +17,9 @@ export class PrepareStep extends DockerBuildStep {
     private cwd: string,
     private public_address: string
   ) {
-    super(`. --tag internal/${name} --build-arg CONFIG_PATH=${newConfigPath(cwd, false)}`, __rootDir);
+    super(Path.join(cwd, 'Dockerfile'), name, () => ({
+      CONFIG_PATH: newConfigPath(cwd, false)
+    }));
   }
 
   async execute(workspace: IWorkspace, pm: IExecutablePackageManager, rootDirectory: string): Promise<void> {

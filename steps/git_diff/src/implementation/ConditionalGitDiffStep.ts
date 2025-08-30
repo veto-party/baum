@@ -54,7 +54,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
           branch.all.map((givenBranch) => {
             for (const remote of remotes) {
               if (givenBranch.startsWith(`${remote}/`)) {
-                return givenBranch.substring(`${remote.length}/`.length);
+                return givenBranch.substring(`${remote}/`.length);
               }
             }
 

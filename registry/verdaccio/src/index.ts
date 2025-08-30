@@ -1,45 +1,6 @@
-import Crypto from 'node:crypto';
-import { CachedFN, GroupStep, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
+import { CachedFN, GroupStep, type IBaumRegistrable, type IExecutablePackageManager, type IPackageManager, type IStep, type IWorkspace, ModifyNPMRC, PKGMStep } from '@veto-party/baum__core';
 import { ARegistryStep, GenericVersionManager, type IVersionManager, NPMRCForSpecifiedRegistryStep, VersionManagerVersionOverride } from '@veto-party/baum__registry';
-import portFinder from 'portfinder';
-import { PrepareStep } from './implementation/internal/Docker/PrepareStep.js';
-import { StartupStep } from './implementation/internal/Docker/StartupStep.js';
-
-class InitStep extends GroupStep {
-  private port?: number;
-
-  constructor(private address: string) {
-    super([]);
-  }
-
-  async getPort() {
-    const url = new URL(this.address);
-
-    this.port ??= await portFinder.getPortPromise({
-      host: url.host
-    });
-
-    return this.port;
-  }
-
-  @CachedFN(true)
-  public async init(root: string) {
-    const port = await this.getPort();
-    const hash = Crypto.createHash('sha256').update(root).update(port.toString()).update(this.address).digest('hex');
-
-    this.addExecutionStep('prepare', new PrepareStep(hash, root, `${this.address}:${port.toString()}`));
-    this.addExecutionStep('startup', new StartupStep(hash, port.toString(), root, `${this.address}:${port.toString()}`));
-  }
-
-  async execute(workspace: IWorkspace, packageManager: IExecutablePackageManager, root: string): Promise<void> {
-    await this.init(root);
-    await super.execute(workspace, packageManager, root);
-  }
-
-  async clean(workspace: IWorkspace, packageManager: IExecutablePackageManager, rootDirectory: string): Promise<void> {
-    await super.clean(workspace, packageManager, rootDirectory);
-  }
-}
+import { InitStep } from './implementation/internal/InitStep.js';
 
 export class VerdaccioRegistryStep extends ARegistryStep {
   private publishStep?: IStep;
@@ -49,10 +10,21 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
   constructor(
     private pinVersion: string,
-    private dockerAddress = 'http://localhost'
+    manager: IBaumRegistrable,
+    private dockerAddress = 'http://localhost',
+    port?: number,
+    doStop: boolean = false
   ) {
     super((workspaces, pm) => new VersionManagerVersionOverride(this.pinVersion, workspaces, pm));
-    this.initStep = new InitStep(this.dockerAddress);
+    this.initStep = new InitStep(this.dockerAddress, port);
+
+    doStop &&
+      manager.addCleanup(async () => {
+        for (const test of (await this.initStep.ensureStartup().catch(() => ({ containers: [] }))).containers) {
+          await test.stop();
+          await test.remove();
+        }
+      });
   }
 
   @CachedFN(true)
@@ -62,8 +34,6 @@ export class VerdaccioRegistryStep extends ARegistryStep {
 
     this.installStep.addExecutionStep('npmrc', new NPMRCForSpecifiedRegistryStep(`${this.dockerAddress}:${port}/`));
     this.installStep.addExecutionStep('modify-npmrc', new ModifyNPMRC(`\n${[`${url.toString().substring(url.protocol.length)}:_authToken="npm-empty"`, `${url.toString().substring(url.protocol.length)}:always-auth=true`].join('\n')}`));
-
-    // TODO: Add storage for published package hashes or get from registry(https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get)
     this.installStep.addExecutionStep('install', new PKGMStep((intent) => intent.install().install()));
 
     return this;
