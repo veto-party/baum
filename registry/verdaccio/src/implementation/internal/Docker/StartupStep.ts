@@ -12,7 +12,7 @@ export class StartupStep extends ADockerStep {
   }
 
   constructor(image: string, port: string) {
-    super(async (docker, workspace, root) => {
+    super(async (docker, _, root) => {
       const name = ADockerStep.getContainerName(root, `internal/${image}`);
       let container = docker.getContainer(name);
       const givenImage = docker.getImage(ADockerStep.getContainerName(root, image));
