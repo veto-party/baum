@@ -87,7 +87,7 @@ export class GitVersionStrategy extends IncrementalVersionStrategy {
     return (await ConditionalGitDiffStep.diffSummary(root, hash)).map((e) => Resolver.ensureAbsolute(e.file)).filter((e) => e.startsWith(absWorkspacePath));
   }
 
-  private async incrementUsingStatusUpdate(workspace: IWorkspace, _packageManager: IPackageManager | undefined, currentVersion: string, type: VersionStatusUpdateType) {
+  public async incrementUsingStatusUpdate(workspace: IWorkspace, _packageManager: IPackageManager | undefined, currentVersion: string, type: VersionStatusUpdateType) {
     this.dependentMap.set(workspace.getName(), type);
     await this.increment(workspace, GitVersionStrategy.incrementVersion(currentVersion, type));
   }
