@@ -27,7 +27,7 @@ jobs:
       - uses: azure/setup-helm@v4
         with:
           version: 'latest'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.version }}
           registry-url: https://registry.npmjs.org/
