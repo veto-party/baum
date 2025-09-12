@@ -6,7 +6,7 @@ import * as util from 'node:util';
 
 process.on('uncaughtException', (error) => {
   try {
-    console.error(error[util.inspect.custom](error));
+    console.error(util.inspect(error));
   } catch (__error) {
     throw error;
   }
