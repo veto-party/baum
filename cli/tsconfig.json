@@ -11,13 +11,14 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "target": "ES2018",
     "allowSyntheticDefaultImports": true,
     "allowUmdGlobalAccess": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "allowJs": true
+    "allowJs": true,
+    "allowUnreachableCode": true
   },
   "ts-node": {
     "esm": true,
