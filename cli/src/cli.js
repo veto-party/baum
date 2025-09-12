@@ -25,6 +25,8 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
    * If Typescript is detected using the code above, we will not end up here.
    */
 
+  console.log("starting child process...")
+
   const childProcess = spawnSync(process.argv[0], process.argv.slice(1), {
     stdio: 'inherit',
     env: {
