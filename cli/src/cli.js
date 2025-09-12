@@ -26,9 +26,9 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
    */
 
   console.log("starting child process...")
-  const params = ["--loader", "ts-node/esm", Path.join(__dirname, "entrypoint.ts"), process.argv.slice(1)];
+  const params = ["--loader", "ts-node/esm", Path.join(__dirname, "entrypoint.ts"), ...process.argv.slice(2)];
 
-  console.log(params.flat().join(' '));
+  console.log(params.join(' '));
 
   const childProcess = spawnSync(process.argv[0], params, {
     stdio: 'inherit',
