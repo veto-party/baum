@@ -4,7 +4,7 @@ import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as util from 'node:util';
 
-const __dirname = fileURLToPath(Path.dirname(Path.dirname(import.meta.resolve('baum'))));
+const __dirname = fileURLToPath(Path.dirname(import.meta.resolve('baum')));
 
 if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
   /**
