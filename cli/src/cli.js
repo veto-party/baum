@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
 import Path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,6 +41,7 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
 
 async function main() {
   try {
+    console.log("running main...")
     const { run } = await import('./runner.js');
     const success = await run();
 
