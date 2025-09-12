@@ -17,7 +17,7 @@ process.on('unhandledRejection', (reason, p) => {
   // application specific logging, throwing an error, or other logic here
 });
 
-const __dirname = fileURLToPath(Path.dirname(import.meta.url));
+const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 
 if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
   /**
