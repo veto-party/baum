@@ -26,7 +26,7 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
    */
 
   console.log("starting child process...")
-  const params = ["--loader", "ts-node/esm", Path.join(__dirname, "entrypoint.ts"), ...process.argv.slice(2)];
+  const params = ["--loader", "ts-node/esm", Path.join(__dirname, "entrypoint.js"), ...process.argv.slice(2)];
 
   console.log(params.join(' '));
 
