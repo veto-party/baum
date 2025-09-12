@@ -16,7 +16,8 @@
     "allowSyntheticDefaultImports": true,
     "allowUmdGlobalAccess": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "allowJs": true
   },
   "ts-node": {
     "esm": true,
