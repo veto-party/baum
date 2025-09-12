@@ -17,5 +17,9 @@
     "allowUmdGlobalAccess": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
+  },
+  "ts-node": {
+    "esm": true,
+    "logError": true
   }
 }
