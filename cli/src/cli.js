@@ -25,8 +25,8 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
    * If Typescript is detected using the code above, we will not end up here.
    */
 
-  console.log("starting child process...")
-  const params = [Path.join(__dirname, "entrypoint.js"), ...process.argv.slice(2)];
+  console.log('starting child process...');
+  const params = [Path.join(__dirname, 'entrypoint.js'), ...process.argv.slice(2)];
 
   console.log(params.join(' '));
 
@@ -34,7 +34,7 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
     stdio: 'inherit',
     env: {
       ...process.env,
-      TS_NODE_PROJECT: Path.join(Path.dirname(__dirname), "tsconfig.json"),
+      TS_NODE_PROJECT: Path.join(Path.dirname(__dirname), 'tsconfig.json'),
       NODE_OPTIONS: [process.env.NODE_OPTIONS, '--loader ts-node/esm'].filter((item) => !!item).join(' ')
     },
     windowsHide: true
@@ -42,4 +42,3 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
 
   process.exit(childProcess.status ?? (childProcess.error ? 1 : 0));
 }
-

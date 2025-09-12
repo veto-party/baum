@@ -15,7 +15,7 @@ process.on('unhandledRejection', (reason, p) => {
 
 async function main() {
   try {
-    console.log("running main...")
+    console.log('running main...');
     const { run } = await import('./runner.js');
     const success = await run();
 
