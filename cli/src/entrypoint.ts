@@ -9,7 +9,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, p) => {
-  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason, reason.stack);
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason, (reason as any)?.stack);
   // application specific logging, throwing an error, or other logic here
 });
 
@@ -23,7 +23,9 @@ async function main() {
       process.exit(1);
     }
   } catch (error) {
-    console.error('error', error, Error.captureStackTrace(error));
+    if (error instanceof Error) {
+      console.error('error', error, Error.captureStackTrace(error));
+    }
     throw error;
   }
 }

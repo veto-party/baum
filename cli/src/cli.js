@@ -34,7 +34,7 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
     stdio: 'inherit',
     env: {
       ...process.env,
-      TS_NODE_PROJECT: Path.join(__dirname, "tsconfig.json"),
+      TS_NODE_PROJECT: Path.join(Path.dirname(__dirname), "tsconfig.json"),
       NODE_OPTIONS: [process.env.NODE_OPTIONS, '--loader ts-node/esm'].filter((item) => !!item).join(' ')
     },
     windowsHide: true

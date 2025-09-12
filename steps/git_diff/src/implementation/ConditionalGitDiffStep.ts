@@ -71,7 +71,7 @@ export class ConditionalGitDiffStep extends ConditionalStep<ConditionalGitDiffSt
   @CachedFN(true)
   public static async getGitDiff(root: string, branch: string): Promise<DiffResult['files'] | typeof skipped> {
     const git = ConditionalGitDiffStep.ensureGit(root);
-    const remotes = ((await git.remote([])) ?? '').split('\n').map((el) => el.trim());
+    const remotes = ((await git.remote([]) as any as string|undefined) ?? '').split('\n').map((el) => el.trim());
 
     let prefix = 'refs/heads/';
 
