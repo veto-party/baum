@@ -26,8 +26,11 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
    */
 
   console.log("starting child process...")
+  const params = ["--loader", "ts-node/esm", Path.join(__dirname, "entrypoint.ts"), process.argv.slice(1)];
 
-  const childProcess = spawnSync(process.argv[0], process.argv.slice(1), {
+  console.log(params.flat().join(' '));
+
+  const childProcess = spawnSync(process.argv[0], params, {
     stdio: 'inherit',
     env: {
       ...process.env,
@@ -40,19 +43,3 @@ if (!(process.env.NODE_OPTIONS || '').includes('--loader ts-node')) {
   process.exit(childProcess.status ?? (childProcess.error ? 1 : 0));
 }
 
-async function main() {
-  try {
-    console.log("running main...")
-    const { run } = await import('./runner.js');
-    const success = await run();
-
-    if (!success) {
-      process.exit(1);
-    }
-  } catch (error) {
-    console.error('error', error, Error.captureStackTrace(error));
-    throw error;
-  }
-}
-
-main();
